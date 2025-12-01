@@ -4,7 +4,7 @@
 
 🔴 หลังทำงานเสร็จ :
 "ส่งของใหม่ขึ้นไปเก็บ"
-        git a
+        git add .
         git commit -m "อัปเดตงาน
         git push
 
@@ -12,4 +12,4 @@
         firebase deploy
 
 ⬇️ รันบนเครื่อง localhost
-        firebase serve (ถ้าจะปิดให้กด Ctrl+C หรือ Cmd+C)`
+        firebase serve (ถ้าจะปิดให้กด Ctrl+C หรือ Cmd+C)

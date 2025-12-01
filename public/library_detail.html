@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายละเอียด - ระบบเช็คเกรดออนไลน์</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    <style> 
+        body { font-family: 'Sarabun', sans-serif; } 
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="library.html" class="text-gray-500 hover:text-blue-600 flex items-center font-bold transition">
+                <i class="fa-solid fa-arrow-left mr-2"></i> กลับหน้ารวม
+            </a>
+            <div class="hidden md:flex space-x-6">
+                <a href="index.html" class="hover:text-blue-600 transition">หน้าแรก</a>
+                <a href="student.html" class="hover:text-blue-600 transition">นักเรียน</a>
+                <a href="library.html" class="text-blue-600 font-bold">คลังโค้ด</a>
+            </div>
+            <!-- Mobile Menu Placeholder -->
+             <button class="md:hidden text-gray-600"><i class="fa-solid fa-bars text-xl"></i></button>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="container mx-auto px-4 py-8 max-w-6xl">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Column: Content & Gallery (พื้นที่หลัก 2/3) -->
+            <div class="lg:col-span-2 space-y-8">
+                
+                <!-- Header Info -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                    <!-- Tags Row -->
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="text-[10px] uppercase font-bold px-2 py-1 bg-green-100 text-green-700 rounded-md">Apps Script</span>
+                        <span class="text-[10px] uppercase font-bold px-2 py-1 bg-blue-100 text-blue-700 rounded-md">Web Templates</span>
+                        <span class="text-[10px] uppercase font-bold px-2 py-1 bg-orange-100 text-orange-700 rounded-md">HTML5</span>
+                    </div>
+                    
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">ระบบเช็คเกรดออนไลน์ (Google Sheets)</h1>
+                    
+                    <div class="flex items-center text-sm text-gray-500 gap-4 border-t pt-4 mt-4 border-gray-100">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <span class="font-semibold text-gray-700">KruBoat</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <i class="fa-regular fa-clock"></i> 12 ธ.ค. 67
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <i class="fa-regular fa-eye"></i> 1.2k views
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Screenshots Gallery -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fa-regular fa-images mr-2 text-blue-500"></i> ตัวอย่างหน้าจอ
+                    </h2>
+                    <!-- Scrollable Container -->
+                    <div class="flex overflow-x-auto gap-4 pb-2 hide-scroll snap-x snap-mandatory">
+                        <!-- Image 1 -->
+                        <div class="flex-shrink-0 w-full md:w-[80%] snap-center">
+                            <img src="https://placehold.co/800x450/e2e8f0/475569?text=Login+Page" class="rounded-lg shadow-sm border w-full">
+                        </div>
+                        <!-- Image 2 -->
+                        <div class="flex-shrink-0 w-full md:w-[80%] snap-center">
+                            <img src="https://placehold.co/800x450/e2e8f0/475569?text=Dashboard+View" class="rounded-lg shadow-sm border w-full">
+                        </div>
+                        <!-- Image 3 -->
+                        <div class="flex-shrink-0 w-full md:w-[80%] snap-center">
+                            <img src="https://placehold.co/800x450/e2e8f0/475569?text=Mobile+Responsive" class="rounded-lg shadow-sm border w-full">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detail Content -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4 border-l-4 border-blue-500 pl-3">รายละเอียดโปรเจกต์</h2>
+                    <div class="prose prose-blue max-w-none text-gray-600 leading-relaxed">
+                        <p>
+                            <strong>ระบบเช็คเกรดออนไลน์ (Online Grading System)</strong> คือเว็บแอปพลิเคชันที่ช่วยให้ครูสามารถประกาศผลการเรียนให้นักเรียนทราบได้ผ่านระบบออนไลน์ โดยไม่ต้องพึ่งพาระบบใหญ่ของโรงเรียน หรือเสียค่าเช่า Server ราคาแพง
+                        </p>
+                        <p class="mt-4">
+                            ระบบทำงานโดยใช้ <strong>Google Sheets</strong> เป็นฐานข้อมูล (Database) ซึ่งครูทุกคนคุ้นเคยดีอยู่แล้ว เพียงแค่ Copy ไฟล์ Excel เกรดลงไป ระบบหน้าเว็บก็จะดึงข้อมูลไปแสดงผลให้นักเรียนดูได้ทันที
+                        </p>
+
+                        <h3 class="text-gray-800 font-bold text-lg mt-6 mb-2">ฟีเจอร์การทำงาน</h3>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li><strong>Secure Login:</strong> ระบบล็อกอินด้วยรหัสนักเรียน (และวันเดือนปีเกิด หรือรหัสผ่าน)</li>
+                            <li><strong>Privacy First:</strong> นักเรียนเห็นข้อมูลเฉพาะของตัวเองเท่านั้น ไม่เห็นของเพื่อน</li>
+                            <li><strong>Real-time:</strong> แก้เกรดใน Sheet ปุ๊บ หน้าเว็บเปลี่ยนปั๊บ ไม่ต้องกด Publish ใหม่</li>
+                            <li><strong>Customizable:</strong> สามารถเปลี่ยนโลโก้ สีธีม และข้อความต่างๆ ได้ง่ายผ่านไฟล์ Config</li>
+                        </ul>
+
+                        <h3 class="text-gray-800 font-bold text-lg mt-6 mb-2">สิ่งที่ต้องเตรียม</h3>
+                        <div class="bg-yellow-50 border border-yellow-100 rounded-lg p-4 text-sm text-yellow-800">
+                            <ul class="list-decimal pl-5 space-y-1">
+                                <li>บัญชี Gmail สำหรับสร้าง Google Sheets</li>
+                                <li>ไฟล์รายชื่อนักเรียน (เลขที่, ชื่อ, รหัสประจำตัว, เกรดแต่ละวิชา)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Sidebar (Download & Info) (พื้นที่ 1/3) -->
+            <div class="lg:col-span-1">
+                <div class="sticky top-24 space-y-6">
+                    
+                    <!-- Action Card -->
+                    <div class="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+                        <h3 class="font-bold text-gray-800 mb-4">ดาวน์โหลด & ใช้งาน</h3>
+                        
+                        <a href="#" target="_blank" class="block w-full text-center py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow transition mb-3">
+                            <i class="fa-brands fa-google-drive mr-2"></i> รับโค้ด (Copy File)
+                        </a>
+                        
+                        <a href="#" target="_blank" class="block w-full text-center py-3 bg-white border-2 border-blue-600 text-blue-600 font-bold rounded-lg hover:bg-blue-50 transition">
+                            <i class="fa-solid fa-desktop mr-2"></i> ดูตัวอย่างจริง
+                        </a>
+
+                        <div class="mt-6 pt-4 border-t border-gray-100">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-gray-500 text-sm">ยอดดาวน์โหลด</span>
+                                <span class="font-bold text-gray-800">542 ครั้ง</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-500 text-sm">สัญญาอนุญาต</span>
+                                <span class="text-green-600 text-sm font-bold bg-green-50 px-2 py-0.5 rounded">Free / Open Source</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tech Spec Card -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-gray-800 mb-4 text-sm uppercase tracking-wide">ข้อมูลทางเทคนิค</h3>
+                        <ul class="space-y-3 text-sm">
+                            <li class="flex items-center justify-between">
+                                <span class="text-gray-500">ประเภท</span>
+                                <span class="font-medium">Web Application</span>
+                            </li>
+                            <li class="flex items-center justify-between">
+                                <span class="text-gray-500">ภาษา</span>
+                                <span class="font-medium">HTML, CSS, JS</span>
+                            </li>
+                            <li class="flex items-center justify-between">
+                                <span class="text-gray-500">Backend</span>
+                                <span class="font-medium">Google Apps Script</span>
+                            </li>
+                            <li class="flex items-center justify-between">
+                                <span class="text-gray-500">Database</span>
+                                <span class="font-medium">Google Sheets</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Contact Dev -->
+                    <div class="bg-blue-50 rounded-xl p-4 border border-blue-100 flex items-start gap-3">
+                        <div class="bg-blue-100 p-2 rounded-full text-blue-600">
+                            <i class="fa-regular fa-comment-dots"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-blue-800 uppercase mb-1">ต้องการความช่วยเหลือ?</p>
+                            <p class="text-xs text-blue-600 mb-2">หากติดปัญหาการติดตั้ง หรือต้องการจ้างพัฒนาเพิ่มเติม</p>
+                            <a href="#" class="text-xs font-bold text-blue-700 hover:underline">ติดต่อผู้พัฒนา <i class="fa-solid fa-arrow-right ml-1"></i></a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-6 text-center mt-auto">
+        <p class="text-sm text-gray-400">&copy; 2025 KruBoat. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
