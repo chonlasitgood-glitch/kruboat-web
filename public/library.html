@@ -4,36 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KruBoat - Code Library</title>
+    <!-- เพิ่ม Meta นี้เพื่อแก้ปัญหา Google Drive Block รูป -->
+    <meta name="referrer" content="no-referrer">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
-    <style> 
-        body { font-family: 'Sarabun', sans-serif; } 
-    </style>
+    <style> body { font-family: 'Sarabun', sans-serif; } </style>
 </head>
 <body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
 
-    <!-- Navbar -->
     <nav class="bg-white shadow-md sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="index.html" class="text-xl font-bold text-blue-600">
-                <i class="fa-solid fa-graduation-cap"></i> KruBoat
-            </a>
+            <a href="index.html" class="text-xl font-bold text-blue-600"><i class="fa-solid fa-graduation-cap"></i> KruBoat</a>
             <div class="hidden md:flex space-x-6">
                 <a href="index.html" class="hover:text-blue-600 transition">หน้าแรก</a>
-                <a href="student.html" class="hover:text-blue-600 transition">นักเรียน</a>
+                <!-- แก้ลิงก์ตรงนี้ -->
+                <a href="student/" class="hover:text-blue-600 transition">นักเรียน</a>
                 <a href="library.html" class="text-blue-600 font-semibold">คลังโค้ด</a>
             </div>
             <button class="md:hidden text-gray-600"><i class="fa-solid fa-bars text-xl"></i></button>
         </div>
     </nav>
 
-    <!-- Header Section -->
     <header class="bg-gradient-to-r from-slate-800 to-slate-900 py-12 text-center text-white">
         <div class="container mx-auto px-4">
             <h1 class="text-3xl md:text-4xl font-bold mb-2"><i class="fa-solid fa-laptop-code mr-2 text-blue-400"></i>Code Library</h1>
             <p class="text-slate-300 mb-6">พื้นที่แบ่งปัน Source Code และนวัตกรรมสำหรับครูและนักพัฒนา</p>
-            
             <div class="max-w-2xl mx-auto relative">
                 <input type="text" placeholder="ค้นหา..." class="w-full pl-12 pr-4 py-3 rounded-full text-gray-800 shadow focus:ring-4 focus:ring-blue-500 outline-none">
                 <i class="fa-solid fa-magnifying-glass absolute left-5 top-3.5 text-gray-400"></i>
@@ -41,90 +38,19 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="container mx-auto px-4 py-12">
-        
         <div id="library-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-            <!-- Card 1: ตัวอย่างระบบเช็คเกรด (ลิงก์ไปหน้า Detail) -->
-            <div class="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 flex flex-col h-full group hover:-translate-y-1 overflow-hidden">
-                <!-- Preview Image (16:9 Aspect Ratio) -->
-                <a href="library_detail.html" class="relative w-full aspect-video block overflow-hidden cursor-pointer">
-                    <img src="https://placehold.co/640x360/10b981/ffffff?text=Grade+System+Preview" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                    <!-- Overlay เมื่อ Hover -->
-                    <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
-                        <span class="text-white font-bold border border-white px-4 py-2 rounded-full hover:bg-white hover:text-black transition">ดูรายละเอียด</span>
-                    </div>
-                </a>
-
-                <div class="p-5 flex flex-col flex-grow">
-                    <!-- Category Tags (Max 3) -->
-                    <div class="flex flex-wrap gap-2 mb-3">
-                        <span class="text-[10px] uppercase font-bold px-2 py-1 bg-green-100 text-green-700 rounded-md">Apps Script</span>
-                        <span class="text-[10px] uppercase font-bold px-2 py-1 bg-orange-100 text-orange-700 rounded-md">HTML</span>
-                        <span class="text-[10px] uppercase font-bold px-2 py-1 bg-blue-100 text-blue-700 rounded-md">Web Templates</span>
-                    </div>
-
-                    <h3 class="text-lg font-bold text-gray-800 mb-2 leading-tight">
-                        <a href="library_detail.html" class="hover:text-blue-600 transition">ระบบเช็คเกรดออนไลน์ (Google Sheets)</a>
-                    </h3>
-                    
-                    <p class="text-gray-600 text-sm line-clamp-2 mb-4 flex-grow">
-                        เทมเพลต Web App เชื่อมต่อ Google Sheets สำหรับทำระบบประกาศผลการเรียน รองรับการล็อกอิน
-                    </p>
-
-                    <!-- Uploader & Stats -->
-                    <div class="flex items-center justify-between text-xs text-gray-500 mb-4 border-t pt-3 border-gray-100">
-                        <div class="flex items-center gap-1">
-                            <i class="fa-solid fa-user-circle text-gray-400"></i>
-                            <span class="font-semibold text-blue-600">Kruboat</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                             <span title="ยอดดาวน์โหลด"><i class="fa-solid fa-download mr-1"></i> 542</span>
-                             <span title="ยอดเข้าชม"><i class="fa-solid fa-eye mr-1"></i> 1.2k</span>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="grid grid-cols-2 gap-3 mt-auto">
-                        <a href="#" target="_blank" class="flex items-center justify-center px-4 py-2 border border-blue-600 text-blue-600 text-sm font-bold rounded-lg hover:bg-blue-50 transition">
-                            <i class="fa-solid fa-desktop mr-2"></i> ตัวอย่าง
-                        </a>
-                        <a href="#" target="_blank" class="flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition">
-                            <i class="fa-brands fa-google-drive mr-2"></i> รับโค้ด
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 2: Mockup อื่นๆ -->
-            <div class="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 flex flex-col h-full group hover:-translate-y-1 overflow-hidden">
-                <a href="#" class="relative w-full aspect-video block overflow-hidden cursor-pointer">
-                    <img src="https://placehold.co/640x360/3b82f6/ffffff?text=JS+Game" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                </a>
-                <div class="p-5 flex flex-col flex-grow">
-                    <div class="flex flex-wrap gap-2 mb-3">
-                        <span class="text-[10px] uppercase font-bold px-2 py-1 bg-yellow-100 text-yellow-700 rounded-md">JavaScript</span>
-                        <span class="text-[10px] uppercase font-bold px-2 py-1 bg-purple-100 text-purple-700 rounded-md">Game</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-800 mb-2 leading-tight">Source Code เกมทายคำศัพท์</h3>
-                    <p class="text-gray-600 text-sm line-clamp-2 mb-4 flex-grow">แจกโค้ดเกมทายคำศัพท์ภาษาอังกฤษ เขียนด้วย HTML/CSS/JS เพียวๆ</p>
-                    <div class="flex items-center justify-between text-xs text-gray-500 mb-4 border-t pt-3 border-gray-100">
-                        <div class="flex items-center gap-1"><i class="fa-solid fa-user-circle"></i> <span class="font-semibold">Other</span></div>
-                        <div class="flex items-center gap-3"><span><i class="fa-solid fa-download mr-1"></i> 120</span></div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 mt-auto">
-                        <a href="#" class="flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-600 text-sm font-bold rounded-lg hover:bg-gray-50">ตัวอย่าง</a>
-                        <a href="#" class="flex items-center justify-center px-4 py-2 bg-gray-800 text-white text-sm font-bold rounded-lg hover:bg-gray-900">รับโค้ด</a>
-                    </div>
-                </div>
-            </div>
-
+            <!-- JavaScript จะมาทำงานตรงนี้ -->
         </div>
     </main>
 
     <footer class="bg-slate-900 text-white py-6 text-center mt-auto">
         <p class="text-sm">&copy; 2025 KruBoat. All rights reserved.</p>
     </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', loadLibrary);
+    </script>
 </body>
 </html>

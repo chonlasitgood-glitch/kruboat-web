@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoomMate UI Mockup</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts (Prompt) -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #6366f1; /* สีม่วง Indigo ทันสมัย */
+            --secondary-color: #ec4899; /* สีชมพูสดใส */
+            --bg-color: #f3f4f6;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --fab-text-bg: #374151; /* สีพื้นหลังป้ายข้อความ */
+        }
+
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding-bottom: 100px;
+        }
+
+        /* จำลองหน้าจอมือถือเมื่อเปิดในคอม */
+        .mobile-container {
+            max-width: 480px;
+            margin: 0 auto;
+            background-color: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        /* Header Style */
+        .app-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            border-bottom-left-radius: 25px;
+            border-bottom-right-radius: 25px;
+            margin-bottom: 20px;
+        }
+
+        .profile-section img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.5);
+            object-fit: cover;
+        }
+
+        .xp-bar {
+            height: 8px;
+            background-color: rgba(255,255,255,0.3);
+            border-radius: 10px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .xp-progress {
+            height: 100%;
+            background-color: #fbbf24; /* สีเหลืองทอง */
+            width: 75%; /* Mock XP */
+        }
+
+        /* Card Styles */
+        .custom-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 15px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .card-header-custom {
+            padding: 12px 15px;
+            font-weight: 600;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Schedule Items */
+        .schedule-item {
+            padding: 10px 15px;
+            border-left: 4px solid #e5e7eb;
+            margin-bottom: 8px;
+            background-color: #f9fafb;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .schedule-item.active {
+            border-left: 4px solid var(--primary-color);
+            background-color: #eef2ff;
+        }
+
+        .time-badge {
+            font-size: 0.75rem;
+            color: #6b7280;
+            display: block;
+        }
+
+        /* Homework Styles */
+        .hw-item {
+            border-left: 4px solid transparent;
+        }
+        .hw-urgent { border-left-color: #ef4444; } /* แดง */
+        .hw-normal { border-left-color: #fbbf24; } /* เหลือง */
+        .hw-done { border-left-color: #10b981; opacity: 0.6; } /* เขียว */
+
+        .status-badge {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        /* Floating Action Button (FAB) Menu Style */
+        .fab-container {
+            position: fixed;
+            bottom: 15px; /* ปรับให้ชิดขอบล่างมากขึ้น */
+            right: 15px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column; /* เรียงจากบนลงล่าง (เมนูอยู่บน ปุ่มอยู่ล่าง) */
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .fab-trigger {
+            width: 45px; /* ลดขนาดปุ่มหลัก */
+            height: 45px;
+            background-color: white; /* พื้นหลังปุ่มหลักสีขาว */
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-size: 18px; /* ลดขนาดไอคอน */
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+        
+        .fab-trigger:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Menu Items Animation */
+        .fab-menu {
+            display: flex;
+            flex-direction: column-reverse; /* ให้รายการเรียงซ้อนขึ้นไป */
+            align-items: flex-end;
+            gap: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+            transition: all 0.3s ease-in-out;
+            margin-bottom: 5px; /* ระยะห่างระหว่างเมนูกับปุ่มหลัก */
+        }
+
+        .fab-container.active .fab-menu {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .fab-item {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .fab-item:hover .fab-item-btn {
+            background-color: #f8f9fa;
+        }
+
+        .fab-item-btn {
+            width: 35px; /* ลดขนาดปุ่มย่อย */
+            height: 35px;
+            background-color: white;
+            border-radius: 50%;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .fab-item-label {
+            background-color: var(--fab-text-bg);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        /* Overlay */
+        .fab-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255,255,255,0.8);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            backdrop-filter: blur(2px);
+        }
+        .fab-container.active ~ .fab-overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .add-hw-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            border: none;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="mobile-container">
+
+    <!-- 1. Header Section -->
+    <header class="app-header">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="fw-bold fs-5"><i class="fa-solid fa-shapes me-2"></i>RoomMate [demo]</div>
+            <div class="position-relative">
+                <i class="fa-regular fa-bell fs-5"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5rem;">
+                    2
+                </span>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center profile-section">
+            <img src="https://ui-avatars.com/api/?name=Rakrian+K&background=random" alt="Profile">
+            <div class="ms-3 flex-grow-1">
+                <div class="fw-bold">ด.ช.Demo demo (ม.1/1)</div>
+                <div class="d-flex justify-content-between align-items-end" style="font-size: 0.8rem;">
+                    <span>Lv. 5 Ranger</span>
+                    <span>450/600 XP</span>
+                </div>
+                <div class="xp-bar">
+                    <div class="xp-progress"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container px-3">
+
+        <!-- 2. Schedule Card (Auto Highlight) -->
+        <div class="custom-card">
+            <div class="card-header-custom">
+                <span><i class="fa-regular fa-calendar-days me-2 text-primary"></i>ตารางเรียนวันนี้</span>
+                <span class="badge bg-primary rounded-pill">อังคาร</span>
+            </div>
+            <div class="p-3">
+                <div class="schedule-item">
+                    <span class="time-badge">08:30 - 09:30</span>
+                    <div class="fw-medium text-muted">ภาษาไทย</div>
+                </div>
+                
+                <div class="schedule-item active d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="time-badge text-primary fw-bold">09:30 - 10:30 (ตอนนี้)</span>
+                        <div class="fw-bold text-dark">คณิตศาสตร์ พื้นฐาน</div>
+                        <small class="text-muted"><i class="fa-solid fa-location-dot me-1"></i>ห้อง 412</small>
+                    </div>
+                    <i class="fa-solid fa-book-open text-primary fs-4 opacity-50"></i>
+                </div>
+
+                <div class="schedule-item">
+                    <span class="time-badge">10:30 - 11:30</span>
+                    <div class="fw-medium">วิทยาศาสตร์</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Duty Card (เวรประจำวัน) -->
+        <div class="custom-card border-0" style="background: linear-gradient(to right, #fff1eb, #ace0f9);">
+            <div class="card-header-custom bg-transparent border-0">
+                <span><i class="fa-solid fa-broom me-2 text-success"></i>เวรประจำวัน</span>
+                <span class="badge bg-success">กลุ่ม B</span>
+            </div>
+            <div class="p-3 pt-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted d-block mb-1">สมาชิกเวรวันนี้:</small>
+                        <div class="d-flex">
+                            <img src="https://ui-avatars.com/api/?name=Somchai&background=random" class="rounded-circle border border-white" width="30" height="30" style="margin-right: -10px;">
+                            <img src="https://ui-avatars.com/api/?name=Somsri&background=random" class="rounded-circle border border-white" width="30" height="30" style="margin-right: -10px;">
+                            <img src="https://ui-avatars.com/api/?name=Rakrian&background=random" class="rounded-circle border border-white" width="30" height="30" style="z-index:1;">
+                            <div class="rounded-circle bg-white border d-flex align-items-center justify-content-center ms-2" style="width: 30px; height: 30px; font-size: 10px;">+2</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="alert('เปิดกล้องเพื่อถ่ายรูปส่งงาน...')">
+                        <i class="fa-solid fa-camera me-1"></i> ส่งงาน
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Homework List -->
+        <div class="d-flex justify-content-between align-items-center mb-2 mt-4">
+            <h6 class="fw-bold m-0"><i class="fa-solid fa-pen-to-square me-2 text-warning"></i>การบ้านวันนี้</h6>
+            <button class="btn btn-dark add-hw-btn shadow-sm" data-bs-toggle="modal" data-bs-target="#addHomeworkModal">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </div>
+
+        <div class="custom-card hw-item hw-urgent p-3 mb-2">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <span class="badge bg-danger mb-1" style="font-size: 0.6rem;">ส่งพรุ่งนี้!</span>
+                    <div class="fw-bold">แบบฝึกหัด 1.2 (ข้อคู่)</div>
+                    <div class="text-muted small">วิชาคณิตศาสตร์</div>
+                </div>
+                <div class="text-end">
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill" style="font-size: 0.7rem;">
+                        รายละเอียด
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="custom-card hw-item hw-normal p-3 mb-2">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <span class="badge bg-warning text-dark mb-1" style="font-size: 0.6rem;">ส่ง 25 ส.ค.</span>
+                    <div class="fw-bold">วาดภาพระบายสีหัวข้อ "วันแม่"</div>
+                    <div class="text-muted small">วิชาศิลปะ</div>
+                </div>
+                <div class="text-end">
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill" style="font-size: 0.7rem;">
+                        รายละเอียด
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="custom-card hw-item hw-done p-3 mb-2 bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="badge bg-success mb-1" style="font-size: 0.6rem;">ส่งแล้ว ✅</span>
+                    <div class="fw-bold text-decoration-line-through text-muted">ท่องศัพท์ Unit 3</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Voting Poll -->
+        <div class="custom-card mt-4">
+            <div class="card-header-custom">
+                <span><i class="fa-solid fa-square-poll-vertical me-2 text-info"></i>โหวตมติห้อง</span>
+                <small class="text-danger"><i class="fa-regular fa-clock me-1"></i>ปิดวันนี้ 16.00</small>
+            </div>
+            <div class="p-3">
+                <p class="mb-3 fw-bold small">Q: ธีมพานไหว้ครูปีนี้เอาแบบไหน?</p>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span>1. มินิมอล (Minimal)</span>
+                        <span>40%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-info" role="progressbar" style="width: 40%"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span>2. อลังการงานสร้าง</span>
+                        <span class="fw-bold">60%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 60%"></div>
+                    </div>
+                </div>
+                <button class="btn btn-outline-primary btn-sm w-100 rounded-pill mt-2">เข้าร่วมโหวต</button>
+            </div>
+        </div>
+
+    </div>
+    
+    <div style="height: 40px;"></div>
+
+</div>
+
+<!-- NEW: Hamburger Floating Action Button Menu -->
+<div class="fab-container" id="fabMenu">
+    
+    <div class="fab-menu">
+        <!-- 4. Profile Item -->
+        <a href="#" class="fab-item">
+            <span class="fab-item-label">โปรไฟล์</span>
+            <div class="fab-item-btn">
+                <i class="fa-solid fa-user"></i>
+            </div>
+        </a>
+
+        <!-- 3. Ranking Item -->
+        <a href="#" class="fab-item">
+            <span class="fab-item-label">จัดอันดับ</span>
+            <div class="fab-item-btn">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+        </a>
+
+        <!-- 2. Calendar Item -->
+        <a href="#" class="fab-item">
+            <span class="fab-item-label">ปฏิทินงาน</span>
+            <div class="fab-item-btn">
+                <i class="fa-regular fa-calendar-check"></i>
+            </div>
+        </a>
+
+        <!-- 1. Home Item -->
+        <!-- กลับไปหน้า Portal -->
+        <a href="../student.html" class="fab-item">
+            <span class="fab-item-label">หน้าหลัก</span>
+            <div class="fab-item-btn">
+                <i class="fa-solid fa-house"></i>
+            </div>
+        </a>
+    </div>
+    
+    <!-- Main Trigger Button (Hamburger) -->
+    <button class="fab-trigger" onclick="toggleFab()">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+</div>
+
+<!-- Overlay Background -->
+<div class="fab-overlay" onclick="toggleFab()"></div>
+
+<!-- Modal: Add Homework -->
+<div class="modal fade" id="addHomeworkModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="modal-title fw-bold">เพิ่มการบ้านใหม่</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">วิชา (จากตารางเรียนวันนี้)</label>
+                        <select class="form-select form-select-sm bg-light border-0">
+                            <option selected>คณิตศาสตร์ พื้นฐาน</option>
+                            <option>วิทยาศาสตร์</option>
+                            <option>ภาษาไทย</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">รายละเอียดงาน</label>
+                        <textarea class="form-control form-control-sm bg-light border-0" rows="2" placeholder="เช่น ทำแบบฝึกหัดหน้า 5-6"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">กำหนดส่ง</label>
+                        <input type="date" class="form-control form-control-sm bg-light border-0">
+                    </div>
+                    <button type="button" class="btn btn-primary w-100 rounded-pill btn-sm" data-bs-dismiss="modal">บันทึก</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Script for FAB Interaction -->
+<script>
+    function toggleFab() {
+        const fabContainer = document.getElementById('fabMenu');
+        const icon = fabContainer.querySelector('.fab-trigger i');
+        
+        fabContainer.classList.toggle('active');
+        
+        // สลับไอคอนระหว่าง Hamburger กับ X
+        if (fabContainer.classList.contains('active')) {
+            icon.classList.remove('fa-bars');
+            icon.classList.add('fa-xmark');
+        } else {
+            icon.classList.remove('fa-xmark');
+            icon.classList.add('fa-bars');
+        }
+    }
+</script>
+
+</body>
+</html>
