@@ -14,7 +14,6 @@
 </head>
 <body class="bg-gray-100 text-gray-800 flex h-screen overflow-hidden">
 
-    <!-- ... (LOGIN MODAL, ADD PROJECT MODAL, MANAGE MODAL, ADD NEWS MODAL, MANAGE NEWS MODAL เหมือนเดิมเป๊ะ ไม่ต้องแก้) ... -->
     <!-- LOGIN MODAL -->
     <div id="login-modal" class="fixed inset-0 z-50 bg-gray-900 flex items-center justify-center hidden">
         <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md text-center">
@@ -143,10 +142,14 @@
         </div>
     </div>
 
-    <!-- Sidebar (เหมือนเดิม) -->
-    <aside class="w-64 bg-slate-800 text-white flex flex-col hidden md:flex flex-shrink-0 transition-all duration-300">
-        <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-900 shadow-lg">
+    <!-- Sidebar: เพิ่ม ID และปุ่มปิดสำหรับ Mobile -->
+    <aside id="sidebar" class="w-64 bg-slate-800 text-white flex flex-col hidden md:flex flex-shrink-0 transition-all duration-300 z-20">
+        <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-900 shadow-lg relative">
             <h1 class="text-xl font-bold tracking-wider"><i class="fa-solid fa-code text-blue-400 mr-2"></i>KruBoat Dev</h1>
+            <!-- ปุ่มปิดสำหรับ Mobile -->
+            <button onclick="toggleSidebar()" class="absolute right-4 md:hidden text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
         <nav class="flex-grow py-6 px-2 space-y-1 overflow-y-auto">
             <a href="#" onclick="location.reload()" class="flex items-center px-4 py-3 bg-slate-700 text-white rounded-lg shadow-sm transition"><i class="fa-solid fa-gauge-high w-6 text-center mr-3 text-blue-400"></i><span class="font-medium">Dashboard</span></a>
@@ -172,11 +175,11 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
     <div class="flex-1 flex flex-col overflow-hidden">
         <header class="bg-white shadow-sm h-16 flex items-center justify-between px-4 md:hidden z-10">
             <span class="font-bold text-lg text-slate-800">Admin Panel</span>
-            <button class="text-slate-600 focus:outline-none"><i class="fa-solid fa-bars text-xl"></i></button>
+            <!-- ปุ่ม Hamburger ที่เพิ่ม onclick="toggleSidebar()" -->
+            <button onclick="toggleSidebar()" class="text-slate-600 focus:outline-none"><i class="fa-solid fa-bars text-xl"></i></button>
         </header>
         <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
             <div class="flex justify-between items-center mb-8"><div><h2 class="text-2xl font-bold text-gray-800">Developer Dashboard</h2><p class="text-gray-500 text-sm mt-1">จัดการข้อมูลเว็บไซต์และคลังโค้ด</p></div></div>
@@ -188,10 +191,8 @@
                 <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500 flex items-center justify-between"><div><p class="text-gray-500 text-xs font-bold uppercase tracking-wide">ข่าวทั้งหมด</p><h3 id="stat-news" class="text-3xl font-bold text-gray-800 mt-1">-</h3></div><div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-newspaper"></i></div></div>
             </div>
 
-            <!-- Main Layout (Grid) -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full pb-20">
-                <!-- Actions Column (2/3) -->
-                <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6 h-fit">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
                     <h3 class="font-bold text-lg text-gray-800 mb-4 border-b pb-2">Actions</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div onclick="openAddProjectModal()" class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-purple-300 cursor-pointer transition flex items-center group">
@@ -213,7 +214,6 @@
                     </div>
                 </div>
 
-                <!-- Note Column (1/3) [แก้ไขแล้ว] -->
                 <div class="bg-white rounded-xl shadow-sm p-6 h-fit lg:h-auto flex flex-col">
                     <div class="flex justify-between items-center mb-4 border-b pb-2">
                         <h3 class="font-bold text-lg text-gray-800">Admin Note</h3>
@@ -221,7 +221,6 @@
                             <i class="fa-solid fa-floppy-disk mr-1"></i> บันทึก
                         </button>
                     </div>
-                    <!-- Textarea สำหรับจดบันทึก -->
                     <textarea id="admin-note-input" class="w-full flex-grow bg-yellow-50 p-4 rounded-lg border border-yellow-100 text-sm text-yellow-800 resize-none outline-none focus:ring-2 focus:ring-yellow-400 placeholder-yellow-300 leading-relaxed" style="min-height: 200px;" placeholder="จดบันทึกกันลืม... (กดบันทึกเพื่อเก็บไว้ในระบบ)"></textarea>
                 </div>
             </div>

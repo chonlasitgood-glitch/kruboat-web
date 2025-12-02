@@ -24,7 +24,7 @@ function formatDate(dateString) {
     return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
 }
 
-// ... (Login, Dashboard, Projects, News Functions - คงเดิม) ...
+// --- Login & Dashboard ---
 function checkLogin() {
     const savedPassword = sessionStorage.getItem('admin_password');
     if (savedPassword) {
@@ -340,3 +340,16 @@ async function saveNote() {
 document.getElementById('password-input')?.addEventListener('keypress', function (e) {
     if (e.key === 'Enter') performLogin();
 });
+
+// --- Mobile Sidebar Toggle (เพิ่มใหม่) ---
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('hidden');
+    
+    // ทำให้เป็น Absolute Overlay บนมือถือ
+    if (!sidebar.classList.contains('hidden')) {
+        sidebar.classList.add('absolute', 'inset-y-0', 'left-0', 'h-full');
+    } else {
+        sidebar.classList.remove('absolute', 'inset-y-0', 'left-0', 'h-full');
+    }
+}
