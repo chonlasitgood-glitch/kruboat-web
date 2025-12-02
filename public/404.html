@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 Not Found - KruBoat</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    <style> 
+        body { font-family: 'Sarabun', sans-serif; } 
+        /* Animation สำหรับไอคอน 404 */
+        .bounce-slow { animation: bounce 3s infinite; }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(-5%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
+            50% { transform: translateY(0); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center px-4 py-16">
+        <div class="text-center">
+            <!-- ไอคอน 404 -->
+            <div class="text-9xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 bounce-slow">
+                404
+            </div>
+            
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mt-4 mb-6">เอ๋า! ไม่พบหน้าที่คุณต้องการ</h1>
+            <p class="text-gray-600 text-lg mb-8 leading-relaxed">
+                หน้าที่คุณกำลังตามหาอาจถูกลบ ย้ายที่อยู่ <br class="hidden md:inline">หรือที่อยู่ URL ที่คุณพิมพ์มาอาจไม่ถูกต้องครับ
+            </p>
+
+            <!-- ปุ่มกดกลับหน้าแรก -->
+            <a href="index.html" class="inline-flex items-center px-8 py-3 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                <i class="fa-solid fa-house mr-2"></i> กลับสู่หน้าแรก
+            </a>
+
+            <div class="mt-12 text-gray-400 text-sm">
+                <p>หากคุณคิดว่านี่คือข้อผิดพลาดของระบบ</p>
+                <p>กรุณาแจ้งครูโบ๊ทได้เลยครับ</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer (เหมือนหน้าอื่นๆ) -->
+    <footer class="bg-gray-800 text-white py-6 text-center mt-auto">
+        <div class="container mx-auto px-4"><p class="mb-1 font-semibold">KruBoat.com</p><p class="text-gray-400 text-xs">&copy; 2025 พัฒนาโดย ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์ | ติดต่อ chonlasitgood@gmail.com</p></div>
+    </footer>
+
+</body>
+</html>
