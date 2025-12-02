@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Details</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
+    
     <meta name="referrer" content="no-referrer">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -19,58 +22,36 @@
             </a>
             <div class="hidden md:flex space-x-6">
                 <a href="index.html" class="hover:text-blue-600 transition">หน้าแรก</a>
+                <a href="student/" class="hover:text-blue-600 transition">นักเรียน</a>
                 <a href="library.html" class="text-blue-600 font-bold">คลังโค้ด</a>
             </div>
-             <button class="md:hidden text-gray-600"><i class="fa-solid fa-bars text-xl"></i></button>
+             <button id="mobile-menu-btn" class="md:hidden text-gray-600 focus:outline-none">
+                <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 shadow-lg">
+            <div class="flex flex-col px-4 py-2 space-y-2">
+                <a href="index.html" class="block py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 px-2 transition">หน้าแรก</a>
+                <a href="student/" class="block py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 px-2 transition">นักเรียน</a>
+                <a href="library.html" class="block py-2 text-blue-600 font-semibold rounded hover:bg-gray-50 px-2">คลังโค้ด</a>
+            </div>
         </div>
     </nav>
 
     <main class="container mx-auto px-4 py-8 max-w-6xl">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Left Content -->
             <div class="lg:col-span-2 space-y-8">
-                
-                <!-- Skeleton: Header Info -->
                 <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                    <div id="d-tags" class="flex flex-wrap gap-2 mb-4">
-                        <div class="bg-gray-200 h-6 w-20 rounded animate-pulse"></div>
-                        <div class="bg-gray-200 h-6 w-24 rounded animate-pulse"></div>
-                    </div>
-                    
-                    <h1 id="d-title" class="text-3xl font-bold text-gray-800 mb-2">
-                        <div class="bg-gray-200 h-10 w-3/4 rounded animate-pulse"></div>
-                    </h1>
-                    
+                    <div id="d-tags" class="flex flex-wrap gap-2 mb-4"><div class="bg-gray-200 h-6 w-20 rounded animate-pulse"></div><div class="bg-gray-200 h-6 w-24 rounded animate-pulse"></div></div>
+                    <h1 id="d-title" class="text-3xl font-bold text-gray-800 mb-2"><div class="bg-gray-200 h-10 w-3/4 rounded animate-pulse"></div></h1>
                     <div class="flex items-center gap-4 border-t pt-4 mt-4 border-gray-100">
-                        <div class="flex items-center gap-2">
-                            <!-- เพิ่ม ID ตรงนี้: d-author-icon -->
-                            <div id="d-author-icon" class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-blue-600 text-xs overflow-hidden">
-                                <i class="fa-solid fa-user" style="display:none"></i>
-                            </div>
-                            <span id="d-author" class="font-semibold text-gray-700">
-                                <div class="bg-gray-200 h-4 w-24 rounded inline-block animate-pulse"></div>
-                            </span>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <i class="fa-regular fa-clock text-gray-400"></i> 
-                            <span id="d-date" class="text-sm text-gray-500">
-                                <div class="bg-gray-200 h-4 w-20 rounded inline-block animate-pulse"></div>
-                            </span>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <i class="fa-regular fa-eye text-gray-400"></i> 
-                            <span id="d-views" class="text-sm text-gray-500">
-                                <div class="bg-gray-200 h-4 w-16 rounded inline-block animate-pulse"></div>
-                            </span>
-                        </div>
+                        <div class="flex items-center gap-2"><div class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-blue-600 text-xs"><i class="fa-solid fa-user" style="display:none"></i></div><span id="d-author" class="font-semibold text-gray-700"><div class="bg-gray-200 h-4 w-24 rounded inline-block animate-pulse"></div></span></div>
+                        <div class="flex items-center gap-1"><i class="fa-regular fa-clock text-gray-400"></i> <span id="d-date" class="text-sm text-gray-500"><div class="bg-gray-200 h-4 w-20 rounded inline-block animate-pulse"></div></span></div>
+                        <div class="flex items-center gap-1"><i class="fa-regular fa-eye text-gray-400"></i> <span id="d-views" class="text-sm text-gray-500"><div class="bg-gray-200 h-4 w-16 rounded inline-block animate-pulse"></div></span></div>
                     </div>
                 </div>
-
-                <!-- Skeleton: Image -->
                 <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                    <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                        <i class="fa-regular fa-images mr-2 text-blue-500"></i> ตัวอย่างหน้าจอ
-                    </h2>
+                    <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><i class="fa-regular fa-images mr-2 text-blue-500"></i> ตัวอย่างหน้าจอ</h2>
                     <div class="flex overflow-x-auto gap-4 pb-2 hide-scroll snap-x snap-mandatory">
                         <div class="flex-shrink-0 w-full md:w-[80%] snap-center relative rounded-lg overflow-hidden h-64 border border-gray-200">
                             <div class="absolute inset-0 bg-gray-200 animate-pulse"></div>
@@ -78,42 +59,22 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Skeleton: Detail -->
                 <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                     <h2 class="text-lg font-bold text-gray-800 mb-4 border-l-4 border-blue-500 pl-3">รายละเอียดโปรเจกต์</h2>
                     <div id="d-desc" class="space-y-3 prose prose-blue max-w-none text-gray-600 leading-relaxed">
-                        <div class="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
-                        <div class="h-4 bg-gray-200 rounded w-5/6 animate-pulse"></div>
-                        <div class="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
-                        <div class="h-4 bg-gray-200 rounded w-4/6 animate-pulse"></div>
+                        <div class="h-4 bg-gray-200 rounded w-full animate-pulse"></div><div class="h-4 bg-gray-200 rounded w-5/6 animate-pulse"></div><div class="h-4 bg-gray-200 rounded w-full animate-pulse"></div><div class="h-4 bg-gray-200 rounded w-4/6 animate-pulse"></div>
                     </div>
                 </div>
             </div>
-
-            <!-- Right Sidebar -->
             <div class="lg:col-span-1">
                 <div class="sticky top-24 space-y-6">
                     <div class="bg-white rounded-xl p-6 shadow-md border border-gray-200">
                         <h3 class="font-bold text-gray-800 mb-4">ดาวน์โหลด & ใช้งาน</h3>
-                        
-                        <a id="btn-code" href="#" target="_blank" class="block w-full text-center py-3 bg-blue-600 text-white font-bold rounded-lg shadow transition mb-3 opacity-50 cursor-not-allowed pointer-events-none">
-                            <i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...
-                        </a>
-                        
-                        <a id="btn-preview" href="#" target="_blank" class="block w-full text-center py-3 bg-white border-2 border-blue-600 text-blue-600 font-bold rounded-lg hover:bg-blue-50 transition opacity-50 cursor-not-allowed pointer-events-none">
-                            <i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...
-                        </a>
-
+                        <a id="btn-code" href="#" target="_blank" class="block w-full text-center py-3 bg-blue-600 text-white font-bold rounded-lg shadow transition mb-3 opacity-50 cursor-not-allowed pointer-events-none"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</a>
+                        <a id="btn-preview" href="#" target="_blank" class="block w-full text-center py-3 bg-white border-2 border-blue-600 text-blue-600 font-bold rounded-lg hover:bg-blue-50 transition opacity-50 cursor-not-allowed pointer-events-none"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลด...</a>
                         <div class="mt-6 pt-4 border-t border-gray-100">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-gray-500 text-sm">ยอดดาวน์โหลด</span>
-                                <span id="s-downloads" class="font-bold text-gray-800">-</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-500 text-sm">สัญญาอนุญาต</span>
-                                <span class="text-green-600 text-sm font-bold bg-green-50 px-2 py-0.5 rounded">Free / Open Source</span>
-                            </div>
+                            <div class="flex justify-between items-center mb-2"><span class="text-gray-500 text-sm">ยอดดาวน์โหลด</span><span id="s-downloads" class="font-bold text-gray-800">-</span></div>
+                            <div class="flex justify-between items-center"><span class="text-gray-500 text-sm">สัญญาอนุญาต</span><span class="text-green-600 text-sm font-bold bg-green-50 px-2 py-0.5 rounded">Free / Open Source</span></div>
                         </div>
                     </div>
                 </div>
@@ -121,13 +82,8 @@
         </div>
     </main>
 
-    <footer class="bg-gray-800 text-white py-6 text-center mt-auto">
-        <p class="text-sm text-gray-400">&copy; 2025 KruBoat. All rights reserved.</p>
-    </footer>
-
+    <footer class="bg-gray-800 text-white py-6 text-center mt-auto"><p class="text-sm text-gray-400">&copy; 2025 พัฒนาโดย ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์ | ติดต่อ chonlasitgood@gmail.com</p></footer>
     <script src="js/script.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', loadProjectDetail);
-    </script>
+    <script> document.addEventListener('DOMContentLoaded', loadProjectDetail); </script>
 </body>
 </html>

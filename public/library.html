@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KruBoat - Code Library</title>
-    <!-- เพิ่ม Meta นี้เพื่อแก้ปัญหา Google Drive Block รูป -->
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
+    
     <meta name="referrer" content="no-referrer">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
@@ -19,11 +20,19 @@
             <a href="index.html" class="text-xl font-bold text-blue-600"><i class="fa-solid fa-graduation-cap"></i> KruBoat</a>
             <div class="hidden md:flex space-x-6">
                 <a href="index.html" class="hover:text-blue-600 transition">หน้าแรก</a>
-                <!-- แก้ลิงก์ตรงนี้ -->
                 <a href="student/" class="hover:text-blue-600 transition">นักเรียน</a>
                 <a href="library.html" class="text-blue-600 font-semibold">คลังโค้ด</a>
             </div>
-            <button class="md:hidden text-gray-600"><i class="fa-solid fa-bars text-xl"></i></button>
+            <button id="mobile-menu-btn" class="md:hidden text-gray-600 focus:outline-none">
+                <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 shadow-lg">
+            <div class="flex flex-col px-4 py-2 space-y-2">
+                <a href="index.html" class="block py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 px-2 transition">หน้าแรก</a>
+                <a href="student/" class="block py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 px-2 transition">นักเรียน</a>
+                <a href="library.html" class="block py-2 text-blue-600 font-semibold rounded hover:bg-gray-50 px-2">คลังโค้ด</a>
+            </div>
         </div>
     </nav>
 
@@ -39,9 +48,7 @@
     </header>
 
     <main class="container mx-auto px-4 py-12">
-        <div id="library-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- JavaScript จะมาทำงานตรงนี้ -->
-        </div>
+        <div id="library-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
     </main>
 
     <footer class="bg-slate-900 text-white py-6 text-center mt-auto">
@@ -49,8 +56,6 @@
     </footer>
 
     <script src="js/script.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', loadLibrary);
-    </script>
+    <script> document.addEventListener('DOMContentLoaded', loadLibrary); </script>
 </body>
 </html>

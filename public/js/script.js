@@ -1,7 +1,6 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbzC8znKAdu6230TgnQdjZjNVn6GJTY1FtX2FFifHFyoafbZ2gjEcCu_KIK1zpX8mdUh/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxkaGc8gLW98phQ1rslCfV2aeOrFtH-62pR7gFjiKbAIqcUvRpWWRs0f3mkMBbYaaLh/exec";
 
 // --- Helper Functions ---
-
 function convertDriveImage(url) {
     if (!url) return 'https://placehold.co/640x360?text=No+Image';
     if (url.includes('drive.google.com')) {
@@ -61,7 +60,6 @@ function getTagColorClass(tag) {
 }
 
 // --- HTML Generators ---
-
 function createCardHTML(project) {
     const tags = project.tags ? project.tags.split(',').map(t => t.trim()) : [];
     const tagsHTML = tags.slice(0, 2).map(tag => 
@@ -151,7 +149,6 @@ function createNewsHTML(newsItem) {
 }
 
 // --- Main Loading Functions ---
-
 async function loadHomePortfolio() {
     const container = document.getElementById('home-portfolio-grid');
     if (container) {
@@ -249,15 +246,12 @@ function renderDetailHTML(project) {
     document.getElementById('d-date').innerText = formatDate(project.date);
     document.getElementById('d-views').innerText = (project.views || 0) + ' views';
     
-    // --- เปลี่ยนรูปโปรไฟล์ตามชื่อ ---
     const authorIcon = document.getElementById('d-author-icon');
     if(authorIcon) {
         if(authorName.toLowerCase().includes('kruboat')) {
-            // ถ้าชื่อมีคำว่า KruBoat (ไม่สนตัวเล็กใหญ่) ให้ใส่รูป
             authorIcon.innerHTML = `<img src="https://lh3.googleusercontent.com/d/1VUZ7MASQaCBSjW1IdE4Ip4O81Jxzqyk6" class="w-full h-full object-cover">`;
-            authorIcon.className = "w-6 h-6 rounded-full shadow-sm overflow-hidden"; // ปรับสไตล์นิดหน่อย
+            authorIcon.className = "w-6 h-6 rounded-full shadow-sm overflow-hidden";
         } else {
-            // ถ้าไม่ใช่ ให้ใช้ไอคอนเดิม
             authorIcon.innerHTML = `<i class="fa-solid fa-user"></i>`;
             authorIcon.className = "w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-blue-600 text-xs overflow-hidden";
         }
@@ -319,3 +313,15 @@ function closeNewsModal() {
     modal.classList.add('hidden');
     document.body.style.overflow = 'auto';
 }
+
+// Add Mobile Menu Event Listener
+document.addEventListener('DOMContentLoaded', () => {
+    const mobileBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    if (mobileBtn && mobileMenu) {
+        mobileBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+    }
+});
