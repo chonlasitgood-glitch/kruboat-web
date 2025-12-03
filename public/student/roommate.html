@@ -40,6 +40,27 @@
             position: relative;
         }
 
+        /* Demo Label Style (New) */
+        .demo-badge {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.65); /* พื้นหลังโปร่งแสง */
+            backdrop-filter: blur(4px); /* เอฟเฟกต์เบลอ */
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            color: #9ca3af;
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            z-index: 5; /* อยู่เหนือ Content แต่อยู่ใต้เมนู/Modal */
+            pointer-events: none; /* คลิกทะลุได้ */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            text-transform: uppercase;
+        }
+
         /* Header Style */
         .app-header {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
@@ -251,19 +272,27 @@
             background-color: #f8f9fa;
             border-left: 4px solid var(--primary-color);
             padding: 10px 15px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             border-radius: 4px;
         }
         .structure-title {
             font-weight: 600;
             color: #374151;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+        }
+        .structure-title i {
+            margin-right: 8px;
+            color: var(--primary-color);
             font-size: 0.9rem;
         }
         .structure-content {
-            font-size: 0.8rem;
-            color: #6b7280;
+            font-size: 0.85rem;
+            color: #4b5563;
             margin: 0;
+            line-height: 1.6;
         }
         .name-list {
             list-style: none;
@@ -288,6 +317,11 @@
 
 <div class="mobile-container">
 
+    <!-- DEMO Badge (New Feature) -->
+    <div class="demo-badge">
+        <i class="fa-solid fa-flask me-2"></i>DEMO MODE
+    </div>
+
     <!-- 1. Header Section -->
     <header class="app-header">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -301,9 +335,9 @@
         </div>
 
         <div class="d-flex align-items-center profile-section">
-            <img src="https://ui-avatars.com/api/?name=Rakrian+K&background=random" alt="Profile">
+            <img src="https://ui-avatars.com/api/?name=Nattapol+A&background=random" alt="Profile">
             <div class="ms-3 flex-grow-1">
-                <div class="fw-bold">ด.ช.ณัฐพล อนุไพร (ม.1/1)</div> <!-- Mock name to match team -->
+                <div class="fw-bold">ด.ช.ณัฐพล อนุไพร (ม.1/1)</div>
                 <div class="d-flex justify-content-between align-items-end" style="font-size: 0.8rem;">
                     <span>Lv. 5 Ranger</span>
                     <span>450/600 XP</span>
@@ -456,7 +490,7 @@
 <div class="fab-container" id="fabMenu">
     
     <div class="fab-menu">
-        <!-- 5. Project Structure Item (NEW) -->
+        <!-- 5. Project Structure Item -->
         <div class="fab-item" data-bs-toggle="modal" data-bs-target="#projectStructureModal">
             <span class="fab-item-label">เค้าโครง</span>
             <div class="fab-item-btn text-white bg-warning">
@@ -506,7 +540,7 @@
 <!-- Overlay Background -->
 <div class="fab-overlay" onclick="toggleFab()"></div>
 
-<!-- Modal: Project Structure (เค้าโครง) -->
+<!-- Modal: Project Structure (เค้าโครง - Updated for Junior High) -->
 <div class="modal fade" id="projectStructureModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable modal-fullscreen-sm-down">
         <div class="modal-content rounded-4 border-0">
@@ -517,7 +551,7 @@
             <div class="modal-body bg-white">
                 
                 <div class="text-center mb-4">
-                    <h6 class="fw-bold mb-1">RoomMate: ระบบบริหารจัดการชั้นเรียนอัจฉริยะ</h6>
+                    <h6 class="fw-bold mb-1">RoomMate: ผู้ช่วยดิจิทัลประจำห้องเรียน</h6>
                     <small class="text-muted">(Smart Homeroom Management System)</small>
                 </div>
 
@@ -547,48 +581,53 @@
 
                 <!-- บทที่ 1 -->
                 <div class="structure-card">
-                    <div class="structure-title">บทที่ 1: บทนำ</div>
+                    <div class="structure-title"><i class="fa-solid fa-circle-question"></i>บทที่ 1: ทำไมต้องมี RoomMate?</div>
                     <p class="structure-content">
-                        <strong>ที่มาและความสำคัญ:</strong> แก้ปัญหาการลืมการบ้าน, เวรประจำวันขาดความรับผิดชอบ และการสื่อสารในห้องเรียน โดยใช้เทคโนโลยีที่มีอยู่แล้ว (Google Ecosystem) พัฒนาเป็นเว็บแอปพลิเคชันเพื่อจัดการห้องเรียนแบบ Paperless<br>
-                        <strong>วัตถุประสงค์:</strong> เพื่อพัฒนาระบบ RoomMate, แก้ปัญหาความรับผิดชอบ และส่งเสริมบรรยากาศประชาธิปไตย
+                        <strong>ปัญหาที่พบ (Pain Point):</strong><br>
+                        1. เพื่อนๆ มักลืมจดการบ้านบนกระดาน ทำให้ส่งงานไม่ครบ<br>
+                        2. กระเป๋านักเรียนหนักเพราะจัดตารางสอนผิด<br>
+                        3. จำเวรประจำวันไม่ได้ ทำให้ห้องเรียนสกปรกและโดนหักคะแนน<br><br>
+                        <strong>แนวคิดแก้ไข:</strong><br>
+                        สร้าง "เว็บแอป" ที่ทุกคนเข้าถึงได้ง่ายผ่านมือถือ เพื่อรวบรวมข้อมูลสำคัญไว้ในที่เดียว เปรียบเสมือนเพื่อนคู่คิด (RoomMate) ที่คอยเตือนเรื่องต่างๆ ในห้องเรียน
                     </p>
                 </div>
 
                 <!-- บทที่ 2 -->
                 <div class="structure-card">
-                    <div class="structure-title">บทที่ 2: เอกสารที่เกี่ยวข้อง</div>
+                    <div class="structure-title"><i class="fa-solid fa-book-open"></i>บทที่ 2: ความรู้ที่ใช้</div>
                     <p class="structure-content">
-                        - แนวคิดห้องเรียนอัจฉริยะ (Smart Classroom)<br>
-                        - ทฤษฎีเกมมิฟิเคชัน (Gamification)<br>
-                        - ความรู้เกี่ยวกับ Google Apps Script และ Web App
+                        <strong>1. Google Ecosystem:</strong> การประยุกต์ใช้เครื่องมือฟรีของ Google (Sites, Sheets) มาสร้างนวัตกรรม<br>
+                        <strong>2. ระบบสะสมแต้ม (XP):</strong> การใช้หลักการเกม (Gamification) มากระตุ้นให้เพื่อนๆ อยากทำเวรและส่งงาน<br>
+                        <strong>3. Web Application:</strong> พื้นฐาน HTML/CSS และ Google Apps Script เบื้องต้น
                     </p>
                 </div>
 
                 <!-- บทที่ 3 -->
                 <div class="structure-card">
-                    <div class="structure-title">บทที่ 3: วิธีการดำเนินงาน</div>
+                    <div class="structure-title"><i class="fa-solid fa-laptop-code"></i>บทที่ 3: วิธีการสร้าง</div>
                     <p class="structure-content">
-                        <strong>วัสดุอุปกรณ์:</strong> คอมพิวเตอร์, สมาร์ทโฟน<br>
-                        <strong>ขั้นตอน:</strong> 1.วิเคราะห์ปัญหา 2.ออกแบบฐานข้อมูลและหน้าจอ 3.พัฒนาระบบด้วย HTML/CSS/GAS 4.ทดสอบระบบ 5.นำไปใช้จริง
+                        <strong>1. ออกแบบฐานข้อมูล:</strong> เก็บข้อมูลนักเรียน, ตารางเวร, และการบ้าน ลงใน Google Sheets<br>
+                        <strong>2. เขียนคำสั่ง (Script):</strong> ใช้ Google Apps Script ดึงข้อมูลจาก Sheets มาแสดงผล<br>
+                        <strong>3. สร้างหน้าจอ (UI):</strong> ใช้ HTML/Bootstrap จัดหน้าจอให้สวยเหมือนแอปมือถือ<br>
+                        <strong>4. เชื่อมต่อ:</strong> นำโค้ดไปฝัง (Embed) บน Google Sites ให้เพื่อนๆ ใช้งาน
                     </p>
                 </div>
 
                 <!-- บทที่ 4 -->
                 <div class="structure-card">
-                    <div class="structure-title">บทที่ 4: ผลการดำเนินงาน</div>
+                    <div class="structure-title"><i class="fa-solid fa-chart-line"></i>บทที่ 4: ผลการใช้งาน</div>
                     <p class="structure-content">
-                        - ระบบสามารถแสดงผลตารางเรียน, การบ้าน, และเวรประจำวันได้ถูกต้อง<br>
-                        - นักเรียนสามารถใช้งานระบบผ่านมือถือได้สะดวก<br>
-                        - สถิติการส่งงานของนักเรียนดีขึ้น
+                        - <strong>หน้าตาแอป:</strong> สวยงาม ใช้งานง่าย ปุ่มกดสะดวกแม้ใช้มือเดียว<br>
+                        - <strong>ตารางเรียน:</strong> ระบบรู้ว่าตอนนี้เรียนวิชาอะไร และไฮไลท์ให้อัตโนมัติ<br>
+                        - <strong>การส่งงาน:</strong> เพื่อนๆ ส่งการบ้านตรงเวลามากขึ้น เพราะมีระบบแยกสี (แดง=ด่วน) เตือนความจำ
                     </p>
                 </div>
 
                 <!-- บทที่ 5 -->
                 <div class="structure-card">
-                    <div class="structure-title">บทที่ 5: สรุปและข้อเสนอแนะ</div>
+                    <div class="structure-title"><i class="fa-solid fa-star"></i>บทที่ 5: สรุปผล</div>
                     <p class="structure-content">
-                        <strong>สรุป:</strong> RoomMate ช่วยลดภาระงานครูและสร้างวินัยให้นักเรียนได้จริง<br>
-                        <strong>ข้อเสนอแนะ:</strong> ควรพัฒนาให้มีการแจ้งเตือนผ่าน LINE Notify
+                        RoomMate ช่วยแก้ปัญหาในห้องเรียนได้จริง ทำให้เพื่อนๆ มีความรับผิดชอบมากขึ้น และช่วยลดภาระหัวหน้าห้อง ที่สำคัญคือเป็นนวัตกรรมที่ <strong>"ทำได้ง่าย ไม่มีค่าใช้จ่าย และใช้ประโยชน์ได้จริง"</strong>
                     </p>
                 </div>
 
