@@ -40,24 +40,24 @@
             position: relative;
         }
 
-        /* Demo Label Style (New) */
+        /* Demo Label Style (Updated: Red Color & Fixed Position) */
         .demo-badge {
-            position: absolute;
+            position: fixed; /* เปลี่ยนเป็น fixed เพื่อให้ลอยอยู่กลางจอตลอดเวลา */
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(255, 255, 255, 0.65); /* พื้นหลังโปร่งแสง */
+            background-color: rgba(255, 255, 255, 0.85); /* พื้นหลังทึบขึ้นเล็กน้อยเพื่อให้อ่านง่าย */
             backdrop-filter: blur(4px); /* เอฟเฟกต์เบลอ */
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            color: #9ca3af;
-            padding: 6px 18px;
+            border: 1px solid rgba(239, 68, 68, 0.3); /* ขอบสีแดงจางๆ */
+            color: #ef4444; /* เปลี่ยนข้อความเป็นสีแดง */
+            padding: 8px 24px;
             border-radius: 50px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 1.5px;
-            z-index: 5; /* อยู่เหนือ Content แต่อยู่ใต้เมนู/Modal */
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            z-index: 1050; /* อยู่เหนือ Content ทุกอย่าง รวมถึง Modal บางตัว */
             pointer-events: none; /* คลิกทะลุได้ */
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.15); /* เงาสีแดงจางๆ */
             text-transform: uppercase;
         }
 
@@ -317,7 +317,7 @@
 
 <div class="mobile-container">
 
-    <!-- DEMO Badge (New Feature) -->
+    <!-- DEMO Badge (Updated: Fixed Position & Red Color) -->
     <div class="demo-badge">
         <i class="fa-solid fa-flask me-2"></i>DEMO MODE
     </div>
