@@ -248,7 +248,7 @@ function renderDetailHTML(project) {
     
     const authorIcon = document.getElementById('d-author-icon');
     if(authorIcon) {
-        if(authorName.toLowerCase().includes('kruboat')) {
+        if(authorName.toLowerCase().includes('KruBoat')) {
             authorIcon.innerHTML = `<img src="https://lh3.googleusercontent.com/d/1VUZ7MASQaCBSjW1IdE4Ip4O81Jxzqyk6" class="w-full h-full object-cover">`;
             authorIcon.className = "w-6 h-6 rounded-full shadow-sm overflow-hidden";
         } else {
@@ -289,7 +289,7 @@ function renderDetailHTML(project) {
             btnPreview.removeAttribute('href');
             btnPreview.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
         }
-        btnPreview.innerHTML = `<i class="fa-solid fa-desktop mr-2"></i> ดูตัวอย่างจริง`;
+        btnPreview.innerHTML = `<i class="fa-solid fa-desktop mr-2"></i> ดูตัวอย่าง`;
     }
 }
 
