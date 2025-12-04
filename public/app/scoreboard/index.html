@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KruBoat Scoreboard</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏀</text></svg>">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Prompt & Digital Numbers) -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Prompt', sans-serif; }
+        .font-digital { font-family: 'Share Tech Mono', monospace; }
+        .glass-panel { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        /* ซ่อน Scrollbar */
+        ::-webkit-scrollbar { display: none; }
+        
+        /* Animation for Score Change */
+        .score-pop { animation: pop 0.3s ease-in-out; }
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex flex-col overflow-hidden">
+
+    <!-- PART 1: LOBBY (หน้าแรกสำหรับเลือกห้อง) -->
+    <div id="view-lobby" class="flex-grow flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-slate-800 p-8 rounded-3xl shadow-2xl text-center border border-slate-700">
+            <div class="text-5xl mb-4">🏀</div>
+            <h1 class="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">KruBoat Scoreboard</h1>
+            <p class="text-slate-400 mb-8">ระบบป้ายคะแนนออนไลน์ Real-time</p>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-left text-sm text-slate-400 mb-1">รหัสห้อง (Room ID)</label>
+                    <div class="flex gap-2">
+                        <!-- ช่องกรอกรหัสห้อง -->
+                        <input type="text" id="room-id-input" class="flex-grow bg-slate-700 border border-slate-600 rounded-xl px-4 py-3 text-white text-center text-2xl font-bold tracking-widest focus:ring-2 focus:ring-blue-500 outline-none uppercase" placeholder="XXXXX">
+                        <!-- ปุ่มสุ่มรหัสใหม่ -->
+                        <button onclick="randomNewId()" class="bg-slate-700 border border-slate-600 rounded-xl px-4 text-slate-400 hover:bg-slate-600 hover:text-white transition" title="สุ่มรหัสใหม่">
+                            <i class="fa-solid fa-shuffle"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 pt-4">
+                    <button onclick="enterRoom('board')" class="bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-bold transition flex flex-col items-center gap-2 shadow-lg shadow-blue-900/20">
+                        <i class="fa-solid fa-desktop text-2xl"></i>
+                        เปิดหน้าจอแสดงผล
+                    </button>
+                    <button onclick="enterRoom('control')" class="bg-purple-600 hover:bg-purple-500 text-white py-4 rounded-xl font-bold transition flex flex-col items-center gap-2 shadow-lg shadow-purple-900/20">
+                        <i class="fa-solid fa-gamepad text-2xl"></i>
+                        รีโมทควบคุม
+                    </button>
+                </div>
+            </div>
+            <div class="mt-6 text-xs text-slate-500">
+                <p>วิธีใช้: เปิด "หน้าจอแสดงผล" บนคอมพิวเตอร์</p>
+                <p>แล้วใช้โทรศัพท์เข้า "รีโมทควบคุม" ด้วยรหัสเดียวกัน</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PART 2: BOARD VIEW (หน้าจอแสดงผลบนคอม) -->
+    <div id="view-board" class="hidden h-screen w-screen flex-col bg-black">
+        <!-- Header -->
+        <div class="h-20 bg-slate-900 flex justify-between items-center px-8 border-b border-slate-800">
+            <div class="text-xl font-bold text-slate-400 flex items-center gap-2">
+                <i class="fa-solid fa-wifi text-green-500 animate-pulse"></i> LIVE SCORE
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-slate-500 font-mono text-xl bg-slate-800 px-4 py-1 rounded-lg">ROOM: <span id="display-room-id" class="text-white font-bold tracking-widest">...</span></div>
+                <!-- เพิ่มปุ่มเต็มจอ -->
+                <button onclick="toggleFullScreen()" class="text-slate-400 hover:text-white transition p-2 rounded-lg hover:bg-slate-800" title="เต็มจอ">
+                    <i class="fa-solid fa-expand text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Score Area -->
+        <div class="flex-grow flex items-center justify-center gap-4 p-4">
+            
+            <!-- Team A -->
+            <div class="flex-1 h-full bg-red-900/20 border-4 border-red-600 rounded-3xl flex flex-col items-center justify-center relative overflow-hidden">
+                <div class="absolute top-8 left-0 w-full text-center px-4">
+                    <h2 id="board-name-a" class="text-5xl md:text-7xl font-bold text-red-100 uppercase tracking-wider drop-shadow-lg truncate">HOME</h2>
+                </div>
+                <div id="board-score-a" class="font-digital text-[18rem] md:text-[30rem] leading-none font-bold text-red-500 drop-shadow-[0_0_30px_rgba(239,68,68,0.6)] mt-10">0</div>
+            </div>
+
+            <!-- VS / Set -->
+            <div class="w-32 md:w-48 flex flex-col items-center justify-center gap-8">
+                <div class="text-slate-600 font-bold text-5xl italic">VS</div>
+                <div class="glass-panel p-6 rounded-2xl text-center w-full">
+                    <div class="text-slate-400 text-sm uppercase mb-2 font-bold tracking-widest">PERIOD</div>
+                    <div id="board-set" class="font-digital text-8xl text-yellow-400 font-bold leading-none">1</div>
+                </div>
+            </div>
+
+            <!-- Team B -->
+            <div class="flex-1 h-full bg-blue-900/20 border-4 border-blue-600 rounded-3xl flex flex-col items-center justify-center relative overflow-hidden">
+                <div class="absolute top-8 left-0 w-full text-center px-4">
+                    <h2 id="board-name-b" class="text-5xl md:text-7xl font-bold text-blue-100 uppercase tracking-wider drop-shadow-lg truncate">GUEST</h2>
+                </div>
+                <div id="board-score-b" class="font-digital text-[18rem] md:text-[30rem] leading-none font-bold text-blue-500 drop-shadow-[0_0_30px_rgba(59,130,246,0.6)] mt-10">0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PART 3: CONTROL VIEW (รีโมทบนมือถือ) -->
+    <div id="view-control" class="hidden h-screen w-screen flex-col bg-slate-900 overflow-y-auto">
+        <!-- Navbar -->
+        <div class="bg-slate-800 p-4 shadow-lg flex justify-between items-center sticky top-0 z-50 border-b border-slate-700">
+            <button onclick="location.reload()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-arrow-left"></i> ออก</button>
+            <div class="font-bold text-lg">🎮 รีโมทควบคุม</div>
+            <div class="text-xs bg-slate-700 px-3 py-1 rounded-full text-slate-300 font-mono">ID: <span id="ctrl-room-id" class="font-bold text-white">...</span></div>
+        </div>
+
+        <div class="p-4 space-y-6 pb-20 max-w-md mx-auto w-full">
+            <!-- Team A Control -->
+            <div class="bg-slate-800 rounded-2xl p-5 border-l-8 border-red-600 shadow-lg">
+                <input type="text" id="ctrl-name-a" onchange="updateData()" class="bg-transparent text-2xl font-bold text-white w-full mb-6 outline-none placeholder-slate-600 border-b border-slate-700 pb-2 focus:border-red-500 transition" placeholder="ชื่อทีม A">
+                <div class="flex items-center justify-between gap-4">
+                    <button onclick="adjustScore('a', -1)" class="w-16 h-16 bg-slate-700 rounded-2xl flex items-center justify-center text-2xl hover:bg-slate-600 active:scale-95 transition shadow-md"><i class="fa-solid fa-minus"></i></button>
+                    <div id="ctrl-score-a" class="font-digital text-7xl font-bold text-red-500">0</div>
+                    <button onclick="adjustScore('a', 1)" class="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center text-2xl text-white hover:bg-red-500 active:scale-95 transition shadow-lg shadow-red-900/50"><i class="fa-solid fa-plus"></i></button>
+                </div>
+            </div>
+
+            <!-- Team B Control -->
+            <div class="bg-slate-800 rounded-2xl p-5 border-l-8 border-blue-600 shadow-lg">
+                <input type="text" id="ctrl-name-b" onchange="updateData()" class="bg-transparent text-2xl font-bold text-white w-full mb-6 outline-none placeholder-slate-600 text-right border-b border-slate-700 pb-2 focus:border-blue-500 transition" placeholder="ชื่อทีม B">
+                <!-- แก้ไข: เอา flex-row-reverse ออก เพื่อให้ปุ่มลบอยู่ซ้าย บวกอยู่ขวา -->
+                <div class="flex items-center justify-between gap-4">
+                    <button onclick="adjustScore('b', -1)" class="w-16 h-16 bg-slate-700 rounded-2xl flex items-center justify-center text-2xl hover:bg-slate-600 active:scale-95 transition shadow-md"><i class="fa-solid fa-minus"></i></button>
+                    <div id="ctrl-score-b" class="font-digital text-7xl font-bold text-blue-500">0</div>
+                    <button onclick="adjustScore('b', 1)" class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-2xl text-white hover:bg-blue-500 active:scale-95 transition shadow-lg shadow-blue-900/50"><i class="fa-solid fa-plus"></i></button>
+                </div>
+            </div>
+
+            <!-- Set Control -->
+            <div class="bg-slate-800 rounded-2xl p-4 flex justify-between items-center shadow-lg border border-slate-700">
+                <span class="text-slate-400 font-bold uppercase tracking-wide pl-2">Set / Period</span>
+                <div class="flex items-center gap-4 bg-slate-900 p-1 rounded-xl">
+                    <button onclick="adjustSet(-1)" class="w-10 h-10 bg-slate-700 rounded-lg hover:bg-slate-600 transition text-white"><i class="fa-solid fa-minus"></i></button>
+                    <span id="ctrl-set" class="font-bold text-2xl text-yellow-400 w-10 text-center">1</span>
+                    <button onclick="adjustSet(1)" class="w-10 h-10 bg-slate-700 rounded-lg hover:bg-slate-600 transition text-white"><i class="fa-solid fa-plus"></i></button>
+                </div>
+            </div>
+
+            <!-- Reset Button -->
+            <button onclick="resetScore()" class="w-full bg-slate-800 border border-red-900/30 text-red-400 py-4 rounded-xl font-bold hover:bg-red-900/20 transition mt-8 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-rotate-right"></i> รีเซ็ตคะแนนใหม่ (Reset Match)
+            </button>
+        </div>
+    </div>
+
+    <!-- FIREBASE & LOGIC Script -->
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // ---------------------------------------------------------
+        // ⚠️ ใส่ Config ของครูที่นี่ ⚠️
+        // ---------------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyAlfZHbCFxGK3p3nDoAPy3m9KqZzmX2s9I",
+            authDomain: "kruboat-web.firebaseapp.com",
+            projectId: "kruboat-web",
+            storageBucket: "kruboat-web.firebasestorage.app",
+            messagingSenderId: "61868765546",
+            appId: "1:61868765546:web:683b18ddf68c89dd317513",
+            measurementId: "G-4MQ3GL6CTB"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let currentRoom = "";
+        let currentData = { teamA: "HOME", teamB: "GUEST", scoreA: 0, scoreB: 0, set: 1 };
+
+        // --- Random ID Generator ---
+        window.generateRandomId = () => {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // ตัดตัวที่สับสนง่ายออก
+            let result = '';
+            for (let i = 0; i < 5; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        window.randomNewId = () => {
+            const newId = generateRandomId();
+            document.getElementById('room-id-input').value = newId;
+        }
+
+        // --- Main Functions ---
+        window.enterRoom = async (role) => {
+            const input = document.getElementById('room-id-input').value.trim().toUpperCase();
+            if(!input) return alert("กรุณาใส่ชื่อห้อง");
+            
+            currentRoom = input;
+            document.getElementById('view-lobby').classList.add('hidden');
+            
+            if(role === 'board') {
+                document.getElementById('view-board').classList.remove('hidden');
+                document.getElementById('view-board').classList.add('flex');
+                document.getElementById('display-room-id').innerText = currentRoom;
+                startListening();
+            } else {
+                document.getElementById('view-control').classList.remove('hidden');
+                document.getElementById('view-control').classList.add('flex');
+                document.getElementById('ctrl-room-id').innerText = currentRoom;
+                await initControllerData();
+            }
+        };
+
+        // ฟังก์ชันเต็มจอ (Full Screen)
+        window.toggleFullScreen = () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        function startListening() {
+            onSnapshot(doc(db, "scoreboards", currentRoom), (doc) => {
+                if (doc.exists()) {
+                    updateBoardUI(doc.data());
+                }
+            });
+        }
+
+        function updateBoardUI(data) {
+            const scoreA = document.getElementById('board-score-a');
+            const scoreB = document.getElementById('board-score-b');
+            
+            // Animation
+            if(scoreA.innerText != data.scoreA) { scoreA.classList.remove('score-pop'); void scoreA.offsetWidth; scoreA.classList.add('score-pop'); }
+            if(scoreB.innerText != data.scoreB) { scoreB.classList.remove('score-pop'); void scoreB.offsetWidth; scoreB.classList.add('score-pop'); }
+
+            document.getElementById('board-name-a').innerText = data.teamA || "HOME";
+            document.getElementById('board-name-b').innerText = data.teamB || "GUEST";
+            scoreA.innerText = data.scoreA;
+            scoreB.innerText = data.scoreB;
+            document.getElementById('board-set').innerText = data.set;
+        }
+
+        async function initControllerData() {
+            try {
+                const docRef = doc(db, "scoreboards", currentRoom);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) { currentData = docSnap.data(); } 
+                else { await setDoc(docRef, currentData); }
+                updateControllerUI();
+            } catch (error) {
+                console.error("Error init:", error);
+            }
+        }
+
+        window.updateData = async () => {
+            currentData.teamA = document.getElementById('ctrl-name-a').value || "HOME";
+            currentData.teamB = document.getElementById('ctrl-name-b').value || "GUEST";
+            saveToFirebase();
+        }
+
+        window.adjustScore = (team, amount) => {
+            if(team === 'a') currentData.scoreA = Math.max(0, currentData.scoreA + amount);
+            if(team === 'b') currentData.scoreB = Math.max(0, currentData.scoreB + amount);
+            updateControllerUI();
+            saveToFirebase();
+        }
+
+        window.adjustSet = (amount) => {
+            currentData.set = Math.max(1, currentData.set + amount);
+            updateControllerUI();
+            saveToFirebase();
+        }
+
+        window.resetScore = () => {
+            if(confirm("ต้องการรีเซ็ตคะแนนเป็น 0 ใช่หรือไม่?")) {
+                currentData.scoreA = 0; currentData.scoreB = 0;
+                updateControllerUI(); saveToFirebase();
+            }
+        }
+
+        function updateControllerUI() {
+            document.getElementById('ctrl-name-a').value = currentData.teamA;
+            document.getElementById('ctrl-name-b').value = currentData.teamB;
+            document.getElementById('ctrl-score-a').innerText = currentData.scoreA;
+            document.getElementById('ctrl-score-b').innerText = currentData.scoreB;
+            document.getElementById('ctrl-set').innerText = currentData.set;
+        }
+
+        async function saveToFirebase() {
+            await setDoc(doc(db, "scoreboards", currentRoom), currentData);
+        }
+
+        // Start with random ID
+        randomNewId();
+
+    </script>
+</body>
+</html>
