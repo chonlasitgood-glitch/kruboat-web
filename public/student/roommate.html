@@ -3,707 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RoomMate UI Mockup</title>
+    <title>RoomMate - Student App</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
     
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Google Fonts (Prompt) -->
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        :root {
-            --primary-color: #6366f1; /* สีม่วง Indigo ทันสมัย */
-            --secondary-color: #ec4899; /* สีชมพูสดใส */
-            --bg-color: #f3f4f6;
-            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --fab-text-bg: #374151; /* สีพื้นหลังป้ายข้อความ */
-        }
-
-        body {
-            font-family: 'Prompt', sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            padding-bottom: 100px;
-        }
-
-        /* จำลองหน้าจอมือถือเมื่อเปิดในคอม */
-        .mobile-container {
-            max-width: 480px;
-            margin: 0 auto;
-            background-color: white;
-            min-height: 100vh;
-            box-shadow: 0 0 20px rgba(0,0,0,0.05);
-            position: relative;
-        }
-
-        /* Demo Label Style (Updated: Red Color & Fixed Position) */
-        .demo-badge {
-            position: fixed; /* เปลี่ยนเป็น fixed เพื่อให้ลอยอยู่กลางจอตลอดเวลา */
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(255, 255, 255, 0.85); /* พื้นหลังทึบขึ้นเล็กน้อยเพื่อให้อ่านง่าย */
-            backdrop-filter: blur(4px); /* เอฟเฟกต์เบลอ */
-            border: 1px solid rgba(239, 68, 68, 0.3); /* ขอบสีแดงจางๆ */
-            color: #ef4444; /* เปลี่ยนข้อความเป็นสีแดง */
-            padding: 8px 24px;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            z-index: 1050; /* อยู่เหนือ Content ทุกอย่าง รวมถึง Modal บางตัว */
-            pointer-events: none; /* คลิกทะลุได้ */
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.15); /* เงาสีแดงจางๆ */
-            text-transform: uppercase;
-        }
-
-        /* Header Style */
-        .app-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 20px;
-            border-bottom-left-radius: 25px;
-            border-bottom-right-radius: 25px;
-            margin-bottom: 20px;
-        }
-
-        .profile-section img {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: 3px solid rgba(255,255,255,0.5);
-            object-fit: cover;
-        }
-
-        .xp-bar {
-            height: 8px;
-            background-color: rgba(255,255,255,0.3);
-            border-radius: 10px;
-            margin-top: 5px;
-            overflow: hidden;
-        }
+        :root { --primary-color: #6366f1; --secondary-color: #ec4899; --bg-color: #f3f4f6; --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); --fab-text-bg: #374151; }
+        body { font-family: 'Prompt', sans-serif; background-color: var(--bg-color); margin: 0; padding-bottom: 100px; }
+        .mobile-container { max-width: 480px; margin: 0 auto; background-color: white; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.05); position: relative; }
+        .app-header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 20px; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; margin-bottom: 20px; position: relative; }
+        .profile-section img { width: 60px; height: 60px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.5); object-fit: cover; background: white; }
+        .xp-bar { height: 8px; background-color: rgba(255,255,255,0.3); border-radius: 10px; margin-top: 5px; overflow: hidden; }
+        .xp-progress { height: 100%; background-color: #fbbf24; width: 0%; transition: width 0.5s; }
+        .custom-card { border: none; border-radius: 15px; box-shadow: var(--card-shadow); margin-bottom: 15px; overflow: hidden; background: white; }
+        .card-header-custom { padding: 12px 15px; font-weight: 600; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
         
-        .xp-progress {
-            height: 100%;
-            background-color: #fbbf24; /* สีเหลืองทอง */
-            width: 75%; /* Mock XP */
-        }
-
-        /* Card Styles */
-        .custom-card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: var(--card-shadow);
-            margin-bottom: 15px;
-            overflow: hidden;
-            background: white;
-        }
-
-        .card-header-custom {
-            padding: 12px 15px;
-            font-weight: 600;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* Schedule Items */
-        .schedule-item {
-            padding: 10px 15px;
-            border-left: 4px solid #e5e7eb;
-            margin-bottom: 8px;
-            background-color: #f9fafb;
-            border-radius: 0 8px 8px 0;
-        }
-
-        .schedule-item.active {
-            border-left: 4px solid var(--primary-color);
-            background-color: #eef2ff;
-        }
-
-        .time-badge {
-            font-size: 0.75rem;
-            color: #6b7280;
-            display: block;
-        }
-
-        /* Homework Styles */
-        .hw-item {
-            border-left: 4px solid transparent;
-        }
-        .hw-urgent { border-left-color: #ef4444; } /* แดง */
-        .hw-normal { border-left-color: #fbbf24; } /* เหลือง */
-        .hw-done { border-left-color: #10b981; opacity: 0.6; } /* เขียว */
-
-        .status-badge {
-            font-size: 0.7rem;
-            padding: 2px 8px;
-            border-radius: 12px;
-        }
-
-        /* Floating Action Button (FAB) Menu Style */
-        .fab-container {
-            position: fixed;
-            bottom: 15px; /* ชิดขอบล่าง */
-            right: 15px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column; 
-            align-items: flex-end;
-            gap: 10px;
-        }
-
-        .fab-trigger {
-            width: 45px;
-            height: 45px;
-            background-color: white; 
-            border-radius: 50%;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary-color);
-            font-size: 18px;
-            cursor: pointer;
-            border: none;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-        }
+        /* Schedule Item Styles (Updated) */
+        .schedule-item { padding: 12px 15px; border-left: 4px solid #e5e7eb; margin-bottom: 8px; background-color: #f9fafb; border-radius: 0 8px 8px 0; transition: all 0.3s; }
+        .schedule-item.active { border-left: 4px solid var(--primary-color); background-color: #eef2ff; transform: translateX(5px); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .time-badge { font-size: 0.7rem; color: #6b7280; display: block; margin-bottom: 2px; font-weight: 500; }
+        .subject-code { font-size: 0.7rem; background: #e0e7ff; color: #4338ca; padding: 1px 6px; border-radius: 4px; margin-right: 5px; font-weight: 600; }
+        .teacher-room { font-size: 0.75rem; color: #6b7280; margin-top: 2px; }
         
-        .fab-trigger:hover {
-            background-color: #f8f9fa;
-        }
+        .hw-item { border-left: 4px solid transparent; position: relative; }
+        .hw-urgent { border-left-color: #ef4444; }
+        .hw-normal { border-left-color: #fbbf24; }
+        .hw-done { border-left-color: #10b981; opacity: 0.6; }
+        .btn-delete-hw { position: absolute; top: 10px; right: 10px; font-size: 0.7rem; color: #9ca3af; cursor: pointer; }
+        .btn-delete-hw:hover { color: #ef4444; }
+        .fab-container { position: fixed; bottom: 15px; right: 15px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+        .fab-trigger { width: 45px; height: 45px; background-color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; color: var(--primary-color); font-size: 18px; cursor: pointer; border: none; transition: all 0.3s; }
+        .fab-menu { display: flex; flex-direction: column-reverse; align-items: flex-end; gap: 12px; opacity: 0; pointer-events: none; transform: translateY(10px); transition: all 0.3s ease-in-out; margin-bottom: 5px; }
+        .fab-container.active .fab-menu { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        .fab-item { display: flex; align-items: center; justify-content: flex-end; gap: 10px; text-decoration: none; cursor: pointer; }
+        .fab-item-btn { width: 35px; height: 35px; background-color: white; border-radius: 50%; box-shadow: 0 3px 6px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; color: var(--primary-color); font-size: 14px; transition: background-color 0.2s; }
+        .fab-item-label { background-color: var(--fab-text-bg); color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.15); opacity: 0.9; font-weight: 400; }
+        .fab-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255,255,255,0.8); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); }
+        .fab-container.active ~ .fab-overlay { opacity: 1; pointer-events: auto; }
+        .add-btn { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; border: none; }
+        .teacher-btn { position: absolute; top: 20px; right: 20px; color: rgba(255,255,255,0.6); cursor: pointer; }
+        .teacher-btn:hover { color: white; }
+        .xp-badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background: #fbbf24; color: #78350f; font-weight: bold; margin-left: 5px;}
+        .student-list-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #eee; }
 
-        /* Menu Items Animation */
-        .fab-menu {
-            display: flex;
-            flex-direction: column-reverse; /* เรียงซ้อนขึ้นไปด้านบน */
-            align-items: flex-end;
-            gap: 12px;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(10px);
-            transition: all 0.3s ease-in-out;
-            margin-bottom: 5px; 
-        }
-
-        .fab-container.active .fab-menu {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateY(0);
-        }
-
-        .fab-item {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .fab-item:hover .fab-item-btn {
-            background-color: #f8f9fa;
-        }
-
-        .fab-item-btn {
-            width: 35px;
-            height: 35px;
-            background-color: white;
-            border-radius: 50%;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary-color);
-            font-size: 14px;
-            transition: background-color 0.2s;
-        }
-
-        .fab-item-label {
-            background-color: var(--fab-text-bg);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-            opacity: 0.9;
-            font-weight: 400;
-        }
-
-        /* Overlay */
-        .fab-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255,255,255,0.8);
-            z-index: 999;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-            backdrop-filter: blur(2px);
-        }
-        .fab-container.active ~ .fab-overlay {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .add-hw-btn {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            border: none;
-        }
-        
-        /* Styles for Project Structure Content */
-        .structure-card {
-            background-color: #f8f9fa;
-            border-left: 4px solid var(--primary-color);
-            padding: 10px 15px;
-            margin-bottom: 15px; /* เพิ่มระยะห่าง */
-            border-radius: 4px;
-        }
-        .structure-title {
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 10px;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px dashed #d1d5db;
-            padding-bottom: 5px;
-        }
-        .structure-title i {
-            margin-right: 8px;
-            color: var(--primary-color);
-            font-size: 0.9rem;
-        }
-        .structure-content {
-            font-size: 0.85rem;
-            color: #4b5563;
-            margin: 0;
-            line-height: 1.6;
-        }
-        /* Custom list for methodology steps */
-        .method-step {
-            display: flex;
-            margin-bottom: 8px;
-            align-items: flex-start;
-        }
-        .method-step-num {
-            background-color: var(--primary-color);
-            color: white;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            font-size: 0.7rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 8px;
-            flex-shrink: 0;
-            margin-top: 3px;
-        }
-        .name-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            font-size: 0.85rem;
-        }
-        .name-list li {
-            margin-bottom: 4px;
-            display: flex;
-            align-items: center;
-        }
-        .name-list li i {
-            margin-right: 8px;
-            color: var(--primary-color);
-            font-size: 0.7rem;
-        }
-
+        /* Tab Style in Modal */
+        .nav-pills .nav-link { color: #6b7280; background-color: #f3f4f6; margin: 0 2px; }
+        .nav-pills .nav-link.active { background-color: var(--primary-color); color: white; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="mobile-container">
-
-    <!-- DEMO Badge (Updated: Fixed Position & Red Color) -->
-    <div class="demo-badge">
-        <i class="fa-solid fa-flask me-2"></i>DEMO MODE
-    </div>
-
-    <!-- 1. Header Section -->
+    <!-- Header -->
     <header class="app-header">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="fw-bold fs-5"><i class="fa-solid fa-shapes me-2"></i>RoomMate</div>
-            <div class="position-relative">
-                <i class="fa-regular fa-bell fs-5"></i>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5rem;">
-                    2
-                </span>
-            </div>
+            <div class="teacher-btn" onclick="unlockTeacherMode()"><i class="fa-solid fa-gear"></i></div>
         </div>
-
         <div class="d-flex align-items-center profile-section">
-            <img src="https://ui-avatars.com/api/?name=Nattapol+A&background=random" alt="Profile">
+            <img src="https://ui-avatars.com/api/?name=Guest&background=random" alt="Profile" id="student-img">
             <div class="ms-3 flex-grow-1">
-                <div class="fw-bold">ด.ช.ณัฐพล อนุไพร (ม.1/1)</div>
+                <div class="fw-bold" id="student-name">กำลังโหลด...</div>
                 <div class="d-flex justify-content-between align-items-end" style="font-size: 0.8rem;">
-                    <span>Lv. 5 Ranger</span>
-                    <span>450/600 XP</span>
+                    <span id="student-lvl">Lv. 1</span>
+                    <span id="student-xp">0 XP</span>
                 </div>
-                <div class="xp-bar">
-                    <div class="xp-progress"></div>
-                </div>
+                <div class="xp-bar"><div class="xp-progress" id="student-xp-bar" style="width: 0%"></div></div>
             </div>
         </div>
     </header>
 
     <div class="container px-3">
-
-        <!-- 2. Schedule Card (Auto Highlight) -->
+        
+        <!-- Schedule Card -->
         <div class="custom-card">
             <div class="card-header-custom">
                 <span><i class="fa-regular fa-calendar-days me-2 text-primary"></i>ตารางเรียนวันนี้</span>
-                <span class="badge bg-primary rounded-pill">อังคาร</span>
+                <span class="badge bg-primary rounded-pill" id="today-day">-</span>
             </div>
-            <div class="p-3">
-                <div class="schedule-item">
-                    <span class="time-badge">08:30 - 09:30</span>
-                    <div class="fw-medium text-muted">ภาษาไทย</div>
-                </div>
-                
-                <div class="schedule-item active d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="time-badge text-primary fw-bold">09:30 - 10:30 (ตอนนี้)</span>
-                        <div class="fw-bold text-dark">คณิตศาสตร์ พื้นฐาน</div>
-                        <small class="text-muted"><i class="fa-solid fa-location-dot me-1"></i>ห้อง 412</small>
-                    </div>
-                    <i class="fa-solid fa-book-open text-primary fs-4 opacity-50"></i>
-                </div>
-
-                <div class="schedule-item">
-                    <span class="time-badge">10:30 - 11:30</span>
-                    <div class="fw-medium">วิทยาศาสตร์</div>
-                </div>
+            <div class="p-3" id="schedule-list">
+                <div class="text-center text-muted small py-3">กำลังโหลดตารางเรียน...</div>
             </div>
         </div>
 
-        <!-- 3. Duty Card (เวรประจำวัน) -->
+        <!-- Duty Card (แก้ไขส่วนหัว) -->
         <div class="custom-card border-0" style="background: linear-gradient(to right, #fff1eb, #ace0f9);">
             <div class="card-header-custom bg-transparent border-0">
                 <span><i class="fa-solid fa-broom me-2 text-success"></i>เวรประจำวัน</span>
-                <span class="badge bg-success">กลุ่ม B</span>
+                <div class="d-flex align-items-center gap-2">
+                    <!-- ปุ่มใหม่: ดูสมาชิก -->
+                    <button class="btn btn-light btn-sm rounded-pill px-3 py-1 border-0 shadow-sm text-success fw-bold" style="font-size: 0.7rem;" onclick="openDutyRosterModal()">
+                        <i class="fa-solid fa-users-viewfinder me-1"></i> ดูสมาชิก
+                    </button>
+                    <span class="badge bg-success" id="duty-group">-</span>
+                </div>
             </div>
             <div class="p-3 pt-0">
                 <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <small class="text-muted d-block mb-1">สมาชิกเวรวันนี้:</small>
-                        <div class="d-flex">
-                            <img src="https://ui-avatars.com/api/?name=Suchada&background=random" class="rounded-circle border border-white" width="30" height="30" style="margin-right: -10px;">
-                            <img src="https://ui-avatars.com/api/?name=Supansa&background=random" class="rounded-circle border border-white" width="30" height="30" style="margin-right: -10px;">
-                            <img src="https://ui-avatars.com/api/?name=Nattapol&background=random" class="rounded-circle border border-white" width="30" height="30" style="z-index:1;">
-                            <div class="rounded-circle bg-white border d-flex align-items-center justify-content-center ms-2" style="width: 30px; height: 30px; font-size: 10px;">+2</div>
-                        </div>
+                    <div id="duty-members">
+                        <small class="text-muted d-block mb-1">สมาชิกเวร:</small>
+                        <div id="duty-list-text" class="small text-dark fw-bold">กำลังโหลด...</div>
                     </div>
-                    <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="alert('เปิดกล้องเพื่อถ่ายรูปส่งงาน...')">
+                    <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="triggerCamera()">
                         <i class="fa-solid fa-camera me-1"></i> ส่งงาน
                     </button>
+                    <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;" onchange="uploadDutyPhoto(this)">
                 </div>
             </div>
         </div>
 
-        <!-- 4. Homework List -->
+        <!-- Homework List -->
         <div class="d-flex justify-content-between align-items-center mb-2 mt-4">
-            <h6 class="fw-bold m-0"><i class="fa-solid fa-pen-to-square me-2 text-warning"></i>การบ้านวันนี้</h6>
-            <button class="btn btn-dark add-hw-btn shadow-sm" data-bs-toggle="modal" data-bs-target="#addHomeworkModal">
-                <i class="fa-solid fa-plus"></i>
-            </button>
+            <h6 class="fw-bold m-0"><i class="fa-solid fa-pen-to-square me-2 text-warning"></i>การบ้าน</h6>
+            <button class="btn btn-dark add-btn shadow-sm" data-bs-toggle="modal" data-bs-target="#addHomeworkModal"><i class="fa-solid fa-plus"></i></button>
         </div>
-
-        <div class="custom-card hw-item hw-urgent p-3 mb-2">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <span class="badge bg-danger mb-1" style="font-size: 0.6rem;">ส่งพรุ่งนี้!</span>
-                    <div class="fw-bold">แบบฝึกหัด 1.2 (ข้อคู่)</div>
-                    <div class="text-muted small">วิชาคณิตศาสตร์</div>
-                </div>
-                <div class="text-end">
-                    <button class="btn btn-outline-secondary btn-sm rounded-pill" style="font-size: 0.7rem;">
-                        รายละเอียด
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="custom-card hw-item hw-normal p-3 mb-2">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <span class="badge bg-warning text-dark mb-1" style="font-size: 0.6rem;">ส่ง 25 ส.ค.</span>
-                    <div class="fw-bold">วาดภาพระบายสีหัวข้อ "วันแม่"</div>
-                    <div class="text-muted small">วิชาศิลปะ</div>
-                </div>
-                <div class="text-end">
-                    <button class="btn btn-outline-secondary btn-sm rounded-pill" style="font-size: 0.7rem;">
-                        รายละเอียด
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="custom-card hw-item hw-done p-3 mb-2 bg-light">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <span class="badge bg-success mb-1" style="font-size: 0.6rem;">ส่งแล้ว ✅</span>
-                    <div class="fw-bold text-decoration-line-through text-muted">ท่องศัพท์ Unit 3</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 5. Voting Poll -->
-        <div class="custom-card mt-4">
-            <div class="card-header-custom">
-                <span><i class="fa-solid fa-square-poll-vertical me-2 text-info"></i>โหวตมติห้อง</span>
-                <small class="text-danger"><i class="fa-regular fa-clock me-1"></i>ปิดวันนี้ 16.00</small>
-            </div>
-            <div class="p-3">
-                <p class="mb-3 fw-bold small">Q: ธีมพานไหว้ครูปีนี้เอาแบบไหน?</p>
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between small mb-1">
-                        <span>1. มินิมอล (Minimal)</span>
-                        <span>40%</span>
-                    </div>
-                    <div class="progress" style="height: 8px;">
-                        <div class="progress-bar bg-info" role="progressbar" style="width: 40%"></div>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between small mb-1">
-                        <span>2. อลังการงานสร้าง</span>
-                        <span class="fw-bold">60%</span>
-                    </div>
-                    <div class="progress" style="height: 8px;">
-                        <div class="progress-bar bg-primary" role="progressbar" style="width: 60%"></div>
-                    </div>
-                </div>
-                <button class="btn btn-outline-primary btn-sm w-100 rounded-pill mt-2">เข้าร่วมโหวต</button>
-            </div>
+        <div id="homework-list">
+            <div class="text-center text-muted small py-3">กำลังโหลด...</div>
         </div>
 
     </div>
-    
-    <div style="height: 40px;"></div>
-
+    <div style="height: 60px;"></div>
 </div>
 
-<!-- Hamburger Floating Action Button Menu -->
+<!-- FAB Menu -->
 <div class="fab-container" id="fabMenu">
-    
     <div class="fab-menu">
-        <!-- 5. Project Structure Item -->
-        <div class="fab-item" data-bs-toggle="modal" data-bs-target="#projectStructureModal">
-            <span class="fab-item-label">เค้าโครง</span>
-            <div class="fab-item-btn text-white bg-warning">
-                <i class="fa-solid fa-file-lines text-white"></i>
-            </div>
+        <div class="fab-item" onclick="logoutStudent()">
+            <span class="fab-item-label">ออกจากระบบ</span>
+            <div class="fab-item-btn bg-danger text-white"><i class="fa-solid fa-right-from-bracket"></i></div>
         </div>
-
-        <!-- 4. Profile Item -->
-        <a href="#" class="fab-item">
-            <span class="fab-item-label">โปรไฟล์</span>
-            <div class="fab-item-btn">
-                <i class="fa-solid fa-user"></i>
-            </div>
-        </a>
-
-        <!-- 3. Ranking Item -->
-        <a href="#" class="fab-item">
-            <span class="fab-item-label">จัดอันดับ</span>
-            <div class="fab-item-btn">
-                <i class="fa-solid fa-trophy"></i>
-            </div>
-        </a>
-
-        <!-- 2. Calendar Item -->
-        <a href="#" class="fab-item">
-            <span class="fab-item-label">ปฏิทินงาน</span>
-            <div class="fab-item-btn">
-                <i class="fa-regular fa-calendar-check"></i>
-            </div>
-        </a>
-
-        <!-- 1. Home Item -->
-        <a href="#" class="fab-item">
+        <a href="../student/index.html" class="fab-item">
             <span class="fab-item-label">หน้าหลัก</span>
-            <div class="fab-item-btn">
-                <i class="fa-solid fa-house"></i>
-            </div>
+            <div class="fab-item-btn"><i class="fa-solid fa-house"></i></div>
         </a>
     </div>
-    
-    <!-- Main Trigger Button (Hamburger) -->
-    <button class="fab-trigger" onclick="toggleFab()">
-        <i class="fa-solid fa-bars"></i>
-    </button>
+    <button class="fab-trigger" onclick="toggleFab()"><i class="fa-solid fa-bars"></i></button>
 </div>
-
-<!-- Overlay Background -->
 <div class="fab-overlay" onclick="toggleFab()"></div>
 
-<!-- Modal: Project Structure (เค้าโครง - Detailed Version) -->
-<div class="modal fade" id="projectStructureModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable modal-fullscreen-sm-down">
-        <div class="modal-content rounded-4 border-0">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title fw-bold text-primary"><i class="fa-solid fa-book me-2"></i>เค้าโครงโครงงาน</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- Modal: Duty Roster (ใหม่) -->
+<div class="modal fade" id="dutyRosterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-4 border-0" style="min-height: 500px;">
+            <div class="modal-header border-0 bg-success text-white">
+                <h6 class="modal-title fw-bold"><i class="fa-solid fa-broom me-2"></i>สมาชิกเวรประจำวัน</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body bg-white">
+            <div class="modal-body bg-light">
+                <!-- Day Selector -->
+                <ul class="nav nav-pills nav-fill mb-3 gap-1 small" id="duty-tabs" role="tablist">
+                    <li class="nav-item" role="presentation"><button class="nav-link active rounded-pill py-1" id="d-mon-tab" data-bs-toggle="pill" data-bs-target="#d-mon" type="button">จันทร์</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link rounded-pill py-1" id="d-tue-tab" data-bs-toggle="pill" data-bs-target="#d-tue" type="button">อังคาร</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link rounded-pill py-1" id="d-wed-tab" data-bs-toggle="pill" data-bs-target="#d-wed" type="button">พุธ</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link rounded-pill py-1" id="d-thu-tab" data-bs-toggle="pill" data-bs-target="#d-thu" type="button">พฤหัส</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link rounded-pill py-1" id="d-fri-tab" data-bs-toggle="pill" data-bs-target="#d-fri" type="button">ศุกร์</button></li>
+                </ul>
                 
-                <div class="text-center mb-4">
-                    <h6 class="fw-bold mb-1">RoomMate: ผู้ช่วยดิจิทัลประจำห้องเรียน</h6>
-                    <small class="text-muted">(Smart Homeroom Management System)</small>
+                <div class="tab-content" id="duty-tabContent">
+                    <div class="tab-pane fade show active" id="d-mon" role="tabpanel"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
+                    <div class="tab-pane fade" id="d-tue" role="tabpanel"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
+                    <div class="tab-pane fade" id="d-wed" role="tabpanel"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
+                    <div class="tab-pane fade" id="d-thu" role="tabpanel"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
+                    <div class="tab-pane fade" id="d-fri" role="tabpanel"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
                 </div>
-
-                <!-- ผู้จัดทำ -->
-                <div class="card mb-3 border-0 shadow-sm">
-                    <div class="card-body p-3" style="background-color: #eef2ff;">
-                        <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-users me-2"></i>ผู้จัดทำโครงงาน</h6>
-                        <ul class="name-list">
-                            <li><i class="fa-solid fa-user-graduate"></i>เด็กชายณัฐพล อนุไพร</li>
-                            <li><i class="fa-solid fa-user-graduate"></i>เด็กหญิงสุชาดา บุญกุ้ม</li>
-                            <li><i class="fa-solid fa-user-graduate"></i>เด็กหญิงสุพรรณษา บุญกุ้ม</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- ครูที่ปรึกษา -->
-                <div class="card mb-4 border-0 shadow-sm">
-                    <div class="card-body p-3" style="background-color: #fff7ed;">
-                        <h6 class="fw-bold text-warning mb-2" style="color: #ea580c !important;"><i class="fa-solid fa-chalkboard-user me-2"></i>ครูที่ปรึกษา</h6>
-                        <ul class="name-list">
-                            <li><i class="fa-solid fa-user-tie" style="color: #ea580c;"></i>นายชลสิทธิ์ วิเชียรพันธ์</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <hr class="my-4">
-
-                <!-- บทที่ 1 -->
-                <div class="structure-card">
-                    <div class="structure-title"><i class="fa-solid fa-circle-question"></i>บทที่ 1: ที่มาและความสำคัญ</div>
-                    <p class="structure-content">
-                        <strong>1. สภาพปัญหาในปัจจุบัน:</strong><br>
-                        - การสื่อสารในห้องเรียนผ่านกระดานดำหรือกลุ่มแชท ทำให้ข้อมูลสำคัญ (การบ้าน, ตารางเวร) ตกหล่น<br>
-                        - นักเรียนขาดแรงจูงใจในการทำเวรประจำวัน<br>
-                        - กระเป๋านักเรียนหนักเกินความจำเป็นเพราะจัดตารางสอนผิด<br><br>
-                        <strong>2. แนวคิดในการพัฒนา:</strong><br>
-                        นำเทคโนโลยี Google Workspace ที่นักเรียนคุ้นเคย มาพัฒนาเป็น Web Application เพื่อเป็นศูนย์กลางข้อมูล (Hub) ที่เข้าถึงง่าย ช่วยแจ้งเตือนและสร้างแรงจูงใจผ่านระบบ Gamification
-                    </p>
-                </div>
-
-                <!-- บทที่ 2 -->
-                <div class="structure-card">
-                    <div class="structure-title"><i class="fa-solid fa-book-open"></i>บทที่ 2: เอกสารที่เกี่ยวข้อง</div>
-                    <p class="structure-content">
-                        <strong>1. แนวคิดห้องเรียนอัจฉริยะ (Smart Classroom):</strong> การใช้ ICT เพิ่มประสิทธิภาพการจัดการ<br>
-                        <strong>2. ทฤษฎีเกมมิฟิเคชัน (Gamification):</strong> การใช้ระบบเลเวล (Level) และแต้ม (XP) ปรับเปลี่ยนพฤติกรรม<br>
-                        <strong>3. เครื่องมือที่ใช้พัฒนา:</strong><br>
-                        - HTML5/CSS (Bootstrap Framework) สำหรับหน้าจอแสดงผล<br>
-                        - Google Apps Script สำหรับประมวลผลข้อมูล<br>
-                        - Google Sheets สำหรับเป็นฐานข้อมูลออนไลน์
-                    </p>
-                </div>
-
-                <!-- บทที่ 3 (Expanded) -->
-                <div class="structure-card">
-                    <div class="structure-title"><i class="fa-solid fa-laptop-code"></i>บทที่ 3: วิธีการดำเนินงาน</div>
-                    
-                    <div class="method-step">
-                        <div class="method-step-num">1</div>
-                        <div class="structure-content">
-                            <strong>การศึกษาและรวบรวมข้อมูล:</strong><br>
-                            - สำรวจปัญหาผ่านแบบสอบถาม Google Forms จากเพื่อน 30 คน<br>
-                            - รวบรวมตารางสอนและรายชื่อวิชาทั้งหมดของชั้น ม.1
-                        </div>
-                    </div>
-
-                    <div class="method-step">
-                        <div class="method-step-num">2</div>
-                        <div class="structure-content">
-                            <strong>การวิเคราะห์และออกแบบระบบ:</strong><br>
-                            - ออกแบบ Flowchart การทำงานของระบบ (เช่น ขั้นตอนการส่งการบ้าน)<br>
-                            - ออกแบบฐานข้อมูลใน Google Sheets (ตารางนักเรียน, ตารางงาน)<br>
-                            - ออกแบบหน้าจอ (UI Design) แบบ Mobile-First
-                        </div>
-                    </div>
-
-                    <div class="method-step">
-                        <div class="method-step-num">3</div>
-                        <div class="structure-content">
-                            <strong>การพัฒนาโปรแกรม:</strong><br>
-                            - เขียนโค้ด HTML/CSS สร้างหน้าเว็บ<br>
-                            - เขียนสคริปต์ Google Apps Script เชื่อมต่อฐานข้อมูล<br>
-                            - สร้างฟังก์ชันคำนวณอัตโนมัติ (เช่น ไฮไลท์วิชาเรียนปัจจุบัน)
-                        </div>
-                    </div>
-
-                    <div class="method-step">
-                        <div class="method-step-num">4</div>
-                        <div class="structure-content">
-                            <strong>การทดสอบและปรับปรุง (Testing):</strong><br>
-                            - ทดสอบระบบเบื้องต้น (Alpha Test) กับกลุ่มเพื่อนสนิท 5 คน<br>
-                            - ปรับปรุงบั๊ก (Bug Fix) เช่น การแสดงผลผิดพลาดในมือถือบางรุ่น
-                        </div>
-                    </div>
-
-                    <div class="method-step">
-                        <div class="method-step-num">5</div>
-                        <div class="structure-content">
-                            <strong>การนำไปใช้จริง (Implementation):</strong><br>
-                            - นำไปฝังบน Google Sites ของโรงเรียน<br>
-                            - ให้เพื่อนในห้องใช้งานจริงเป็นเวลา 1 ภาคเรียน
-                        </div>
-                    </div>
-                </div>
-
-                <!-- บทที่ 4 -->
-                <div class="structure-card">
-                    <div class="structure-title"><i class="fa-solid fa-chart-line"></i>บทที่ 4: ผลการดำเนินงาน</div>
-                    <p class="structure-content">
-                        <strong>1. ผลการพัฒนาระบบ:</strong><br>
-                        ได้เว็บแอปพลิเคชันที่มีฟังก์ชันครบถ้วน (ตารางเรียนเรียลไทม์, ระบบส่งงาน, ระบบโหวต)<br><br>
-                        <strong>2. ผลการประเมินความพึงพอใจ:</strong><br>
-                        จากการสำรวจความพึงพอใจของนักเรียน 40 คน พบว่ามีความพึงพอใจในระดับ "มากที่สุด" (ค่าเฉลี่ย 4.65) โดยเฉพาะความสะดวกในการใช้งานผ่านมือถือ
-                    </p>
-                </div>
-
-                <!-- บทที่ 5 -->
-                <div class="structure-card">
-                    <div class="structure-title"><i class="fa-solid fa-star"></i>บทที่ 5: สรุปผลและข้อเสนอแนะ</div>
-                    <p class="structure-content">
-                        <strong>สรุปผล:</strong> RoomMate ช่วยลดปัญหาการลืมการบ้านได้จริงถึง 80% และช่วยสร้างบรรยากาศห้องเรียนที่ทันสมัย<br>
-                        <strong>ปัญหาและอุปสรรค:</strong> อินเทอร์เน็ตโรงเรียนบางจุดไม่เสถียร ทำให้โหลดข้อมูลช้า<br>
-                        <strong>ข้อเสนอแนะ:</strong> พัฒนาให้ใช้งานแบบ Offline ได้บางส่วน และเชื่อมต่อแจ้งเตือนผ่าน LINE Notify
-                    </p>
-                </div>
-
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-secondary w-100 rounded-pill btn-sm" data-bs-dismiss="modal">ปิดหน้าต่าง</button>
-            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Student Register -->
+<div class="modal fade" id="studentRegisterModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 p-4 text-center">
+            <div class="mb-3"><i class="fa-solid fa-user-lock text-5xl text-primary"></i></div>
+            <h4 class="fw-bold mb-2">ยินดีต้อนรับสู่ RoomMate!</h4>
+            <p class="text-muted small mb-4">กรุณากรอกรหัสประจำตัวนักเรียนเพื่อเข้าใช้งาน</p>
+            <input type="text" id="reg-student-id" class="form-control text-center mb-3" placeholder="รหัสนักเรียน4หลัก (เช่น 7210)">
+            <button class="btn btn-primary w-100 rounded-pill" onclick="registerStudent()">เข้าใช้งาน</button>
+            <p class="text-muted small mt-3" style="font-size: 0.7rem;">*หากยังไม่มีรหัส กรุณาติดต่อครูโบ๊ท</p>
         </div>
     </div>
 </div>
@@ -712,55 +192,604 @@
 <div class="modal fade" id="addHomeworkModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content rounded-4 border-0">
-            <div class="modal-header border-0 pb-0">
-                <h6 class="modal-title fw-bold">เพิ่มการบ้านใหม่</h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
+            <div class="modal-header border-0 pb-0"><h6 class="modal-title fw-bold">เพิ่มการบ้านใหม่</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
-                <form>
-                    <div class="mb-3">
-                        <label class="form-label small text-muted">วิชา (จากตารางเรียนวันนี้)</label>
-                        <select class="form-select form-select-sm bg-light border-0">
-                            <option selected>คณิตศาสตร์ พื้นฐาน</option>
-                            <option>วิทยาศาสตร์</option>
-                            <option>ภาษาไทย</option>
-                        </select>
+                <form id="hw-form">
+                    <div class="mb-3"><label class="form-label small text-muted">วิชา</label><input type="text" id="hw-subject" class="form-control form-control-sm bg-light border-0"></div>
+                    <div class="mb-3"><label class="form-label small text-muted">รายละเอียด</label><textarea id="hw-desc" class="form-control form-control-sm bg-light border-0" rows="2"></textarea></div>
+                    <div class="mb-3"><label class="form-label small text-muted">กำหนดส่ง</label><input type="date" id="hw-date" class="form-control form-control-sm bg-light border-0"></div>
+                    <div class="mb-3"><label class="form-label small text-muted">ความด่วน</label>
+                        <select id="hw-type" class="form-select form-select-sm bg-light border-0"><option value="normal">ปกติ (สีเหลือง)</option><option value="urgent">ด่วน (สีแดง)</option></select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small text-muted">รายละเอียดงาน</label>
-                        <textarea class="form-control form-control-sm bg-light border-0" rows="2" placeholder="เช่น ทำแบบฝึกหัดหน้า 5-6"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small text-muted">กำหนดส่ง</label>
-                        <input type="date" class="form-control form-control-sm bg-light border-0">
-                    </div>
-                    <button type="button" class="btn btn-primary w-100 rounded-pill btn-sm" data-bs-dismiss="modal">บันทึก</button>
+                    <button type="button" class="btn btn-primary w-100 rounded-pill btn-sm" onclick="saveHomework()">บันทึก</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Modal: Teacher Login -->
+<div class="modal fade" id="teacherLoginModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-header border-0 pb-0"><h6 class="modal-title fw-bold">สำหรับครู</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body text-center">
+                <input type="password" id="teacher-pin" class="form-control form-control-lg text-center tracking-widest mb-3" placeholder="PIN" maxlength="5">
+                <button class="btn btn-primary w-100 rounded-pill" onclick="checkTeacherPin()">เข้าสู่ระบบ</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-<!-- Script for FAB Interaction -->
-<script>
-    function toggleFab() {
-        const fabContainer = document.getElementById('fabMenu');
-        const icon = fabContainer.querySelector('.fab-trigger i');
-        
-        fabContainer.classList.toggle('active');
-        
-        // สลับไอคอนระหว่าง Hamburger กับ X
-        if (fabContainer.classList.contains('active')) {
-            icon.classList.remove('fa-bars');
-            icon.classList.add('fa-xmark');
+<!-- Modal: Teacher Dashboard -->
+<div class="modal fade" id="teacherDashboardModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-4 border-0" style="min-height: 600px;">
+            <div class="modal-header border-0 bg-primary text-white">
+                <h6 class="modal-title fw-bold" id="teacher-modal-title">จัดการห้องเรียน</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body bg-light p-0">
+                <!-- Teacher Menu -->
+                <div id="teacher-menu" class="p-3">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-white shadow-sm text-start p-3 rounded-3 border" onclick="showSection('teacher-students')">
+                            <i class="fa-solid fa-users me-2 text-success"></i> จัดการนักเรียน / ให้คะแนน
+                        </button>
+                        <button class="btn btn-white shadow-sm text-start p-3 rounded-3 border" onclick="showSection('teacher-schedule')">
+                            <i class="fa-solid fa-calendar-days me-2 text-primary"></i> แก้ไขตารางเรียน
+                        </button>
+                        <button class="btn btn-white shadow-sm text-start p-3 rounded-3 border" onclick="viewDutyHistory()">
+                            <i class="fa-solid fa-images me-2 text-warning"></i> ดูรูปงานเวร
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Section: Manage Students -->
+                <div id="teacher-students" class="d-none h-100 d-flex flex-column">
+                    <div class="p-2 border-bottom bg-white d-flex align-items-center">
+                        <button class="btn btn-sm btn-link text-decoration-none me-2" onclick="showSection('teacher-menu')"><i class="fa-solid fa-arrow-left"></i></button>
+                        <span class="fw-bold small">รายชื่อนักเรียน</span>
+                    </div>
+                    <div class="p-3 bg-white border-bottom">
+                        <div class="mb-2">
+                            <input type="text" id="new-student-id" class="form-control form-control-sm mb-2" placeholder="รหัสประจำตัว (ID)">
+                            <input type="text" id="new-student-name" class="form-control form-control-sm mb-2" placeholder="ชื่อ-นามสกุล">
+                            <select id="new-student-group" class="form-select form-select-sm mb-2">
+                                <option value="">-- เลือกวันเวร --</option>
+                                <option value="1">เวรวันจันทร์</option>
+                                <option value="2">เวรวันอังคาร</option>
+                                <option value="3">เวรวันพุธ</option>
+                                <option value="4">เวรวันพฤหัสบดี</option>
+                                <option value="5">เวรวันศุกร์</option>
+                            </select>
+                            <label class="form-label small text-muted mb-1">รูปประจำตัว (ไม่บังคับ)</label>
+                            <input type="file" id="new-student-photo" class="form-control form-control-sm mb-2" accept="image/*">
+                            <button id="btn-add-student" class="btn btn-success btn-sm w-100 rounded-pill" onclick="addStudent()">
+                                <i class="fa-solid fa-plus"></i> เพิ่มนักเรียน
+                            </button>
+                        </div>
+                    </div>
+                    <div id="student-list-container" class="p-2 overflow-auto flex-grow-1"></div>
+                </div>
+
+                <!-- Section: Edit Schedule -->
+                <div id="teacher-schedule" class="d-none h-100 d-flex flex-column">
+                    <div class="p-2 border-bottom bg-white d-flex align-items-center">
+                        <button class="btn btn-sm btn-link text-decoration-none me-2" onclick="showSection('teacher-menu')"><i class="fa-solid fa-arrow-left"></i></button>
+                        <span class="fw-bold small">แก้ไขตารางเรียน</span>
+                    </div>
+                    <div class="p-3 overflow-auto flex-grow-1">
+                        <!-- เลือกวัน -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">เลือกวันที่จะแก้ไข</label>
+                            <select id="edit-day-select" class="form-select form-select-sm" onchange="loadScheduleForDay()">
+                                <option value="mon">วันจันทร์</option>
+                                <option value="tue">วันอังคาร</option>
+                                <option value="wed">วันพุธ</option>
+                                <option value="thu">วันพฤหัสบดี</option>
+                                <option value="fri">วันศุกร์</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Form 7 คาบ -->
+                        <div id="period-forms-container" class="space-y-3">
+                            <!-- จะถูกเติมด้วย JS -->
+                        </div>
+
+                        <button class="btn btn-primary w-100 rounded-pill btn-sm mt-3" onclick="saveScheduleByDay()">บันทึกข้อมูลวันนี้</button>
+                    </div>
+                </div>
+
+                <!-- Section: Gallery -->
+                <div id="duty-photo-gallery" class="d-none h-100 d-flex flex-column">
+                     <div class="p-2 border-bottom bg-white d-flex align-items-center">
+                        <button class="btn btn-sm btn-link text-decoration-none me-2" onclick="showSection('teacher-menu')"><i class="fa-solid fa-arrow-left"></i></button>
+                        <span class="fw-bold small">รูปงานเวร</span>
+                    </div>
+                    <div id="gallery-grid" class="d-grid gap-2 p-2 overflow-auto" style="grid-template-columns: 1fr 1fr;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FIREBASE & LOGIC -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp, getDoc, updateDoc, setDoc, limit, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+    // ⚠️ Config ของครู
+    const firebaseConfig = {
+        apiKey: "AIzaSyAlfZHbCFxGK3p3nDoAPy3m9KqZzmX2s9I",
+        authDomain: "kruboat-web.firebaseapp.com",
+        projectId: "kruboat-web",
+        storageBucket: "kruboat-web.firebasestorage.app",
+        messagingSenderId: "61868765546",
+        appId: "1:61868765546:web:683b18ddf68c89dd317513"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    let currentUserData = null;
+    let currentStudentId = null;
+
+    // เวลาเรียน 7 คาบ
+    const periodTimes = [
+        "08:30 - 09:20", "09:20 - 10:10", "10:10 - 11:00", 
+        "11:00 - 11:50", "13:00 - 13:50", "13:50 - 14:40", "14:40 - 15:30"
+    ];
+
+    // 1. Auth & Identity Logic
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const storedId = localStorage.getItem('roommate_student_id');
+            if (storedId) {
+                currentStudentId = storedId;
+                loadUserProfile(storedId);
+            } else {
+                const regModal = new bootstrap.Modal(document.getElementById('studentRegisterModal'));
+                regModal.show();
+            }
         } else {
-            icon.classList.remove('fa-xmark');
-            icon.classList.add('fa-bars');
+            signInAnonymously(auth).catch((error) => console.error("Auth Error", error));
+        }
+    });
+
+    window.registerStudent = async () => {
+        const id = document.getElementById('reg-student-id').value.trim();
+        if(!id) return alert("กรุณากรอกรหัสนักเรียน");
+        
+        const docRef = doc(db, "rm_students", id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            localStorage.setItem('roommate_student_id', id);
+            bootstrap.Modal.getInstance(document.getElementById('studentRegisterModal')).hide();
+            currentStudentId = id;
+            loadUserProfile(id);
+        } else {
+            alert("❌ ไม่พบรหัสนักเรียนนี้ในระบบ\nกรุณาติดต่อครูเพื่อเพิ่มรายชื่อก่อนใช้งานครับ");
         }
     }
+
+    async function loadUserProfile(id) {
+        const userRef = doc(db, "rm_students", id);
+        onSnapshot(userRef, (docSnap) => {
+            if (docSnap.exists()) {
+                currentUserData = docSnap.data();
+                updateProfileUI();
+            } else {
+                alert("ข้อมูลนักเรียนถูกลบออกจากระบบ");
+                localStorage.removeItem('roommate_student_id');
+                location.reload();
+            }
+        });
+    }
+
+    function updateProfileUI() {
+        if(!currentUserData) return;
+        document.getElementById('student-name').innerText = currentUserData.name;
+        const imgUrl = currentUserData.photoURL ? currentUserData.photoURL : `https://ui-avatars.com/api/?name=${currentUserData.name}&background=random`;
+        document.getElementById('student-img').src = imgUrl;
+        document.getElementById('student-lvl').innerText = `Lv. ${currentUserData.level || 1}`;
+        document.getElementById('student-xp').innerText = `${currentUserData.xp || 0}/100 XP`;
+        document.getElementById('student-xp-bar').style.width = `${Math.min(currentUserData.xp || 0, 100)}%`;
+    }
+    
+    window.logoutStudent = () => {
+        if(confirm("ต้องการออกจากระบบใช่หรือไม่?")) {
+            localStorage.removeItem('roommate_student_id');
+            location.reload();
+        }
+    }
+
+    // 2. Schedule Logic
+    const daysMap = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+    const todayKey = daysMap[new Date().getDay()];
+    
+    onSnapshot(doc(db, "rm_config", "schedule"), (docSnap) => {
+        const list = document.getElementById('schedule-list');
+        if (docSnap.exists() && docSnap.data()[todayKey]) {
+            const subjects = docSnap.data()[todayKey]; // Now expects an array of objects
+            
+            if(Array.isArray(subjects) && subjects.length > 0) {
+                 list.innerHTML = subjects.map((subj, i) => `
+                    <div class="schedule-item ${isCurrentPeriod(i) ? 'active':''}">
+                        <span class="time-badge">${periodTimes[i]}</span>
+                        <div class="fw-bold text-dark">
+                            <span class="subject-code">${subj.code || '-'}</span> ${subj.name || 'ว่าง'}
+                        </div>
+                        <div class="teacher-room">
+                            <i class="fa-solid fa-user me-1"></i> ${subj.teacher || '-'} | 
+                            <i class="fa-solid fa-location-dot me-1"></i> ${subj.room || '-'}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                 list.innerHTML = '<div class="text-center text-muted small py-3">วันนี้ไม่มีเรียน</div>';
+            }
+        } else {
+            list.innerHTML = '<div class="text-center text-muted small py-3">ยังไม่มีตารางเรียน</div>';
+        }
+    });
+
+    function isCurrentPeriod(index) {
+        // เช็คเวลาปัจจุบันง่ายๆ เพื่อ highlight (คร่าวๆ)
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMin = now.getMinutes();
+        const currentTime = currentHour * 60 + currentMin;
+        
+        const times = periodTimes[index].split(' - ')[0].split(':');
+        const start = parseInt(times[0]) * 60 + parseInt(times[1]);
+        const endTimes = periodTimes[index].split(' - ')[1].split(':');
+        const end = parseInt(endTimes[0]) * 60 + parseInt(endTimes[1]);
+        
+        return currentTime >= start && currentTime < end;
+    }
+
+    // Teacher: Schedule Editor Logic
+    let currentScheduleData = {};
+
+    window.loadScheduleForDay = () => {
+        const day = document.getElementById('edit-day-select').value;
+        const container = document.getElementById('period-forms-container');
+        const dataForDay = currentScheduleData[day] || [];
+        
+        container.innerHTML = periodTimes.map((time, i) => {
+            const d = dataForDay[i] || {};
+            return `
+                <div class="card p-2 bg-light border mb-2">
+                    <div class="fw-bold small mb-1 text-primary">คาบที่ ${i+1} (${time})</div>
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <input type="text" class="form-control form-control-sm p-code" placeholder="รหัสวิชา" value="${d.code || ''}">
+                        </div>
+                        <div class="col-8">
+                            <input type="text" class="form-control form-control-sm p-name" placeholder="ชื่อวิชา" value="${d.name || ''}">
+                        </div>
+                        <div class="col-6">
+                            <input type="text" class="form-control form-control-sm p-teacher" placeholder="ชื่อครู" value="${d.teacher || ''}">
+                        </div>
+                        <div class="col-6">
+                            <input type="text" class="form-control form-control-sm p-room" placeholder="ห้องเรียน" value="${d.room || ''}">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    window.saveScheduleByDay = async () => {
+        const day = document.getElementById('edit-day-select').value;
+        const container = document.getElementById('period-forms-container');
+        const periods = [];
+        
+        // Loop เก็บข้อมูลจาก 7 คาบ
+        container.querySelectorAll('.card').forEach(card => {
+            periods.push({
+                code: card.querySelector('.p-code').value.trim(),
+                name: card.querySelector('.p-name').value.trim(),
+                teacher: card.querySelector('.p-teacher').value.trim(),
+                room: card.querySelector('.p-room').value.trim()
+            });
+        });
+
+        // อัปเดตเฉพาะวันนั้น
+        const updateData = {};
+        updateData[day] = periods;
+        
+        await setDoc(doc(db, "rm_config", "schedule"), updateData, { merge: true });
+        alert(`บันทึกตารางวัน${day}เรียบร้อย!`);
+    }
+
+    // Teacher: Add Student
+    window.addStudent = async () => {
+        const id = document.getElementById('new-student-id').value.trim();
+        const name = document.getElementById('new-student-name').value.trim();
+        const group = document.getElementById('new-student-group').value;
+        const fileInput = document.getElementById('new-student-photo');
+        const file = fileInput.files[0];
+        
+        if(!id || !name) return alert("กรอกรหัสและชื่อให้ครบ");
+        
+        const btn = document.getElementById('btn-add-student');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+
+        try {
+            let photoURL = "";
+            if (file) {
+                const storageRef = ref(storage, `student_photos/${id}_${Date.now()}.jpg`);
+                const snapshot = await uploadBytes(storageRef, file);
+                photoURL = await getDownloadURL(snapshot.ref);
+            }
+
+            await setDoc(doc(db, "rm_students", id), {
+                name: name,
+                photoURL: photoURL,
+                group: group || "1",
+                xp: 0,
+                level: 1,
+                createdAt: serverTimestamp()
+            });
+            
+            document.getElementById('new-student-id').value = "";
+            document.getElementById('new-student-name').value = "";
+            document.getElementById('new-student-group').value = "";
+            fileInput.value = "";
+            
+        } catch(e) {
+            alert("Error: " + e.message);
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+    
+    window.updateStudentGroup = async (uid, newGroup) => {
+        const ref = doc(db, "rm_students", uid);
+        await updateDoc(ref, { group: newGroup });
+    }
+
+    // 3. Homework Logic
+    const hwList = document.getElementById('homework-list');
+    const qHw = query(collection(db, "rm_homeworks"), orderBy("date", "asc"));
+    onSnapshot(qHw, (snapshot) => {
+        if(snapshot.empty) { hwList.innerHTML = '<div class="text-center text-muted small py-3">ไม่มีการบ้าน</div>'; return; }
+        hwList.innerHTML = "";
+        snapshot.forEach((doc) => {
+            const hw = doc.data();
+            const isUrgent = hw.type === 'urgent' ? 'hw-urgent' : 'hw-normal';
+            const badge = hw.type === 'urgent' ? '<span class="badge bg-danger mb-1" style="font-size: 0.6rem;">ด่วน!</span>' : `<span class="badge bg-warning text-dark mb-1" style="font-size: 0.6rem;">ส่ง ${hw.date}</span>`;
+            hwList.innerHTML += `
+                <div class="custom-card hw-item ${isUrgent} p-3 mb-2 position-relative">
+                    <i class="fa-solid fa-trash btn-delete-hw" onclick="deleteHomework('${doc.id}')"></i>
+                    <div class="d-flex justify-content-between"><div>${badge}<div class="fw-bold">${hw.desc}</div><div class="text-muted small">${hw.subject}</div></div></div>
+                </div>`;
+        });
+    });
+
+    window.saveHomework = async () => {
+        const subject = document.getElementById('hw-subject').value;
+        const desc = document.getElementById('hw-desc').value;
+        const date = document.getElementById('hw-date').value;
+        const type = document.getElementById('hw-type').value;
+        if(!subject || !desc) return alert("กรอกข้อมูลให้ครบ");
+        await addDoc(collection(db, "rm_homeworks"), { subject, desc, date, type, createdAt: serverTimestamp() });
+        bootstrap.Modal.getInstance(document.getElementById('addHomeworkModal')).hide();
+        document.getElementById('hw-form').reset();
+    }
+    window.deleteHomework = async (id) => { if(confirm("ลบรายการนี้?")) await deleteDoc(doc(db, "rm_homeworks", id)); }
+
+    // 5. Duty & Teacher Functions
+    window.triggerCamera = () => document.getElementById('camera-input').click();
+    window.uploadDutyPhoto = async (input) => {
+        const file = input.files[0];
+        if(!file) return;
+        alert("กำลังอัปโหลด...");
+        try {
+            const refFile = ref(storage, 'duty/'+Date.now()+'.jpg');
+            const snap = await uploadBytes(refFile, file);
+            const url = await getDownloadURL(snap.ref);
+            await addDoc(collection(db, "rm_logs"), { type: 'duty', imageUrl: url, timestamp: serverTimestamp() });
+            alert("ส่งงานแล้ว!");
+        } catch(e) { alert("Upload Failed: " + e.message); }
+    }
+
+    window.unlockTeacherMode = () => new bootstrap.Modal(document.getElementById('teacherLoginModal')).show();
+    window.checkTeacherPin = () => {
+        if(document.getElementById('teacher-pin').value === "admin") {
+            bootstrap.Modal.getInstance(document.getElementById('teacherLoginModal')).hide();
+            new bootstrap.Modal(document.getElementById('teacherDashboardModal')).show();
+            
+            // โหลดข้อมูลเพื่อเตรียมพร้อม (รายชื่อนักเรียน & ตารางเรียน)
+            loadTeacherStudents(); 
+            getDoc(doc(db, "rm_config", "schedule")).then(snap => {
+                if(snap.exists()) {
+                    currentScheduleData = snap.data();
+                    // โหลดวันจันทร์เป็น Default
+                    document.getElementById('edit-day-select').value = 'mon';
+                    loadScheduleForDay(); 
+                }
+            });
+            
+        } else alert("รหัสผิด");
+    }
+    window.showSection = (id) => {
+        ['teacher-menu', 'teacher-students', 'teacher-schedule', 'duty-photo-gallery'].forEach(el => document.getElementById(el).classList.add('d-none'));
+        document.getElementById(id).classList.remove('d-none');
+    }
+    
+    // Load Students for Teacher
+    function loadTeacherStudents() {
+        const container = document.getElementById('student-list-container');
+        const q = query(collection(db, "rm_students")); 
+        
+        onSnapshot(q, (snap) => {
+            container.innerHTML = "";
+            const students = [];
+            snap.forEach(d => students.push({ id: d.id, ...d.data() }));
+            students.sort((a, b) => a.id.localeCompare(b.id)); 
+
+            students.forEach(s => {
+                const imgDisplay = s.photoURL ? s.photoURL : `https://ui-avatars.com/api/?name=${s.name}&background=random`;
+                const currentGroup = s.group || "1";
+                const groupSelect = `
+                    <select class="form-select form-select-sm border-0 bg-light" style="width: auto; font-size: 0.7rem;" onchange="updateStudentGroup('${s.id}', this.value)">
+                        <option value="1" ${currentGroup == '1' ? 'selected' : ''}>เวรวันจันทร์</option>
+                        <option value="2" ${currentGroup == '2' ? 'selected' : ''}>เวรวันอังคาร</option>
+                        <option value="3" ${currentGroup == '3' ? 'selected' : ''}>เวรวันพุธ</option>
+                        <option value="4" ${currentGroup == '4' ? 'selected' : ''}>เวรวันพฤหัสบดี</option>
+                        <option value="5" ${currentGroup == '5' ? 'selected' : ''}>เวรวันศุกร์</option>
+                    </select>`;
+
+                container.innerHTML += `
+                    <div class="d-flex justify-content-between align-items-center border-bottom p-2">
+                        <div class="d-flex align-items-center" style="overflow: hidden;">
+                            <img src="${imgDisplay}" class="student-list-img me-2 flex-shrink-0">
+                            <div style="min-width: 0;">
+                                <div class="d-flex align-items-center mb-1">
+                                    <span class="badge bg-secondary me-1" style="font-size:0.6rem">${s.id}</span>
+                                    <strong class="text-truncate" style="font-size:0.85rem">${s.name}</strong> 
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    ${groupSelect}
+                                    <span class="xp-badge ms-1">${s.xp} XP</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column gap-1 ms-2">
+                            <button class="btn btn-sm btn-outline-success py-0" style="font-size:0.7rem" onclick="giveXP('${s.id}', 10)">+10</button>
+                            <button class="btn btn-sm btn-outline-danger py-0" style="font-size:0.7rem" onclick="giveXP('${s.id}', -10)">-10</button>
+                        </div>
+                    </div>`;
+            });
+        });
+    }
+    
+    window.giveXP = async (uid, amount) => {
+        const ref = doc(db, "rm_students", uid);
+        const snap = await getDoc(ref);
+        if(snap.exists()) {
+            const current = snap.data().xp || 0;
+            await updateDoc(ref, { xp: current + amount });
+        }
+    }
+
+    window.viewDutyHistory = async () => {
+        window.showSection('duty-photo-gallery');
+        const gallery = document.getElementById('gallery-grid');
+        gallery.innerHTML = "Loading...";
+        const q = query(collection(db, "rm_logs"), orderBy("timestamp", "desc"), limit(20));
+        onSnapshot(q, (snap) => {
+            gallery.innerHTML = "";
+            snap.forEach(d => {
+                const data = d.data();
+                if(data.imageUrl) gallery.innerHTML += `<img src="${data.imageUrl}" class="w-100 rounded border mb-2">`;
+            });
+        });
+    }
+
+    // Init UI
+    const daysTH = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัส", "ศุกร์", "เสาร์"];
+    const currentDayIndex = new Date().getDay();
+    document.getElementById('today-day').innerText = daysTH[currentDayIndex];
+    
+    const dutyListText = document.getElementById('duty-list-text');
+    const dutyGroupBadge = document.getElementById('duty-group');
+    let todayGroup = currentDayIndex;
+    if(todayGroup === 0 || todayGroup === 6) todayGroup = 1;
+
+    const dutyConfig = {
+        1: { text: "เวรวันจันทร์", color: "#fbbf24", textColor: "#000" },
+        2: { text: "เวรวันอังคาร", color: "#f472b6", textColor: "#fff" },
+        3: { text: "เวรวันพุธ", color: "#22c55e", textColor: "#fff" },
+        4: { text: "เวรวันพฤหัสบดี", color: "#fb923c", textColor: "#fff" },
+        5: { text: "เวรวันศุกร์", color: "#3b82f6", textColor: "#fff" }
+    };
+
+    const config = dutyConfig[todayGroup] || dutyConfig[1];
+    
+    dutyGroupBadge.innerText = config.text;
+    dutyGroupBadge.classList.remove('bg-success'); 
+    dutyGroupBadge.style.backgroundColor = config.color;
+    dutyGroupBadge.style.color = config.textColor;
+
+    const qDuty = query(collection(db, "rm_students"), where("group", "==", String(todayGroup)));
+    onSnapshot(qDuty, (snap) => {
+        const container = document.getElementById('duty-list-text');
+        if(snap.empty) {
+            container.innerHTML = '<span class="small text-muted">ไม่มีสมาชิกเวร</span>';
+        } else {
+            let html = '<div class="d-flex align-items-center ps-2">'; 
+            snap.forEach(d => {
+                const s = d.data();
+                const img = s.photoURL ? s.photoURL : `https://ui-avatars.com/api/?name=${s.name}&background=random`;
+                html += `<img src="${img}" class="rounded-circle border border-white" style="width:35px; height:35px; object-fit:cover; margin-left: -10px;" title="${s.name}">`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+    });
+
+    window.openDutyRosterModal = () => {
+        new bootstrap.Modal(document.getElementById('dutyRosterModal')).show();
+        loadAllDutyMembers();
+    }
+
+    function loadAllDutyMembers() {
+        const q = query(collection(db, "rm_students"));
+        onSnapshot(q, (snap) => {
+            const days = { '1': [], '2': [], '3': [], '4': [], '5': [] };
+            
+            snap.forEach(d => {
+                const s = d.data();
+                const g = s.group || '1';
+                if(days[g]) days[g].push(s);
+            });
+
+            const targets = { '1': 'd-mon', '2': 'd-tue', '3': 'd-wed', '4': 'd-thu', '5': 'd-fri' };
+            
+            for(let g in days) {
+                const container = document.getElementById(targets[g]);
+                if(!container) continue;
+                
+                if(days[g].length === 0) {
+                    container.innerHTML = '<div class="text-center py-4 text-muted opacity-50"><i class="fa-solid fa-user-slash mb-2 fs-4"></i><br>ไม่มีสมาชิก</div>';
+                    continue;
+                }
+
+                let html = '<div class="list-group shadow-sm rounded-3 overflow-hidden border-0">';
+                days[g].forEach(s => {
+                    const img = s.photoURL ? s.photoURL : `https://ui-avatars.com/api/?name=${s.name}&background=random`;
+                    html += `
+                        <div class="list-group-item border-0 border-bottom py-3 d-flex align-items-center">
+                            <img src="${img}" class="rounded-circle me-3 border" width="40" height="40" style="object-fit:cover;">
+                            <div>
+                                <div class="fw-bold text-dark">${s.name}</div>
+                                <div class="small text-muted"><i class="fa-solid fa-star text-warning me-1"></i>${s.xp || 0} XP</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }
+        });
+    }
+
+    window.toggleFab = () => document.getElementById('fabMenu').classList.toggle('active');
+
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
