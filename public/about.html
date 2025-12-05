@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกี่ยวกับครูโบ๊ท - KruBoat.com</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4MQ3GL6CTB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-4MQ3GL6CTB');
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Sarabun', sans-serif; }
+        .font-code { font-family: 'JetBrains Mono', monospace; }
+        
+        .bg-grid-pattern {
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes float-delay { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        @keyframes float-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        
+        .animate-float { animation: float 4s ease-in-out infinite; }
+        .animate-float-delay { animation: float-delay 5s ease-in-out infinite; animation-delay: 1s; }
+        .animate-float-slow { animation: float-slow 6s ease-in-out infinite; animation-delay: 2s; }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        
+        .code-badge {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 flex flex-col min-h-screen bg-grid-pattern selection:bg-cyan-500 selection:text-white overflow-x-hidden">
+
+    <!-- Navbar (Logo Only) -->
+    <nav class="fixed top-0 w-full z-50 glass-card border-b border-slate-800">
+        <div class="container mx-auto px-4 py-3 flex justify-center md:justify-start items-center">
+            <a href="index.html" class="text-xl font-bold text-cyan-400 font-code tracking-tight hover:text-cyan-300 transition">
+                <i class="fa-solid fa-terminal mr-2"></i>KruBoat<span class="text-white">.com</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Profile -->
+    <header class="relative pt-32 pb-20">
+        <div class="absolute top-10 left-10 w-72 h-72 bg-purple-600/10 rounded-full blur-[100px] animate-pulse"></div>
+        <div class="absolute bottom-10 right-10 w-96 h-96 bg-cyan-600/10 rounded-full blur-[100px] animate-pulse delay-1000"></div>
+
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="flex flex-col md:flex-row items-center gap-12 max-w-5xl mx-auto">
+                
+                <div class="relative w-fit mx-auto md:mx-0 fade-in-up">
+                    <div class="w-64 h-64 md:w-80 md:h-80 relative group">
+                        <div class="absolute -inset-0.5 bg-gradient-to-tr from-cyan-500 via-blue-500 to-purple-600 rounded-full blur opacity-60 group-hover:opacity-80 transition duration-1000 animate-spin-slow"></div>
+                        <div class="relative w-full h-full rounded-full overflow-hidden border-[3px] border-slate-900 bg-slate-900">
+                            <!-- รูปโปรไฟล์ใหม่จาก Firebase Storage -->
+                            <img src="https://firebasestorage.googleapis.com/v0/b/kruboat-web.firebasestorage.app/o/kruboat.com-profile.JPG?alt=media&token=859324c7-8a3d-401b-acfa-f46f256b3122" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500 filter brightness-110">
+                        </div>
+                    </div>
+
+                    <div class="absolute -bottom-2 -right-4 code-badge text-cyan-400 px-3 py-1.5 rounded-lg text-sm font-code font-bold animate-float z-20">
+                        &lt;Coder /&gt;
+                    </div>
+                    <div class="absolute top-4 -left-6 code-badge text-purple-400 px-3 py-1.5 rounded-lg text-sm font-code font-bold animate-float-delay z-20">
+                        { EdTech }
+                    </div>
+                    <div class="absolute top-0 right-0 code-badge text-yellow-400 w-10 h-10 flex items-center justify-center rounded-full font-bold animate-float-slow z-10 text-xs">
+                        JS
+                    </div>
+                    <div class="absolute top-1/2 -left-8 code-badge text-emerald-400 px-2 py-1 rounded text-xs font-code animate-float-delay z-10 hidden md:block">
+                        =&gt;
+                    </div>
+                </div>
+
+                <div class="text-center md:text-left space-y-5 fade-in-up delay-100 max-w-xl relative">
+                    
+                    <div class="absolute -top-10 right-0 code-badge text-slate-500 px-2 py-1 rounded text-xs font-code animate-float z-0 hidden md:block">
+                        // Teacher Life
+                    </div>
+
+                    <div class="inline-flex items-center gap-2 bg-slate-800/80 border border-emerald-500/30 rounded-full px-3 py-1 mb-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-xs font-code text-emerald-400 tracking-wide">ONLINE & READY</span>
+                    </div>
+                    
+                    <h1 class="text-2xl md:text-4xl font-bold text-white leading-tight drop-shadow-lg">
+                        ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์
+                    </h1>
+                    
+                    <p class="text-lg md:text-xl text-cyan-400 font-code">
+                        <span class="text-slate-500">const</span> role = <span class="text-green-400">"Teacher & Dev"</span>;
+                    </p>
+                    
+                    <p class="text-slate-300 text-base md:text-lg leading-relaxed border-l-4 border-cyan-500 pl-4 bg-slate-800/30 py-2 pr-2 rounded-r-lg">
+                        "เปลี่ยนห้องเรียนให้เป็นโลกแห่งนวัตกรรม สร้างสรรค์สื่อการสอนด้วยโค้ด และเทคโนโลยีที่ทันสมัย เพื่อการเรียนรู้ที่ไร้ขีดจำกัด"
+                    </p>
+                    
+                    <div class="pt-4 flex flex-wrap justify-center md:justify-start gap-4">
+                        <a href="#contact" class="px-8 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg font-bold shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:-translate-y-1 transition duration-300 flex items-center gap-2 group">
+                            <i class="fa-regular fa-paper-plane group-hover:animate-bounce"></i> ติดต่อครูโบ๊ท
+                        </a>
+                        <a href="library.html" class="px-8 py-3 bg-slate-800 border border-slate-600 text-slate-300 rounded-lg font-bold hover:bg-slate-700 hover:border-slate-500 hover:text-white transition duration-300 flex items-center gap-2">
+                            <i class="fa-solid fa-code"></i> ดูผลงาน
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content Section -->
+    <main class="container mx-auto px-4 py-10 max-w-6xl">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            
+            <!-- Left Column: Timeline (7 cols) -->
+            <div class="lg:col-span-7 space-y-10 fade-in-up delay-200 relative">
+                
+                <div class="absolute top-0 right-10 code-badge text-pink-400 px-2 py-1 rounded text-xs font-code animate-float-slow z-10">
+                    while(alive) { learn(); }
+                </div>
+
+                <div class="relative">
+                    <div class="absolute -top-8 -right-4 text-slate-700/20 text-8xl font-bold select-none pointer-events-none">
+                        &lt;/&gt;
+                    </div>
+
+                    <h2 class="text-2xl font-bold text-white mb-8 flex items-center font-code relative z-10">
+                        <span class="text-cyan-500 mr-2">01.</span> Experience_Log
+                    </h2>
+                    
+                    <div class="space-y-6 border-l-2 border-slate-700/50 ml-3 pl-8 relative">
+                        
+                        <div class="absolute bottom-1/3 -left-2 code-badge text-blue-400 px-2 py-1 rounded text-xs font-code animate-float-delay hidden md:block">try {</div>
+                        <div class="absolute bottom-0 -left-6 code-badge text-blue-400 px-2 py-1 rounded text-xs font-code animate-float hidden md:block">} catch(err)</div>
+
+                        <!-- Items -->
+                        <div class="relative group">
+                            <span class="absolute -left-[41px] top-5 w-5 h-5 bg-slate-900 rounded-full border-2 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.6)] group-hover:scale-125 transition duration-300 z-10"></span>
+                            <div class="glass-card p-5 rounded-xl hover:bg-slate-800 transition border-l-4 border-l-emerald-500 transform group-hover:translate-x-1">
+                                <div class="flex flex-wrap justify-between items-start mb-1 gap-2">
+                                    <h3 class="font-bold text-lg text-white">ครูอัตราจ้าง รายวิชาคอมพิวเตอร์</h3>
+                                    <span class="text-xs font-code bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded border border-emerald-500/20">Now Loading...</span>
+                                </div>
+                                <p class="text-slate-300 text-sm mb-2"><i class="fa-regular fa-building mr-2 text-emerald-500"></i>โรงเรียนจังหารฐิตวิริยาประชาสรรค์ (สพม.ร้อยเอ็ด)</p>
+                                <p class="text-slate-500 text-xs font-code">2025 - ปัจจุบัน</p>
+                            </div>
+                        </div>
+
+                        <div class="relative group">
+                            <span class="absolute -left-[41px] top-5 w-5 h-5 bg-slate-900 rounded-full border-2 border-cyan-500 group-hover:scale-125 transition duration-300 z-10"></span>
+                            <div class="glass-card p-5 rounded-xl hover:bg-slate-800 transition border-l-4 border-l-cyan-500 transform group-hover:translate-x-1">
+                                <h3 class="font-bold text-lg text-white">นักศึกษาฝึกประสบการณ์วิชาชีพครู (Computing)</h3>
+                                <p class="text-slate-300 text-sm mb-2"><i class="fa-solid fa-chalkboard-user mr-2 text-cyan-500"></i>โรงเรียนสาธิตมหาวิทยาลัยขอนแก่น ฝ่ายนานาชาติ</p>
+                                <p class="text-slate-500 text-xs font-code">2024</p>
+                            </div>
+                        </div>
+
+                        <div class="relative group">
+                            <span class="absolute -left-[41px] top-5 w-5 h-5 bg-slate-900 rounded-full border-2 border-purple-500 group-hover:scale-125 transition duration-300 z-10"></span>
+                            <div class="glass-card p-5 rounded-xl hover:bg-slate-800 transition border-l-4 border-l-purple-500 transform group-hover:translate-x-1">
+                                <div class="flex flex-wrap justify-between items-start mb-1 gap-2">
+                                    <h3 class="font-bold text-lg text-white">ปริญญาตรี คอมพิวเตอร์ศึกษา</h3>
+                                    <span class="text-xs font-code bg-purple-500/10 text-purple-400 px-2 py-1 rounded border border-purple-500/20">เกียรตินิยมอันดับ 1 🏆</span>
+                                </div>
+                                <p class="text-slate-300 text-sm mb-2"><i class="fa-solid fa-graduation-cap mr-2 text-purple-500"></i>คณะศึกษาศาสตร์ มหาวิทยาลัยขอนแก่น</p>
+                                <p class="text-slate-500 text-xs font-code">2020 - 2024</p>
+                            </div>
+                        </div>
+
+                        <div class="relative group">
+                            <span class="absolute -left-[41px] top-5 w-5 h-5 bg-slate-900 rounded-full border-2 border-slate-500 group-hover:scale-125 transition duration-300 z-10"></span>
+                            <div class="glass-card p-5 rounded-xl hover:bg-slate-800 transition border-l-4 border-l-slate-600 transform group-hover:translate-x-1">
+                                <h3 class="font-bold text-lg text-white">มัธยมศึกษาตอนปลาย (วิทย์-คณิต)</h3>
+                                <p class="text-slate-300 text-sm mb-2"><i class="fa-solid fa-school mr-2 text-slate-400"></i>โรงเรียนร้อยเอ็ดวิทยาลัย (สพม.ร้อยเอ็ด)</p>
+                                <p class="text-slate-500 text-xs font-code">2020</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Skills & Contact (5 cols) -->
+            <div class="lg:col-span-5 space-y-12 fade-in-up delay-300">
+                
+                <!-- Skills Cloud -->
+                <div class="relative">
+                    <!-- Floating Decor -->
+                    <div class="absolute -top-6 -right-2 code-badge text-yellow-400 px-2 py-1 rounded text-xs font-code animate-float-slow">git push</div>
+
+                    <div class="absolute -top-8 left-0 code-badge text-red-400 px-2 py-1 rounded text-xs font-code animate-float-delay z-10">
+                        npm install
+                    </div>
+
+                    <h2 class="text-2xl font-bold text-white mb-6 flex items-center font-code">
+                        <span class="text-cyan-500 mr-2">02.</span> Tech_Stack
+                    </h2>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-2 bg-slate-800/80 border border-slate-600 rounded-lg text-sm text-orange-300 hover:bg-orange-900/30 hover:border-orange-500 transition cursor-default flex items-center"><i class="fa-brands fa-html5 mr-2"></i> HTML5/CSS3</span>
+                        <span class="px-3 py-2 bg-slate-800/80 border border-slate-600 rounded-lg text-sm text-yellow-300 hover:bg-yellow-900/30 hover:border-yellow-500 transition cursor-default flex items-center"><i class="fa-brands fa-js mr-2"></i> JavaScript</span>
+                        <span class="px-3 py-2 bg-slate-800/80 border border-slate-600 rounded-lg text-sm text-green-300 hover:bg-green-900/30 hover:border-green-500 transition cursor-default flex items-center"><i class="fa-brands fa-google mr-2"></i> Apps Script</span>
+                        <span class="px-3 py-2 bg-slate-800/80 border border-slate-600 rounded-lg text-sm text-yellow-500 hover:bg-yellow-900/30 hover:border-yellow-500 transition cursor-default flex items-center"><i class="fa-solid fa-fire mr-2"></i> Firebase</span>
+                        <span class="px-3 py-2 bg-slate-800/80 border border-slate-600 rounded-lg text-sm text-blue-300 hover:bg-blue-900/30 hover:border-blue-500 transition cursor-default flex items-center"><i class="fa-brands fa-python mr-2"></i> Python</span>
+                        <span class="px-3 py-2 bg-slate-800/80 border border-slate-600 rounded-lg text-sm text-indigo-300 hover:bg-indigo-900/30 hover:border-indigo-500 transition cursor-default flex items-center"><i class="fa-brands fa-php mr-2"></i> PHP</span>
+                        <span class="px-3 py-2 bg-slate-800/80 border border-slate-600 rounded-lg text-sm text-cyan-300 hover:bg-cyan-900/30 hover:border-cyan-500 transition cursor-default flex items-center"><i class="fa-solid fa-database mr-2"></i> MySQL</span>
+                        <span class="px-3 py-2 bg-slate-800/80 border border-slate-600 rounded-lg text-sm text-white hover:bg-slate-700 hover:border-white transition cursor-default flex items-center"><i class="fa-brands fa-wordpress mr-2"></i> WordPress</span>
+                        <span class="px-3 py-2 bg-slate-800/80 border border-slate-600 rounded-lg text-sm text-green-400 hover:bg-green-900/30 hover:border-green-500 transition cursor-default">Google Sheet</span>
+                        <span class="px-3 py-2 bg-slate-800/80 border border-slate-600 rounded-lg text-sm text-blue-400 hover:bg-blue-900/30 hover:border-blue-500 transition cursor-default">Google Site</span>
+                        <span class="px-3 py-2 bg-slate-800/80 border border-slate-600 rounded-lg text-sm text-orange-400 hover:bg-orange-900/30 hover:border-orange-500 transition cursor-default">Google Analytics</span>
+                        
+                        <!-- Added Skills -->
+                        <span class="px-3 py-2 bg-slate-800/80 border border-slate-600 rounded-lg text-sm text-gray-300 hover:bg-gray-700 hover:border-gray-400 transition cursor-default flex items-center"><i class="fa-brands fa-github mr-2"></i> GitHub</span>
+                        <span class="px-3 py-2 bg-slate-800/80 border border-slate-600 rounded-lg text-sm text-blue-400 hover:bg-blue-900/30 hover:border-blue-400 transition cursor-default flex items-center"><i class="fa-solid fa-code mr-2"></i> VS Code</span>
+                        <span class="px-3 py-2 bg-slate-800/80 border border-slate-600 rounded-lg text-sm text-amber-700 hover:bg-amber-900/30 hover:border-amber-600 transition cursor-default flex items-center"><i class="fa-solid fa-mug-hot mr-2"></i> Coffee??</span>
+                        <span class="px-3 py-2 bg-slate-800/80 border border-slate-600 rounded-lg text-sm text-red-400 hover:bg-red-900/30 hover:border-red-500 transition cursor-default flex items-center"><i class="fa-solid fa-pizza-slice mr-2"></i> Pizza???</span>
+                    </div>
+                </div>
+
+                <!-- Contact Box -->
+                <div id="contact" class="glass-card p-6 rounded-2xl border-t-4 border-t-cyan-500 scroll-mt-24 relative overflow-hidden">
+                    
+                    <div class="absolute top-4 right-4 code-badge text-green-400 px-2 py-1 rounded text-xs font-code animate-float-delay z-10">
+                        200 OK
+                    </div>
+                    
+                    <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-cyan-500/20 rounded-full blur-3xl"></div>
+
+                    <h2 class="text-xl font-bold text-white mb-6 flex items-center font-code">
+                        <span class="text-cyan-500 mr-2">03.</span> Contact_Me
+                    </h2>
+                    
+                    <div class="space-y-4 relative z-10">
+                        <a href="https://www.facebook.com/chonlasitgood" target="_blank" class="flex items-center p-3 rounded-lg bg-slate-800/50 hover:bg-blue-600 transition group border border-slate-700 hover:border-blue-500">
+                            <div class="w-10 h-10 bg-blue-600/20 rounded-lg flex items-center justify-center text-blue-400 group-hover:text-white group-hover:bg-white/20 transition">
+                                <i class="fa-brands fa-facebook-f"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-xs text-slate-400 font-code">Facebook</p>
+                                <p class="text-sm font-bold text-white">KruBoat Chonlasit</p>
+                            </div>
+                            <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-slate-500 group-hover:text-white"></i>
+                        </a>
+
+                        <a href="https://www.instagram.com/ruabai.photo" target="_blank" class="flex items-center p-3 rounded-lg bg-slate-800/50 hover:bg-pink-600 transition group border border-slate-700 hover:border-pink-500">
+                            <div class="w-10 h-10 bg-pink-600/20 rounded-lg flex items-center justify-center text-pink-400 group-hover:text-white group-hover:bg-white/20 transition">
+                                <i class="fa-brands fa-instagram"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-xs text-slate-400 font-code">Instagram</p>
+                                <p class="text-sm font-bold text-white">@ruabai.photo</p>
+                            </div>
+                            <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-slate-500 group-hover:text-white"></i>
+                        </a>
+
+                        <a href="mailto:chonlasitgood@gmail.com" class="flex items-center p-3 rounded-lg bg-slate-800/50 hover:bg-red-600 transition group border border-slate-700 hover:border-red-500">
+                            <div class="w-10 h-10 bg-red-600/20 rounded-lg flex items-center justify-center text-red-400 group-hover:text-white group-hover:bg-white/20 transition">
+                                <i class="fa-solid fa-envelope"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-xs text-slate-400 font-code">Email</p>
+                                <p class="text-sm font-bold text-white">chonlasitgood@gmail.com</p>
+                            </div>
+                            <i class="fa-solid fa-copy ml-auto text-slate-500 group-hover:text-white"></i>
+                        </a>
+                    </div>
+
+                    <!-- Simple Form -->
+                    <div class="mt-8 pt-6 border-t border-slate-700 relative">
+                        
+                        <div class="absolute -top-3 right-1/2 transform translate-x-1/2 bg-slate-900 px-2 text-xs text-slate-500 font-code">
+                            async function send()
+                        </div>
+
+                        <h3 class="text-sm font-bold text-white mb-3">ส่งข้อความด่วน</h3>
+                        <form onsubmit="event.preventDefault(); alert('ระบบส่งข้อความจะเปิดใช้งานเร็วๆ นี้ครับ');">
+                            <input type="text" placeholder="ชื่อของคุณ" class="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-sm text-white mb-2 focus:border-cyan-500 outline-none placeholder-slate-600 focus:ring-1 focus:ring-cyan-500 transition">
+                            <textarea rows="2" placeholder="ข้อความ..." class="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-sm text-white mb-3 focus:border-cyan-500 outline-none placeholder-slate-600 focus:ring-1 focus:ring-cyan-500 transition"></textarea>
+                            <button class="w-full bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-bold py-2 rounded transition shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2">
+                                <i class="fa-regular fa-paper-plane"></i> ส่งข้อความ
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-center mt-auto">
+        <p class="text-xs text-slate-500 font-code">&copy; 2025 KruBoat.com <span class="mx-2">|</span> <span class="text-cyan-500">Built with ❤️ & ☕</span></p>
+    </footer>
+
+</body>
+</html>
