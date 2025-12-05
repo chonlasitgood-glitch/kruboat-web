@@ -88,7 +88,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 
                 <!-- App 1: Live Scoreboard (ACTIVE) -->
-                <a href="app/scoreboard/" class="app-card bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-indigo-100 group relative overflow-hidden" target="_blank">
+                <a href="scoreboard/" class="app-card bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-indigo-100 group relative overflow-hidden">
                     <div class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg shadow-sm">HOT</div>
                     <div class="flex items-center gap-4 mb-4">
                         <div class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition">
@@ -103,7 +103,7 @@
                 </a>
 
                 <!-- App 2: สุ่มเลขที่ (ACTIVE) -->
-                <a href="app/random/" class="app-card bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 group relative overflow-hidden" target="_blank">
+                <a href="random/" class="app-card bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 group relative overflow-hidden">
                     <div class="absolute top-0 right-0 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg shadow-sm">New</div>
                     <div class="flex items-center gap-4 mb-4">
                         <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition">
@@ -197,19 +197,36 @@
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 
-                <!-- Game 1 (Coming Soon) -->
-                <div class="app-card bg-gray-50 rounded-2xl p-0 shadow-none border border-gray-200 opacity-60 cursor-not-allowed group overflow-hidden flex flex-col grayscale hover:grayscale-0 transition-all">
-                    <div class="h-40 bg-gray-200 relative overflow-hidden flex items-center justify-center">
+                <!-- Game 1: Algorithm Bot (ACTIVE - NEW!) -->
+                <a href="app/algorithmbot/" class="app-card bg-white rounded-2xl p-0 shadow-sm hover:shadow-xl transition-all duration-300 border border-indigo-100 group overflow-hidden flex flex-col" target="_blank">
+                    <div class="h-40 bg-indigo-600 relative overflow-hidden flex items-center justify-center">
+                        <div class="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-0.5 rounded text-xs font-bold text-indigo-600 shadow-sm">New</div>
+                        <!-- ใช้ไอคอนแทนรูปปกไปก่อน -->
+                        <i class="fa-solid fa-robot text-6xl text-white/80 group-hover:scale-110 transition duration-500"></i>
+                    </div>
+                    <div class="p-5">
+                        <h3 class="font-bold text-lg text-gray-800 mb-1 group-hover:text-indigo-600 transition">Algorithm Bot</h3>
+                        <p class="text-sm text-gray-500 mb-3">เกมฝึกตรรกะพาหุ่นยนต์เดินเข้าเส้นชัย (Logic & Coding)</p>
+                        <div class="flex gap-2">
+                            <span class="inline-block bg-indigo-50 text-indigo-600 text-[10px] px-2 py-1 rounded border border-indigo-100 font-bold">Coding</span>
+                            <span class="inline-block bg-purple-50 text-purple-600 text-[10px] px-2 py-1 rounded border border-purple-100 font-bold">Logic</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Game 2 (Coming Soon) -->
+                <div class="app-card bg-gray-50 rounded-2xl p-0 shadow-none border border-gray-200 opacity-60 cursor-not-allowed flex flex-col grayscale hover:grayscale-0 transition-all">
+                    <div class="h-40 bg-gray-200 flex items-center justify-center">
                         <i class="fa-solid fa-font text-4xl text-gray-400"></i>
                     </div>
                     <div class="p-5">
-                        <h3 class="font-bold text-lg text-gray-600 mb-1">เกมทายคำศัพท์</h3>
+                        <h3 class="font-bold text-lg text-gray-600">เกมทายคำศัพท์</h3>
                         <p class="text-sm text-gray-400 mb-3">ฝึกฝนคำศัพท์ภาษาอังกฤษผ่านเกมสนุกๆ</p>
                         <span class="inline-block bg-gray-200 text-gray-500 text-xs px-2 py-1 rounded font-bold">เร็วๆ นี้</span>
                     </div>
                 </div>
 
-                <!-- Game 2 (Coming Soon) -->
+                <!-- Game 3 (Coming Soon) -->
                 <div class="app-card bg-gray-50 rounded-2xl p-0 shadow-none border border-gray-200 opacity-60 cursor-not-allowed flex flex-col grayscale hover:grayscale-0 transition-all">
                     <div class="h-40 bg-gray-200 flex items-center justify-center">
                         <i class="fa-solid fa-puzzle-piece text-4xl text-gray-400"></i>
@@ -221,7 +238,7 @@
                     </div>
                 </div>
 
-                <!-- Game 3: Typing (Coming Soon) -->
+                <!-- Game 4 (Coming Soon) -->
                 <div class="app-card bg-gray-50 rounded-2xl p-0 shadow-none border border-gray-200 opacity-60 cursor-not-allowed flex flex-col grayscale hover:grayscale-0 transition-all">
                     <div class="h-40 bg-gray-200 flex items-center justify-center">
                         <i class="fa-solid fa-keyboard text-4xl text-gray-400"></i>
@@ -233,19 +250,7 @@
                     </div>
                 </div>
 
-                <!-- Game 4: Logic (Coming Soon) -->
-                <div class="app-card bg-gray-50 rounded-2xl p-0 shadow-none border border-gray-200 opacity-60 cursor-not-allowed flex flex-col grayscale hover:grayscale-0 transition-all">
-                    <div class="h-40 bg-gray-200 flex items-center justify-center">
-                        <i class="fa-solid fa-code-branch text-4xl text-gray-400"></i>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="font-bold text-lg text-gray-600">Logic Puzzle</h3>
-                        <p class="text-sm text-gray-400 mb-3">ฝึกตรรกะและกระบวนการคิดแบบ Coding</p>
-                        <span class="inline-block bg-gray-200 text-gray-500 text-xs px-2 py-1 rounded font-bold">เร็วๆ นี้</span>
-                    </div>
-                </div>
-
-                <!-- Game 5: Flag Quiz (Coming Soon) -->
+                <!-- Game 5 (Coming Soon) -->
                 <div class="app-card bg-gray-50 rounded-2xl p-0 shadow-none border border-gray-200 opacity-60 cursor-not-allowed flex flex-col grayscale hover:grayscale-0 transition-all">
                     <div class="h-40 bg-gray-200 flex items-center justify-center">
                         <i class="fa-solid fa-flag text-4xl text-gray-400"></i>
@@ -265,8 +270,8 @@
     <footer class="bg-slate-800 text-white py-8 text-center mt-auto">
         <div class="container mx-auto px-4">
             <h3 class="font-bold text-xl mb-2">KruBoat Apps</h3>
-            <p class="text-slate-400 text-sm mb-4">พัฒนาด้วยใจ ❤️ เพื่อการศึกษาไทย</p>
-            <p class="text-xs text-slate-500">&copy; 2025 KruBoat. All rights reserved.</p>
+            <p class="text-slate-400 text-sm mb-4">Need some Coffee? ☕️</p>
+            <p class="text-xs text-slate-500">&copy; 2025 พัฒนาโดย ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์ | ติดต่อ chonlasitgood@gmail.com</p>
         </div>
     </footer>
 

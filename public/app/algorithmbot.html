@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logic Robot: ฝึกคิดแบบอัลกอริทึม</title>
+    <!-- ใช้ Tailwind CSS สำหรับตกแต่ง -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ใช้ Font Awesome สำหรับไอคอน -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap');
+        
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #1a202c;
+            color: white;
+            touch-action: manipulation; /* ป้องกันการซูมบนมือถือเวลากดปุ่มรัวๆ */
+        }
+
+        .grid-cell {
+            transition: all 0.3s ease;
+        }
+
+        /* หุ่นยนต์ */
+        #robot {
+            transition: transform 0.5s ease-in-out, top 0.5s ease-in-out, left 0.5s ease-in-out;
+            z-index: 10;
+        }
+
+        /* เอฟเฟกต์ตอนกดปุ่ม */
+        .btn-press:active {
+            transform: scale(0.95);
+        }
+
+        /* Scrollbar สำหรับรายการคำสั่ง */
+        .command-list::-webkit-scrollbar {
+            height: 8px;
+        }
+        .command-list::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col items-center justify-center overflow-hidden">
+
+    <!-- Header -->
+    <div class="w-full max-w-4xl px-4 py-2 flex justify-between items-center bg-gray-800 shadow-md">
+        <h1 class="text-xl md:text-2xl font-bold text-green-400"><i class="fas fa-robot mr-2"></i>Logic Robot</h1>
+        <div class="flex gap-4">
+            <span class="text-gray-300">ด่าน: <span id="level-display" class="font-bold text-white">1</span></span>
+            <button onclick="resetLevel()" class="text-red-400 hover:text-red-300 text-sm"><i class="fas fa-rotate-right"></i> รีเซ็ต</button>
+        </div>
+    </div>
+
+    <div class="flex flex-col md:flex-row w-full max-w-4xl flex-grow overflow-hidden p-2 gap-4">
+        
+        <!-- ส่วนแสดงผลเกม (Game Board) -->
+        <div class="flex-grow flex items-center justify-center bg-gray-900 rounded-xl border-2 border-gray-700 relative p-4" id="game-container">
+            <!-- Grid จะถูกสร้างโดย JavaScript -->
+            <div id="grid-board" class="relative"></div>
+            
+            <!-- Overlay แจ้งเตือน -->
+            <div id="message-modal" class="hidden absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50 rounded-xl">
+                <h2 id="modal-title" class="text-3xl font-bold mb-4 text-green-400">สำเร็จ!</h2>
+                <p id="modal-text" class="mb-6 text-gray-300 text-center px-4">คุณเขียนโปรแกรมได้ถูกต้อง</p>
+                <button id="modal-btn" onclick="nextLevel()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full transition shadow-lg">
+                    ด่านถัดไป
+                </button>
+            </div>
+        </div>
+
+        <!-- ส่วนควบคุม (Controls) -->
+        <div class="w-full md:w-80 flex flex-col gap-2 bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-xl">
+            
+            <!-- หน้าจอแสดงคำสั่ง -->
+            <div class="flex-grow bg-gray-900 rounded-lg p-3 border border-gray-600 flex flex-col min-h-[150px]">
+                <div class="flex justify-between items-center mb-2 border-b border-gray-700 pb-1">
+                    <span class="text-xs text-gray-400 uppercase tracking-wider">Main Function</span>
+                    <span id="command-count" class="text-xs text-gray-500">0/20</span>
+                </div>
+                <div id="command-list" class="command-list flex flex-wrap content-start gap-2 overflow-y-auto h-full">
+                    <!-- คำสั่งจะมาโผล่ตรงนี้ -->
+                    <div class="text-gray-500 text-sm italic w-full text-center mt-4 empty-msg">เลือกคำสั่งด้านล่าง...</div>
+                </div>
+            </div>
+
+            <!-- ปุ่มควบคุม -->
+            <div class="grid grid-cols-4 gap-2 mt-2">
+                <button onclick="addCommand('L')" class="btn-press bg-blue-600 hover:bg-blue-500 p-3 rounded-lg shadow-md flex flex-col items-center justify-center">
+                    <i class="fas fa-undo text-white mb-1"></i>
+                    <span class="text-[10px]">หันซ้าย</span>
+                </button>
+                <button onclick="addCommand('F')" class="btn-press bg-green-600 hover:bg-green-500 p-3 rounded-lg shadow-md flex flex-col items-center justify-center col-span-2">
+                    <i class="fas fa-arrow-up text-white mb-1"></i>
+                    <span class="text-[10px]">เดินหน้า</span>
+                </button>
+                <button onclick="addCommand('R')" class="btn-press bg-blue-600 hover:bg-blue-500 p-3 rounded-lg shadow-md flex flex-col items-center justify-center">
+                    <i class="fas fa-redo text-white mb-1"></i>
+                    <span class="text-[10px]">หันขวา</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 mt-2">
+                <button onclick="clearCommands()" class="btn-press bg-red-900 hover:bg-red-800 text-red-200 py-2 rounded-lg border border-red-700 text-sm">
+                    <i class="fas fa-trash"></i> ล้างคำสั่ง
+                </button>
+                <button id="run-btn" onclick="runProgram()" class="btn-press bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-2 rounded-lg shadow-lg text-sm flex items-center justify-center gap-2">
+                    <i class="fas fa-play"></i> เริ่มทำงาน
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script หลักของเกม -->
+    <script>
+        // --- 1. การตั้งค่าและตัวแปรหลัก ---
+        const boardSize = 50; // ขนาดช่อง Grid (px)
+        const gapSize = 4;    // ช่องว่างระหว่าง Grid
+        
+        // สถานะของเกม
+        let currentLevel = 0;
+        let robotState = { x: 0, y: 0, dir: 1 }; // dir: 0=Up, 1=Right, 2=Down, 3=Left
+        let isRunning = false;
+        let commands = [];
+        
+        // นิยามของ Grid: 0=ว่าง, 1=กำแพง, 2=จุดเริ่ม, 3=เป้าหมาย
+        const levels = [
+            // Level 1: เดินตรงๆ
+            {
+                map: [
+                    [0, 0, 0, 0, 0],
+                    [2, 0, 0, 3, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0]
+                ],
+                startDir: 1, // หันขวา
+                hint: "ลองใช้คำสั่ง 'เดินหน้า' หลายๆ ครั้งดูสิ"
+            },
+            // Level 2: ต้องเลี้ยว
+            {
+                map: [
+                    [0, 0, 0, 3, 0],
+                    [0, 1, 1, 0, 0],
+                    [2, 0, 0, 0, 0],
+                    [0, 1, 1, 1, 0],
+                    [0, 0, 0, 0, 0]
+                ],
+                startDir: 1,
+                hint: "ระวังกำแพง! ต้องเลี้ยวซ้ายแล้วค่อยเดินต่อ"
+            },
+            // Level 3: ซับซ้อนขึ้น
+            {
+                map: [
+                    [0, 0, 1, 3, 0],
+                    [0, 0, 1, 0, 0],
+                    [0, 0, 1, 0, 0],
+                    [0, 2, 0, 0, 1],
+                    [0, 1, 1, 1, 1]
+                ],
+                startDir: 0, // หันขึ้น
+                hint: "วางแผนให้ดีนะ ทางมันคดเคี้ยว"
+            },
+            // Level 4: เขาวงกต
+            {
+                map: [
+                    [3, 0, 0, 0, 0],
+                    [1, 1, 1, 1, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 1, 1, 1, 1],
+                    [2, 0, 0, 0, 0]
+                ],
+                startDir: 1,
+                hint: "ด่านสุดท้ายแล้ว!"
+            }
+        ];
+
+        // --- 2. ฟังก์ชันเริ่มเกมและการวาดกระดาน ---
+        
+        function initGame() {
+            renderBoard();
+            updateUI();
+        }
+
+        function renderBoard() {
+            const levelData = levels[currentLevel];
+            const map = levelData.map;
+            const rows = map.length;
+            const cols = map[0].length;
+            
+            const gridBoard = document.getElementById('grid-board');
+            gridBoard.innerHTML = '';
+            
+            // ตั้งค่าขนาด Grid Container
+            gridBoard.style.display = 'grid';
+            gridBoard.style.gridTemplateColumns = `repeat(${cols}, ${boardSize}px)`;
+            gridBoard.style.gridTemplateRows = `repeat(${rows}, ${boardSize}px)`;
+            gridBoard.style.gap = `${gapSize}px`;
+
+            // วาดช่องต่างๆ
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const cellVal = map[r][c];
+                    const cell = document.createElement('div');
+                    cell.className = 'w-full h-full rounded flex items-center justify-center relative';
+                    
+                    if (cellVal === 1) { // กำแพง
+                        cell.className += ' bg-gray-700 border border-gray-600 shadow-inner';
+                        cell.innerHTML = '<i class="fas fa-cube text-gray-500"></i>';
+                    } else if (cellVal === 3) { // เป้าหมาย (Battery)
+                        cell.className += ' bg-gray-800 border border-gray-700';
+                        cell.innerHTML = '<i class="fas fa-bolt text-yellow-400 text-xl animate-pulse"></i>';
+                    } else { // ทางเดิน
+                        cell.className += ' bg-gray-800 border border-gray-700';
+                        // จุด Grid เล็กๆ เพื่อความสวยงาม
+                        const dot = document.createElement('div');
+                        dot.className = 'w-1 h-1 bg-gray-700 rounded-full';
+                        cell.appendChild(dot);
+                    }
+                    
+                    if (cellVal === 2) { // จุดเริ่ม (จำค่าไว้ แต่แสดงผลเหมือนทางเดิน)
+                        robotState.x = c;
+                        robotState.y = r;
+                    }
+                    
+                    // เก็บค่าพิกัดใน ID เพื่อใช้เช็คตอนเดิน
+                    cell.id = `cell-${c}-${r}`;
+                    gridBoard.appendChild(cell);
+                }
+            }
+
+            // สร้างตัวหุ่นยนต์ (Overlay บน Grid)
+            // เราใช้ Absolute Position เทียบกับ Container ของ GridBoard
+            const robot = document.createElement('div');
+            robot.id = 'robot';
+            robot.className = 'absolute flex items-center justify-center text-green-400 drop-shadow-lg';
+            robot.style.width = `${boardSize}px`;
+            robot.style.height = `${boardSize}px`;
+            robot.innerHTML = '<i class="fas fa-robot text-3xl"></i>'; // ไอคอนหุ่นยนต์
+            
+            gridBoard.appendChild(robot);
+            
+            // ตั้งค่าตำแหน่งเริ่มต้น
+            robotState.dir = levelData.startDir;
+            updateRobotVisual();
+        }
+
+        function updateRobotVisual() {
+            const robot = document.getElementById('robot');
+            // คำนวณตำแหน่ง pixel (ช่อง * (ขนาด+ช่องว่าง))
+            const left = robotState.x * (boardSize + gapSize);
+            const top = robotState.y * (boardSize + gapSize);
+            
+            // คำนวณการหมุน (0=Up, 1=Right, 2=Down, 3=Left)
+            // หมายเหตุ: icon fas fa-robot หน้าตรงปกติ ถ้าเรามองเป็นทิศ 0 (Up) ก็โอเค
+            // แต่เพื่อให้ดูมีทิศทาง เราอาจจะต้องหมุน
+            const rotation = (robotState.dir) * 90; 
+
+            robot.style.transform = `translate(${left}px, ${top}px) rotate(${rotation}deg)`;
+        }
+
+        // --- 3. ระบบคำสั่ง (Logic) ---
+
+        function addCommand(cmd) {
+            if (isRunning) return;
+            if (commands.length >= 20) return; // จำกัด 20 คำสั่ง
+
+            commands.push(cmd);
+            renderCommandList();
+        }
+
+        function clearCommands() {
+            if (isRunning) return;
+            commands = [];
+            renderCommandList();
+        }
+
+        function renderCommandList() {
+            const listEl = document.getElementById('command-list');
+            const countEl = document.getElementById('command-count');
+            const emptyMsg = document.querySelector('.empty-msg');
+            
+            listEl.innerHTML = ''; // ล้างของเก่า แต่เก็บ emptyMsg ไว้เดี๋ยวเช็คใหม่
+
+            if (commands.length === 0) {
+                 listEl.innerHTML = '<div class="text-gray-500 text-sm italic w-full text-center mt-4 empty-msg">เลือกคำสั่งด้านล่าง...</div>';
+            } else {
+                commands.forEach((cmd, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'w-8 h-8 rounded flex items-center justify-center text-sm font-bold shadow-sm cursor-pointer hover:bg-red-500 hover:text-white transition';
+                    
+                    // สีและไอคอนตามประเภทคำสั่ง
+                    if (cmd === 'F') {
+                        item.classList.add('bg-green-700', 'text-white', 'border', 'border-green-500');
+                        item.innerHTML = '<i class="fas fa-arrow-up"></i>';
+                    } else if (cmd === 'L') {
+                        item.classList.add('bg-blue-700', 'text-white', 'border', 'border-blue-500');
+                        item.innerHTML = '<i class="fas fa-undo"></i>';
+                    } else if (cmd === 'R') {
+                        item.classList.add('bg-blue-700', 'text-white', 'border', 'border-blue-500');
+                        item.innerHTML = '<i class="fas fa-redo"></i>';
+                    }
+                    
+                    // คลิกเพื่อลบคำสั่งตัวนั้น
+                    item.onclick = () => {
+                        if(!isRunning) {
+                            commands.splice(index, 1);
+                            renderCommandList();
+                        }
+                    };
+                    
+                    listEl.appendChild(item);
+                });
+            }
+            
+            countEl.innerText = `${commands.length}/20`;
+            
+            // Auto scroll to bottom
+            listEl.scrollTop = listEl.scrollHeight;
+        }
+
+        // --- 4. การทำงานของโปรแกรม (Execution) ---
+
+        async function runProgram() {
+            if (isRunning || commands.length === 0) return;
+            
+            isRunning = true;
+            document.getElementById('run-btn').classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('run-btn').innerHTML = '<i class="fas fa-cog fa-spin"></i> กำลังทำงาน...';
+
+            // รีเซ็ตตำแหน่งหุ่นยนต์ก่อนเริ่ม (เพื่อให้ดูเหมือนเริ่มใหม่จากจุด start)
+            resetRobotToStart();
+            await sleep(500); // รอแป๊บนึง
+
+            // วนลูปทำตามคำสั่งทีละขั้น
+            for (let i = 0; i < commands.length; i++) {
+                if (!isRunning) break; // เผื่อมีการกดหยุดหรือ reset ระหว่างทาง (ยังไม่ได้ทำปุ่มหยุดแต่เผื่อไว้)
+
+                const cmd = commands[i];
+                highlightCommand(i); // ไฮไลท์คำสั่งที่กำลังทำ
+                
+                await executeCommand(cmd);
+                
+                // ตรวจสอบเงื่อนไขแพ้/ชนะ หลังจบแต่ละคำสั่ง
+                const result = checkWinCondition();
+                if (result === 'win') {
+                    showModal(true);
+                    isRunning = false;
+                    resetBtnState();
+                    return;
+                } else if (result === 'crash') {
+                    showModal(false, 'หุ่นยนต์ชนกำแพง!');
+                    isRunning = false;
+                    resetBtnState();
+                    return;
+                } else if (result === 'out') {
+                    showModal(false, 'หุ่นยนต์หลุดออกนอกแผนที่!');
+                    isRunning = false;
+                    resetBtnState();
+                    return;
+                }
+
+                await sleep(600); // หน่วงเวลาให้เห็น animation
+            }
+
+            // ถ้าทำครบทุกคำสั่งแล้วยังไม่ถึงเป้าหมาย
+            if (isRunning) {
+                 showModal(false, 'โปรแกรมจบแล้ว แต่ยังไม่ถึงเป้าหมาย');
+                 isRunning = false;
+                 resetBtnState();
+            }
+        }
+
+        async function executeCommand(cmd) {
+            if (cmd === 'F') { // Forward
+                const nextX = robotState.x + (robotState.dir === 1 ? 1 : robotState.dir === 3 ? -1 : 0);
+                const nextY = robotState.y + (robotState.dir === 2 ? 1 : robotState.dir === 0 ? -1 : 0);
+                
+                // อัพเดท state (ยังไม่เช็คชนตรงนี้ ปล่อยให้ move ไปก่อนแล้วเช็คทีหลัง หรือเช็คก่อนก็ได้)
+                robotState.x = nextX;
+                robotState.y = nextY;
+            } else if (cmd === 'L') { // Turn Left
+                robotState.dir = (robotState.dir + 3) % 4; // (0->3, 1->0, etc.)
+            } else if (cmd === 'R') { // Turn Right
+                robotState.dir = (robotState.dir + 1) % 4;
+            }
+            updateRobotVisual();
+        }
+
+        function checkWinCondition() {
+            const map = levels[currentLevel].map;
+            const r = robotState.y;
+            const c = robotState.x;
+
+            // 1. ออกนอก Map
+            if (r < 0 || r >= map.length || c < 0 || c >= map[0].length) {
+                return 'out';
+            }
+
+            // 2. ชนกำแพง
+            if (map[r][c] === 1) {
+                return 'crash';
+            }
+
+            // 3. ถึงเป้าหมาย
+            if (map[r][c] === 3) {
+                return 'win';
+            }
+
+            return 'continue';
+        }
+
+        function resetRobotToStart() {
+            const levelData = levels[currentLevel];
+            const map = levelData.map;
+            for (let r = 0; r < map.length; r++) {
+                for (let c = 0; c < map[0].length; c++) {
+                    if (map[r][c] === 2) {
+                        robotState.x = c;
+                        robotState.y = r;
+                    }
+                }
+            }
+            robotState.dir = levelData.startDir;
+            updateRobotVisual();
+        }
+
+        function resetLevel() {
+            // หยุดการทำงานถ้าวิ่งอยู่
+            isRunning = false;
+            resetBtnState();
+            
+            // ล้างคำสั่ง
+            clearCommands();
+            
+            // รีเซ็ตตำแหน่ง
+            resetRobotToStart();
+            
+            // ซ่อน Modal
+            document.getElementById('message-modal').classList.add('hidden');
+        }
+
+        // --- 5. Helper Functions & UI Utilities ---
+
+        function nextLevel() {
+            currentLevel++;
+            if (currentLevel >= levels.length) {
+                currentLevel = 0; // วนกลับด่านแรก หรือจะทำหน้าจบเกมก็ได้
+                alert("ยินดีด้วย! คุณผ่านทุกด่านแล้ว กลับไปเริ่มด่าน 1 ใหม่นะ");
+            }
+            document.getElementById('level-display').innerText = currentLevel + 1;
+            resetLevel(); // รีเซ็ตทุกอย่างสำหรับด่านใหม่
+            initGame();   // วาดกระดานใหม่
+        }
+
+        function showModal(isSuccess, message) {
+            const modal = document.getElementById('message-modal');
+            const title = document.getElementById('modal-title');
+            const text = document.getElementById('modal-text');
+            const btn = document.getElementById('modal-btn');
+
+            modal.classList.remove('hidden');
+            
+            if (isSuccess) {
+                title.innerText = "ภารกิจสำเร็จ! 🎉";
+                title.className = "text-3xl font-bold mb-4 text-green-400";
+                text.innerText = "คุณเขียนโค้ดพาหุ่นยนต์ไปถึงเป้าหมายได้เยี่ยมมาก";
+                btn.innerText = "ด่านถัดไป";
+                btn.className = "bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full transition shadow-lg";
+                btn.onclick = nextLevel;
+            } else {
+                title.innerText = "ภารกิจล้มเหลว 💥";
+                title.className = "text-3xl font-bold mb-4 text-red-400";
+                text.innerText = message || "ลองตรวจสอบคำสั่งดูใหม่อีกครั้งนะ";
+                btn.innerText = "ลองใหม่";
+                btn.className = "bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-full transition shadow-lg";
+                btn.onclick = () => {
+                     modal.classList.add('hidden');
+                     resetRobotToStart(); // รีเซ็ตตำแหน่งให้ผู้เล่นลองใหม่ แต่ไม่ลบคำสั่ง (เพื่อให้แก้ debug ได้)
+                };
+            }
+        }
+
+        function highlightCommand(index) {
+            const listEl = document.getElementById('command-list');
+            const items = listEl.children;
+            // ล้าง highlight เก่า
+            for(let item of items) {
+                item.style.opacity = '0.5';
+                item.style.transform = 'scale(1)';
+            }
+            // highlight ใหม่
+            if(items[index]) {
+                items[index].style.opacity = '1';
+                items[index].style.transform = 'scale(1.1)';
+                items[index].style.borderColor = 'yellow';
+            }
+        }
+
+        function resetBtnState() {
+            const btn = document.getElementById('run-btn');
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            btn.innerHTML = '<i class="fas fa-play"></i> เริ่มทำงาน';
+            
+            // คืนค่า Opacity รายการคำสั่ง
+            const listEl = document.getElementById('command-list');
+            for(let item of listEl.children) {
+                item.style.opacity = '1';
+                item.style.borderColor = '';
+                item.style.transform = '';
+            }
+        }
+
+        const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+        // เริ่มเกม
+        window.onload = initGame;
+
+    </script>
+</body>
+</html>
