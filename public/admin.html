@@ -28,20 +28,34 @@
         </div>
     </div>
 
-    <!-- ADD PROJECT MODAL -->
+    <!-- ADD/EDIT PROJECT MODAL -->
     <div id="project-modal" class="fixed inset-0 z-40 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
             <div class="bg-purple-600 px-6 py-4 flex justify-between items-center text-white rounded-t-xl sticky top-0 z-10">
-                <h3 class="font-bold text-lg"><i class="fa-solid fa-plus-circle mr-2"></i>เพิ่มโปรเจกต์ใหม่</h3>
+                <h3 class="font-bold text-lg" id="p-modal-title"><i class="fa-solid fa-plus-circle mr-2"></i>เพิ่มโปรเจกต์ใหม่</h3>
                 <button onclick="closeAddProjectModal()" class="hover:bg-purple-700 rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="p-6 space-y-4">
+                <!-- Hidden ID Field for Edit Mode -->
+                <input type="hidden" id="p-id">
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div><label class="block text-sm font-bold text-gray-700 mb-1">ชื่อโปรเจกต์ <span class="text-red-500">*</span></label><input type="text" id="p-title" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none"></div>
                     <div><label class="block text-sm font-bold text-gray-700 mb-1">หมวดหมู่ <span class="text-red-500">*</span></label><select id="p-category" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none bg-white"><option>Web Application</option><option>Game</option><option>Utility</option><option>Data</option><option>Template</option></select></div>
                 </div>
                 <div><label class="block text-sm font-bold text-gray-700 mb-1">Tags (คั่นด้วยจุลภาค) <span class="text-red-500">*</span></label><input type="text" id="p-tags" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none"></div>
-                <div><label class="block text-sm font-bold text-gray-700 mb-1">ลิงก์รูปภาพ (Google Drive / URL) <span class="text-red-500">*</span></label><input type="text" id="p-image" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none"></div>
+                
+                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">ลิงก์รูปภาพ (Google Drive / URL) <span class="text-red-500">*</span></label>
+                    <div class="space-y-2">
+                        <input type="text" id="p-image-1" class="w-full border rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none" placeholder="รูปหลัก (Thumbnail)">
+                        <input type="text" id="p-image-2" class="w-full border rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none" placeholder="รูปเพิ่มเติม 2">
+                        <input type="text" id="p-image-3" class="w-full border rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none" placeholder="รูปเพิ่มเติม 3">
+                        <input type="text" id="p-image-4" class="w-full border rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none" placeholder="รูปเพิ่มเติม 4">
+                        <input type="text" id="p-image-5" class="w-full border rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none" placeholder="รูปเพิ่มเติม 5">
+                    </div>
+                </div>
+
                 <div><label class="block text-sm font-bold text-gray-700 mb-1">คำอธิบายย่อ <span class="text-red-500">*</span></label><textarea id="p-desc" rows="2" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none"></textarea></div>
                 <div><label class="block text-sm font-bold text-gray-700 mb-1">รายละเอียดเต็ม</label><textarea id="p-detail" rows="4" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none"></textarea></div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -80,14 +94,17 @@
         </div>
     </div>
 
-    <!-- ADD NEWS MODAL -->
+    <!-- ADD/EDIT NEWS MODAL -->
     <div id="add-news-modal" class="fixed inset-0 z-40 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg m-4">
             <div class="bg-red-500 px-6 py-4 flex justify-between items-center text-white rounded-t-xl">
-                <h3 class="font-bold text-lg"><i class="fa-solid fa-bullhorn mr-2"></i>ประกาศข่าวใหม่</h3>
+                <h3 class="font-bold text-lg" id="n-modal-title"><i class="fa-solid fa-bullhorn mr-2"></i>ประกาศข่าวใหม่</h3>
                 <button onclick="closeAddNewsModal()" class="hover:bg-red-600 rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="p-6 space-y-4">
+                <!-- Hidden ID -->
+                <input type="hidden" id="n-id">
+
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1">หัวข้อข่าว <span class="text-red-500">*</span></label>
                     <input type="text" id="n-title" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 outline-none" placeholder="เช่น แจ้งปิดปรับปรุงระบบ...">
@@ -110,7 +127,7 @@
                 </div>
                 <div class="pt-4 border-t flex justify-end gap-3">
                     <button onclick="closeAddNewsModal()" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">ยกเลิก</button>
-                    <button id="save-news-btn" onclick="saveNews()" class="px-6 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 font-bold shadow">ประกาศข่าว</button>
+                    <button id="save-news-btn" onclick="saveNews()" class="px-6 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 font-bold shadow">บันทึก</button>
                 </div>
             </div>
         </div>
@@ -142,17 +159,40 @@
         </div>
     </div>
 
-    <!-- Sidebar: เพิ่ม ID และปุ่มปิดสำหรับ Mobile -->
-    <aside id="sidebar" class="w-64 bg-slate-800 text-white flex flex-col hidden md:flex flex-shrink-0 transition-all duration-300 z-20">
-        <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-900 shadow-lg relative">
+    <!-- INBOX MODAL -->
+    <div id="inbox-modal" class="fixed inset-0 z-40 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden m-4 flex flex-col">
+            <div class="bg-slate-800 px-6 py-4 flex justify-between items-center text-white rounded-t-xl">
+                <div class="flex items-center gap-2">
+                    <h3 class="font-bold text-lg"><i class="fa-solid fa-envelope mr-2"></i>กล่องข้อความ</h3>
+                    <span id="inbox-count" class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full hidden">0</span>
+                </div>
+                <button onclick="closeInboxModal()" class="hover:bg-slate-700 rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
+                <span class="text-sm text-gray-500">ข้อความจากหน้า "ติดต่อเรา"</span>
+                <button onclick="loadMessages()" class="text-xs text-blue-600 hover:underline"><i class="fa-solid fa-rotate-right mr-1"></i> รีเฟรช</button>
+            </div>
+            <div class="overflow-y-auto flex-grow p-0">
+                <div id="inbox-list" class="divide-y divide-gray-100"><div class="text-center py-10 text-gray-400">กำลังโหลด...</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-800 text-white flex flex-col hidden md:flex flex-shrink-0 transition-all duration-300">
+        <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-900 shadow-lg">
             <h1 class="text-xl font-bold tracking-wider"><i class="fa-solid fa-code text-blue-400 mr-2"></i>KruBoat Dev</h1>
-            <!-- ปุ่มปิดสำหรับ Mobile -->
-            <button onclick="toggleSidebar()" class="absolute right-4 md:hidden text-slate-400 hover:text-white">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
         </div>
         <nav class="flex-grow py-6 px-2 space-y-1 overflow-y-auto">
             <a href="#" onclick="location.reload()" class="flex items-center px-4 py-3 bg-slate-700 text-white rounded-lg shadow-sm transition"><i class="fa-solid fa-gauge-high w-6 text-center mr-3 text-blue-400"></i><span class="font-medium">Dashboard</span></a>
+            
+            <p class="px-4 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Inbox</p>
+            <button onclick="openInboxModal()" class="w-full flex items-center px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg transition group text-left">
+                <i class="fa-solid fa-envelope w-6 text-center mr-3 group-hover:text-blue-400 transition"></i><span>กล่องข้อความ</span>
+                <span id="sidebar-inbox-badge" class="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full hidden">New</span>
+            </button>
+
             <p class="px-4 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Content Management</p>
             <button onclick="openManageModal()" class="w-full flex items-center px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg transition group text-left">
                 <i class="fa-solid fa-laptop-code w-6 text-center mr-3 group-hover:text-purple-400 transition"></i><span>จัดการคลังโค้ด</span>
@@ -163,6 +203,7 @@
             <button onclick="openManageNewsModal()" class="w-full flex items-center px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg transition group text-left">
                 <i class="fa-solid fa-newspaper w-6 text-center mr-3 group-hover:text-red-400 transition"></i><span>ข่าวประชาสัมพันธ์</span>
             </button>
+            
             <p class="px-4 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">System</p>
             <a href="index.html" target="_blank" class="flex items-center px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg transition"><i class="fa-solid fa-earth-asia w-6 text-center mr-3"></i><span>เปิดหน้าเว็บจริง</span></a>
         </nav>
@@ -178,8 +219,7 @@
     <div class="flex-1 flex flex-col overflow-hidden">
         <header class="bg-white shadow-sm h-16 flex items-center justify-between px-4 md:hidden z-10">
             <span class="font-bold text-lg text-slate-800">Admin Panel</span>
-            <!-- ปุ่ม Hamburger ที่เพิ่ม onclick="toggleSidebar()" -->
-            <button onclick="toggleSidebar()" class="text-slate-600 focus:outline-none"><i class="fa-solid fa-bars text-xl"></i></button>
+            <button class="text-slate-600 focus:outline-none"><i class="fa-solid fa-bars text-xl"></i></button>
         </header>
         <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
             <div class="flex justify-between items-center mb-8"><div><h2 class="text-2xl font-bold text-gray-800">Developer Dashboard</h2><p class="text-gray-500 text-sm mt-1">จัดการข้อมูลเว็บไซต์และคลังโค้ด</p></div></div>
@@ -192,7 +232,7 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6 h-fit">
                     <h3 class="font-bold text-lg text-gray-800 mb-4 border-b pb-2">Actions</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div onclick="openAddProjectModal()" class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-purple-300 cursor-pointer transition flex items-center group">
@@ -207,19 +247,18 @@
                             <div class="w-10 h-10 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition"><i class="fa-solid fa-bullhorn"></i></div>
                             <div><h4 class="font-bold text-gray-700">ประกาศข่าวใหม่</h4><p class="text-xs text-gray-500">แจ้งข่าวสารหน้าแรก</p></div>
                         </div>
-                        <div onclick="checkSystemStatus()" class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-green-300 cursor-pointer transition flex items-center group">
-                            <div class="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition"><i class="fa-solid fa-server"></i></div>
-                            <div><h4 class="font-bold text-gray-700">System Status</h4><p class="text-xs text-gray-500">ตรวจสอบสถานะ API</p></div>
+                        <div onclick="openInboxModal()" class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-blue-300 cursor-pointer transition flex items-center group relative">
+                            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition"><i class="fa-solid fa-envelope"></i></div>
+                            <div><h4 class="font-bold text-gray-700">กล่องข้อความ</h4><p class="text-xs text-gray-500">อ่านข้อความจากทางบ้าน</p></div>
+                            <span id="quick-inbox-badge" class="absolute top-3 right-3 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full hidden">New</span>
                         </div>
+                        <div onclick="checkSystemStatus()" class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-green-300 cursor-pointer transition flex items-center group"><div class="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition"><i class="fa-solid fa-server"></i></div><div><h4 class="font-bold text-gray-700">System Status</h4><p class="text-xs text-gray-500">ตรวจสอบสถานะ API</p></div></div>
                     </div>
                 </div>
-
                 <div class="bg-white rounded-xl shadow-sm p-6 h-fit lg:h-auto flex flex-col">
                     <div class="flex justify-between items-center mb-4 border-b pb-2">
                         <h3 class="font-bold text-lg text-gray-800">Admin Note</h3>
-                        <button id="save-note-btn" onclick="saveNote()" class="text-xs bg-yellow-500 text-white px-3 py-1.5 rounded hover:bg-yellow-600 transition shadow-sm font-bold flex items-center">
-                            <i class="fa-solid fa-floppy-disk mr-1"></i> บันทึก
-                        </button>
+                        <button id="save-note-btn" onclick="saveNote()" class="text-xs bg-yellow-500 text-white px-3 py-1.5 rounded hover:bg-yellow-600 transition shadow-sm font-bold flex items-center"><i class="fa-solid fa-floppy-disk mr-1"></i> บันทึก</button>
                     </div>
                     <textarea id="admin-note-input" class="w-full flex-grow bg-yellow-50 p-4 rounded-lg border border-yellow-100 text-sm text-yellow-800 resize-none outline-none focus:ring-2 focus:ring-yellow-400 placeholder-yellow-300 leading-relaxed" style="min-height: 200px;" placeholder="จดบันทึกกันลืม... (กดบันทึกเพื่อเก็บไว้ในระบบ)"></textarea>
                 </div>
@@ -227,6 +266,7 @@
         </main>
     </div>
 
-    <script src="js/admin.js"></script>
+    <!-- เปลี่ยนเป็น type="module" เพื่อใช้ Firebase -->
+    <script type="module" src="js/admin.js"></script>
 </body>
 </html>

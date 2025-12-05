@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Details</title>
-    
-    <!-- 🟢 Google Analytics (เริ่มเก็บสถิติ) -->
-    <!-- Google tag (gtag.js) -->
+
+    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4MQ3GL6CTB"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -15,8 +14,7 @@
 
       gtag('config', 'G-4MQ3GL6CTB');
     </script>
-    <!-- 🟢 จบโค้ด Google Analytics -->
-
+    
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
     
@@ -68,11 +66,13 @@
                 <!-- Header Info -->
                 <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                     <div id="d-tags" class="flex flex-wrap gap-2 mb-4">
+                        <!-- Skeleton Tags -->
                         <div class="bg-gray-200 h-6 w-20 rounded animate-pulse"></div>
                         <div class="bg-gray-200 h-6 w-24 rounded animate-pulse"></div>
                     </div>
                     
                     <h1 id="d-title" class="text-3xl font-bold text-gray-800 mb-2">
+                        <!-- Skeleton Title -->
                         <div class="bg-gray-200 h-10 w-3/4 rounded animate-pulse"></div>
                     </h1>
                     
@@ -100,15 +100,16 @@
                     </div>
                 </div>
 
-                <!-- Image -->
+                <!-- Image Gallery Section -->
                 <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                     <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
                         <i class="fa-regular fa-images mr-2 text-blue-500"></i> ตัวอย่างหน้าจอ
                     </h2>
+                    <!-- Container สำหรับใส่รูปภาพ (JS จะมาเติมตรงนี้) -->
                     <div class="flex overflow-x-auto gap-4 pb-2 hide-scroll snap-x snap-mandatory">
+                        <!-- Skeleton Image (แสดงตอนโหลด) -->
                         <div class="flex-shrink-0 w-full md:w-[80%] snap-center relative rounded-lg overflow-hidden h-64 border border-gray-200">
                             <div class="absolute inset-0 bg-gray-200 animate-pulse"></div>
-                            <img id="d-image-main" src="https://placehold.co/800x450/e2e8f0/475569?text=Loading..." class="absolute inset-0 w-full h-full object-cover z-10" onerror="this.onerror=null;this.src='https://placehold.co/800x450/e2e8f0/475569?text=Image+Not+Found';" style="min-height: 100%;">
                         </div>
                     </div>
                 </div>
@@ -118,11 +119,11 @@
                     <h2 class="text-lg font-bold text-gray-800 mb-4 border-l-4 border-blue-500 pl-3">รายละเอียดโปรเจกต์</h2>
                     
                     <!-- 
-                        แก้ไข: เพิ่ม class 'whitespace-pre-line' เพื่อให้รองรับการเว้นบรรทัดจาก Google Sheet
-                        และใช้ 'prose' เพื่อจัดรูปแบบตัวอักษรให้อ่านง่ายเหมือนบทความ
+                        ใช้ class 'whitespace-pre-line' เพื่อให้รองรับการเว้นบรรทัด
+                        และ 'prose' เพื่อจัดรูปแบบตัวอักษร
                     -->
                     <div id="d-desc" class="prose prose-blue max-w-none text-gray-600 leading-relaxed whitespace-pre-line">
-                        <!-- Skeleton -->
+                        <!-- Skeleton Text -->
                         <div class="h-4 bg-gray-200 rounded w-full animate-pulse mb-2"></div>
                         <div class="h-4 bg-gray-200 rounded w-5/6 animate-pulse mb-2"></div>
                         <div class="h-4 bg-gray-200 rounded w-full animate-pulse mb-2"></div>
@@ -165,9 +166,16 @@
         <p class="text-sm text-gray-400">&copy; 2025 พัฒนาโดย ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์ | ติดต่อ chonlasitgood@gmail.com</p>
     </footer>
 
-    <script src="js/script.js"></script>
+    <!-- เชื่อมต่อกับ script.js (ต้องเป็น module เพื่อใช้ Firebase) -->
+    <script type="module" src="js/script.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', loadProjectDetail);
+        // ตัวช่วยเรียก function จาก module เมื่อโหลดเสร็จ
+        document.addEventListener('DOMContentLoaded', () => {
+            // รอ module โหลดเสร็จสักครู่ (หรือเรียกผ่าน window ถ้า expose ไว้)
+            setTimeout(() => {
+                if(window.loadProjectDetail) window.loadProjectDetail();
+            }, 500); 
+        });
     </script>
 </body>
 </html>

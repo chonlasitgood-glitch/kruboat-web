@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KruBoat - Student Zone</title>
-    
-    <!-- 🟢 Google Analytics (เริ่มเก็บสถิติ) -->
-    <!-- Google tag (gtag.js) -->
+    <title>KruBoat.com - Student Zone</title>
+
+    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4MQ3GL6CTB"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -15,7 +14,6 @@
 
       gtag('config', 'G-4MQ3GL6CTB');
     </script>
-    <!-- 🟢 จบโค้ด Google Analytics -->
 
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
@@ -23,7 +21,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
-    <style> body { font-family: 'Sarabun', sans-serif; } .app-card:hover { transform: translateY(-3px); } </style>
+    <style> 
+        body { font-family: 'Sarabun', sans-serif; } 
+        .app-card:hover { transform: translateY(-3px); }
+    </style>
 </head>
 <body class="bg-slate-50 text-gray-800 flex flex-col min-h-screen">
 
@@ -33,8 +34,8 @@
             <div class="hidden md:flex space-x-6">
                 <a href="/" class="hover:text-blue-600 transition">หน้าแรก</a>
                 <a href="student/" class="text-blue-600 font-semibold">นักเรียน</a>
-                <a href="../app/" class="hover:text-teal-600 transition font-medium"><i class="fa-solid fa-rocket mr-1 text-sm"></i>แอปครูโบ๊ท</a>
-                <a href="../library/" class="hover:text-blue-600 transition">คลังโค้ด</a>
+                <a href="../app/" class="hover:text-teal-600 transition font-medium"><i class="fa-solid fa-rocket mr-1 text-sm"></i>แอพครูโบ๊ท</a>
+                <a href="../library.html" class="hover:text-blue-600 transition">คลังโค้ด</a>
             </div>
             <button id="mobile-menu-btn" class="md:hidden text-gray-600 focus:outline-none"><i class="fa-solid fa-bars text-xl"></i></button>
         </div>
@@ -42,8 +43,8 @@
             <div class="flex flex-col px-4 py-2 space-y-2">
                 <a href="/" class="block py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 px-2 transition">หน้าแรก</a>
                 <a href="student/" class="block py-2 text-blue-600 font-semibold rounded hover:bg-gray-50 px-2">นักเรียน</a>
-                <a href="../app/" class="block py-2 text-teal-600 font-semibold rounded hover:bg-teal-50 px-2">แอปครูโบ๊ท</a>
-                <a href="../library/" class="block py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 px-2 transition">คลังโค้ด</a>
+                <a href="../app/" class="block py-2 text-teal-600 font-semibold rounded hover:bg-teal-50 px-2">แอพครูโบ๊ท</a>
+                <a href="../library.html" class="block py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 px-2 transition">คลังโค้ด</a>
             </div>
         </div>
     </nav>
@@ -53,6 +54,7 @@
             <i class="fa-solid fa-shapes absolute top-4 left-10 text-6xl"></i>
             <i class="fa-solid fa-rocket absolute bottom-4 right-10 text-6xl"></i>
         </div>
+        
         <div class="container mx-auto px-4 text-center relative z-10">
             <h1 class="text-3xl md:text-4xl font-bold mb-2">Student Apps</h1>
             <p class="text-blue-100 opacity-90">รวมแอพพลิเคชันและเครื่องมือช่วยเรียนสำหรับนักเรียนของครูโบ๊ท</p>
@@ -62,48 +64,93 @@
     <main class="container mx-auto px-4 py-12 flex-grow">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             
-            <a href="student/roommate_demo" class="app-card bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-indigo-100 flex items-start space-x-4 cursor-pointer group relative overflow-hidden" target="_blank">
+            <!-- App 1: RoomMate -->
+            <a href="roommate" class="app-card bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-indigo-100 flex items-start space-x-4 cursor-pointer group relative overflow-hidden">
                 <div class="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500"></div>
-                <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-2xl group-hover:bg-indigo-600 group-hover:text-white transition shadow-sm border border-indigo-100"><i class="fa-solid fa-users-rectangle"></i></div>
+                <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-2xl group-hover:bg-indigo-600 group-hover:text-white transition shadow-sm border border-indigo-100">
+                    <i class="fa-solid fa-users-rectangle"></i>
+                </div>
                 <div class="flex-1">
-                    <div class="flex justify-between items-start"><h3 class="font-bold text-lg text-gray-800 group-hover:text-indigo-600 transition">RoomMate</h3><span class="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full font-bold border border-green-200">Online</span></div>
-                    <p class="text-sm text-gray-500 mt-1 leading-relaxed">ระบบจัดการ Homeroom บันทึกการบ้านและส่งงานทำเวร</p>
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-bold text-lg text-gray-800 group-hover:text-indigo-600 transition">RoomMate</h3>
+                        <span class="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full font-bold border border-green-200">Online</span>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-1 leading-relaxed">ระบบจัดการ Homeroom เช็คชื่อและบันทึกความดี</p>
                 </div>
             </a>
 
-            <!-- App 2: ตรวจสอบผลการเรียน (Unlocked!) -->
-            <a href="student/scorecheck" class="app-card bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-blue-100 flex items-start space-x-4 cursor-pointer group relative overflow-hidden" target="_blank">
+            <!-- App 2: ตรวจสอบผลการเรียน (Online) -->
+            <a href="grade" class="app-card bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-blue-100 flex items-start space-x-4 cursor-pointer group relative overflow-hidden">
                 <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
                 <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl group-hover:bg-blue-600 group-hover:text-white transition shadow-sm border border-blue-100">
                     <i class="fa-solid fa-chart-column"></i>
                 </div>
                 <div class="flex-1">
                     <div class="flex justify-between items-start">
-                        <h3 class="font-bold text-lg text-gray-800 group-hover:text-blue-600 transition">ตรวจสอบคะแนน</h3>
+                        <h3 class="font-bold text-lg text-gray-800 group-hover:text-blue-600 transition">ตรวจสอบผลการเรียน</h3>
                         <span class="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full font-bold border border-green-200">Online</span>
                     </div>
-                    <p class="text-sm text-gray-500 mt-1 leading-relaxed">ดูคะแนนและการส่งงานวิชาครูโบ๊ท</p>
+                    <p class="text-sm text-gray-500 mt-1 leading-relaxed">ดูเกรดและผลการเรียนรายเทอม</p>
                 </div>
             </a>
 
-            <!-- ... (Apps อื่นๆ เหมือนเดิม) ... -->
+            <!-- App 3: เอกสารประกอบการเรียน (Coming Soon) -->
             <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 flex items-start space-x-4 cursor-not-allowed opacity-75 grayscale hover:grayscale-0 transition-all duration-500">
-                <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl border border-gray-200"><i class="fa-solid fa-folder-open"></i></div>
-                <div class="flex-1"><div class="flex justify-between items-start"><h3 class="font-bold text-lg text-gray-600">เอกสารการเรียน</h3><span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span></div><p class="text-sm text-gray-400 mt-1">ดาวน์โหลดชีทและสไลด์การสอน</p></div>
+                <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl border border-gray-200">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-bold text-lg text-gray-600">เอกสารการเรียน</h3>
+                        <span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-1">ดาวน์โหลดชีทและสไลด์การสอน</p>
+                </div>
             </div>
+
+            <!-- App 4: ส่งงาน (Coming Soon) -->
             <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 flex items-start space-x-4 cursor-not-allowed opacity-75 grayscale hover:grayscale-0 transition-all duration-500">
-                <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl border border-gray-200"><i class="fa-solid fa-file-arrow-up"></i></div>
-                <div class="flex-1"><div class="flex justify-between items-start"><h3 class="font-bold text-lg text-gray-600">ส่งงาน / การบ้าน</h3><span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span></div><p class="text-sm text-gray-400 mt-1">ระบบอัปโหลดงานส่งครู</p></div>
+                <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl border border-gray-200">
+                    <i class="fa-solid fa-file-arrow-up"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-bold text-lg text-gray-600">ส่งงาน / การบ้าน</h3>
+                        <span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-1">ระบบอัปโหลดงานส่งครู</p>
+                </div>
             </div>
+
+            <!-- App 5: ตารางเรียน (Coming Soon) -->
             <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 flex items-start space-x-4 cursor-not-allowed opacity-75 grayscale hover:grayscale-0 transition-all duration-500">
-                <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl border border-gray-200"><i class="fa-solid fa-calendar-days"></i></div>
-                <div class="flex-1"><div class="flex justify-between items-start"><h3 class="font-bold text-lg text-gray-600">ตารางเรียน</h3><span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span></div><p class="text-sm text-gray-400 mt-1">ดูตารางเรียนประจำภาคเรียน</p></div>
+                <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl border border-gray-200">
+                    <i class="fa-solid fa-calendar-days"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-bold text-lg text-gray-600">ตารางเรียน</h3>
+                        <span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-1">ดูตารางเรียนประจำภาคเรียน</p>
+                </div>
             </div>
-            <!-- ... Apps เพิ่มเติม ... -->
-             <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 flex items-start space-x-4 cursor-not-allowed opacity-75 grayscale hover:grayscale-0 transition-all duration-500">
-                <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl border border-gray-200"><i class="fa-solid fa-bed-pulse"></i></div>
-                <div class="flex-1"><div class="flex justify-between items-start"><h3 class="font-bold text-lg text-gray-600">ระบบลาออนไลน์</h3><span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span></div><p class="text-sm text-gray-400 mt-1">แจ้งลาป่วย/ลากิจ ไม่ต้องใช้กระดาษ</p></div>
+
+            <!-- App 6: ระบบลาออนไลน์ (Coming Soon) -->
+            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 flex items-start space-x-4 cursor-not-allowed opacity-75 grayscale hover:grayscale-0 transition-all duration-500">
+                <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl border border-gray-200">
+                    <i class="fa-solid fa-bed-pulse"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-bold text-lg text-gray-600">ระบบลาออนไลน์</h3>
+                        <span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-1">แจ้งลาป่วย/ลากิจ ไม่ต้องใช้กระดาษ</p>
+                </div>
             </div>
+
+            <!-- App 7: บัตรนักเรียนดิจิทัล (Coming Soon) -->
             <a href="student/idcard" class="app-card bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-blue-100 flex items-start space-x-4 cursor-pointer group relative overflow-hidden" target="_blank">
                 <div class="absolute left-0 top-0 bottom-0 w-1 bg-red-500"></div>
                 <div class="w-14 h-14 bg-red-50 text-red-600 rounded-xl flex items-center justify-center text-2xl group-hover:bg-red-600 group-hover:text-white transition shadow-sm border border-blue-100">
@@ -117,30 +164,85 @@
                     <p class="text-sm text-gray-500 mt-1 leading-relaxed">บัตรนักเรียนดิจิทัล สามารถใช้งานได้โดยไม่ต้องพกบัตรจริง</p>
                 </div>
             </a>
+
+            <!-- App 8: ห้องสมุดออนไลน์ (Coming Soon) -->
             <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 flex items-start space-x-4 cursor-not-allowed opacity-75 grayscale hover:grayscale-0 transition-all duration-500">
-                <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl border border-gray-200"><i class="fa-solid fa-book"></i></div>
-                <div class="flex-1"><div class="flex justify-between items-start"><h3 class="font-bold text-lg text-gray-600">ห้องสมุดออนไลน์</h3><span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span></div><p class="text-sm text-gray-400 mt-1">ค้นหาและจองหนังสือห้องสมุด</p></div>
+                <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl border border-gray-200">
+                    <i class="fa-solid fa-book"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-bold text-lg text-gray-600">ห้องสมุดออนไลน์</h3>
+                        <span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-1">ค้นหาและจองหนังสือห้องสมุด</p>
+                </div>
             </div>
+
+            <!-- App 9: ลงทะเบียนชุมนุม (Coming Soon) -->
             <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 flex items-start space-x-4 cursor-not-allowed opacity-75 grayscale hover:grayscale-0 transition-all duration-500">
-                <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl border border-gray-200"><i class="fa-solid fa-puzzle-piece"></i></div>
-                <div class="flex-1"><div class="flex justify-between items-start"><h3 class="font-bold text-lg text-gray-600">ลงทะเบียนชุมนุม</h3><span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span></div><p class="text-sm text-gray-400 mt-1">เลือกลงวิชาชุมนุมตามความสนใจ</p></div>
+                <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl border border-gray-200">
+                    <i class="fa-solid fa-puzzle-piece"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-bold text-lg text-gray-600">ลงทะเบียนชุมนุม</h3>
+                        <span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-1">เลือกลงวิชาชุมนุมตามความสนใจ</p>
+                </div>
             </div>
+
+            <!-- App 10: แจ้งของหาย (Coming Soon) -->
             <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 flex items-start space-x-4 cursor-not-allowed opacity-75 grayscale hover:grayscale-0 transition-all duration-500">
-                <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl border border-gray-200"><i class="fa-solid fa-magnifying-glass-location"></i></div>
-                <div class="flex-1"><div class="flex justify-between items-start"><h3 class="font-bold text-lg text-gray-600">แจ้งของหาย</h3><span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span></div><p class="text-sm text-gray-400 mt-1">Lost & Found ศูนย์รวมของหาย</p></div>
+                <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl border border-gray-200">
+                    <i class="fa-solid fa-magnifying-glass-location"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-bold text-lg text-gray-600">แจ้งของหาย</h3>
+                        <span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-1">Lost & Found ศูนย์รวมของหาย</p>
+                </div>
             </div>
+
+            <!-- App 11: เมนูอาหารกลางวัน (Coming Soon) -->
             <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 flex items-start space-x-4 cursor-not-allowed opacity-75 grayscale hover:grayscale-0 transition-all duration-500">
-                <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl border border-gray-200"><i class="fa-solid fa-utensils"></i></div>
-                <div class="flex-1"><div class="flex justify-between items-start"><h3 class="font-bold text-lg text-gray-600">เมนูอาหารกลางวัน</h3><span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span></div><p class="text-sm text-gray-400 mt-1">เช็คเมนูอาหารโรงอาหารประจำวัน</p></div>
+                <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl border border-gray-200">
+                    <i class="fa-solid fa-utensils"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-bold text-lg text-gray-600">เมนูอาหารกลางวัน</h3>
+                        <span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-1">เช็คเมนูอาหารโรงอาหารประจำวัน</p>
+                </div>
             </div>
+
+            <!-- App 12: กล่องรับความคิดเห็น (Coming Soon) -->
             <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 flex items-start space-x-4 cursor-not-allowed opacity-75 grayscale hover:grayscale-0 transition-all duration-500">
-                <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl border border-gray-200"><i class="fa-solid fa-comment-dots"></i></div>
-                <div class="flex-1"><div class="flex justify-between items-start"><h3 class="font-bold text-lg text-gray-600">กล่องรับความคิดเห็น</h3><span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span></div><p class="text-sm text-gray-400 mt-1">ส่งข้อเสนอแนะถึงสภานักเรียน</p></div>
+                <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl border border-gray-200">
+                    <i class="fa-solid fa-comment-dots"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-bold text-lg text-gray-600">กล่องรับความคิดเห็น</h3>
+                        <span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-1">ส่งข้อเสนอแนะถึงสภานักเรียน</p>
+                </div>
             </div>
+
         </div>
     </main>
 
-    <footer class="bg-white border-t border-gray-200 py-6 text-center mt-auto"><p class="text-sm text-gray-500 font-medium">&copy; 2025 พัฒนาโดย ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์ | ติดต่อ chonlasitgood@gmail.com</p></footer>
-    <script src="../js/script.js"></script>
+    <footer class="bg-white border-t border-gray-200 py-6 text-center mt-auto">
+        <p class="text-sm text-gray-500 font-medium">&copy; 2025 พัฒนาโดย ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์ | ติดต่อ chonlasitgood@gmail.com</p>
+    </footer>
+
+    <!-- 🔴 แก้ไข: ใส่ type="module" เพื่อให้ script.js ทำงานได้ -->
+    <script type="module" src="../js/script.js"></script>
 </body>
 </html>

@@ -1,12 +1,51 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbxkaGc8gLW98phQ1rslCfV2aeOrFtH-62pR7gFjiKbAIqcUvRpWWRs0f3mkMBbYaaLh/exec";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc, addDoc, serverTimestamp, getDocs, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-let CURRENT_PASSWORD = "";
+// ⚠️ Config (ใช้ตัวเดียวกับ RoomMate/Contact)
+const firebaseConfig = {
+    apiKey: "AIzaSyAlfZHbCFxGK3p3nDoAPy3m9KqZzmX2s9I",
+    authDomain: "kruboat-web.firebaseapp.com",
+    projectId: "kruboat-web",
+    storageBucket: "kruboat-web.firebasestorage.app",
+    messagingSenderId: "61868765546",
+    appId: "1:61868765546:web:683b18ddf68c89dd317513"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const ADMIN_PIN = "1234"; // รหัสผ่าน Admin
+
+// Expose functions
+window.checkLogin = checkLogin;
+window.performLogin = performLogin;
+window.logout = logout;
+window.openAddProjectModal = openAddProjectModal;
+window.closeAddProjectModal = closeAddProjectModal;
+window.saveProject = saveProject;
+window.openManageModal = openManageModal;
+window.closeManageModal = closeManageModal;
+window.deleteProject = deleteProject;
+window.editProject = editProject; // New
+window.openAddNewsModal = openAddNewsModal;
+window.closeAddNewsModal = closeAddNewsModal;
+window.saveNews = saveNews;
+window.openManageNewsModal = openManageNewsModal;
+window.closeManageNewsModal = closeManageNewsModal;
+window.deleteNews = deleteNews;
+window.editNews = editNews; // New
+window.checkSystemStatus = checkSystemStatus;
+window.saveNote = saveNote;
+window.openInboxModal = openInboxModal;
+window.closeInboxModal = closeInboxModal;
+window.loadMessages = loadMessages;
+window.deleteMessage = deleteMessage;
 
 document.addEventListener('DOMContentLoaded', () => {
     checkLogin();
 });
 
-// --- Helper Functions ---
+// --- Helper ---
 function convertDriveImage(url) {
     if (!url) return 'https://placehold.co/640x360?text=No+Image';
     if (url.includes('drive.google.com')) {
@@ -20,6 +59,10 @@ function convertDriveImage(url) {
 
 function formatDate(dateString) {
     if(!dateString) return "-";
+    // If already formatted
+    if(dateString.includes('/')) return dateString;
+    
+    // From Timestamp
     const date = new Date(dateString);
     return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
 }
@@ -27,53 +70,25 @@ function formatDate(dateString) {
 // --- Login & Dashboard ---
 function checkLogin() {
     const savedPassword = sessionStorage.getItem('admin_password');
-    if (savedPassword) {
-        CURRENT_PASSWORD = savedPassword;
+    if (savedPassword === ADMIN_PIN) {
+        document.getElementById('login-modal').classList.add('hidden');
         showDashboard();
         loadNote();
+        listenToMessages();
     } else {
-        const modal = document.getElementById('login-modal');
-        if(modal) modal.classList.remove('hidden');
+        document.getElementById('login-modal').classList.remove('hidden');
     }
 }
 
-async function performLogin() {
+function performLogin() {
     const input = document.getElementById('password-input').value;
     const errorMsg = document.getElementById('login-error');
-    const loginBtn = document.getElementById('login-btn');
-
-    if (!input) {
-        errorMsg.innerText = "กรุณากรอกรหัสผ่าน";
+    
+    if (input === ADMIN_PIN) {
+        sessionStorage.setItem('admin_password', input);
+        checkLogin();
+    } else {
         errorMsg.classList.remove('hidden');
-        return;
-    }
-
-    const originalText = loginBtn.innerHTML;
-    loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังตรวจสอบ...';
-    loginBtn.disabled = true;
-    errorMsg.classList.add('hidden');
-
-    try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'login', password: input })
-        });
-        const result = await response.json();
-
-        if (result.status === 'success') {
-            sessionStorage.setItem('admin_password', input);
-            CURRENT_PASSWORD = input;
-            document.getElementById('login-modal').classList.add('hidden');
-            showDashboard();
-            loadNote();
-        } else {
-            throw new Error(result.message || 'รหัสผ่านไม่ถูกต้อง');
-        }
-    } catch (error) {
-        errorMsg.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-1"></i> ${error.message}`;
-        errorMsg.classList.remove('hidden');
-        loginBtn.innerHTML = originalText;
-        loginBtn.disabled = false;
     }
 }
 
@@ -82,274 +97,356 @@ function logout() {
     window.location.reload();
 }
 
-async function showDashboard() {
-    try {
-        const res = await fetch(API_URL + "?action=getAllProjects");
-        const projects = await res.json();
-        const totalProjects = projects.length;
-        const totalViews = projects.reduce((sum, p) => sum + (p.views || 0), 0);
-        const totalDownloads = projects.reduce((sum, p) => sum + (p.downloads || 0), 0);
+function showDashboard() {
+    onSnapshot(collection(db, "projects"), (snap) => {
+        document.getElementById('stat-projects').innerText = snap.size.toLocaleString();
+        let downloads = 0, views = 0;
+        snap.forEach(d => {
+            downloads += (d.data().downloads || 0);
+            views += (d.data().views || 0);
+        });
+        document.getElementById('stat-downloads').innerText = downloads.toLocaleString();
+        document.getElementById('stat-views').innerText = views.toLocaleString();
+    });
 
-        updateText('stat-projects', totalProjects.toLocaleString());
-        updateText('stat-views', totalViews.toLocaleString());
-        updateText('stat-downloads', totalDownloads.toLocaleString());
-    } catch (e) {
-        console.error("Load Dashboard Error:", e);
-    }
-
-    try {
-        const resNews = await fetch(API_URL + "?action=getNews");
-        const news = await resNews.json();
-        if(Array.isArray(news)) updateText('stat-news', news.length.toLocaleString());
-    } catch (e) {
-        console.log("News API might not be ready yet");
-    }
+    onSnapshot(collection(db, "news"), (snap) => {
+        document.getElementById('stat-news').innerText = snap.size.toLocaleString();
+    });
 }
 
-function updateText(id, text) {
-    const el = document.getElementById(id);
-    if(el) el.innerText = text;
-}
-
-// --- Project Management Functions ---
-function openAddProjectModal() { document.getElementById('project-modal').classList.remove('hidden'); }
-function closeAddProjectModal() { document.getElementById('project-modal').classList.add('hidden'); }
+// --- Project Management ---
 
 async function saveProject() {
+    const id = document.getElementById('p-id').value; // Check if ID exists (Edit mode)
     const title = document.getElementById('p-title').value;
     const category = document.getElementById('p-category').value;
     const tags = document.getElementById('p-tags').value;
-    const image = document.getElementById('p-image').value;
     const desc = document.getElementById('p-desc').value;
     const detail = document.getElementById('p-detail').value;
     const linkPreview = document.getElementById('p-link-preview').value;
     const linkCode = document.getElementById('p-link-code').value;
+    
+    const images = [];
+    for(let i=1; i<=5; i++) {
+        const val = document.getElementById('p-image-'+i).value.trim();
+        if(val) images.push(convertDriveImage(val));
+    }
 
-    if(!title || !tags || !image || !desc) { alert("กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบถ้วน"); return; }
+    if(!title || !tags || images.length === 0 || !desc) {
+        alert("กรุณากรอกข้อมูลให้ครบ");
+        return;
+    }
 
     const btn = document.getElementById('save-project-btn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
+    const originalText = btn.innerText;
+    btn.innerText = "กำลังบันทึก...";
     btn.disabled = true;
 
-    const newId = 'P' + Date.now();
     const payload = {
-        id: newId, title: title, category: category, tags: tags, image: image, description: desc,
-        detail: detail || desc, link_preview: linkPreview, link_code: linkCode,
-        author: 'KruBoat', views: 0, downloads: 0, date: new Date().toISOString()
+        title, category, tags, images, description: desc, detail: detail || desc,
+        link_preview: linkPreview, link_code: linkCode,
+        author: "KruBoat"
     };
 
     try {
-        const response = await fetch(API_URL, {
-            method: 'POST', body: JSON.stringify({ action: 'addProject', password: CURRENT_PASSWORD, payload: payload })
-        });
-        const result = await response.json();
-        if(result.status === 'success') { alert("บันทึกข้อมูลเรียบร้อยแล้ว!"); closeAddProjectModal(); showDashboard(); if(!document.getElementById('manage-modal').classList.contains('hidden')) openManageModal(); } 
-        else { throw new Error(result.message); }
-    } catch (error) { alert("เกิดข้อผิดพลาด: " + error.message); } finally { btn.innerHTML = originalText; btn.disabled = false; }
+        if (id) {
+            // Update existing
+            await updateDoc(doc(db, "projects", id), payload);
+            alert("แก้ไขโปรเจกต์สำเร็จ!");
+        } else {
+            // Add new
+            payload.views = 0;
+            payload.downloads = 0;
+            payload.createdAt = serverTimestamp();
+            await addDoc(collection(db, "projects"), payload);
+            alert("เพิ่มโปรเจกต์สำเร็จ!");
+        }
+        
+        closeAddProjectModal();
+        if(!document.getElementById('manage-modal').classList.contains('hidden')) openManageModal();
+    } catch(e) {
+        alert("Error: " + e.message);
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
 }
 
 async function openManageModal() {
     document.getElementById('manage-modal').classList.remove('hidden');
     const tbody = document.getElementById('manage-list-body');
-    tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดข้อมูล...</td></tr>`;
-    try {
-        const res = await fetch(API_URL + "?action=getAllProjects");
-        const projects = await res.json();
-        projects.reverse();
-        if (projects.length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-gray-400">ยังไม่มีข้อมูล</td></tr>`; return; }
-        tbody.innerHTML = projects.map(p => `
-            <tr class="bg-white border-b hover:bg-gray-50 transition">
-                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap flex items-center gap-3"><img src="${convertDriveImage(p.image)}" class="w-10 h-10 rounded object-cover border"><div class="truncate max-w-xs" title="${p.title}">${p.title}</div></td>
-                <td class="px-6 py-4"><span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded border border-gray-500">${p.category}</span></td>
-                <td class="px-6 py-4 text-center text-xs text-gray-500"><div><i class="fa-solid fa-eye mr-1"></i> ${p.views || 0}</div><div><i class="fa-solid fa-download mr-1"></i> ${p.downloads || 0}</div></td>
-                <td class="px-6 py-4 text-right"><button onclick="deleteProject('${p.id}', '${p.title}')" class="text-white bg-red-500 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-xs px-3 py-2 text-center inline-flex items-center"><i class="fa-solid fa-trash-can mr-1"></i> ลบ</button></td>
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading...</td></tr>';
+    
+    const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+    
+    if(snap.empty) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">ไม่มีข้อมูล</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = "";
+    snap.forEach(docSnap => {
+        const p = docSnap.data();
+        // Encode data for edit function to avoid quote issues
+        const safeId = docSnap.id;
+        
+        tbody.innerHTML += `
+            <tr class="bg-white border-b hover:bg-gray-50">
+                <td class="px-6 py-4 flex items-center gap-3">
+                    <img src="${p.images ? p.images[0] : ''}" class="w-10 h-10 rounded object-cover">
+                    <span class="truncate max-w-xs">${p.title}</span>
+                </td>
+                <td class="px-6 py-4">${p.category}</td>
+                <td class="px-6 py-4 text-center">${p.views || 0} / ${p.downloads || 0}</td>
+                <td class="px-6 py-4 text-right flex justify-end gap-2">
+                    <button onclick="editProject('${safeId}')" class="text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded"><i class="fa-solid fa-pen"></i> แก้ไข</button>
+                    <button onclick="deleteProject('${safeId}', '${p.title}')" class="text-red-600 hover:text-red-800 bg-red-50 px-2 py-1 rounded"><i class="fa-solid fa-trash"></i> ลบ</button>
+                </td>
             </tr>
-        `).join('');
-    } catch (error) { tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-red-500">โหลดข้อมูลไม่สำเร็จ</td></tr>`; }
+        `;
+    });
+}
+
+async function editProject(id) {
+    // Close manage modal first? Optional. Let's keep it open behind or close it.
+    // Better to close it to avoid z-index issues or stacking.
+    closeManageModal();
+    
+    const docSnap = await getDoc(doc(db, "projects", id));
+    if (!docSnap.exists()) return alert("ไม่พบข้อมูล");
+    
+    const p = docSnap.data();
+    
+    // Fill form
+    document.getElementById('p-id').value = id;
+    document.getElementById('p-title').value = p.title;
+    document.getElementById('p-category').value = p.category;
+    document.getElementById('p-tags').value = p.tags;
+    document.getElementById('p-desc').value = p.description;
+    document.getElementById('p-detail').value = p.detail || "";
+    document.getElementById('p-link-preview').value = p.link_preview || "";
+    document.getElementById('p-link-code').value = p.link_code || "";
+    
+    // Fill images
+    const images = p.images || [];
+    for(let i=1; i<=5; i++) {
+        document.getElementById('p-image-'+i).value = images[i-1] || "";
+    }
+    
+    // Change modal title and button text
+    document.getElementById('p-modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2"></i>แก้ไขโปรเจกต์';
+    document.getElementById('save-project-btn').innerText = "อัปเดตข้อมูล";
+    
+    openAddProjectModal();
+}
+
+async function deleteProject(id, title) {
+    if(confirm(`ลบโปรเจกต์ "${title}"?`)) {
+        await deleteDoc(doc(db, "projects", id));
+        openManageModal(); // Refresh
+    }
+}
+
+function openAddProjectModal() { 
+    document.getElementById('project-modal').classList.remove('hidden'); 
+}
+
+function closeAddProjectModal() { 
+    document.getElementById('project-modal').classList.add('hidden');
+    // Reset Form
+    document.getElementById('p-id').value = "";
+    const inputs = document.querySelectorAll('#project-modal input, #project-modal textarea');
+    inputs.forEach(input => input.value = '');
+    
+    // Reset Text
+    document.getElementById('p-modal-title').innerHTML = '<i class="fa-solid fa-plus-circle mr-2"></i>เพิ่มโปรเจกต์ใหม่';
+    document.getElementById('save-project-btn').innerText = "บันทึกข้อมูล";
 }
 
 function closeManageModal() { document.getElementById('manage-modal').classList.add('hidden'); }
 
-async function deleteProject(id, title) {
-    if (!confirm(`คุณต้องการลบโปรเจกต์ "${title}" ใช่หรือไม่?`)) return;
-    try {
-        const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteProject', password: CURRENT_PASSWORD, id: id }) });
-        const result = await response.json();
-        if (result.status === 'success') { alert("ลบข้อมูลสำเร็จ!"); openManageModal(); showDashboard(); } 
-        else { throw new Error(result.message); }
-    } catch (error) { alert("เกิดข้อผิดพลาด: " + error.message); }
-}
 
-// --- News Management Functions ---
-function openAddNewsModal() { document.getElementById('add-news-modal').classList.remove('hidden'); }
-function closeAddNewsModal() { document.getElementById('add-news-modal').classList.add('hidden'); }
+// --- 3. News Management ---
 
 async function saveNews() {
+    const id = document.getElementById('n-id').value;
     const title = document.getElementById('n-title').value;
     const tag = document.getElementById('n-tag').value;
     const content = document.getElementById('n-content').value;
 
-    if(!title || !content) { alert("กรุณากรอกข้อมูลให้ครบถ้วน"); return; }
-
+    if(!title || !content) return alert("กรอกข้อมูลให้ครบ");
+    
     const btn = document.getElementById('save-news-btn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
+    btn.innerText = "กำลังบันทึก...";
     btn.disabled = true;
 
-    const newId = 'N' + Date.now();
     const payload = {
-        id: newId, title: title, tag: tag, content: content,
-        date: new Date().toISOString()
+        title, tag, content
     };
 
     try {
-        const response = await fetch(API_URL, {
-            method: 'POST', body: JSON.stringify({ action: 'addNews', password: CURRENT_PASSWORD, payload: payload })
-        });
-        const result = await response.json();
-        if(result.status === 'success') { 
-            alert("ประกาศข่าวสำเร็จ!"); 
-            closeAddNewsModal(); 
-            showDashboard(); 
-            if(!document.getElementById('manage-news-modal').classList.contains('hidden')) openManageNewsModal();
-        } else { throw new Error(result.message); }
-    } catch (error) { alert("เกิดข้อผิดพลาด: " + error.message); } finally { btn.innerHTML = originalText; btn.disabled = false; }
+        if (id) {
+            // Update
+            await updateDoc(doc(db, "news", id), payload);
+            alert("แก้ไขข่าวสำเร็จ!");
+        } else {
+            // Add
+            payload.createdAt = serverTimestamp();
+            await addDoc(collection(db, "news"), payload);
+            alert("ประกาศข่าวสำเร็จ!");
+        }
+        closeAddNewsModal();
+        if(!document.getElementById('manage-news-modal').classList.contains('hidden')) openManageNewsModal();
+    } catch(e) {
+        alert("Error: " + e.message);
+    } finally {
+        btn.innerText = "บันทึก";
+        btn.disabled = false;
+    }
 }
 
 async function openManageNewsModal() {
     document.getElementById('manage-news-modal').classList.remove('hidden');
     const tbody = document.getElementById('manage-news-body');
-    tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดข้อมูล...</td></tr>`;
+    const q = query(collection(db, "news"), orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+    
+    tbody.innerHTML = "";
+    snap.forEach(docSnap => {
+        const n = docSnap.data();
+        let dateStr = "-";
+        if(n.createdAt) dateStr = new Date(n.createdAt.toDate()).toLocaleDateString('th-TH');
 
-    try {
-        const res = await fetch(API_URL + "?action=getNews");
-        const news = await res.json();
-        news.reverse();
-
-        if (news.length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-gray-400">ยังไม่มีข่าว</td></tr>`; return; }
-
-        tbody.innerHTML = news.map(n => `
-            <tr class="bg-white border-b hover:bg-gray-50 transition">
-                <td class="px-6 py-4 font-medium text-gray-500">${formatDate(n.date)}</td>
-                <td class="px-6 py-4 font-medium text-gray-900">${n.title}</td>
-                <td class="px-6 py-4"><span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded border border-gray-500">${n.tag}</span></td>
-                <td class="px-6 py-4 text-right">
-                    <button onclick="deleteNews('${n.id}', '${n.title}')" class="text-white bg-red-500 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-xs px-3 py-2 text-center inline-flex items-center">
-                        <i class="fa-solid fa-trash-can mr-1"></i> ลบ
-                    </button>
+        tbody.innerHTML += `
+            <tr class="bg-white border-b">
+                <td class="px-6 py-4">${dateStr}</td>
+                <td class="px-6 py-4">${n.title}</td>
+                <td class="px-6 py-4"><span class="px-2 py-1 rounded bg-gray-100 text-xs">${n.tag}</span></td>
+                <td class="px-6 py-4 text-right flex justify-end gap-2">
+                    <button onclick="editNews('${docSnap.id}')" class="text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded"><i class="fa-solid fa-pen"></i> แก้ไข</button>
+                    <button onclick="deleteNews('${docSnap.id}')" class="text-red-600"><i class="fa-solid fa-trash"></i> ลบ</button>
                 </td>
             </tr>
-        `).join('');
-    } catch (error) { tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-red-500">โหลดข้อมูลไม่สำเร็จ</td></tr>`; }
+        `;
+    });
 }
 
-function closeManageNewsModal() { document.getElementById('manage-news-modal').classList.add('hidden'); }
-
-async function deleteNews(id, title) {
-    if (!confirm(`คุณต้องการลบข่าว "${title}" ใช่หรือไม่?`)) return;
-    try {
-        const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteNews', password: CURRENT_PASSWORD, id: id }) });
-        const result = await response.json();
-        if (result.status === 'success') { alert("ลบข่าวสำเร็จ!"); openManageNewsModal(); showDashboard(); } 
-        else { throw new Error(result.message); }
-    } catch (error) { alert("เกิดข้อผิดพลาด: " + error.message); }
+async function editNews(id) {
+    closeManageNewsModal();
+    const docSnap = await getDoc(doc(db, "news", id));
+    if (!docSnap.exists()) return;
+    
+    const n = docSnap.data();
+    
+    document.getElementById('n-id').value = id;
+    document.getElementById('n-title').value = n.title;
+    document.getElementById('n-tag').value = n.tag;
+    document.getElementById('n-content').value = n.content;
+    
+    document.getElementById('n-modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2"></i>แก้ไขข่าว';
+    document.getElementById('save-news-btn').innerText = "อัปเดตข่าว";
+    
+    openAddNewsModal();
 }
 
-async function checkSystemStatus() {
-    alert("กำลังตรวจสอบสถานะระบบ... กรุณารอสักครู่");
-    const startTime = Date.now();
-    try {
-        const response = await fetch(API_URL + "?action=getAllProjects");
-        if (!response.ok) throw new Error("Network response was not ok");
-        const data = await response.json();
-        const endTime = Date.now();
-        const latency = endTime - startTime;
-        if (Array.isArray(data)) {
-            alert(`✅ ระบบทำงานปกติ\n\n- API Status: Online\n- Database: Connected\n- Latency: ${latency} ms\n- Total Projects: ${data.length}`);
-        } else {
-            throw new Error("Invalid Data Format");
-        }
-    } catch (error) {
-        alert(`❌ พบปัญหาการเชื่อมต่อ\n\nError: ${error.message}\nกรุณาตรวจสอบ Google Apps Script หรือการเชื่อมต่อเน็ต`);
+async function deleteNews(id) {
+    if(confirm("ลบข่าวนี้?")) {
+        await deleteDoc(doc(db, "news", id));
+        openManageNewsModal();
     }
 }
 
-// --- Note System Functions ---
-async function loadNote() {
-    const noteInput = document.getElementById('admin-note-input');
-    noteInput.value = "กำลังโหลด...";
-    noteInput.disabled = true;
+function openAddNewsModal() { document.getElementById('add-news-modal').classList.remove('hidden'); }
+function closeAddNewsModal() { 
+    document.getElementById('add-news-modal').classList.add('hidden'); 
+    // Reset
+    document.getElementById('n-id').value = "";
+    document.getElementById('n-title').value = "";
+    document.getElementById('n-content').value = "";
+    document.getElementById('n-modal-title').innerHTML = '<i class="fa-solid fa-bullhorn mr-2"></i>ประกาศข่าวใหม่';
+    document.getElementById('save-news-btn').innerText = "ประกาศข่าว";
+}
+function closeManageNewsModal() { document.getElementById('manage-news-modal').classList.add('hidden'); }
 
-    try {
-        const response = await fetch(API_URL + "?action=getConfig");
-        const config = await response.json();
-        noteInput.value = config.admin_note || ""; 
-    } catch (error) {
-        console.error("Load Note Error:", error);
-        noteInput.value = "โหลดบันทึกไม่สำเร็จ";
-    } finally {
-        noteInput.disabled = false;
+// --- 4. Note & Config, Inbox, System ---
+// (ส่วนนี้เหมือนเดิม ไม่ต้องแก้)
+
+async function loadNote() {
+    const el = document.getElementById('admin-note-input');
+    const docRef = doc(db, "config", "admin_note");
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+        el.value = snap.data().text || "";
     }
 }
 
 async function saveNote() {
-    const noteInput = document.getElementById('admin-note-input');
+    const val = document.getElementById('admin-note-input').value;
     const btn = document.getElementById('save-note-btn');
-    const content = noteInput.value;
+    btn.innerText = "...";
+    await setDoc(doc(db, "config", "admin_note"), { text: val });
+    btn.innerText = "บันทึก";
+    setTimeout(() => btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> บันทึก', 1000);
+}
 
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-    btn.disabled = true;
-    noteInput.disabled = true;
-
-    try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'saveConfig',
-                password: CURRENT_PASSWORD,
-                key: 'admin_note',
-                value: content
-            })
+function listenToMessages() {
+    const q = query(collection(db, "messages"), orderBy("timestamp", "desc"));
+    onSnapshot(q, (snapshot) => {
+        let unread = 0;
+        snapshot.forEach(d => { if(!d.data().read) unread++; });
+        const badges = [document.getElementById('sidebar-inbox-badge'), document.getElementById('quick-inbox-badge')];
+        badges.forEach(b => {
+            if(b) {
+                b.classList.toggle('hidden', unread === 0);
+                b.innerText = unread > 9 ? '9+' : unread;
+            }
         });
+    });
+}
 
-        const result = await response.json();
+function openInboxModal() {
+    document.getElementById('inbox-modal').classList.remove('hidden');
+    loadMessages();
+}
+function closeInboxModal() { document.getElementById('inbox-modal').classList.add('hidden'); }
 
-        if (result.status === 'success') {
-            btn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
-            btn.classList.add('bg-green-500', 'hover:bg-green-600');
-            btn.innerHTML = '<i class="fa-solid fa-check"></i>';
-            setTimeout(() => {
-                btn.classList.remove('bg-green-500', 'hover:bg-green-600');
-                btn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
-                btn.innerHTML = originalText;
-            }, 2000);
-        } else {
-            throw new Error(result.message);
-        }
-    } catch (error) {
-        alert("บันทึกไม่สำเร็จ: " + error.message);
-        btn.innerHTML = originalText;
-    } finally {
-        btn.disabled = false;
-        noteInput.disabled = false;
-    }
+function loadMessages() {
+    const list = document.getElementById('inbox-list');
+    const q = query(collection(db, "messages"), orderBy("timestamp", "desc"));
+    onSnapshot(q, (snap) => {
+        list.innerHTML = "";
+        snap.forEach(d => {
+            const m = d.data();
+            const date = m.timestamp ? new Date(m.timestamp.toDate()).toLocaleString('th-TH') : "-";
+            const bg = m.read ? "bg-white opacity-60" : "bg-blue-50 border-l-4 border-blue-500";
+            if(!m.read) updateDoc(doc(db, "messages", d.id), { read: true }); 
+            
+            list.innerHTML += `
+                <div class="p-4 ${bg} hover:bg-gray-50 border-b flex justify-between items-start">
+                    <div>
+                        <div class="font-bold text-sm">${m.name} <span class="text-xs font-normal text-gray-400 ml-2">${date}</span></div>
+                        <div class="text-sm text-gray-600 mt-1">${m.message}</div>
+                    </div>
+                    <button onclick="deleteMessage('${d.id}')" class="text-gray-300 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `;
+        });
+    });
+}
+
+async function deleteMessage(id) {
+    if(confirm("ลบข้อความ?")) await deleteDoc(doc(db, "messages", id));
+}
+
+function checkSystemStatus() {
+    const start = Date.now();
+    getDoc(doc(db, "config", "admin_note")).then(() => {
+        const ping = Date.now() - start;
+        alert(`✅ System Online\nLatency: ${ping}ms\nDatabase: Connected`);
+    }).catch(e => alert("❌ Error: " + e.message));
 }
 
 document.getElementById('password-input')?.addEventListener('keypress', function (e) {
     if (e.key === 'Enter') performLogin();
 });
-
-// --- Mobile Sidebar Toggle (เพิ่มใหม่) ---
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('hidden');
-    
-    // ทำให้เป็น Absolute Overlay บนมือถือ
-    if (!sidebar.classList.contains('hidden')) {
-        sidebar.classList.add('absolute', 'inset-y-0', 'left-0', 'h-full');
-    } else {
-        sidebar.classList.remove('absolute', 'inset-y-0', 'left-0', 'h-full');
-    }
-}

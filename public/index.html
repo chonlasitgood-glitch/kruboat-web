@@ -3,8 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ครูโบ๊ทดอทคอม (KruBoat.com) - แพลตฟอร์มเพื่อการศึกษาและคลังโค้ด</title>
-    <meta name="description" content="เว็บไซต์ครูโบ๊ท (KruBoat.com) แหล่งรวมสื่อการเรียนรู้ ระบบเช็คเกรดออนไลน์ และคลังความรู้สำหรับนักพัฒนา">
+    <title>ครูโบ๊ท (KruBoat) - แพลตฟอร์มเพื่อการศึกษาและคลังโค้ด</title>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4MQ3GL6CTB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-4MQ3GL6CTB');
+    </script>
+
+    <meta name="description" content="เว็บไซต์ครูโบ๊ท (KruBoat.com) แหล่งรวมสื่อการเรียนรู้ ระบบเช็คเกรดออนไลน์ และคลังความรู้สำหรับนักพัฒนา แบ่งปันโปรแกรมและ Source Code ฟรีสำหรับครูและนักเรียน">
     <meta name="keywords" content="ครูโบ๊ท, เว็บครูโบ๊ท, kruboat, สื่อการสอน, คลังโค้ด, แจกโค้ดฟรี">
     <meta name="author" content="ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์">
     
@@ -32,13 +43,12 @@
 
     <nav class="bg-white shadow-md sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="/" class="text-xl font-bold text-blue-600"><i class="fa-solid fa-graduation-cap"></i> KruBoat</a>
+            <a href="index.html" class="text-xl font-bold text-blue-600"><i class="fa-solid fa-graduation-cap"></i> KruBoat</a>
             <div class="hidden md:flex space-x-6">
-                <a href="/" class="text-blue-600 font-semibold">หน้าแรก</a>
-                <!-- เพิ่มเมนูตรงนี้ -->
+                <a href="index.html" class="text-blue-600 font-semibold">หน้าแรก</a>
                 <a href="student/" class="hover:text-blue-600 transition">นักเรียน</a>
-                <a href="app/" class="hover:text-teal-600 transition font-medium"><i class="fa-solid fa-rocket mr-1 text-sm"></i>แอปครูโบ๊ท</a>
-                <a href="library/" class="hover:text-blue-600 transition">คลังโค้ด</a>
+                <a href="app/" class="hover:text-teal-600 transition font-medium"><i class="fa-solid fa-rocket mr-1 text-sm"></i>แอพครูโบ๊ท</a>
+                <a href="library.html" class="hover:text-blue-600 transition">คลังโค้ด</a>
             </div>
             <button id="mobile-menu-btn" class="md:hidden text-gray-600 focus:outline-none">
                 <i class="fa-solid fa-bars text-xl"></i>
@@ -46,11 +56,10 @@
         </div>
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 shadow-lg">
             <div class="flex flex-col px-4 py-2 space-y-2">
-                <a href="/" class="block py-2 text-blue-600 font-semibold rounded hover:bg-gray-50 px-2">หน้าแรก</a>
-                <!-- เพิ่มเมนูมือถือตรงนี้ -->
+                <a href="index.html" class="block py-2 text-blue-600 font-semibold rounded hover:bg-gray-50 px-2">หน้าแรก</a>
                 <a href="student/" class="block py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 px-2 transition">นักเรียน</a>
-                <a href="app/" class="block py-2 text-teal-600 font-semibold rounded hover:bg-teal-50 px-2">แอปครูโบ๊ท</a>
-                <a href="library/" class="block py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 px-2 transition">คลังโค้ด</a>
+                <a href="app/" class="block py-2 text-teal-600 font-semibold rounded hover:bg-teal-50 px-2">แอพครูโบ๊ท</a>
+                <a href="library.html" class="block py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 px-2 transition">คลังโค้ด</a>
             </div>
         </div>
     </nav>
@@ -64,9 +73,8 @@
                 <a href="student/" class="bg-white text-blue-600 px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition shadow-lg">
                     <i class="fa-solid fa-user-check mr-2"></i>นักเรียนคลิกที่นี่
                 </a>
-                <!-- เพิ่มปุ่มใน Hero Section -->
                 <a href="app/" class="bg-teal-500 text-white border-2 border-teal-500 px-6 py-3 rounded-full font-bold hover:bg-teal-600 transition shadow-lg">
-                    <i class="fa-solid fa-rocket mr-2"></i>แอปครูโบ๊ท
+                    <i class="fa-solid fa-rocket mr-2"></i>ดูแอพทั้งหมด
                 </a>
             </div>
         </div>
@@ -96,22 +104,23 @@
 
     <section class="bg-white py-12 border-t border-gray-100">
         <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 max-w-3xl mx-auto">
-                <div class="relative group flex-shrink-0">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full blur opacity-20 group-hover:opacity-80 transition duration-500"></div>
-                    <img src="https://lh3.googleusercontent.com/d/1VUZ7MASQaCBSjW1IdE4Ip4O81Jxzqyk6" class="relative w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-white shadow-md" alt="ครูโบ๊ท ชลสิทธิ์">
-                </div>
-                <div class="text-center md:text-left">
-                    <h2 class="text-2xl font-bold text-gray-800">ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์</h2>
-                    <p class="text-blue-600 font-medium text-sm mb-3">ครูผู้พัฒนาเว็บไซต์และแพลตฟอร์ม kruboat.com</p>
-                    <p class="text-gray-600 text-sm mb-4 leading-relaxed max-w-md">พื้นที่แบ่งปันสื่อและโปรแกรมที่จำเป็นสำหรับครู, นักพัฒนา และนักเรียนที่สนใจ ❤️</p>
-                    <div class="flex justify-center md:justify-start space-x-3">
-                        <a href="https://www.facebook.com/chonlasitgood" target="_blank" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition text-sm"><i class="fa-brands fa-facebook-f"></i></a>
-                        <a href="https://www.instagram.com/ruabai.photo" target="_blank" class="w-8 h-8 rounded-full bg-pink-50 text-pink-600 flex items-center justify-center hover:bg-pink-600 hover:text-white transition text-sm"><i class="fa-brands fa-instagram"></i></a>
-                        <a href="mailto:chonlasitgood@gmail.com" class="w-8 h-8 rounded-full bg-gray-50 text-gray-600 flex items-center justify-center hover:bg-gray-600 hover:text-white transition text-sm"><i class="fa-solid fa-envelope"></i></a>
+            <!-- เปลี่ยนจาก div เป็น a href="about.html" เพื่อให้คลิกได้ทั้งการ์ด -->
+            <a href="about.html" class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 max-w-3xl mx-auto text-center group cursor-pointer transition duration-500 hover:scale-105 hover:shadow-2xl rounded-2xl p-6 block">
+                <div class="relative flex-shrink-0">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full blur opacity-20 group-hover:opacity-50 transition duration-500"></div>
+                    <img src="https://lh3.googleusercontent.com/d/1VUZ7MASQaCBSjW1IdE4Ip4O81Jxzqyk6" class="relative w-40 h-40 md:w-48 md:h-48 rounded-full object-cover border-4 border-white shadow-md transition duration-300" alt="ครูโบ๊ท ชลสิทธิ์" title="คลิกเพื่อดูประวัติ">
+                    <div class="absolute bottom-0 right-2 bg-white text-blue-600 rounded-full w-8 h-8 flex items-center justify-center shadow-md border border-gray-100 group-hover:bg-blue-600 group-hover:text-white transition">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
                     </div>
                 </div>
-            </div>
+                <div class="text-center md:text-left">
+                    <h2 class="text-2xl font-bold text-gray-800 group-hover:text-blue-600 transition">ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์</h2>
+                    <p class="text-blue-600 font-medium text-sm mb-3">ครูผู้พัฒนาเว็บไซต์และแพลตฟอร์ม kruboat.com</p>
+                    <p class="text-gray-600 text-sm mb-4 leading-relaxed max-w-md mx-auto">ยินดีต้อนรับสู่พื้นที่แห่งการแบ่งปัน! ที่นี่รวบรวม Web App สื่อการสอน และ Source Code ที่ผมพัฒนาขึ้นเพื่ออำนวยความสะดวกในการจัดการเรียนรู้และการทำงาน หวังว่าจะเป็นประโยชน์ต่อครูและนักเรียนทุกคนครับ ❤️</p>
+                    
+                    <!-- ลบปุ่มด้านล่างออกแล้ว เพราะคลิกที่การ์ดได้เลย -->
+                </div>
+            </a>
         </div>
     </section>
 
@@ -136,7 +145,9 @@
         </div>
     </div>
 
-    <script src="js/script.js"></script>
-    <script> document.addEventListener('DOMContentLoaded', loadHomePortfolio); </script>
+    <!-- ลบ Profile Modal ออกแล้วตามที่เคยคุยกัน -->
+
+    <!-- 🔴 แก้ไข: ใส่ type="module" เพื่อให้ script.js ทำงานได้ -->
+    <script type="module" src="js/script.js"></script>
 </body>
 </html>
