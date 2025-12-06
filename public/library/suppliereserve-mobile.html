@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบยืม-คืนอุปกรณ์โรงเรียน (Mobile Version)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome & Google Fonts -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #f3f4f6; }
+        
+        /* Mobile App Container Style */
+        .app-container {
+            max-width: 480px; /* Limit width like a mobile app */
+            margin: 0 auto;
+            background-color: #ffffff;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding-bottom: 80px; /* Space for bottom nav */
+        }
+
+        /* Hide Scrollbar but keep functionality */
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="app">
+        <!-- Header will be injected here -->
+        <div id="header-container"></div>
+
+        <!-- Main Content Area -->
+        <main id="main-content" class="p-4 fade-in">
+            <!-- Dynamic Content -->
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 w-full max-w-[480px] bg-white border-t border-gray-200 flex justify-around py-3 text-xs text-gray-500 z-50">
+            <button onclick="router('home')" class="nav-btn flex flex-col items-center w-full text-blue-600" id="nav-home">
+                <i class="fas fa-home text-xl mb-1"></i>
+                <span>หน้าหลัก</span>
+            </button>
+            <button onclick="router('catalog')" class="nav-btn flex flex-col items-center w-full hover:text-blue-600" id="nav-catalog">
+                <i class="fas fa-search text-xl mb-1"></i>
+                <span>ค้นหา</span>
+            </button>
+            <button onclick="router('cart')" class="nav-btn flex flex-col items-center w-full hover:text-blue-600 relative" id="nav-cart">
+                <i class="fas fa-shopping-basket text-xl mb-1"></i>
+                <span id="cart-badge" class="absolute top-0 right-8 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+                <span>ตะกร้า</span>
+            </button>
+            <button onclick="router('profile')" class="nav-btn flex flex-col items-center w-full hover:text-blue-600" id="nav-profile">
+                <i class="fas fa-user-circle text-xl mb-1"></i>
+                <span>ของฉัน</span>
+            </button>
+        </nav>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm transition-opacity duration-300 opacity-0 pointer-events-none z-50">
+            แจ้งเตือน
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- 1. MOCK DATA (15 รายการ) ---
+        const initialData = [
+            { id: 1, name: "Epson Projector X05", category: "IT", status: "available", img: "https://placehold.co/150x150/2563eb/white?text=Projector", location: "ห้องโสตฯ", desc: "ความสว่าง 3300 lumens เหมาะกับห้องประชุม" },
+            { id: 2, name: "ไมโครโฟนไร้สาย Shure", category: "IT", status: "available", img: "https://placehold.co/150x150/2563eb/white?text=Mic", location: "ห้องโสตฯ", desc: "ไมค์ลอยคู่ พร้อมตัวรับสัญญาณ" },
+            { id: 3, name: "ลำโพง JBL PartyBox", category: "IT", status: "borrowed", img: "https://placehold.co/150x150/2563eb/white?text=Speaker", location: "ห้องดนตรี", desc: "ลำโพงบลูทูธเสียงดัง แบตในตัว" },
+            { id: 4, name: "สาย HDMI 10 เมตร", category: "IT", status: "available", img: "https://placehold.co/150x150/2563eb/white?text=HDMI", location: "ห้องพักครู", desc: "สายถัก หัวทองเหลือง" },
+            { id: 5, name: "ปลั๊กพ่วง 20 เมตร", category: "IT", status: "available", img: "https://placehold.co/150x150/2563eb/white?text=Plug", location: "ห้องช่าง", desc: "แบบม้วน เก็บสายง่าย" },
+            { id: 6, name: "กล้อง Canon EOS 800D", category: "IT", status: "available", img: "https://placehold.co/150x150/2563eb/white?text=Camera", location: "ชมรมถ่ายภาพ", desc: "พร้อมเลนส์ Kit 18-55mm" },
+            { id: 7, name: "ลูกบาสเก็ตบอล (หนัง)", category: "Sport", status: "available", img: "https://placehold.co/150x150/ea580c/white?text=Basketball", location: "โรงยิม", desc: "Molten เบอร์ 7 มาตรฐานแข่ง" },
+            { id: 8, name: "ลูกวอลเลย์บอล", category: "Sport", status: "borrowed", img: "https://placehold.co/150x150/ea580c/white?text=Volleyball", location: "โรงยิม", desc: "Mikasa รุ่น MVA300" },
+            { id: 9, name: "ไม้แบดมินตัน (คู่)", category: "Sport", status: "available", img: "https://placehold.co/150x150/ea580c/white?text=Badminton", location: "โรงยิม", desc: "Yonex พร้อมลูกขนไก่ 2 ลูก" },
+            { id: 10, name: "นาฬิกาจับเวลา", category: "Sport", status: "available", img: "https://placehold.co/150x150/ea580c/white?text=Stopwatch", location: "ห้องพักครูพละ", desc: "ดิจิตอล กันน้ำ" },
+            { id: 11, name: "กล้องจุลทรรศน์", category: "Science", status: "available", img: "https://placehold.co/150x150/16a34a/white?text=Microscope", location: "ห้องวิทย์ 1", desc: "กำลังขยาย 1000x" },
+            { id: 12, name: "บีกเกอร์ 500ml (Set)", category: "Science", status: "available", img: "https://placehold.co/150x150/16a34a/white?text=Beaker", location: "ห้องวิทย์ 2", desc: "แก้วทนความร้อน 1 ชุดมี 3 ใบ" },
+            { id: 13, name: "ขาตั้งวาดรูป (Easel)", category: "Art", status: "available", img: "https://placehold.co/150x150/d946ef/white?text=Easel", location: "ห้องศิลปะ", desc: "ไม้สน ปรับระดับได้" },
+            { id: 14, name: "ชุดสีน้ำมัน (ส่วนกลาง)", category: "Art", status: "borrowed", img: "https://placehold.co/150x150/d946ef/white?text=OilPaint", location: "ห้องศิลปะ", desc: "Winsor & Newton 12 สี" },
+            { id: 15, name: "แท็บเล็ต iPad Gen 9", category: "IT", status: "available", img: "https://placehold.co/150x150/2563eb/white?text=iPad", location: "ห้องสมุด", desc: "สำหรับยืมเรียนในคาบ" }
+        ];
+
+        // --- 2. STATE MANAGEMENT ---
+        let items = JSON.parse(localStorage.getItem('items')) || initialData;
+        let cart = []; // รายการในตะกร้า
+        let myBookings = JSON.parse(localStorage.getItem('myBookings')) || []; // ประวัติการยืม
+        let currentUser = "ครูโบ๊ทดอทคอม (ครู)";
+
+        // --- 3. CORE FUNCTIONS ---
+
+        function saveData() {
+            localStorage.setItem('items', JSON.stringify(items));
+            localStorage.setItem('myBookings', JSON.stringify(myBookings));
+            renderCartBadge();
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => toast.classList.add('opacity-0'), 3000);
+        }
+
+        function renderCartBadge() {
+            const badge = document.getElementById('cart-badge');
+            if (cart.length > 0) {
+                badge.innerText = cart.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function addToCart(id) {
+            const item = items.find(i => i.id === id);
+            if (item.status !== 'available') {
+                showToast('อุปกรณ์นี้ไม่ว่าง');
+                return;
+            }
+            if (cart.some(i => i.id === id)) {
+                showToast('มีในตะกร้าแล้ว');
+                return;
+            }
+            cart.push(item);
+            renderCartBadge();
+            showToast('เพิ่มลงตะกร้าแล้ว');
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            renderCartBadge();
+            renderCart(); // Re-render cart page
+        }
+
+        function submitBooking() {
+            if (cart.length === 0) return;
+
+            const pickupDate = document.getElementById('pickupDate').value;
+            if (!pickupDate) {
+                alert('กรุณาเลือกวันที่ต้องการใช้');
+                return;
+            }
+
+            // Process Booking
+            const bookingId = 'BK-' + Math.floor(Math.random() * 10000);
+            const newBooking = {
+                bookingId: bookingId,
+                items: [...cart],
+                date: pickupDate,
+                status: 'pending_pickup', // pending_pickup, active, returned
+                timestamp: new Date().toISOString()
+            };
+
+            // Update Item Status in Global Inventory
+            cart.forEach(cartItem => {
+                const itemIndex = items.findIndex(i => i.id === cartItem.id);
+                if (itemIndex > -1) items[itemIndex].status = 'borrowed';
+            });
+
+            myBookings.unshift(newBooking); // Add to history
+            cart = []; // Clear cart
+            
+            saveData();
+            showToast('ส่งคำขอจองสำเร็จ!');
+            router('profile'); // Go to profile to see ticket
+        }
+
+        function returnItems(bookingIndex) {
+            if(!confirm('ยืนยันการคืนอุปกรณ์ทั้งหมดในรายการนี้?')) return;
+
+            const booking = myBookings[bookingIndex];
+            
+            // Restore Items Status
+            booking.items.forEach(bItem => {
+                const itemIndex = items.findIndex(i => i.id === bItem.id);
+                if (itemIndex > -1) items[itemIndex].status = 'available';
+            });
+
+            // Update Booking Status
+            booking.status = 'returned';
+            booking.returnDate = new Date().toISOString();
+            
+            saveData();
+            showToast('คืนอุปกรณ์เรียบร้อยแล้ว');
+            renderProfile(); // Refresh list
+        }
+
+        // --- 4. RENDER PAGES ---
+
+        function getHeaderHTML(title, isHome = false) {
+            if(isHome) {
+                return `
+                <div class="bg-blue-600 p-4 text-white rounded-b-3xl shadow-md">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs opacity-80">สวัสดีตอนบ่าย</p>
+                                <h1 class="font-bold text-lg">${currentUser}</h1>
+                            </div>
+                        </div>
+                        <i class="fas fa-bell text-xl"></i>
+                    </div>
+                    <!-- Quick Stats -->
+                    <div class="flex gap-2 mt-2">
+                        <div class="flex-1 bg-white/10 p-2 rounded-lg text-center backdrop-blur-sm">
+                            <span class="block text-2xl font-bold">${myBookings.filter(b => b.status === 'active' || b.status === 'pending_pickup').length}</span>
+                            <span class="text-xs opacity-80">กำลังยืม</span>
+                        </div>
+                        <div class="flex-1 bg-white/10 p-2 rounded-lg text-center backdrop-blur-sm">
+                            <span class="block text-2xl font-bold text-green-300">${items.filter(i => i.status === 'available').length}</span>
+                            <span class="text-xs opacity-80">ของว่าง</span>
+                        </div>
+                    </div>
+                </div>`;
+            } else {
+                return `
+                <div class="bg-white p-4 shadow-sm flex items-center justify-between sticky top-0 z-40">
+                    <h1 class="text-xl font-bold text-gray-800">${title}</h1>
+                    <div class="w-8"></div> <!-- Spacer -->
+                </div>`;
+            }
+        }
+
+        function renderHome() {
+            document.getElementById('header-container').innerHTML = getHeaderHTML('', true);
+            const content = document.getElementById('main-content');
+            
+            // Generate Featured Items (Available items)
+            const featuredItems = items.filter(i => i.status === 'available').slice(0, 5).map(item => `
+                <div class="min-w-[140px] bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-2">
+                    <div class="relative">
+                        <img src="${item.img}" class="w-full h-24 object-cover rounded-lg bg-gray-200">
+                        <span class="absolute top-1 right-1 bg-green-500 text-white text-[10px] px-1.5 rounded">ว่าง</span>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold truncate">${item.name}</h3>
+                        <p class="text-[10px] text-gray-500 truncate">${item.location}</p>
+                    </div>
+                    <button onclick="addToCart(${item.id})" class="mt-auto w-full bg-blue-50 text-blue-600 text-xs py-1.5 rounded-lg font-medium hover:bg-blue-100">
+                        + จอง
+                    </button>
+                </div>
+            `).join('');
+
+            content.innerHTML = `
+                <!-- Categories -->
+                <h2 class="font-bold text-gray-700 mb-3">หมวดหมู่</h2>
+                <div class="grid grid-cols-4 gap-3 mb-6">
+                    ${['IT', 'Sport', 'Science', 'Art'].map(cat => `
+                        <button onclick="router('catalog', '${cat}')" class="flex flex-col items-center gap-2">
+                            <div class="w-14 h-14 ${cat === 'IT' ? 'bg-blue-100 text-blue-600' : cat === 'Sport' ? 'bg-orange-100 text-orange-600' : cat === 'Science' ? 'bg-green-100 text-green-600' : 'bg-pink-100 text-pink-600'} rounded-2xl flex items-center justify-center text-xl shadow-sm">
+                                <i class="fas ${cat === 'IT' ? 'fa-laptop' : cat === 'Sport' ? 'fa-basketball-ball' : cat === 'Science' ? 'fa-flask' : 'fa-palette'}"></i>
+                            </div>
+                            <span class="text-xs font-medium text-gray-600">${cat}</span>
+                        </button>
+                    `).join('')}
+                </div>
+
+                <!-- Featured -->
+                <div class="flex justify-between items-end mb-3">
+                    <h2 class="font-bold text-gray-700">แนะนำ (พร้อมใช้งาน)</h2>
+                    <button onclick="router('catalog')" class="text-xs text-blue-600">ดูทั้งหมด</button>
+                </div>
+                <div class="flex gap-3 overflow-x-auto hide-scroll pb-2">
+                    ${featuredItems}
+                </div>
+
+                <!-- Recent Activity Banner -->
+                <div class="mt-4 bg-gray-800 text-white p-4 rounded-xl flex items-center gap-3 shadow-lg">
+                    <div class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold">เช็คประวัติการยืม</h3>
+                        <p class="text-xs opacity-70 text-gray-300">ดูรายการที่คืนแล้วย้อนหลัง</p>
+                    </div>
+                    <button onclick="router('profile')" class="ml-auto bg-white text-gray-900 text-xs px-3 py-1.5 rounded-full font-bold">ดูเลย</button>
+                </div>
+            `;
+        }
+
+        function renderCatalog(filterCat = 'All') {
+            document.getElementById('header-container').innerHTML = getHeaderHTML('ค้นหาอุปกรณ์');
+            const content = document.getElementById('main-content');
+
+            // Filter Logic
+            let displayItems = items;
+            if (filterCat !== 'All') {
+                displayItems = items.filter(i => i.category === filterCat);
+            }
+
+            const itemsHTML = displayItems.map(item => `
+                <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex gap-3 mb-3">
+                    <img src="${item.img}" class="w-24 h-24 object-cover rounded-lg bg-gray-100">
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start">
+                                <span class="text-[10px] uppercase font-bold text-gray-400 tracking-wide">${item.category}</span>
+                                ${item.status === 'available' 
+                                    ? '<span class="status-badge bg-green-100 text-green-700"><i class="fas fa-check-circle mr-1"></i>ว่าง</span>' 
+                                    : '<span class="status-badge bg-red-100 text-red-700"><i class="fas fa-times-circle mr-1"></i>ถูกยืม</span>'}
+                            </div>
+                            <h3 class="font-bold text-gray-800 text-sm leading-tight mt-1">${item.name}</h3>
+                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">${item.desc}</p>
+                        </div>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-xs text-gray-400"><i class="fas fa-map-marker-alt mr-1"></i>${item.location}</span>
+                            ${item.status === 'available' 
+                                ? `<button onclick="addToCart(${item.id})" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg shadow-sm active:scale-95 transition-transform">จอง</button>` 
+                                : `<button disabled class="bg-gray-200 text-gray-400 text-xs px-3 py-1.5 rounded-lg cursor-not-allowed">ไม่ว่าง</button>`}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Category Tabs
+            const tabs = ['All', 'IT', 'Sport', 'Science', 'Art'].map(cat => 
+                `<button onclick="renderCatalog('${cat}')" class="px-4 py-1.5 rounded-full text-xs font-medium transition-colors border ${filterCat === cat ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-600 border-gray-300'}">${cat === 'All' ? 'ทั้งหมด' : cat}</button>`
+            ).join('');
+
+            content.innerHTML = `
+                <div class="relative mb-4">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    <input type="text" placeholder="ค้นหาชื่ออุปกรณ์..." class="w-full bg-white pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="flex gap-2 mb-4 overflow-x-auto hide-scroll">
+                    ${tabs}
+                </div>
+                <div class="pb-16">
+                    ${itemsHTML}
+                </div>
+            `;
+        }
+
+        function renderCart() {
+            document.getElementById('header-container').innerHTML = getHeaderHTML('ตะกร้าของฉัน');
+            const content = document.getElementById('main-content');
+
+            if (cart.length === 0) {
+                content.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-[60vh] text-gray-400">
+                        <i class="fas fa-shopping-basket text-6xl mb-4 opacity-20"></i>
+                        <p>ยังไม่มีรายการจอง</p>
+                        <button onclick="router('catalog')" class="mt-4 text-blue-600 font-semibold text-sm">ไปเลือกอุปกรณ์</button>
+                    </div>`;
+                return;
+            }
+
+            const cartItemsHTML = cart.map((item, index) => `
+                <div class="bg-white p-3 rounded-xl border border-gray-100 flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-3">
+                        <img src="${item.img}" class="w-12 h-12 rounded-lg bg-gray-100 object-cover">
+                        <div>
+                            <h4 class="text-sm font-bold text-gray-800">${item.name}</h4>
+                            <span class="text-xs text-gray-500">${item.id} | ${item.location}</span>
+                        </div>
+                    </div>
+                    <button onclick="removeFromCart(${index})" class="text-red-400 hover:text-red-600 p-2">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            // Get tomorrow's date for default
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const dateStr = tomorrow.toISOString().split('T')[0];
+
+            content.innerHTML = `
+                <div class="bg-blue-50 p-4 rounded-xl mb-4 border border-blue-100">
+                    <label class="block text-xs font-bold text-blue-800 mb-2">วันที่ต้องการใช้งาน</label>
+                    <input type="date" id="pickupDate" value="${dateStr}" class="w-full p-2 rounded-lg border border-blue-200 text-sm text-gray-700 bg-white">
+                </div>
+                
+                <h3 class="text-sm font-bold text-gray-700 mb-2">รายการ (${cart.length})</h3>
+                <div class="mb-20">
+                    ${cartItemsHTML}
+                </div>
+
+                <div class="fixed bottom-[70px] left-0 w-full flex justify-center px-4">
+                    <div class="w-full max-w-[480px]">
+                        <button onclick="submitBooking()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-600/30 flex justify-between px-6 items-center">
+                            <span>ยืนยันการจอง</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProfile() {
+            document.getElementById('header-container').innerHTML = getHeaderHTML('รายการของฉัน');
+            const content = document.getElementById('main-content');
+
+            if (myBookings.length === 0) {
+                content.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-[60vh] text-gray-400">
+                        <i class="fas fa-history text-6xl mb-4 opacity-20"></i>
+                        <p>ไม่มีประวัติการยืม</p>
+                    </div>`;
+                return;
+            }
+
+            const bookingsHTML = myBookings.map((booking, index) => {
+                let statusColor = '';
+                let statusText = '';
+                let actionBtn = '';
+
+                if (booking.status === 'pending_pickup' || booking.status === 'active') {
+                    statusColor = 'bg-yellow-100 text-yellow-700';
+                    statusText = 'รอรับของ / กำลังยืม';
+                    actionBtn = `<button onclick="returnItems(${index})" class="w-full mt-3 border border-blue-600 text-blue-600 py-2 rounded-lg text-sm font-bold hover:bg-blue-50">คืนอุปกรณ์ (จำลอง)</button>`;
+                } else if (booking.status === 'returned') {
+                    statusColor = 'bg-gray-100 text-gray-500';
+                    statusText = 'คืนแล้ว';
+                    actionBtn = ''; // No action for returned items
+                }
+
+                const itemList = booking.items.map(i => `<li class="text-xs text-gray-600 ml-4 list-disc">${i.name}</li>`).join('');
+
+                return `
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="text-xs font-bold text-gray-400">Order #${booking.bookingId}</span>
+                            <p class="text-sm font-bold text-gray-800">วันที่ใช้: ${booking.date}</p>
+                        </div>
+                        <span class="status-badge ${statusColor}">${statusText}</span>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-3 rounded-lg mb-2">
+                        <ul class="mb-0">
+                            ${itemList}
+                        </ul>
+                    </div>
+                    
+                    ${booking.status !== 'returned' ? `
+                    <div class="flex gap-2 items-center bg-gray-100 p-2 rounded border border-dashed border-gray-300 justify-center">
+                        <i class="fas fa-qrcode text-2xl text-gray-600"></i>
+                        <span class="text-xs text-gray-500">ยื่น QR Code นี้ให้เจ้าหน้าที่</span>
+                    </div>
+                    ` : ''}
+
+                    ${actionBtn}
+                </div>`;
+            }).join('');
+
+            content.innerHTML = `<div class="pb-16">${bookingsHTML}</div>`;
+        }
+
+        // --- 5. ROUTER ---
+        function router(page, param = null) {
+            // Update Active Nav
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('text-blue-600', 'active-nav'));
+            const navId = 'nav-' + (page === 'catalog' ? 'catalog' : page); // Map catalog sub-pages to catalog nav
+            const navEl = document.getElementById(navId);
+            if(navEl) navEl.classList.add('text-blue-600');
+
+            // Render Page
+            switch(page) {
+                case 'home': renderHome(); break;
+                case 'catalog': renderCatalog(param || 'All'); break;
+                case 'cart': renderCart(); break;
+                case 'profile': renderProfile(); break;
+                default: renderHome();
+            }
+        }
+
+        // --- INITIALIZE ---
+        window.onload = () => {
+            renderCartBadge();
+            router('home');
+        }
+
+    </script>
+</body>
+</html>
