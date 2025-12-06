@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Hacker: ฝึกเลขฐานสอง</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Chakra Petch', sans-serif;
+            background-color: #050505;
+            color: #00ff41; /* Hacker Green */
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        /* Scanline Effect */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .glow-text {
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.7);
+        }
+
+        .bit-switch {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .bit-switch.active {
+            background-color: #00ff41;
+            color: #000;
+            box-shadow: 0 0 20px #00ff41;
+            transform: translateY(2px);
+        }
+        
+        .bit-switch.inactive {
+            background-color: #111;
+            border-color: #333;
+            color: #444;
+        }
+
+        /* Progress Bar Animation */
+        #time-bar {
+            transition: width 1s linear;
+        }
+        
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col items-center justify-center relative">
+
+    <!-- Background Elements -->
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 opacity-20">
+        <div class="text-[10px] text-green-800 break-words font-mono p-4" id="matrix-bg"></div>
+    </div>
+
+    <!-- Game Container -->
+    <div class="z-10 w-full max-w-2xl px-4 flex flex-col items-center">
+        
+        <!-- Header: Score & Level -->
+        <div class="w-full flex justify-between items-end mb-4 border-b border-green-900 pb-2">
+            <div class="text-left">
+                <p class="text-xs text-green-600 uppercase tracking-widest">System Level</p>
+                <p class="text-2xl font-bold" id="level-display">1</p>
+            </div>
+            <div class="text-center">
+                <h1 class="text-3xl md:text-5xl font-bold glow-text tracking-tighter">BINARY HACKER</h1>
+            </div>
+            <div class="text-right">
+                <p class="text-xs text-green-600 uppercase tracking-widest">Score</p>
+                <p class="text-2xl font-bold" id="score-display">0</p>
+            </div>
+        </div>
+
+        <!-- Timer Bar -->
+        <div class="w-full h-2 bg-gray-900 rounded-full mb-8 overflow-hidden border border-green-900">
+            <div id="time-bar" class="h-full bg-green-500 shadow-[0_0_10px_#00ff41]"></div>
+        </div>
+
+        <!-- Main Game Area -->
+        <div id="game-panel" class="w-full bg-black bg-opacity-80 border border-green-800 p-6 rounded-xl shadow-2xl backdrop-blur-sm">
+            
+            <!-- Target Number Display -->
+            <div class="flex flex-col items-center mb-8">
+                <p class="text-gray-400 text-sm mb-2 uppercase tracking-widest">Target Value (Decimal)</p>
+                <div class="relative">
+                    <div id="target-number" class="text-7xl md:text-8xl font-bold text-white glow-text">0</div>
+                </div>
+                <div class="mt-2 text-green-500 text-sm font-mono">
+                    TARGET MATCH: <span id="current-sum-display" class="text-xl font-bold ml-2">0</span>
+                </div>
+            </div>
+
+            <!-- Bit Switches -->
+            <div class="flex justify-center gap-2 md:gap-4 mb-6 select-none" id="bits-container">
+                <!-- Bits created by JS -->
+            </div>
+
+            <!-- Hint / Status -->
+            <div id="status-msg" class="text-center h-6 text-sm text-green-400 font-mono animate-pulse">
+                WAITING FOR INPUT...
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="mt-8 flex gap-4">
+            <button id="start-btn" onclick="startGame()" class="px-8 py-3 bg-green-600 hover:bg-green-500 text-black font-bold text-xl rounded shadow-[0_0_15px_rgba(0,255,65,0.5)] transition hover:scale-105 uppercase">
+                <i class="fas fa-power-off mr-2"></i> Start Hack
+            </button>
+            <button id="restart-btn" onclick="resetGame()" class="hidden px-8 py-3 border border-green-600 text-green-500 hover:bg-green-900 rounded font-bold text-xl transition uppercase">
+                Retry
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Modal for Game Over -->
+    <div id="game-over-modal" class="hidden absolute inset-0 bg-black bg-opacity-95 z-50 flex flex-col items-center justify-center">
+        <h2 class="text-5xl font-bold text-red-500 mb-4 glow-text">ACCESS DENIED</h2>
+        <p class="text-xl text-gray-300 mb-2">System Locked</p>
+        <p class="text-3xl text-green-400 mb-8">Final Score: <span id="final-score">0</span></p>
+        <button onclick="resetGame()" class="px-8 py-3 bg-green-600 hover:bg-green-500 text-black font-bold rounded shadow-[0_0_15px_rgba(0,255,65,0.5)] uppercase">
+            Try Again
+        </button>
+    </div>
+
+    <script>
+        // --- Game Config ---
+        let currentLevel = 1;
+        let score = 0;
+        let targetNum = 0;
+        let currentSum = 0;
+        let timeLeft = 0;
+        let maxTime = 20; // seconds
+        let timerInterval;
+        let isPlaying = false;
+        let bitCount = 5; // เริ่มต้นที่ 5 bits (สูงสุด 31)
+        
+        // --- DOM Elements ---
+        const bitsContainer = document.getElementById('bits-container');
+        const targetDisplay = document.getElementById('target-number');
+        const currentSumDisplay = document.getElementById('current-sum-display');
+        const timeBar = document.getElementById('time-bar');
+        const scoreDisplay = document.getElementById('score-display');
+        const levelDisplay = document.getElementById('level-display');
+        const statusMsg = document.getElementById('status-msg');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const gameOverModal = document.getElementById('game-over-modal');
+
+        // --- Audio Effects (Synthesized) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            if (type === 'click') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'win') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'error') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(50, audioCtx.currentTime + 0.3);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            }
+        }
+
+        // --- Game Logic ---
+
+        function initBits() {
+            bitsContainer.innerHTML = '';
+            // สร้างปุ่ม Bit จากค่ามากไปน้อย (เช่น 16, 8, 4, 2, 1)
+            for (let i = bitCount - 1; i >= 0; i--) {
+                const val = Math.pow(2, i);
+                const btn = document.createElement('div');
+                btn.className = 'bit-switch inactive w-12 h-16 md:w-16 md:h-24 rounded border-2 flex flex-col items-center justify-center cursor-pointer select-none';
+                btn.id = `bit-${val}`;
+                btn.dataset.value = val;
+                btn.dataset.active = "false";
+                
+                // HTML ภายในปุ่ม
+                btn.innerHTML = `
+                    <div class="text-2xl md:text-3xl font-bold mb-1 state-text">0</div>
+                    <div class="text-[10px] md:text-xs opacity-60">${val}</div>
+                `;
+
+                // Event Listener
+                btn.onclick = () => toggleBit(btn, val);
+                bitsContainer.appendChild(btn);
+            }
+        }
+
+        function toggleBit(btn, val) {
+            if (!isPlaying) return;
+
+            const isActive = btn.dataset.active === "true";
+            
+            // Toggle State
+            btn.dataset.active = !isActive;
+            
+            // Visual Update
+            if (!isActive) {
+                btn.classList.remove('inactive');
+                btn.classList.add('active');
+                btn.querySelector('.state-text').innerText = '1';
+                currentSum += val;
+                playSound('click');
+            } else {
+                btn.classList.remove('active');
+                btn.classList.add('inactive');
+                btn.querySelector('.state-text').innerText = '0';
+                currentSum -= val;
+                playSound('click');
+            }
+
+            updateSumDisplay();
+            checkWin();
+        }
+
+        function updateSumDisplay() {
+            currentSumDisplay.innerText = currentSum;
+            
+            // เปลี่ยนสีตามความใกล้เคียง
+            if (currentSum === targetNum) {
+                currentSumDisplay.className = "text-xl font-bold ml-2 text-green-400";
+            } else if (currentSum > targetNum) {
+                currentSumDisplay.className = "text-xl font-bold ml-2 text-red-500";
+            } else {
+                currentSumDisplay.className = "text-xl font-bold ml-2 text-yellow-500";
+            }
+        }
+
+        function generateTarget() {
+            // สุ่มเลขที่ไม่เกินค่าสูงสุดของ bit ที่มี (2^n - 1)
+            // และไม่ให้เป็น 0
+            const maxVal = Math.pow(2, bitCount) - 1;
+            // ป้องกันไม่ให้สุ่มได้เลขเดิมซ้ำติดกัน
+            let newTarget;
+            do {
+                newTarget = Math.floor(Math.random() * maxVal) + 1;
+            } while (newTarget === targetNum);
+            
+            targetNum = newTarget;
+            targetDisplay.innerText = targetNum;
+            
+            // Reset Bits
+            currentSum = 0;
+            updateSumDisplay();
+            const btns = document.querySelectorAll('.bit-switch');
+            btns.forEach(btn => {
+                btn.dataset.active = "false";
+                btn.classList.remove('active');
+                btn.classList.add('inactive');
+                btn.querySelector('.state-text').innerText = '0';
+            });
+        }
+
+        function checkWin() {
+            if (currentSum === targetNum) {
+                // Correct!
+                playSound('win');
+                score += (Math.floor(timeLeft) * 10) + 100; // คิดคะแนนตามเวลาที่เหลือ
+                scoreDisplay.innerText = score;
+                statusMsg.innerText = "ACCESS GRANTED. DECRYPTING NEXT...";
+                statusMsg.classList.remove('text-red-500');
+                statusMsg.classList.add('text-green-400');
+                
+                // เพิ่มความยาก
+                currentLevel++;
+                levelDisplay.innerText = currentLevel;
+                
+                // ทุกๆ 3 เลเวล เพิ่มจำนวนบิท (สูงสุด 8 บิท = 255)
+                if (currentLevel % 3 === 0 && bitCount < 8) {
+                    bitCount++;
+                    initBits();
+                }
+
+                // Reset Time bonus
+                timeLeft = Math.min(timeLeft + 5, maxTime); 
+                
+                setTimeout(() => {
+                    generateTarget();
+                    statusMsg.innerText = "DECRYPT THE CODE";
+                }, 500);
+            }
+        }
+
+        function gameLoop() {
+            if (!isPlaying) return;
+
+            timeLeft -= 0.1; // ลดทีละ 0.1 วินาที
+            const percent = (timeLeft / maxTime) * 100;
+            timeBar.style.width = `${percent}%`;
+
+            if (percent < 30) {
+                timeBar.className = "h-full bg-red-500 shadow-[0_0_10px_red]";
+                document.getElementById('game-panel').classList.add('border-red-500');
+                document.getElementById('game-panel').classList.remove('border-green-800');
+            } else {
+                timeBar.className = "h-full bg-green-500 shadow-[0_0_10px_#00ff41]";
+                document.getElementById('game-panel').classList.remove('border-red-500');
+                document.getElementById('game-panel').classList.add('border-green-800');
+            }
+
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        function startGame() {
+            isPlaying = true;
+            score = 0;
+            currentLevel = 1;
+            bitCount = 5; // Reset bits
+            timeLeft = maxTime;
+            
+            scoreDisplay.innerText = score;
+            levelDisplay.innerText = currentLevel;
+            
+            startBtn.classList.add('hidden');
+            restartBtn.classList.remove('hidden');
+            gameOverModal.classList.add('hidden');
+            
+            initBits();
+            generateTarget();
+            
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(gameLoop, 100); // อัพเดททุก 100ms
+        }
+
+        function endGame() {
+            isPlaying = false;
+            clearInterval(timerInterval);
+            playSound('error');
+            
+            document.getElementById('final-score').innerText = score;
+            gameOverModal.classList.remove('hidden');
+        }
+
+        function resetGame() {
+            startGame();
+        }
+
+        // --- Ambient Effect (Matrix Rain background stub) ---
+        function generateMatrixBg() {
+            const bg = document.getElementById('matrix-bg');
+            let text = '';
+            for(let i=0; i<400; i++) {
+                text += Math.random() > 0.5 ? '1 ' : '0 ';
+            }
+            bg.innerText = text;
+        }
+        setInterval(generateMatrixBg, 2000); // เปลี่ยนพื้นหลังทุก 2 วิ
+        generateMatrixBg();
+
+        // Init UI
+        initBits();
+
+    </script>
+</body>
+</html>

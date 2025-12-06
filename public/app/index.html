@@ -3,21 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KruBoat.com - Applications</title>
-
-    <!-- 🟢 Google Analytics (เริ่มเก็บสถิติ) -->
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4MQ3GL6CTB"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-4MQ3GL6CTB');
-    </script>
-    <!-- 🟢 จบโค้ด Google Analytics -->
-
-    <!-- Favicon -->
+    <title>KruBoat Apps - รวมแอพพลิเคชัน</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -30,39 +16,33 @@
 </head>
 <body class="bg-slate-50 text-gray-800 flex flex-col min-h-screen">
 
-    <!-- Navbar -->
     <nav class="bg-white shadow-sm sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="/" class="text-xl font-bold text-teal-600 flex items-center gap-2">
+            <a href="../index.html" class="text-xl font-bold text-teal-600 flex items-center gap-2">
                 <i class="fa-solid fa-rocket"></i> KruBoat Apps
             </a>
             
-            <!-- Desktop Menu -->
             <div class="hidden md:flex space-x-6">
-                <a href="../index/" class="hover:text-teal-600 transition">หน้าแรก</a>
+                <a href="../index.html" class="hover:text-teal-600 transition">หน้าแรก</a>
                 <a href="../student/" class="hover:text-blue-600 transition">นักเรียน</a>
-                <a href="../app/" class="text-teal-600 font-bold">แอปครูโบ๊ท</a>
-                <a href="../library/" class="hover:text-purple-600 transition">คลังโค้ด</a>
+                <a href="../app/" class="text-teal-600 font-bold">แอพครูโบ๊ท</a>
+                <a href="../library.html" class="hover:text-purple-600 transition">คลังโค้ด</a>
             </div>
 
-            <!-- Mobile Menu Button -->
             <button id="mobile-menu-btn" class="md:hidden text-gray-600 focus:outline-none">
                 <i class="fa-solid fa-bars text-xl"></i>
             </button>
         </div>
-
-        <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 shadow-lg">
             <div class="flex flex-col px-4 py-2 space-y-2">
-                <a href="../index/" class="block py-2 text-gray-600 hover:bg-gray-50 rounded px-2">หน้าแรก</a>
+                <a href="../index.html" class="block py-2 text-gray-600 hover:bg-gray-50 rounded px-2">หน้าแรก</a>
                 <a href="../student/" class="block py-2 text-gray-600 hover:bg-gray-50 rounded px-2">นักเรียน</a>
-                <a href="../app/" class="block py-2 text-teal-600 font-bold bg-teal-50 rounded px-2">แอปครูโบ๊ท</a>
-                <a href="../library/" class="block py-2 text-gray-600 hover:bg-gray-50 rounded px-2">คลังโค้ด</a>
+                <a href="../app/" class="block py-2 text-teal-600 font-bold bg-teal-50 rounded px-2">แอพครูโบ๊ท</a>
+                <a href="../library.html" class="block py-2 text-gray-600 hover:bg-gray-50 rounded px-2">คลังโค้ด</a>
             </div>
         </div>
     </nav>
 
-    <!-- Header -->
     <header class="bg-gradient-to-br from-teal-500 to-emerald-600 text-white py-16 relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
             <i class="fa-solid fa-microchip absolute top-10 left-10 text-8xl"></i>
@@ -77,7 +57,6 @@
         </div>
     </header>
 
-    <!-- Apps Grid -->
     <main class="container mx-auto px-4 py-12 flex-grow">
         
         <!-- Section 1: เครื่องมือ (Tools) -->
@@ -85,108 +64,8 @@
             <h2 class="text-2xl font-bold text-gray-800 mb-6 border-l-4 border-teal-500 pl-3 flex items-center">
                 <i class="fa-solid fa-toolbox mr-2 text-teal-600"></i> เครื่องมือใช้งานทั่วไป
             </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                
-                <!-- App 1: Live Scoreboard (ACTIVE) -->
-                <a href="scoreboard/" class="app-card bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-indigo-100 group relative overflow-hidden">
-                    <div class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg shadow-sm">HOT</div>
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition">
-                            <i class="fa-solid fa-basketball"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-800 group-hover:text-indigo-600 transition">Live Scoreboard</h3>
-                            <p class="text-xs text-gray-500">ป้ายคะแนนออนไลน์</p>
-                        </div>
-                    </div>
-                    <p class="text-sm text-gray-600 leading-relaxed">ระบบป้ายคะแนนกีฬาสี แสดงผล Real-time ควบคุมผ่านมือถือได้ รองรับการแสดงผลเต็มจอ</p>
-                </a>
-
-                <!-- App 2: สุ่มเลขที่ (ACTIVE) -->
-                <a href="random/" class="app-card bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 group relative overflow-hidden">
-                    <div class="absolute top-0 right-0 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg shadow-sm">New</div>
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition">
-                            <i class="fa-solid fa-dice"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-800 group-hover:text-teal-600 transition">สุ่มเลขที่</h3>
-                            <p class="text-xs text-gray-500">Random Picker</p>
-                        </div>
-                    </div>
-                    <p class="text-sm text-gray-600 leading-relaxed">โปรแกรมสุ่มเลขที่นักเรียน และสุ่มจับกลุ่มทำกิจกรรม ใช้งานง่ายไม่ต้องติดตั้ง</p>
-                </a>
-                
-                <!-- App 3: เครื่องคิดเลข (Coming Soon) -->
-                <div class="app-card bg-gray-50 rounded-2xl p-6 shadow-none border border-gray-200 opacity-60 cursor-not-allowed group relative overflow-hidden grayscale hover:grayscale-0 transition-all">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl shadow-sm border border-gray-200">
-                            <i class="fa-solid fa-calculator"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-600">เครื่องคิดเลข</h3>
-                            <span class="inline-block bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span>
-                        </div>
-                    </div>
-                    <p class="text-sm text-gray-400 leading-relaxed">เครื่องคิดเลขวิทยาศาสตร์ออนไลน์ รองรับฟังก์ชัน sin, cos, tan และการคำนวณพื้นฐาน</p>
-                </div>
-
-                <!-- App 4: นาฬิกาจับเวลา (Coming Soon) -->
-                <div class="app-card bg-gray-50 rounded-2xl p-6 shadow-none border border-gray-200 opacity-60 cursor-not-allowed group relative overflow-hidden grayscale hover:grayscale-0 transition-all">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl shadow-sm border border-gray-200">
-                            <i class="fa-solid fa-stopwatch"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-600">นาฬิกาจับเวลา</h3>
-                            <span class="inline-block bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span>
-                        </div>
-                    </div>
-                    <p class="text-sm text-gray-400 leading-relaxed">ระบบจับเวลาสำหรับทำกิจกรรมในห้องเรียน พร้อมเสียงเตือนเมื่อหมดเวลา</p>
-                </div>
-
-                <!-- App 5: สร้าง QR Code (Coming Soon) -->
-                <div class="app-card bg-gray-50 rounded-2xl p-6 shadow-none border border-gray-200 opacity-60 cursor-not-allowed group relative overflow-hidden grayscale hover:grayscale-0 transition-all">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl shadow-sm border border-gray-200">
-                            <i class="fa-solid fa-qrcode"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-600">สร้าง QR Code</h3>
-                            <span class="inline-block bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span>
-                        </div>
-                    </div>
-                    <p class="text-sm text-gray-400 leading-relaxed">สร้าง QR Code สำหรับเว็บไซต์ ข้อความ หรือ WiFi ได้อย่างรวดเร็ว</p>
-                </div>
-
-                <!-- App 6: คำนวณเกรด (Coming Soon) -->
-                <div class="app-card bg-gray-50 rounded-2xl p-6 shadow-none border border-gray-200 opacity-60 cursor-not-allowed group relative overflow-hidden grayscale hover:grayscale-0 transition-all">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl shadow-sm border border-gray-200">
-                            <i class="fa-solid fa-graduation-cap"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-600">คำนวณเกรด</h3>
-                            <span class="inline-block bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span>
-                        </div>
-                    </div>
-                    <p class="text-sm text-gray-400 leading-relaxed">ช่วยคำนวณเกรดเฉลี่ย (GPA) และวางแผนการเรียนล่วงหน้า</p>
-                </div>
-
-                <!-- App 7: จัดผังที่นั่ง (Coming Soon) -->
-                <div class="app-card bg-gray-50 rounded-2xl p-6 shadow-none border border-gray-200 opacity-60 cursor-not-allowed group relative overflow-hidden grayscale hover:grayscale-0 transition-all">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-14 h-14 bg-white text-gray-400 rounded-xl flex items-center justify-center text-2xl shadow-sm border border-gray-200">
-                            <i class="fa-solid fa-chair"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-600">จัดที่นั่งสอบ</h3>
-                            <span class="inline-block bg-gray-200 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold">เร็วๆ นี้</span>
-                        </div>
-                    </div>
-                    <p class="text-sm text-gray-400 leading-relaxed">ระบบสุ่มและจัดผังที่นั่งสอบหรือที่นั่งเรียนแบบอัตโนมัติ</p>
-                </div>
-
+            <div id="tools-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Data from Firestore -->
             </div>
         </div>
 
@@ -195,73 +74,8 @@
             <h2 class="text-2xl font-bold text-gray-800 mb-6 border-l-4 border-indigo-500 pl-3 flex items-center">
                 <i class="fa-solid fa-gamepad mr-2 text-indigo-600"></i> เกมการศึกษา
             </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                
-                <!-- Game 1: Algorithm Bot (ACTIVE - NEW!) -->
-                <a href="app/algorithmbot/" class="app-card bg-white rounded-2xl p-0 shadow-sm hover:shadow-xl transition-all duration-300 border border-indigo-100 group overflow-hidden flex flex-col" target="_blank">
-                    <div class="h-40 bg-indigo-600 relative overflow-hidden flex items-center justify-center">
-                        <div class="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-0.5 rounded text-xs font-bold text-indigo-600 shadow-sm">New</div>
-                        <!-- ใช้ไอคอนแทนรูปปกไปก่อน -->
-                        <i class="fa-solid fa-robot text-6xl text-white/80 group-hover:scale-110 transition duration-500"></i>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="font-bold text-lg text-gray-800 mb-1 group-hover:text-indigo-600 transition">Algorithm Bot</h3>
-                        <p class="text-sm text-gray-500 mb-3">เกมฝึกตรรกะพาหุ่นยนต์เดินเข้าเส้นชัย (Logic & Coding)</p>
-                        <div class="flex gap-2">
-                            <span class="inline-block bg-indigo-50 text-indigo-600 text-[10px] px-2 py-1 rounded border border-indigo-100 font-bold">Coding</span>
-                            <span class="inline-block bg-purple-50 text-purple-600 text-[10px] px-2 py-1 rounded border border-purple-100 font-bold">Logic</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Game 2 (Coming Soon) -->
-                <div class="app-card bg-gray-50 rounded-2xl p-0 shadow-none border border-gray-200 opacity-60 cursor-not-allowed flex flex-col grayscale hover:grayscale-0 transition-all">
-                    <div class="h-40 bg-gray-200 flex items-center justify-center">
-                        <i class="fa-solid fa-font text-4xl text-gray-400"></i>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="font-bold text-lg text-gray-600">เกมทายคำศัพท์</h3>
-                        <p class="text-sm text-gray-400 mb-3">ฝึกฝนคำศัพท์ภาษาอังกฤษผ่านเกมสนุกๆ</p>
-                        <span class="inline-block bg-gray-200 text-gray-500 text-xs px-2 py-1 rounded font-bold">เร็วๆ นี้</span>
-                    </div>
-                </div>
-
-                <!-- Game 3 (Coming Soon) -->
-                <div class="app-card bg-gray-50 rounded-2xl p-0 shadow-none border border-gray-200 opacity-60 cursor-not-allowed flex flex-col grayscale hover:grayscale-0 transition-all">
-                    <div class="h-40 bg-gray-200 flex items-center justify-center">
-                        <i class="fa-solid fa-puzzle-piece text-4xl text-gray-400"></i>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="font-bold text-lg text-gray-600">เกมคิดเลขเร็ว</h3>
-                        <p class="text-sm text-gray-400 mb-3">ทดสอบความเร็วในการคำนวณเลข</p>
-                        <span class="inline-block bg-gray-200 text-gray-500 text-xs px-2 py-1 rounded font-bold">เร็วๆ นี้</span>
-                    </div>
-                </div>
-
-                <!-- Game 4 (Coming Soon) -->
-                <div class="app-card bg-gray-50 rounded-2xl p-0 shadow-none border border-gray-200 opacity-60 cursor-not-allowed flex flex-col grayscale hover:grayscale-0 transition-all">
-                    <div class="h-40 bg-gray-200 flex items-center justify-center">
-                        <i class="fa-solid fa-keyboard text-4xl text-gray-400"></i>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="font-bold text-lg text-gray-600">ฝึกพิมพ์ดีด</h3>
-                        <p class="text-sm text-gray-400 mb-3">เกมฝึกพิมพ์สัมผัสภาษาไทยและอังกฤษ</p>
-                        <span class="inline-block bg-gray-200 text-gray-500 text-xs px-2 py-1 rounded font-bold">เร็วๆ นี้</span>
-                    </div>
-                </div>
-
-                <!-- Game 5 (Coming Soon) -->
-                <div class="app-card bg-gray-50 rounded-2xl p-0 shadow-none border border-gray-200 opacity-60 cursor-not-allowed flex flex-col grayscale hover:grayscale-0 transition-all">
-                    <div class="h-40 bg-gray-200 flex items-center justify-center">
-                        <i class="fa-solid fa-flag text-4xl text-gray-400"></i>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="font-bold text-lg text-gray-600">ทายธงชาติ</h3>
-                        <p class="text-sm text-gray-400 mb-3">ทดสอบความรู้รอบตัวเกี่ยวกับธงชาติทั่วโลก</p>
-                        <span class="inline-block bg-gray-200 text-gray-500 text-xs px-2 py-1 rounded font-bold">เร็วๆ นี้</span>
-                    </div>
-                </div>
-
+            <div id="games-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Data from Firestore -->
             </div>
         </div>
 
@@ -270,20 +84,20 @@
     <footer class="bg-slate-800 text-white py-8 text-center mt-auto">
         <div class="container mx-auto px-4">
             <h3 class="font-bold text-xl mb-2">KruBoat Apps</h3>
-            <p class="text-slate-400 text-sm mb-4">Need some Coffee? ☕️</p>
+            <p class="text-slate-400 text-sm mb-4">Need some coffee ? ☕️</p>
             <p class="text-xs text-slate-500">&copy; 2025 พัฒนาโดย ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์ | ติดต่อ chonlasitgood@gmail.com</p>
         </div>
     </footer>
 
+    <!-- ใส่ script.js เพื่อโหลดข้อมูล -->
+    <script type="module" src="../js/script.js"></script>
     <script>
-        // Mobile Menu Logic
-        const mobileBtn = document.getElementById('mobile-menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        if(mobileBtn && mobileMenu){
-            mobileBtn.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-            });
-        }
+        // Mobile Menu Logic (Inline fallback)
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('mobile-menu-btn');
+            const menu = document.getElementById('mobile-menu');
+            if(btn && menu) btn.onclick = () => menu.classList.toggle('hidden');
+        });
     </script>
 </body>
 </html>
