@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Virtual Drum Kit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Kanit:wght@300;400&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            background-color: #111;
+            color: white;
+            font-family: 'Kanit', sans-serif;
+            overflow: hidden;
+        }
+        h1, .brand-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        /* 1. Video กลับด้าน (Mirror) เพื่อความเป็นธรรมชาติ */
+        #webcam {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); 
+        }
+        /* 2. Canvas ไม่ต้องกลับด้าน (เพื่อให้ตัวหนังสืออ่านออก และตำแหน่งตรง) */
+        /* เราจะจัดการเรื่อง Mirror ใน Logic JavaScript แทน */
+        #output_canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        /* UI Overlay */
+        .ui-overlay {
+            position: absolute;
+            z-index: 20;
+            pointer-events: none; /* ให้คลิกทะลุได้ */
+        }
+        .drum-label {
+            position: absolute;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(0,0,0,0.8);
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+        }
+        .pointer-auto {
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <!-- 1. กล้อง -->
+        <video id="webcam" autoplay playsinline></video>
+        
+        <!-- 2. Canvas สำหรับวาดกลองและเส้นมือ -->
+        <canvas id="output_canvas"></canvas>
+
+        <!-- UI Header -->
+        <div class="ui-overlay top-4 left-4 bg-black/60 p-4 rounded-xl border border-pink-500/30 backdrop-blur-md">
+            <h1 class="text-2xl font-bold text-pink-500 flex items-center gap-2">
+                <i data-lucide="music"></i> VIRTUAL DRUM KIT
+            </h1>
+            <p class="text-xs text-gray-300 mt-1">ใช้นิ้วชี้ "ตี" ไปที่วงกลมเพื่อสร้างจังหวะ</p>
+            <div id="status" class="mt-2 text-xs flex items-center gap-2 text-yellow-400">
+                <div class="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                Waiting for Start...
+            </div>
+        </div>
+        
+        <!-- Start Button (จำเป็นสำหรับ Web Audio API) -->
+        <div id="startScreen" class="ui-overlay inset-0 flex items-center justify-center bg-black/80 z-50 pointer-auto">
+            <div class="text-center p-8 border border-pink-500 rounded-2xl bg-gray-900/90 shadow-[0_0_30px_rgba(236,72,153,0.3)]">
+                <i data-lucide="headphones" class="w-16 h-16 text-pink-500 mx-auto mb-4"></i>
+                <h2 class="text-3xl font-bold brand-font mb-2">READY TO ROCK?</h2>
+                <p class="text-gray-400 mb-6">กรุณาเปิดลำโพง และกดปุ่มเพื่อเริ่มระบบเสียง</p>
+                <button id="startBtn" class="px-8 py-3 bg-gradient-to-r from-pink-600 to-purple-600 hover:scale-105 transition rounded-full font-bold text-lg shadow-lg">
+                    START ROCKING 🤘
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { FilesetResolver, HandLandmarker } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
+
+        lucide.createIcons();
+
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('output_canvas');
+        const ctx = canvas.getContext('2d');
+        const statusEl = document.getElementById('status');
+        const startScreen = document.getElementById('startScreen');
+        const startBtn = document.getElementById('startBtn');
+
+        let handLandmarker;
+        let webcamRunning = false;
+        let audioContext; // Web Audio API
+
+        // --- 1. Drum Configuration (ตั้งค่าตำแหน่งกลอง) ---
+        // เปลี่ยนมาใช้ type แทน soundUrl เพื่อใช้ Synth
+        const drums = [
+            { 
+                id: "hihat", 
+                name: "HI-HAT", 
+                type: "hihat",
+                x: 0.2, y: 0.3, radius: 0.10, 
+                color: "#22d3ee", // Cyan
+                visualHit: 0,
+                isHovered: false 
+            },
+            { 
+                id: "crash", 
+                name: "CRASH", 
+                type: "crash",
+                x: 0.8, y: 0.3, radius: 0.12, 
+                color: "#eab308", // Yellow
+                visualHit: 0,
+                isHovered: false
+            },
+            { 
+                id: "snare", 
+                name: "SNARE", 
+                type: "snare",
+                x: 0.3, y: 0.7, radius: 0.13, 
+                color: "#ec4899", // Pink
+                visualHit: 0,
+                isHovered: false
+            },
+            { 
+                id: "kick", 
+                name: "KICK", 
+                type: "kick",
+                x: 0.7, y: 0.7, radius: 0.14, 
+                color: "#a855f7", // Purple
+                visualHit: 0,
+                isHovered: false
+            }
+        ];
+
+        // --- 2. Audio System (Synthesizer) ---
+        // ใช้ Oscillator สร้างเสียงสดๆ เพื่อความชัวร์ว่าเสียงออกแน่นอน 100%
+        function initAudio() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        // สร้าง Noise Buffer สำหรับเสียง Snare/Hi-hat
+        let noiseBuffer = null;
+        function getNoiseBuffer() {
+            if (!noiseBuffer) {
+                const bufferSize = audioContext.sampleRate * 2; // 2 seconds
+                noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+                const output = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
+                }
+            }
+            return noiseBuffer;
+        }
+
+        function playSound(drum) {
+            if (!audioContext) return;
+            if (audioContext.state === 'suspended') audioContext.resume();
+
+            const t = audioContext.currentTime;
+
+            if (drum.type === 'kick') {
+                // Kick: Sine wave frequency drop
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+
+                osc.frequency.setValueAtTime(150, t);
+                osc.frequency.exponentialRampToValueAtTime(0.01, t + 0.5);
+                
+                gain.gain.setValueAtTime(1, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+
+                osc.start(t);
+                osc.stop(t + 0.5);
+
+            } else if (drum.type === 'snare') {
+                // Snare: Noise + Oscillator
+                const noise = audioContext.createBufferSource();
+                noise.buffer = getNoiseBuffer();
+                const noiseFilter = audioContext.createBiquadFilter();
+                noiseFilter.type = 'highpass';
+                noiseFilter.frequency.value = 1000;
+                const noiseGain = audioContext.createGain();
+                
+                noise.connect(noiseFilter);
+                noiseFilter.connect(noiseGain);
+                noiseGain.connect(audioContext.destination);
+
+                noiseGain.gain.setValueAtTime(1, t);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+                noise.start(t);
+                noise.stop(t + 0.2);
+
+                const osc = audioContext.createOscillator();
+                osc.type = 'triangle';
+                const oscGain = audioContext.createGain();
+                osc.connect(oscGain);
+                oscGain.connect(audioContext.destination);
+                osc.frequency.setValueAtTime(250, t); // Snare snap
+                oscGain.gain.setValueAtTime(0.5, t);
+                oscGain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                osc.start(t);
+                osc.stop(t + 0.1);
+
+            } else if (drum.type === 'hihat') {
+                // Hi-hat: High frequency noise
+                const noise = audioContext.createBufferSource();
+                noise.buffer = getNoiseBuffer();
+                const noiseFilter = audioContext.createBiquadFilter();
+                noiseFilter.type = 'highpass';
+                noiseFilter.frequency.value = 5000; // High pitch
+                const noiseGain = audioContext.createGain();
+
+                noise.connect(noiseFilter);
+                noiseFilter.connect(noiseGain);
+                noiseGain.connect(audioContext.destination);
+
+                noiseGain.gain.setValueAtTime(0.3, t); // Quieter
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 0.05); // Very short
+                noise.start(t);
+                noise.stop(t + 0.05);
+
+            } else if (drum.type === 'crash') {
+                // Crash: Long noise burst
+                const noise = audioContext.createBufferSource();
+                noise.buffer = getNoiseBuffer();
+                const noiseFilter = audioContext.createBiquadFilter();
+                noiseFilter.type = 'highpass';
+                noiseFilter.frequency.value = 3000; 
+                const noiseGain = audioContext.createGain();
+
+                noise.connect(noiseFilter);
+                noiseFilter.connect(noiseGain);
+                noiseGain.connect(audioContext.destination);
+
+                noiseGain.gain.setValueAtTime(0.5, t);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 1.0); // Long decay
+                noise.start(t);
+                noise.stop(t + 1.0);
+            }
+        }
+
+        // --- 3. Start System ---
+        startBtn.addEventListener('click', async () => {
+            initAudio(); // Setup Audio Context
+            
+            // Resume immediately on user interaction
+            if (audioContext.state === 'suspended') {
+                await audioContext.resume();
+            }
+            
+            // Play a test sound to confirm
+            const osc = audioContext.createOscillator();
+            const g = audioContext.createGain();
+            osc.connect(g);
+            g.connect(audioContext.destination);
+            osc.frequency.value = 440;
+            g.gain.value = 0.1;
+            g.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.1);
+            osc.start();
+            osc.stop(audioContext.currentTime + 0.1);
+
+            startScreen.style.opacity = '0';
+            setTimeout(() => startScreen.style.display = 'none', 500);
+            
+            if (!handLandmarker) {
+                setupAI(); 
+            }
+        });
+
+
+        // --- 4. AI & Vision Setup ---
+        async function setupAI() {
+            try {
+                statusEl.innerHTML = "Loading Vision Model...";
+                const vision = await FilesetResolver.forVisionTasks(
+                    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
+                );
+                
+                handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                    baseOptions: {
+                        modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
+                        delegate: "GPU"
+                    },
+                    runningMode: "VIDEO",
+                    numHands: 2 // ตีได้ 2 มือ
+                });
+
+                statusEl.innerHTML = `<span class="text-green-400">● System Ready</span>`;
+                statusEl.className = "mt-2 text-xs flex items-center gap-2 text-green-400";
+                
+                startCam();
+
+            } catch (err) {
+                console.error(err);
+                statusEl.textContent = "Error: " + err.message;
+            }
+        }
+
+        function startCam() {
+            if (navigator.mediaDevices?.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } }).then(stream => {
+                    video.srcObject = stream;
+                    webcamRunning = true;
+                    video.addEventListener("loadeddata", predictLoop);
+                });
+            }
+        }
+
+        // --- 5. Main Loop ---
+        let lastVideoTime = -1;
+
+        async function predictLoop() {
+            // Resize Canvas
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            if (lastVideoTime !== video.currentTime) {
+                lastVideoTime = video.currentTime;
+                const startTimeMs = performance.now();
+                const results = handLandmarker.detectForVideo(video, startTimeMs);
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // --- Reset Hover State for all drums at start of frame ---
+                const drumsHoveredThisFrame = new Set();
+
+                // A. Check Collisions
+                if (results.landmarks) {
+                    for (const landmarks of results.landmarks) {
+                        // ใช้ปลายนิ้วชี้ (Landmark 8) เป็นไม้กลอง
+                        const indexTip = landmarks[8];
+                        
+                        // --- Mirror Logic Fix ---
+                        const tipX = (1 - indexTip.x) * canvas.width; 
+                        const tipY = indexTip.y * canvas.height;
+
+                        // Check each drum
+                        drums.forEach(drum => {
+                            const drumX = drum.x * canvas.width;
+                            const drumY = drum.y * canvas.height;
+                            const drumR = drum.radius * Math.min(canvas.width, canvas.height);
+
+                            const dist = Math.hypot(tipX - drumX, tipY - drumY);
+
+                            if (dist < drumR) {
+                                drumsHoveredThisFrame.add(drum.id);
+                            }
+                        });
+                        
+                        // Draw Finger Pointer (ไม้กลอง)
+                        ctx.beginPath();
+                        ctx.arc(tipX, tipY, 15, 0, 2 * Math.PI);
+                        ctx.fillStyle = "white";
+                        ctx.fill();
+                        ctx.strokeStyle = "rgba(255,0,0,0.8)";
+                        ctx.lineWidth = 3;
+                        ctx.stroke();
+                    }
+                }
+
+                // B. Update Drum State & Draw
+                drums.forEach(drum => {
+                    const isCurrentlyHovered = drumsHoveredThisFrame.has(drum.id);
+
+                    // Logic: Trigger เมื่อเพิ่งเริ่มแตะ (Transition from False -> True)
+                    if (isCurrentlyHovered && !drum.isHovered) {
+                        playSound(drum);
+                        drum.visualHit = 10; // Frames to show glow
+                    }
+
+                    // Update state for next frame
+                    drum.isHovered = isCurrentlyHovered;
+
+                    // --- Visual Drawing ---
+                    const cx = drum.x * canvas.width;
+                    const cy = drum.y * canvas.height;
+                    const r = drum.radius * Math.min(canvas.width, canvas.height);
+
+                    // Glow Effect
+                    if (drum.visualHit > 0) {
+                        ctx.shadowBlur = 30;
+                        ctx.shadowColor = drum.color;
+                        ctx.fillStyle = drum.color; 
+                        drum.visualHit--;
+                    } else {
+                        ctx.shadowBlur = 0;
+                        ctx.fillStyle = hexToRgba(drum.color, 0.2);
+                    }
+
+                    // Draw Circle
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // Stroke
+                    ctx.lineWidth = 4;
+                    ctx.strokeStyle = drum.color;
+                    ctx.stroke();
+                    ctx.shadowBlur = 0; 
+
+                    // Draw Text Label
+                    ctx.font = `bold ${r * 0.3}px Orbitron`;
+                    ctx.fillStyle = "white";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText(drum.name, cx, cy);
+                });
+
+                // C. Draw Hand Skeleton (Optional)
+                if (results.landmarks) {
+                    for (const landmarks of results.landmarks) {
+                        drawSkeleton(landmarks);
+                    }
+                }
+            }
+
+            if (webcamRunning) window.requestAnimationFrame(predictLoop);
+        }
+
+        // --- Helpers ---
+        function hexToRgba(hex, alpha) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        function drawSkeleton(landmarks) {
+            const connections = [[8,7],[7,6],[6,5], [4,3],[3,2],[2,1], [12,11],[11,10],[10,9], [16,15],[15,14],[14,13], [20,19],[19,18],[18,17], [0,1],[0,5],[0,17],[5,9],[9,13],[13,17]];
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+            ctx.lineWidth = 2;
+            
+            for (const [i, j] of connections) {
+                const p1 = landmarks[i];
+                const p2 = landmarks[j];
+                const x1 = (1 - p1.x) * canvas.width;
+                const y1 = p1.y * canvas.height;
+                const x2 = (1 - p2.x) * canvas.width;
+                const y2 = p2.y * canvas.height;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            }
+        }
+
+    </script>
+</body>
+</html>
