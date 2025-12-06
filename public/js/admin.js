@@ -14,7 +14,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const ADMIN_PIN = "1234";
+const ADMIN_PIN = "0903498148";
 
 // ✅ Expose Functions Globally (ประกาศให้ HTML เรียกใช้ได้)
 window.checkLogin = checkLogin;
