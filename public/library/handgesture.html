@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Hand Gesture Controller</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Firebase SDKs (Compat Version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #0f172a;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+        }
+        h1, h2, .brand-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .video-container {
+            transform: scaleX(-1);
+        }
+        canvas {
+            transform: scaleX(-1);
+        }
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glow-text {
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+    </style>
+</head>
+<body class="text-white min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="w-full glass-card p-4 sticky top-0 z-50 shadow-lg border-b border-gray-700">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i data-lucide="cpu" class="text-cyan-400 w-8 h-8"></i>
+                <span class="text-xl font-bold brand-font bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500">AI GESTURE CONTROL</span>
+            </div>
+            <div class="flex gap-4 text-sm md:text-base">
+                <a href="#guide" class="hover:text-cyan-400 transition-colors">วิธีใช้งาน</a>
+                <a href="#tech" class="hover:text-purple-400 transition-colors">เทคโนโลยี</a>
+                <span id="connectionStatus" class="flex items-center gap-1 text-red-400 text-xs md:text-sm px-3 py-1 rounded-full bg-gray-800 border border-gray-700">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> Offline
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto p-4 md:p-8">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            
+            <!-- Webcam Input Zone -->
+            <div class="glass-card rounded-2xl p-1 shadow-2xl relative group">
+                <div class="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                <div class="relative bg-gray-900 rounded-xl p-4 h-full flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold text-cyan-400 flex items-center gap-2">
+                            <i data-lucide="camera"></i> Webcam Feed
+                        </h2>
+                        <span class="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">30 FPS</span>
+                    </div>
+
+                    <div class="relative w-full aspect-video bg-black rounded-lg overflow-hidden border border-gray-700 shadow-inner">
+                        <video id="webcam" class="absolute w-full h-full object-cover video-container" autoplay playsinline></video>
+                        <canvas id="output_canvas" class="absolute w-full h-full object-cover pointer-events-none"></canvas>
+                        
+                        <!-- Loading / Status Overlay -->
+                        <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-900/90 z-20 transition-opacity duration-500">
+                            <!-- เพิ่ม ID loading-spinner เพื่อให้ซ่อนได้ง่ายขึ้น ไม่ Error ใน Safari -->
+                            <div id="loading-spinner" class="relative">
+                                <div class="w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <i data-lucide="loader-2" class="text-cyan-500 w-6 h-6 animate-pulse"></i>
+                                </div>
+                            </div>
+                            <p id="loadingText" class="mt-4 text-cyan-200 font-light tracking-wider animate-pulse">กำลังเตรียมระบบ AI...</p>
+                            <p id="errorMessage" class="hidden mt-4 text-red-400 bg-red-900/20 px-4 py-2 rounded border border-red-500/50 text-sm max-w-xs text-center"></p>
+                        </div>
+                    </div>
+
+                    <!-- ปุ่มควบคุมกล้อง (ย้ายออกมาอยู่นอก div loading เพื่อให้กดได้ตลอด) -->
+                    <div class="flex justify-center mt-4">
+                        <button id="enableWebcamButton" class="hidden px-8 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-full font-bold shadow-lg shadow-cyan-500/20 transition-all transform hover:scale-105 flex items-center gap-2">
+                            <i data-lucide="power"></i> เปิดใช้งานกล้อง
+                        </button>
+                    </div>
+
+                    <div class="mt-3 flex justify-between text-xs text-gray-500">
+                        <span>Model: MediaPipe Hand Landmarker</span>
+                        <span>Mode: <span id="runMode" class="text-yellow-500">Auto</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result Display Zone -->
+            <div class="glass-card rounded-2xl p-1 shadow-2xl relative group">
+                <div class="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                <div class="relative bg-gray-900 rounded-xl p-4 h-full flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold text-purple-400 flex items-center gap-2">
+                            <i data-lucide="image"></i> Result Display
+                        </h2>
+                        <span class="text-xs text-gray-400">Number Mode: 0-5</span>
+                    </div>
+
+                    <div class="flex-grow flex flex-col items-center justify-center bg-gray-800/50 rounded-lg p-6 border border-gray-700 min-h-[300px] relative overflow-hidden">
+                        <!-- Background Grid -->
+                        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#6366f1 1px, transparent 1px); background-size: 20px 20px;"></div>
+                        
+                        <img id="displayImage" src="" alt="Gesture Image" class="relative z-10 max-w-full max-h-64 object-contain drop-shadow-2xl transition-all duration-300 transform scale-95 opacity-0">
+                        
+                        <div id="placeholderText" class="absolute z-0 flex flex-col items-center text-gray-500 animate-pulse">
+                            <i data-lucide="hand" class="w-16 h-16 mb-2 opacity-50"></i>
+                            <p>ชูนิ้วเพื่อเริ่มนับเลข...</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-4 bg-gray-800 rounded-xl border border-gray-700">
+                        <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Detected Number</p>
+                        <div class="flex justify-between items-end">
+                            <p id="gestureStatus" class="text-3xl font-bold brand-font text-white glow-text">NONE</p>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-500">Firebase Status</p>
+                                <p id="fbDetailStatus" class="text-xs text-gray-400">Waiting...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- User Guide -->
+            <div id="guide" class="md:col-span-2 glass-card rounded-xl p-6">
+                <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-cyan-300">
+                    <i data-lucide="book-open"></i> คู่มือการนับเลขด้วยมือ (Counting Guide)
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div class="bg-gray-800/50 p-4 rounded-lg border border-gray-700 hover:border-cyan-500/50 transition text-center">
+                        <span class="text-3xl mb-2 block">✊</span>
+                        <h4 class="font-bold text-white">0 (Zero)</h4>
+                        <p class="text-xs text-gray-400">กำมือ (0.png)</p>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-lg border border-gray-700 hover:border-cyan-500/50 transition text-center">
+                        <span class="text-3xl mb-2 block">☝️</span>
+                        <h4 class="font-bold text-white">1 (One)</h4>
+                        <p class="text-xs text-gray-400">ชูนิ้วชี้ (1.png)</p>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-lg border border-gray-700 hover:border-cyan-500/50 transition text-center">
+                        <span class="text-3xl mb-2 block">✌️</span>
+                        <h4 class="font-bold text-white">2 (Two)</h4>
+                        <p class="text-xs text-gray-400">ชู 2 นิ้ว (2.png)</p>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-lg border border-gray-700 hover:border-cyan-500/50 transition text-center">
+                        <span class="text-3xl mb-2 block">🤟</span>
+                        <h4 class="font-bold text-white">3 (Three)</h4>
+                        <p class="text-xs text-gray-400">ชู 3 นิ้ว (3.png)</p>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-lg border border-gray-700 hover:border-cyan-500/50 transition text-center">
+                        <span class="text-3xl mb-2 block">🖖</span>
+                        <h4 class="font-bold text-white">4 (Four)</h4>
+                        <p class="text-xs text-gray-400">ชู 4 นิ้ว (4.png)</p>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-lg border border-gray-700 hover:border-cyan-500/50 transition text-center">
+                        <span class="text-3xl mb-2 block">✋</span>
+                        <h4 class="font-bold text-white">5 (Five)</h4>
+                        <p class="text-xs text-gray-400">แบมือ (5.png)</p>
+                    </div>
+                </div>
+                
+                <!-- Troubleshooting / Hardware Acceleration Warning -->
+                <div class="mt-6 p-4 bg-yellow-900/20 border border-yellow-600/30 rounded-lg">
+                    <h4 class="font-bold text-yellow-400 flex items-center gap-2 mb-2">
+                        <i data-lucide="alert-triangle"></i> หากพบปัญหาโหลด AI ไม่ได้ (Error: kGpuService)
+                    </h4>
+                    <p class="text-sm text-gray-300 mb-2">
+                        หากคุณใช้งานบน Chrome และพบว่าหน้าจอค้างที่ "กำลังโหลด..." ให้ลองปิด Hardware Acceleration:
+                    </p>
+                    <ol class="list-decimal list-inside text-sm text-gray-400 space-y-1 ml-2">
+                        <li>ไปที่ <b>Settings</b> ของ Chrome > <b>System</b></li>
+                        <li>ปิด <b>"Use graphics acceleration when available"</b></li>
+                        <li>กด <b>Relaunch</b></li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Tech Stack -->
+            <div id="tech" class="glass-card rounded-xl p-6">
+                <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-purple-300">
+                    <i data-lucide="code-2"></i> เทคโนโลยี (Tech Stack)
+                </h3>
+                <ul class="space-y-4">
+                    <li class="flex items-start gap-3">
+                        <div class="bg-blue-900/50 p-2 rounded text-blue-400"><i data-lucide="eye"></i></div>
+                        <div>
+                            <h5 class="font-bold text-sm">MediaPipe (Google)</h5>
+                            <p class="text-xs text-gray-400">AI Framework สำหรับนับนิ้วมือ (Finger Counting)</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="bg-yellow-900/50 p-2 rounded text-yellow-400"><i data-lucide="database"></i></div>
+                        <div>
+                            <h5 class="font-bold text-sm">Firebase Firestore</h5>
+                            <p class="text-xs text-gray-400">บันทึกตัวเลขที่นับได้แบบ Real-time</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="bg-teal-900/50 p-2 rounded text-teal-400"><i data-lucide="layout"></i></div>
+                        <div>
+                            <h5 class="font-bold text-sm">Tailwind CSS</h5>
+                            <p class="text-xs text-gray-400">ตกแต่งหน้าเว็บแบบ Modern Dashboard</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center p-6 text-gray-600 text-sm mt-8 border-t border-gray-800">
+        <p>พัฒนาโดย <span class="text-gray-400">Kruboat-Web</span> | Powered by MediaPipe & Firebase</p>
+    </footer>
+
+    <!-- Logic Script -->
+    <script type="module">
+        import { FilesetResolver, HandLandmarker } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
+
+        // Initialize Icons
+        lucide.createIcons();
+
+        // --- 1. Configuration & Firebase ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAlfZHbCFxGK3p3nDoAPy3m9KqZzmX2s9I",
+            authDomain: "kruboat-web.firebaseapp.com",
+            projectId: "kruboat-web",
+            storageBucket: "kruboat-web.firebasestorage.app",
+            messagingSenderId: "61868765546",
+            appId: "1:61868765546:web:683b18ddf68c89dd317513"
+        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'gesture-app';
+
+        // UI References
+        const els = {
+            connStatus: document.getElementById('connectionStatus'),
+            fbDetail: document.getElementById('fbDetailStatus'),
+            loading: document.getElementById('loading'),
+            loadingText: document.getElementById('loadingText'),
+            errorMsg: document.getElementById('errorMessage'),
+            btnCam: document.getElementById('enableWebcamButton'),
+            video: document.getElementById('webcam'),
+            canvas: document.getElementById('output_canvas'),
+            displayImg: document.getElementById('displayImage'),
+            placeholder: document.getElementById('placeholderText'),
+            gestureText: document.getElementById('gestureStatus'),
+            runMode: document.getElementById('runMode')
+        };
+        const ctx = els.canvas.getContext('2d');
+
+        // Firebase Logic
+        let db, currentUser;
+        async function initFirebase() {
+            try {
+                if (typeof firebase === 'undefined') throw new Error("Firebase SDK missing");
+                
+                const app = firebase.initializeApp(firebaseConfig);
+                const auth = firebase.auth();
+                db = firebase.firestore();
+
+                auth.onAuthStateChanged(user => {
+                    if (user) {
+                        currentUser = user;
+                        updateStatus(true);
+                    } else {
+                        updateStatus(false);
+                    }
+                });
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await auth.signInWithCustomToken(__initial_auth_token);
+                } else {
+                    await auth.signInAnonymously();
+                }
+            } catch (e) {
+                console.error("Firebase Error", e);
+                els.fbDetail.textContent = "Error: " + e.message;
+                els.fbDetail.className = "text-xs text-red-400";
+            }
+        }
+        
+        function updateStatus(isConnected) {
+            if (isConnected) {
+                els.connStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-green-500"></span> Online`;
+                els.connStatus.className = "flex items-center gap-1 text-green-400 text-xs md:text-sm px-3 py-1 rounded-full bg-green-900/30 border border-green-700/50";
+                els.fbDetail.textContent = "Connected (Ready to write)";
+                els.fbDetail.className = "text-xs text-green-400";
+            } else {
+                els.connStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> Offline`;
+                els.connStatus.className = "flex items-center gap-1 text-red-400 text-xs md:text-sm px-3 py-1 rounded-full bg-red-900/30 border border-red-700/50";
+                els.fbDetail.textContent = "Disconnected";
+                els.fbDetail.className = "text-xs text-red-400";
+            }
+        }
+        initFirebase();
+
+        // --- 2. Image & Gesture Logic (Number 0-5) ---
+        // เปลี่ยน Path รูปภาพตามที่คุณมี เช่น 0.png, 1.png ...
+        const imageGallery = {
+            "0": "https://placehold.co/600x400/dc2626/FFFFFF/png?text=Zero+(0.png)",        
+            "1": "https://placehold.co/600x400/2563eb/FFFFFF/png?text=One+(1.png)", 
+            "2": "https://placehold.co/600x400/ca8a04/FFFFFF/png?text=Two+(2.png)",                
+            "3": "https://placehold.co/600x400/16a34a/FFFFFF/png?text=Three+(3.png)",             
+            "4": "https://placehold.co/600x400/9333ea/FFFFFF/png?text=Four+(4.png)",
+            "5": "https://placehold.co/600x400/0891b2/FFFFFF/png?text=Five+(5.png)",
+            "unknown": "https://placehold.co/600x400/000000/FFFFFF/png?text=Unknown"
+        };
+
+        let lastSavedGesture = "";
+        function updateDisplay(gesture) {
+            if (imageGallery[gesture]) {
+                // UI Updates
+                els.displayImg.src = imageGallery[gesture];
+                els.displayImg.classList.remove('opacity-0', 'scale-95');
+                els.displayImg.classList.add('opacity-100', 'scale-100');
+                els.placeholder.style.display = 'none';
+                els.gestureText.textContent = "NUMBER: " + gesture;
+                
+                // Color coding text
+                if (gesture === '0') els.gestureText.className = "text-3xl font-bold brand-font text-red-400 glow-text";
+                else if (gesture === '5') els.gestureText.className = "text-3xl font-bold brand-font text-green-400 glow-text";
+                else els.gestureText.className = "text-3xl font-bold brand-font text-cyan-400 glow-text";
+
+                // Firestore Save
+                if (currentUser && gesture !== lastSavedGesture) {
+                    db.collection('artifacts').doc(appId).collection('users').doc(currentUser.uid).collection('data').add({
+                        gesture: gesture, // บันทึกเป็นตัวเลข (String) 0-5
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    }).catch(e => console.error(e));
+                    lastSavedGesture = gesture;
+                }
+            }
+        }
+
+        // --- 3. AI / MediaPipe Setup ---
+        let handLandmarker;
+        let webcamRunning = false;
+        
+        async function setupAI() {
+            try {
+                els.loadingText.textContent = "กำลังเชื่อมต่อ Vision Core...";
+                const vision = await FilesetResolver.forVisionTasks(
+                    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
+                );
+                
+                els.loadingText.textContent = "กำลังโหลดโมเดล (GPU Priority)...";
+                
+                // Strategy: Try GPU first, catch error, fallback to CPU
+                try {
+                    handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                        baseOptions: {
+                            modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
+                            delegate: "GPU"
+                        },
+                        runningMode: "VIDEO",
+                        numHands: 1
+                    });
+                    els.runMode.textContent = "GPU (Fast)";
+                    els.runMode.className = "text-green-400 font-bold";
+                } catch (gpuError) {
+                    console.warn("GPU init failed, switching to CPU.", gpuError);
+                    els.loadingText.textContent = "GPU ไม่พร้อม... กำลังเปลี่ยนเป็น CPU";
+                    handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                        baseOptions: {
+                            modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
+                            delegate: "CPU"
+                        },
+                        runningMode: "VIDEO",
+                        numHands: 1
+                    });
+                    els.runMode.textContent = "CPU (Stable)";
+                    els.runMode.className = "text-yellow-400 font-bold";
+                }
+
+                // AI Loaded successfully
+                els.loadingText.style.display = "none";
+                const spinner = document.getElementById('loading-spinner');
+                if (spinner) spinner.style.display = "none";
+                
+                els.btnCam.classList.remove('hidden');
+                
+            } catch (err) {
+                console.error(err);
+                els.loadingText.textContent = "เกิดข้อผิดพลาด";
+                els.errorMsg.innerHTML = `Error: ${err.message}<br><br>แนะนำ: ลองปิด Hardware Acceleration ใน Chrome Settings`;
+                els.errorMsg.classList.remove('hidden');
+            }
+        }
+        setupAI();
+
+        // --- Webcam Logic (Stop Logic Improved) ---
+        if (navigator.mediaDevices?.getUserMedia) {
+            els.btnCam.addEventListener('click', toggleCam);
+        } else {
+            els.errorMsg.textContent = "Browser ไม่รองรับกล้อง Webcam";
+            els.errorMsg.classList.remove('hidden');
+        }
+
+        function toggleCam() {
+            if (!handLandmarker) return;
+            
+            if (webcamRunning) {
+                // STOPPING CAMERA
+                webcamRunning = false;
+                
+                // 1. หยุด Stream ทั้งหมดเพื่อให้ไฟกล้องดับ
+                const stream = els.video.srcObject;
+                if (stream) {
+                    const tracks = stream.getTracks();
+                    tracks.forEach(track => track.stop());
+                }
+                els.video.srcObject = null;
+
+                // 2. UI Updates
+                els.btnCam.innerHTML = `<i data-lucide="power"></i> เปิดใช้งานกล้อง`;
+                els.btnCam.classList.remove('bg-red-600', 'hover:bg-red-500');
+                els.btnCam.classList.add('from-cyan-600', 'to-blue-600');
+                els.loading.classList.remove('hidden');
+                els.loading.classList.remove('opacity-0');
+                
+                // Clear Canvas
+                ctx.clearRect(0, 0, els.canvas.width, els.canvas.height);
+
+            } else {
+                // STARTING CAMERA
+                webcamRunning = true;
+                els.loading.classList.add('opacity-0');
+                setTimeout(() => els.loading.classList.add('hidden'), 500);
+                
+                els.btnCam.innerHTML = `<i data-lucide="stop-circle"></i> ปิดกล้อง`;
+                els.btnCam.classList.remove('from-cyan-600', 'to-blue-600');
+                els.btnCam.classList.add('bg-red-600', 'hover:bg-red-500');
+
+                const constraints = { video: { width: 1280, height: 720 } };
+                navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+                    els.video.srcObject = stream;
+                    els.video.addEventListener("loadeddata", predictLoop);
+                });
+            }
+            lucide.createIcons(); // Refresh icons
+        }
+
+        // --- Prediction Loop ---
+        let lastVideoTime = -1;
+        let gestureCooldown = 0;
+        const COOLDOWN_FRAMES = 10;
+
+        async function predictLoop() {
+            if (!webcamRunning) return; // Exit if stopped
+
+            els.canvas.width = els.video.videoWidth;
+            els.canvas.height = els.video.videoHeight;
+
+            if (lastVideoTime !== els.video.currentTime) {
+                lastVideoTime = els.video.currentTime;
+                const startTimeMs = performance.now();
+                const results = handLandmarker.detectForVideo(els.video, startTimeMs);
+
+                ctx.save();
+                ctx.clearRect(0, 0, els.canvas.width, els.canvas.height);
+
+                let currentGesture = "0"; // Default to Fist/Zero if nothing detected
+
+                if (results.landmarks && results.landmarks.length > 0) {
+                    for (const landmarks of results.landmarks) {
+                        drawHand(ctx, landmarks); 
+                        currentGesture = countFingers(landmarks); // Use new counting logic
+                    }
+                }
+
+                if (gestureCooldown === 0) {
+                    updateDisplay(currentGesture);
+                    gestureCooldown = COOLDOWN_FRAMES;
+                } else if (gestureCooldown > 0) {
+                    gestureCooldown--;
+                }
+                ctx.restore();
+            }
+
+            if (webcamRunning) window.requestAnimationFrame(predictLoop);
+        }
+
+        // --- New Logic: Finger Counter (0-5) ---
+        function countFingers(landmarks) {
+            // Landmark indices
+            // Thumb: 1-4 (Tip 4)
+            // Index: 5-8 (Tip 8)
+            // Middle: 9-12 (Tip 12)
+            // Ring: 13-16 (Tip 16)
+            // Pinky: 17-20 (Tip 20)
+
+            const tips = [8, 12, 16, 20];
+            const pips = [6, 10, 14, 18];
+            
+            let count = 0;
+
+            // 1. Check 4 fingers (Index, Middle, Ring, Pinky)
+            // Note: In MediaPipe image coords, Y increases downwards.
+            // So if Tip Y < PIP Y, the finger is pointing UP (Extended).
+            for (let i = 0; i < 4; i++) {
+                if (landmarks[tips[i]].y < landmarks[pips[i]].y) {
+                    count++;
+                }
+            }
+
+            // 2. Check Thumb
+            // Thumb is extended if the Tip is further from the Index Finger MCP (base) than the IP joint is.
+            // Or simpler check for horizontal hand: Tip x vs IP x.
+            // But 'distance from index base' is more robust for rotation.
+            
+            const thumbTip = landmarks[4];
+            const thumbIp = landmarks[3];
+            const indexMcp = landmarks[5]; // Reference point
+
+            const distTip = Math.hypot(thumbTip.x - indexMcp.x, thumbTip.y - indexMcp.y);
+            const distIp = Math.hypot(thumbIp.x - indexMcp.x, thumbIp.y - indexMcp.y);
+
+            // If tip is further from the palm center area (Index MCP) than the joint, it's extended
+            if (distTip > distIp) {
+                count++;
+            }
+
+            return count.toString(); // Return "0", "1", "2", "3", "4", "5"
+        }
+
+        // --- Visualizer ---
+        function drawHand(ctx, landmarks) {
+            const connections = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+            
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "#22d3ee"; 
+            
+            for (const [start, end] of connections) {
+                const p1 = landmarks[start];
+                const p2 = landmarks[end];
+                ctx.beginPath();
+                ctx.moveTo(p1.x * els.canvas.width, p1.y * els.canvas.height);
+                ctx.lineTo(p2.x * els.canvas.width, p2.y * els.canvas.height);
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = "#ec4899"; 
+            for (const p of landmarks) {
+                ctx.beginPath();
+                ctx.arc(p.x * els.canvas.width, p.y * els.canvas.height, 4, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+    </script>
+</body>
+</html>
