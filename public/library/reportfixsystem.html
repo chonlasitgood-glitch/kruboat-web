@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReportFix - ระบบแจ้งซ่อมออนไลน์ (Icon Edition)</title>
+    
+    <!-- Google Fonts: Kanit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Kanit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1), 0 8px 8px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Status Badge Animations */
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.05); }
+        }
+        .status-dot {
+            height: 8px;
+            width: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        .status-dot.active { animation: pulse-soft 2s infinite; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md sticky top-0 z-40 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                    <div class="flex-shrink-0 flex items-center text-brand-700">
+                        <div class="bg-brand-100 p-2 rounded-lg mr-2 border border-brand-200">
+                            <i class="fa-solid fa-screwdriver-wrench text-2xl text-brand-700"></i>
+                        </div>
+                        <span class="font-extrabold text-2xl tracking-tight text-brand-800">ReportFix<span class="text-slate-900">System</span></span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="showNotifications()" class="relative p-2 text-slate-600 hover:text-brand-700 transition rounded-full hover:bg-gray-100 border border-transparent hover:border-gray-200">
+                        <i class="fa-regular fa-bell text-xl font-bold"></i>
+                        <span class="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600 border border-white"></span>
+                        </span>
+                    </button>
+                    <div class="h-8 w-px bg-gray-300 mx-1"></div>
+                    <div class="flex items-center gap-2 cursor-pointer hover:bg-gray-100 p-1.5 rounded-lg transition border border-transparent hover:border-gray-200" onclick="showProfile()">
+                        <img class="h-9 w-9 rounded-full border-2 border-brand-100 shadow-sm" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Teacher" alt="">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-sm font-bold text-gray-900 leading-none">ครูโบ๊ท ดอทคอม</p>
+                            <p class="text-[11px] text-slate-700 mt-1 font-semibold">Admin (หมวดวิทย์)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-brand-900 to-brand-700 text-white pb-32 pt-12 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="md:flex md:items-center md:justify-between">
+                <div class="mb-6 md:mb-0">
+                    <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl drop-shadow-lg text-white">ระบบแจ้งซ่อมพัสดุครุภัณฑ์</h1>
+                    <p class="mt-3 text-white text-lg max-w-2xl font-medium drop-shadow-md bg-black/10 inline-block px-2 rounded">แพลตฟอร์มบริหารจัดการงานซ่อมบำรุงภายในโรงเรียน สะดวก รวดเร็ว ตรวจสอบได้</p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="Swal.fire('คู่มือการใช้งาน', 'กำลังจัดทำคู่มือ...', 'info')" class="bg-white/20 hover:bg-white/30 text-white px-5 py-2.5 rounded-full font-bold transition backdrop-blur-md border border-white/40 shadow-sm">
+                        <i class="fa-regular fa-circle-question mr-2"></i> คู่มือ
+                    </button>
+                    <button onclick="openModal()" class="bg-white text-brand-800 hover:bg-brand-50 px-6 py-2.5 rounded-full font-extrabold shadow-xl transition transform hover:-translate-y-0.5 active:translate-y-0 border border-brand-100">
+                        <i class="fa-solid fa-plus-circle mr-2"></i> แจ้งซ่อมใหม่
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="-mt-24 pb-12 relative z-10" id="dashboard">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-10">
+                <!-- Total -->
+                <div class="bg-white overflow-hidden shadow-lg rounded-2xl border-b-4 border-brand-600">
+                    <div class="p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-bold text-slate-600 uppercase tracking-wide">รายการทั้งหมด</p>
+                            <p class="text-3xl font-extrabold text-slate-900 mt-1" id="stat-total">0</p>
+                        </div>
+                        <div class="bg-brand-50 p-3 rounded-xl text-brand-700 shadow-sm border border-brand-100">
+                            <i class="fa-solid fa-clipboard-list text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <!-- Pending -->
+                <div class="bg-white overflow-hidden shadow-lg rounded-2xl border-b-4 border-amber-500">
+                    <div class="p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-bold text-slate-600 uppercase tracking-wide">รอตรวจสอบ</p>
+                            <p class="text-3xl font-extrabold text-slate-900 mt-1" id="stat-pending">0</p>
+                        </div>
+                        <div class="bg-amber-50 p-3 rounded-xl text-amber-600 shadow-sm border border-amber-100">
+                            <i class="fa-solid fa-clock text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <!-- Progress -->
+                <div class="bg-white overflow-hidden shadow-lg rounded-2xl border-b-4 border-blue-600">
+                    <div class="p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-bold text-slate-600 uppercase tracking-wide">กำลังดำเนินการ</p>
+                            <p class="text-3xl font-extrabold text-slate-900 mt-1" id="stat-progress">0</p>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded-xl text-blue-600 shadow-sm border border-blue-100">
+                            <i class="fa-solid fa-hammer text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <!-- Completed -->
+                <div class="bg-white overflow-hidden shadow-lg rounded-2xl border-b-4 border-green-600">
+                    <div class="p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-bold text-slate-600 uppercase tracking-wide">เสร็จสิ้น</p>
+                            <p class="text-3xl font-extrabold text-slate-900 mt-1" id="stat-completed">0</p>
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-xl text-green-600 shadow-sm border border-green-100">
+                            <i class="fa-solid fa-check-circle text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters & Content -->
+            <div id="request-section" class="bg-white rounded-2xl shadow-md border border-gray-200 p-6 mb-8">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 border-b border-gray-100 pb-6">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-slate-800 flex items-center">
+                            <i class="fa-solid fa-list-ul mr-2 text-brand-600"></i> รายการแจ้งซ่อม
+                        </h2>
+                        <p class="text-sm text-slate-600 mt-1 font-medium">จัดการและติดตามสถานะการแจ้งซ่อมทั้งหมด</p>
+                    </div>
+                    <div class="flex space-x-1 bg-gray-100 p-1.5 rounded-xl border border-gray-200">
+                        <button onclick="filterRequests('all')" class="filter-btn active w-20 py-2 rounded-lg text-sm font-bold transition-all bg-white text-brand-700 shadow-sm border border-gray-200">ทั้งหมด</button>
+                        <button onclick="filterRequests('pending')" class="filter-btn w-24 py-2 rounded-lg text-sm font-bold text-slate-600 hover:text-slate-900 transition-all">รอตรวจสอบ</button>
+                        <button onclick="filterRequests('progress')" class="filter-btn w-24 py-2 rounded-lg text-sm font-bold text-slate-600 hover:text-slate-900 transition-all">กำลังซ่อม</button>
+                        <button onclick="filterRequests('completed')" class="filter-btn w-20 py-2 rounded-lg text-sm font-bold text-slate-600 hover:text-slate-900 transition-all">เสร็จสิ้น</button>
+                    </div>
+                </div>
+
+                <!-- Grid -->
+                <div id="request-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <!-- Cards will be injected here -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-state" class="hidden flex flex-col items-center justify-center py-16">
+                    <div class="bg-gray-50 rounded-full p-6 mb-4 border border-gray-200">
+                        <i class="fa-solid fa-clipboard-check text-4xl text-gray-300"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900">ไม่พบรายการแจ้งซ่อม</h3>
+                    <p class="text-gray-500 font-medium">เลือกตัวกรองสถานะอื่น หรือเพิ่มรายการใหม่</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-auto py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center mb-4 md:mb-0">
+                <i class="fa-solid fa-screwdriver-wrench text-brand-600 mr-2"></i>
+                <span class="font-bold text-slate-700">ReportFix System</span>
+                <span class="mx-2 text-gray-300">|</span>
+                <span class="text-sm text-gray-500 font-medium">Version 3.0 (Demo)</span>
+            </div>
+            <p class="text-sm text-gray-500 font-medium">
+                &copy; 2025 พัฒนาโดย ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์ | ติดต่อ chonlasitgood@gmail.com
+            </p>
+        </div>
+    </footer>
+
+    <!-- ADD MODAL -->
+    <div id="report-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-md transition-opacity" onclick="closeModal()"></div>
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100">
+                    <form id="repair-form" onsubmit="submitForm(event)">
+                        <div class="bg-brand-700 px-4 py-4 sm:px-6 flex justify-between items-center border-b border-brand-800">
+                            <h3 class="text-lg font-bold leading-6 text-white flex items-center" id="modal-title">
+                                <div class="bg-white/20 p-1.5 rounded-full mr-2"><i class="fa-solid fa-plus text-sm"></i></div> แจ้งซ่อมรายการใหม่
+                            </h3>
+                            <button type="button" onclick="closeModal()" class="text-brand-100 hover:text-white transition">
+                                <i class="fa-solid fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        <div class="px-6 py-6 sm:p-6 space-y-5">
+                            <!-- Item Name -->
+                            <div>
+                                <label for="item-name" class="block text-sm font-extrabold text-slate-700 mb-1">หัวข้อการแจ้งซ่อม <span class="text-red-500">*</span></label>
+                                <input type="text" name="item-name" id="item-name" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-2.5 px-3 border bg-gray-50 font-medium placeholder-gray-400" placeholder="ระบุชื่ออุปกรณ์หรืออาการเสีย...">
+                            </div>
+
+                            <!-- Row -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="location" class="block text-sm font-extrabold text-slate-700 mb-1">สถานที่</label>
+                                    <select id="location" name="location" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-2.5 px-2 border bg-gray-50 font-medium">
+                                        <option>อาคาร 1 (วิชาการ)</option>
+                                        <option>อาคาร 2 (วิทยาศาสตร์)</option>
+                                        <option>อาคาร 3 (โรงอาหาร)</option>
+                                        <option>อาคาร 4 (หอประชุม)</option>
+                                        <option>ห้องพักครู</option>
+                                        <option>ห้องสมุด</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="category" class="block text-sm font-extrabold text-slate-700 mb-1">หมวดหมู่</label>
+                                    <select id="category" name="category" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-2.5 px-2 border bg-gray-50 font-medium">
+                                        <option value="electric">ไฟฟ้า/แสงสว่าง</option>
+                                        <option value="plumbing">ประปา/ห้องน้ำ</option>
+                                        <option value="furniture">ครุภัณฑ์/เฟอร์นิเจอร์</option>
+                                        <option value="computer">คอมพิวเตอร์/โสตฯ</option>
+                                        <option value="building">อาคารสถานที่</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Detail -->
+                            <div>
+                                <label for="description" class="block text-sm font-extrabold text-slate-700 mb-1">รายละเอียดอาการ</label>
+                                <textarea id="description" name="description" rows="3" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-2.5 px-3 border bg-gray-50 font-medium placeholder-gray-400" placeholder="อธิบายอาการเสียเพิ่มเติม..."></textarea>
+                            </div>
+
+                            <!-- Priority -->
+                            <div>
+                                <label class="block text-sm font-extrabold text-slate-700 mb-2">ระดับความเร่งด่วน</label>
+                                <div class="flex space-x-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                    <label class="inline-flex items-center cursor-pointer bg-white px-3 py-1.5 rounded border border-gray-200 shadow-sm hover:bg-gray-50 flex-1 justify-center">
+                                        <input type="radio" name="priority" value="low" class="h-4 w-4 text-brand-600 focus:ring-brand-500">
+                                        <span class="ml-2 text-sm text-slate-700 font-bold">ทั่วไป</span>
+                                    </label>
+                                    <label class="inline-flex items-center cursor-pointer bg-white px-3 py-1.5 rounded border border-gray-200 shadow-sm hover:bg-gray-50 flex-1 justify-center">
+                                        <input type="radio" name="priority" value="medium" checked class="h-4 w-4 text-brand-600 focus:ring-brand-500">
+                                        <span class="ml-2 text-sm text-slate-700 font-bold">ปานกลาง</span>
+                                    </label>
+                                    <label class="inline-flex items-center cursor-pointer bg-white px-3 py-1.5 rounded border border-red-100 shadow-sm hover:bg-red-50 flex-1 justify-center">
+                                        <input type="radio" name="priority" value="high" class="h-4 w-4 text-red-600 focus:ring-red-500">
+                                        <span class="ml-2 text-sm text-red-700 font-bold">ด่วนที่สุด</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-4 sm:flex sm:flex-row-reverse sm:px-6 border-t border-gray-200">
+                            <button type="submit" class="inline-flex w-full justify-center rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-brand-800 transition sm:ml-3 sm:w-auto">
+                                <i class="fa-regular fa-save mr-2 mt-0.5"></i> บันทึกแจ้งซ่อม
+                            </button>
+                            <button type="button" onclick="closeModal()" class="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition sm:mt-0 sm:w-auto">ยกเลิก</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DETAIL MODAL -->
+    <div id="detail-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="detail-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-md transition-opacity" onclick="closeDetailModal()"></div>
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center">
+                <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:w-full sm:max-w-2xl border border-gray-200">
+                    <!-- Detail Content Injected Here -->
+                    <div id="detail-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. MOCK DATA GENERATOR ---
+        const locations = ['อาคาร 1 (วิชาการ)', 'อาคาร 2 (วิทยาศาสตร์)', 'อาคาร 3 (โรงอาหาร)', 'ห้องสมุด', 'หอประชุม', 'ห้องพักครู', 'สนามฟุตบอล'];
+        const reporters = ['ครูสมศรี', 'ครูสมชาย', 'ภารโรงนพ', 'ครูวิภา', 'นักเรียนเวร', 'รปภ. แก้ว'];
+        
+        // Base mock items (Icons)
+        let requests = [
+            {
+                id: 'REQ-016',
+                title: 'โปรเจคเตอร์ภาพเป็นเส้น',
+                location: 'อาคาร 2 (วิทยาศาสตร์)',
+                category: 'computer',
+                categoryLabel: 'โสตทัศนูปกรณ์',
+                detail: 'เปิดแล้วภาพลายเป็นเส้นๆ ดูไม่รู้เรื่องเลยค่ะ ต้องการใช้สอนด่วน',
+                priority: 'high',
+                status: 'pending',
+                reporter: 'ครูสมศรี',
+                date: 'วันนี้',
+                time: '08:15'
+            },
+            {
+                id: 'REQ-015',
+                title: 'ท่อประปาหน้าห้องน้ำรั่ว',
+                location: 'อาคาร 3 (โรงอาหาร)',
+                category: 'plumbing',
+                categoryLabel: 'ประปา',
+                detail: 'น้ำพุ่งแรงมาก ต้องรีบปิดวาล์วใหญ่',
+                priority: 'high',
+                status: 'progress',
+                reporter: 'ภารโรงนพ',
+                date: 'วันนี้',
+                time: '07:30'
+            },
+            {
+                id: 'REQ-014',
+                title: 'เครื่องปรับอากาศไม่เย็น',
+                location: 'ห้องพักครู',
+                category: 'electric',
+                categoryLabel: 'ไฟฟ้า/แอร์',
+                detail: 'มีแต่ลมออกมา อากาศร้อนมาก',
+                priority: 'medium',
+                status: 'pending',
+                reporter: 'ครูวิภา',
+                date: 'เมื่อวาน',
+                time: '14:20'
+            },
+            {
+                id: 'REQ-013',
+                title: 'หน้าต่างกระจกแตก',
+                location: 'อาคาร 1 (วิชาการ)',
+                category: 'building',
+                categoryLabel: 'อาคาร',
+                detail: 'นักเรียนเตะบอลโดนกระจกชั้น 2 แตก',
+                priority: 'medium',
+                status: 'progress',
+                reporter: 'ครูสมชาย',
+                date: 'เมื่อวาน',
+                time: '16:00'
+            },
+            {
+                id: 'REQ-012',
+                title: 'เก้าอี้ขาหัก 3 ตัว',
+                location: 'หอประชุม',
+                category: 'furniture',
+                categoryLabel: 'เฟอร์นิเจอร์',
+                detail: 'เก้าอี้พลาสติกขาหักจากการประชุมผู้ปกครอง',
+                priority: 'low',
+                status: 'pending',
+                reporter: 'ภารโรงนพ',
+                date: '05 ต.ค. 66',
+                time: '09:00'
+            },
+            {
+                id: 'REQ-011',
+                title: 'เปลี่ยนหลอดไฟทางเดิน',
+                location: 'อาคาร 4 (หอประชุม)',
+                category: 'electric',
+                categoryLabel: 'ไฟฟ้า',
+                detail: 'ไฟกระพริบ 2 ดวง ทางเดินมืด',
+                priority: 'low',
+                status: 'completed',
+                reporter: 'รปภ. แก้ว',
+                date: '04 ต.ค. 66',
+                time: '19:30'
+            },
+            {
+                id: 'REQ-010',
+                title: 'คอมพิวเตอร์เปิดไม่ติด',
+                location: 'ห้องสมุด',
+                category: 'computer',
+                categoryLabel: 'คอมพิวเตอร์',
+                detail: 'เครื่องหมายเลข 4 หน้าจอดำสนิท',
+                priority: 'medium',
+                status: 'completed',
+                reporter: 'บรรณารักษ์',
+                date: '03 ต.ค. 66',
+                time: '10:15'
+            },
+            {
+                id: 'REQ-009',
+                title: 'ประตูห้องน้ำล็อคไม่ได้',
+                location: 'อาคาร 2 (วิทยาศาสตร์)',
+                category: 'building',
+                categoryLabel: 'อาคาร/ห้องน้ำ',
+                detail: 'กลอนประตูห้องที่ 3 ชำรุด',
+                priority: 'high',
+                status: 'completed',
+                reporter: 'นักเรียนเวร',
+                date: '02 ต.ค. 66',
+                time: '12:30'
+            },
+            {
+                id: 'REQ-008',
+                title: 'ปลั๊กไฟไหม้',
+                location: 'ห้องพักครู',
+                category: 'electric',
+                categoryLabel: 'ไฟฟ้า',
+                detail: 'มีกลิ่นไหม้และเขม่าดำที่เต้ารับ',
+                priority: 'high',
+                status: 'completed',
+                reporter: 'ครูสมศรี',
+                date: '01 ต.ค. 66',
+                time: '08:00'
+            },
+            {
+                id: 'REQ-007',
+                title: 'กระดานไวท์บอร์ดหลุด',
+                location: 'อาคาร 1 (วิชาการ)',
+                category: 'furniture',
+                categoryLabel: 'เฟอร์นิเจอร์',
+                detail: 'น็อตยึดมุมขวาหลุด เอียงลงมา',
+                priority: 'medium',
+                status: 'pending',
+                reporter: 'ครูวิภา',
+                date: '30 ก.ย. 66',
+                time: '15:45'
+            },
+             {
+                id: 'REQ-006',
+                title: 'ก๊อกน้ำอ่างล้างหน้าตัน',
+                location: 'ห้องน้ำหญิง อาคาร 1',
+                category: 'plumbing',
+                categoryLabel: 'ประปา',
+                detail: 'น้ำระบายไม่ลง ส่งกลิ่นเหม็น',
+                priority: 'medium',
+                status: 'progress',
+                reporter: 'แม่บ้าน',
+                date: '29 ก.ย. 66',
+                time: '16:00'
+            },
+             {
+                id: 'REQ-005',
+                title: 'อินเทอร์เน็ตใช้งานไม่ได้',
+                location: 'ห้องคอมพิวเตอร์ 1',
+                category: 'computer',
+                categoryLabel: 'อินเทอร์เน็ต',
+                detail: 'ไฟ Router สีแดงขึ้นกระพริบ',
+                priority: 'high',
+                status: 'completed',
+                reporter: 'ครูคอมพิวเตอร์',
+                date: '28 ก.ย. 66',
+                time: '08:30'
+            }
+        ];
+
+        // --- 2. HELPER FUNCTIONS ---
+        
+        // Return Icon Class and Color Classes
+        const getCategoryVisuals = (type) => {
+            const map = {
+                'electric': { icon: 'fa-lightbulb', bg: 'bg-yellow-100', text: 'text-yellow-600' },
+                'plumbing': { icon: 'fa-faucet', bg: 'bg-cyan-100', text: 'text-cyan-600' },
+                'furniture': { icon: 'fa-chair', bg: 'bg-orange-100', text: 'text-orange-600' },
+                'computer': { icon: 'fa-desktop', bg: 'bg-purple-100', text: 'text-purple-600' },
+                'building': { icon: 'fa-building', bg: 'bg-gray-200', text: 'text-gray-600' }
+            };
+            return map[type] || { icon: 'fa-wrench', bg: 'bg-gray-100', text: 'text-gray-500' };
+        };
+
+        const getCategoryIcon = (type) => {
+             const vis = getCategoryVisuals(type);
+             return vis.icon + ' ' + vis.text;
+        };
+
+
+        const getStatusConfig = (status) => {
+            // High contrast text/bg combos
+            if (status === 'pending') return { text: 'รอตรวจสอบ', bg: 'bg-amber-100', textCol: 'text-amber-900', icon: 'fa-clock', dot: 'bg-amber-600' };
+            if (status === 'progress') return { text: 'กำลังดำเนินการ', bg: 'bg-blue-100', textCol: 'text-blue-900', icon: 'fa-tools', dot: 'bg-blue-600' };
+            if (status === 'completed') return { text: 'เสร็จสิ้น', bg: 'bg-green-100', textCol: 'text-green-900', icon: 'fa-check-circle', dot: 'bg-green-600' };
+            return { text: 'Unknown', bg: 'bg-gray-100', textCol: 'text-gray-900' };
+        };
+
+        const getPriorityBadge = (level) => {
+            if (level === 'high') return `<span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-extrabold bg-red-100 text-red-800 border border-red-200"><i class="fa-solid fa-fire mr-1.5 text-red-600"></i> ด่วน</span>`;
+            if (level === 'medium') return `<span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-bold bg-orange-50 text-orange-800 border border-orange-200">ปานกลาง</span>`;
+            return `<span class="inline-flex items-center px-2.5 py-1 rounded text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">ทั่วไป</span>`;
+        };
+
+        // --- 3. MAIN RENDER LOGIC ---
+        function renderRequests(filter = 'all') {
+            const grid = document.getElementById('request-grid');
+            grid.innerHTML = '';
+            
+            const filteredData = filter === 'all' ? requests : requests.filter(r => r.status === filter);
+
+            if (filteredData.length === 0) {
+                document.getElementById('empty-state').classList.remove('hidden');
+                grid.classList.add('hidden');
+            } else {
+                document.getElementById('empty-state').classList.add('hidden');
+                grid.classList.remove('hidden');
+                
+                filteredData.forEach(req => {
+                    const status = getStatusConfig(req.status);
+                    const visual = getCategoryVisuals(req.category);
+                    
+                    const card = document.createElement('div');
+                    card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden card-hover flex flex-col h-full group relative';
+                    
+                    // REPLACED IMAGE WITH ICON CONTAINER
+                    card.innerHTML = `
+                        <div class="relative h-40 ${visual.bg} flex items-center justify-center overflow-hidden">
+                            <i class="fa-solid ${visual.icon} text-7xl ${visual.text} opacity-80 group-hover:scale-110 transition-transform duration-500"></i>
+                            
+                            <div class="absolute top-3 right-3 shadow-sm z-10">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${status.bg} ${status.textCol} ring-1 ring-white/50 backdrop-blur-md">
+                                    <span class="status-dot ${status.dot} ${req.status === 'progress' ? 'active' : ''}"></span>
+                                    ${status.text}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col relative">
+                            <!-- Date Badge floating overlapping -->
+                            <div class="absolute -top-5 left-5 bg-white border border-gray-200 shadow-sm px-3 py-1 rounded-lg text-xs font-bold text-slate-600 flex items-center">
+                                <i class="fa-regular fa-calendar-alt mr-1.5 text-brand-500"></i> ${req.date}, ${req.time}
+                            </div>
+
+                            <div class="flex justify-between items-start mb-2 mt-2">
+                                <span class="text-[10px] text-slate-500 font-extrabold font-mono uppercase tracking-wider">${req.id}</span>
+                                ${getPriorityBadge(req.priority)}
+                            </div>
+                            <h3 class="text-lg font-extrabold text-slate-800 mb-2 leading-tight group-hover:text-brand-700 transition line-clamp-1">${req.title}</h3>
+                            <div class="text-xs text-slate-600 mb-4 flex items-center font-semibold">
+                                <i class="fa-solid fa-location-dot mr-1.5 text-slate-400"></i> ${req.location}
+                            </div>
+                            
+                            <div class="mt-auto border-t border-gray-100 pt-4 flex items-center justify-between">
+                                <div class="flex items-center text-sm text-slate-700 font-bold">
+                                    <span class="inline-block w-2 h-2 rounded-full ${visual.text.replace('text', 'bg')} mr-2"></span>
+                                    ${req.categoryLabel}
+                                </div>
+                                <button onclick="openDetailModal('${req.id}')" class="text-brand-700 hover:text-brand-900 text-sm font-extrabold flex items-center transition hover:underline">
+                                    ดูรายละเอียด <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+            updateStats();
+        }
+
+        function updateStats() {
+            // Animate Numbers
+            const animateValue = (id, start, end, duration) => {
+                const obj = document.getElementById(id);
+                if(!obj) return;
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    obj.innerHTML = Math.floor(progress * (end - start) + start);
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }
+
+            animateValue("stat-total", 0, requests.length, 500);
+            animateValue("stat-pending", 0, requests.filter(r => r.status === 'pending').length, 500);
+            animateValue("stat-progress", 0, requests.filter(r => r.status === 'progress').length, 500);
+            animateValue("stat-completed", 0, requests.filter(r => r.status === 'completed').length, 500);
+        }
+
+        function filterRequests(type) {
+            // UI Button State
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = "filter-btn w-auto px-4 py-2 rounded-lg text-sm font-bold text-slate-500 hover:text-slate-800 transition-all";
+                if (btn.getAttribute('onclick').includes(`'${type}'`)) {
+                    btn.className = "filter-btn active w-auto px-4 py-2 rounded-lg text-sm font-extrabold transition-all bg-white text-brand-800 shadow-sm ring-1 ring-gray-200 border-l-4 border-brand-500";
+                }
+            });
+            renderRequests(type);
+        }
+
+        // --- 4. DETAIL MODAL LOGIC (Icon Version) ---
+        function openDetailModal(id) {
+            const req = requests.find(r => r.id === id);
+            if (!req) return;
+
+            const status = getStatusConfig(req.status);
+            const visual = getCategoryVisuals(req.category);
+            const content = document.getElementById('detail-content');
+            
+            content.innerHTML = `
+                <div class="bg-gray-50 px-5 py-4 flex justify-between items-center border-b border-gray-200">
+                    <h3 class="text-lg font-extrabold text-slate-800">รายละเอียดงานซ่อม #${req.id}</h3>
+                    <button onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600 focus:outline-none bg-white rounded-full p-1 shadow-sm hover:shadow-md transition">
+                        <i class="fa-solid fa-times text-xl w-6 h-6 flex items-center justify-center"></i>
+                    </button>
+                </div>
+                
+                <div class="relative h-48 ${visual.bg} flex items-center justify-center">
+                    <i class="fa-solid ${visual.icon} text-8xl ${visual.text} opacity-90"></i>
+                    <div class="absolute bottom-4 left-4">
+                        <span class="px-4 py-1.5 rounded-lg text-sm font-bold text-slate-700 bg-white/90 backdrop-blur-md border border-white/40 shadow-sm">
+                            <i class="fa-solid fa-tag mr-2 text-brand-500"></i> ${req.categoryLabel}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="px-6 py-6 space-y-5">
+                    <div class="flex justify-between items-start gap-4">
+                        <h2 class="text-2xl font-extrabold text-slate-900 leading-snug flex-1">${req.title}</h2>
+                        <div class="flex-shrink-0 pt-1">${getPriorityBadge(req.priority)}</div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-y-2 text-sm text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-200 font-medium">
+                        <div class="flex items-center mr-4"><i class="fa-solid fa-user-circle mr-2 text-slate-400 text-lg"></i> <span class="font-bold mr-1">ผู้แจ้ง:</span> ${req.reporter}</div>
+                        <div class="flex items-center mr-4"><i class="fa-solid fa-map-marker-alt mr-2 text-slate-400 text-lg"></i> <span class="font-bold mr-1">สถานที่:</span> ${req.location}</div>
+                        <div class="flex items-center"><i class="fa-regular fa-calendar-check mr-2 text-slate-400 text-lg"></i> <span class="font-bold mr-1">เวลา:</span> ${req.date}, ${req.time}</div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-sm font-extrabold text-slate-800 mb-2 flex items-center"><i class="fa-solid fa-align-left mr-2 text-brand-600"></i> รายละเอียดปัญหา</h4>
+                        <p class="text-slate-800 text-base leading-relaxed bg-white border border-gray-200 p-4 rounded-xl shadow-sm">
+                            ${req.detail}
+                        </p>
+                    </div>
+
+                    <div class="pt-2">
+                         <h4 class="text-sm font-extrabold text-slate-800 mb-3 flex items-center"><i class="fa-solid fa-tasks mr-2 text-brand-600"></i> การจัดการสถานะ</h4>
+                         <div class="flex flex-col sm:flex-row items-center justify-between bg-${status.bg.split('-')[1]}-50 p-4 rounded-xl border border-${status.bg.split('-')[1]}-200 shadow-sm gap-4">
+                            <div class="flex items-center w-full sm:w-auto">
+                                <div class="p-3 rounded-full ${status.bg} ${status.textCol} mr-3 shadow-sm border border-white">
+                                    <i class="fa-solid ${status.icon} text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold ${status.textCol} text-lg">${status.text}</p>
+                                    <p class="text-xs text-slate-600 font-semibold mt-0.5">อัปเดตล่าสุด: เมื่อสักครู่</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Admin Actions Simulation -->
+                            <div class="flex gap-3 w-full sm:w-auto justify-end">
+                                ${req.status !== 'completed' ? `
+                                <button onclick="changeStatus('${req.id}', 'next')" class="flex-1 sm:flex-none text-sm bg-brand-700 hover:bg-brand-800 text-white px-4 py-2.5 rounded-lg transition shadow-sm font-bold flex items-center justify-center">
+                                    <i class="fa-solid fa-arrow-right mr-2"></i> อัปเดตงาน
+                                </button>` : ''}
+                                <button onclick="deleteRequest('${req.id}')" class="flex-none text-sm bg-white hover:bg-red-50 text-red-600 border border-red-200 px-4 py-2.5 rounded-lg transition font-bold shadow-sm flex items-center justify-center hover:border-red-300">
+                                    <i class="fa-solid fa-trash-alt"></i>
+                                </button>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('detail-modal').classList.remove('hidden');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detail-modal').classList.add('hidden');
+        }
+
+        // --- 5. ACTION SIMULATION ---
+        
+        function changeStatus(id, direction) {
+            const index = requests.findIndex(r => r.id === id);
+            if(index === -1) return;
+            
+            const current = requests[index].status;
+            let next = current;
+            let msg = '';
+
+            if (current === 'pending') { next = 'progress'; msg = 'รับเรื่องแล้ว กำลังส่งช่างเข้าดำเนินการ'; }
+            else if (current === 'progress') { next = 'completed'; msg = 'ปิดงานซ่อมเรียบร้อย'; }
+
+            requests[index].status = next;
+            
+            closeDetailModal();
+            renderRequests(document.querySelector('.filter-btn.active').getAttribute('onclick').match(/'(.*?)'/)[1]);
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'อัปเดตสถานะสำเร็จ',
+                text: msg,
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+
+        function deleteRequest(id) {
+            Swal.fire({
+                title: 'ยืนยันการลบ?',
+                text: "คุณต้องการลบรายการแจ้งซ่อมนี้ใช่หรือไม่",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'ลบรายการ',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    requests = requests.filter(r => r.id !== id);
+                    closeDetailModal();
+                    renderRequests();
+                    Swal.fire('ลบสำเร็จ!', 'รายการถูกลบออกจากระบบแล้ว', 'success');
+                }
+            });
+        }
+
+        // --- 6. ADD FORM LOGIC ---
+        function openModal() { document.getElementById('report-modal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('report-modal').classList.add('hidden'); document.getElementById('repair-form').reset(); }
+
+        function submitForm(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            // Loading State
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
+            btn.disabled = true;
+
+            const catMap = {
+                'electric': 'ไฟฟ้า/แสงสว่าง',
+                'plumbing': 'ประปา/ห้องน้ำ',
+                'furniture': 'ครุภัณฑ์',
+                'computer': 'คอมพิวเตอร์',
+                'building': 'อาคาร'
+            };
+            const cat = formData.get('category');
+
+            setTimeout(() => {
+                const newReq = {
+                    id: `REQ-0${requests.length + 11}`, // Simple ID gen
+                    title: formData.get('item-name'),
+                    location: formData.get('location'),
+                    category: cat,
+                    categoryLabel: catMap[cat],
+                    detail: formData.get('description'),
+                    priority: formData.get('priority'),
+                    status: 'pending',
+                    reporter: 'คุณครูสมชาย (Admin)',
+                    date: 'วันนี้',
+                    time: new Date().toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'})
+                };
+                
+                requests.unshift(newReq);
+                closeModal();
+                filterRequests('all');
+                
+                Swal.fire({
+                    title: 'แจ้งซ่อมสำเร็จ!',
+                    text: 'ระบบได้บันทึกข้อมูลเรียบร้อยแล้ว',
+                    icon: 'success',
+                    confirmButtonColor: '#0ea5e9'
+                });
+
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1000);
+        }
+        
+        // --- 7. NOTIFICATION & PROFILE ---
+        function showNotifications() {
+            Swal.fire({
+                title: 'การแจ้งเตือน',
+                html: `
+                    <div class="text-left text-sm space-y-3">
+                        <div class="flex items-center p-3 bg-blue-50 rounded-lg text-blue-900 border border-blue-100">
+                            <i class="fa-solid fa-circle-info mr-3 text-blue-600 text-lg"></i> 
+                            <div><span class="font-bold">ใหม่!</span> มีรายการแจ้งซ่อมใหม่ 3 รายการ</div>
+                        </div>
+                        <div class="flex items-center p-3 hover:bg-gray-50 rounded-lg text-slate-700 transition border border-transparent hover:border-gray-200">
+                            <i class="fa-solid fa-check-circle mr-3 text-green-600 text-lg"></i> 
+                            <div>งานซ่อม <span class="font-mono font-bold">#REQ-011</span> เสร็จสิ้นแล้ว</div>
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: 'รับทราบ',
+                confirmButtonColor: '#0ea5e9'
+            });
+        }
+        
+        function showProfile() {
+            Swal.fire({
+                title: 'ข้อมูลผู้ใช้งาน',
+                html: '<p class="text-slate-600">คุณเข้าสู่ระบบในฐานะ <span class="font-bold text-brand-700">Admin</span><br>สามารถจัดการ แก้ไข และลบรายการได้</p>',
+                imageUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Teacher',
+                imageWidth: 100,
+                imageHeight: 100,
+                confirmButtonColor: '#0ea5e9',
+                confirmButtonText: 'ปิดหน้าต่าง'
+            });
+        }
+
+        // Init
+        window.onload = () => {
+            renderRequests();
+        };
+
+    </script>
+</body>
+</html>
