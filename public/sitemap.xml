@@ -1,16 +1,99 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+   <!-- หน้าหลัก -->
    <url>
       <loc>https://www.kruboat.com/</loc>
-      <lastmod>2025-12-12</lastmod>
       <priority>1.00</priority>
+      <changefreq>daily</changefreq>
+   </url>
+   <url>
+      <loc>https://www.kruboat.com/about</loc>
+      <priority>0.80</priority>
+      <changefreq>monthly</changefreq>
    </url>
    <url>
       <loc>https://www.kruboat.com/library</loc>
+      <priority>0.90</priority>
+      <changefreq>weekly</changefreq>
+   </url>
+
+   <!-- โซนแอพครูโบ๊ท (App Zone) -->
+   <url>
+      <loc>https://www.kruboat.com/app/</loc>
+      <priority>0.90</priority>
+      <changefreq>weekly</changefreq>
+   </url>
+   <url>
+      <loc>https://www.kruboat.com/app/random</loc>
       <priority>0.80</priority>
    </url>
    <url>
-      <loc>https://www.kruboat.com/app/</loc>
+      <loc>https://www.kruboat.com/app/scoreboard</loc>
       <priority>0.80</priority>
+   </url>
+   <url>
+      <loc>https://www.kruboat.com/app/atomicbuilder</loc>
+      <priority>0.70</priority>
+   </url>
+   <url>
+      <loc>https://www.kruboat.com/app/binaryhackergame</loc>
+      <priority>0.70</priority>
+   </url>
+   <url>
+      <loc>https://www.kruboat.com/app/immunedefence</loc>
+      <priority>0.70</priority>
+   </url>
+   <url>
+      <loc>https://www.kruboat.com/app/logicrobotgame</loc>
+      <priority>0.70</priority>
+   </url>
+
+   <!-- โซนนักเรียน (Student Zone) -->
+   <url>
+      <loc>https://www.kruboat.com/student/</loc>
+      <priority>0.90</priority>
+      <changefreq>weekly</changefreq>
+   </url>
+   <url>
+      <loc>https://www.kruboat.com/student/roommate</loc>
+      <priority>0.80</priority>
+   </url>
+   <url>
+      <loc>https://www.kruboat.com/student/scorecheck</loc>
+      <priority>0.80</priority>
+   </url>
+   <url>
+      <loc>https://www.kruboat.com/student/idcard</loc>
+      <priority>0.60</priority>
+   </url>
+
+   <!-- โซนผลงานในคลัง (Library Items) -->
+   <url>
+      <loc>https://www.kruboat.com/library/studentapp-v1</loc>
+      <priority>0.60</priority>
+   </url>
+   <url>
+      <loc>https://www.kruboat.com/library/handgesture-drum</loc>
+      <priority>0.60</priority>
+   </url>
+   <url>
+      <loc>https://www.kruboat.com/library/handgesture-drumv2</loc>
+      <priority>0.60</priority>
+   </url>
+   <url>
+      <loc>https://www.kruboat.com/library/handgesture-arcube</loc>
+      <priority>0.60</priority>
+   </url>
+   <url>
+      <loc>https://www.kruboat.com/library/handgesture-number</loc>
+      <priority>0.60</priority>
+   </url>
+   <url>
+      <loc>https://www.kruboat.com/library/suppliereserve-desktop</loc>
+      <priority>0.60</priority>
+   </url>
+   <url>
+      <loc>https://www.kruboat.com/library/suppliereserve-mobile</loc>
+      <priority>0.60</priority>
    </url>
 </urlset>
