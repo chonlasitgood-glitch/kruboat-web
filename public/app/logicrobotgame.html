@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Logic Robot: ฝึกคิดแบบอัลกอริทึม</title>
-
+    
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4MQ3GL6CTB"></script>
     <script>
@@ -60,7 +60,7 @@
     <div class="w-full max-w-4xl px-4 py-2 flex justify-between items-center bg-gray-800 shadow-md">
         <h1 class="text-xl md:text-2xl font-bold text-green-400"><i class="fas fa-robot mr-2"></i>Logic Robot</h1>
         <div class="flex gap-4">
-            <span class="text-gray-300">ด่าน: <span id="level-display" class="font-bold text-white">1</span></span>
+            <span class="text-gray-300">ด่าน: <span id="level-display" class="font-bold text-white">1</span>/15</span>
             <button onclick="resetLevel()" class="text-red-400 hover:text-red-300 text-sm"><i class="fas fa-rotate-right"></i> รีเซ็ต</button>
         </div>
     </div>
@@ -68,9 +68,9 @@
     <div class="flex flex-col md:flex-row w-full max-w-4xl flex-grow overflow-hidden p-2 gap-4">
         
         <!-- ส่วนแสดงผลเกม (Game Board) -->
-        <div class="flex-grow flex items-center justify-center bg-gray-900 rounded-xl border-2 border-gray-700 relative p-4" id="game-container">
+        <div class="flex-grow flex items-center justify-center bg-gray-900 rounded-xl border-2 border-gray-700 relative p-4 overflow-auto" id="game-container">
             <!-- Grid จะถูกสร้างโดย JavaScript -->
-            <div id="grid-board" class="relative"></div>
+            <div id="grid-board" class="relative transition-all"></div>
             
             <!-- Overlay แจ้งเตือน -->
             <div id="message-modal" class="hidden absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50 rounded-xl">
@@ -89,7 +89,7 @@
             <div class="flex-grow bg-gray-900 rounded-lg p-3 border border-gray-600 flex flex-col min-h-[150px]">
                 <div class="flex justify-between items-center mb-2 border-b border-gray-700 pb-1">
                     <span class="text-xs text-gray-400 uppercase tracking-wider">Main Function</span>
-                    <span id="command-count" class="text-xs text-gray-500">0/20</span>
+                    <span id="command-count" class="text-xs text-gray-500">0/30</span>
                 </div>
                 <div id="command-list" class="command-list flex flex-wrap content-start gap-2 overflow-y-auto h-full">
                     <!-- คำสั่งจะมาโผล่ตรงนี้ -->
@@ -127,7 +127,7 @@
     <!-- Script หลักของเกม -->
     <script>
         // --- 1. การตั้งค่าและตัวแปรหลัก ---
-        const boardSize = 50; // ขนาดช่อง Grid (px)
+        let boardSize = 45; // ขนาดช่อง Grid (px) - จะปรับอัตโนมัติตามขนาดด่าน
         const gapSize = 4;    // ช่องว่างระหว่าง Grid
         
         // สถานะของเกม
@@ -135,56 +135,147 @@
         let robotState = { x: 0, y: 0, dir: 1 }; // dir: 0=Up, 1=Right, 2=Down, 3=Left
         let isRunning = false;
         let commands = [];
+        const maxCommands = 30; // เพิ่มจำนวนคำสั่งสูงสุดสำหรับด่านยาวๆ
         
         // นิยามของ Grid: 0=ว่าง, 1=กำแพง, 2=จุดเริ่ม, 3=เป้าหมาย
         const levels = [
-            // Level 1: เดินตรงๆ
+            // Level 1: พื้นฐาน เดินตรง
             {
-                map: [
-                    [0, 0, 0, 0, 0],
-                    [2, 0, 0, 3, 0],
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0]
-                ],
-                startDir: 1, // หันขวา
-                hint: "ลองใช้คำสั่ง 'เดินหน้า' หลายๆ ครั้งดูสิ"
+                map: [[0, 0, 0, 0, 0], [2, 0, 0, 3, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]],
+                startDir: 1, hint: "Level 1: เดินหน้าตรงไปเลย!"
             },
-            // Level 2: ต้องเลี้ยว
+            // Level 2: เลี้ยวครั้งแรก
             {
-                map: [
-                    [0, 0, 0, 3, 0],
-                    [0, 1, 1, 0, 0],
-                    [2, 0, 0, 0, 0],
-                    [0, 1, 1, 1, 0],
-                    [0, 0, 0, 0, 0]
-                ],
-                startDir: 1,
-                hint: "ระวังกำแพง! ต้องเลี้ยวซ้ายแล้วค่อยเดินต่อ"
+                map: [[0, 0, 0, 3, 0], [0, 1, 1, 0, 0], [2, 0, 0, 0, 0], [0, 1, 1, 1, 0], [0, 0, 0, 0, 0]],
+                startDir: 1, hint: "Level 2: เลี้ยวซ้ายเพื่อหลบกำแพง"
             },
-            // Level 3: ซับซ้อนขึ้น
+            // Level 3: ซิกแซก
             {
-                map: [
-                    [0, 0, 1, 3, 0],
-                    [0, 0, 1, 0, 0],
-                    [0, 0, 1, 0, 0],
-                    [0, 2, 0, 0, 1],
-                    [0, 1, 1, 1, 1]
-                ],
-                startDir: 0, // หันขึ้น
-                hint: "วางแผนให้ดีนะ ทางมันคดเคี้ยว"
+                map: [[0, 0, 1, 3, 0], [0, 0, 1, 0, 0], [0, 0, 1, 0, 0], [0, 2, 0, 0, 1], [0, 1, 1, 1, 1]],
+                startDir: 0, hint: "Level 3: ซิกแซกไปตามทาง"
             },
-            // Level 4: เขาวงกต
+            // Level 4: ตัว U
+            {
+                map: [[3, 0, 0, 0, 0], [1, 1, 1, 1, 0], [0, 0, 0, 0, 0], [0, 1, 1, 1, 1], [2, 0, 0, 0, 0]],
+                startDir: 1, hint: "Level 4: เดินอ้อมกำแพงเป็นตัว U"
+            },
+            // Level 5: ทางแคบ (5x5)
+            {
+                map: [[1, 1, 3, 1, 1], [1, 0, 0, 0, 1], [1, 0, 1, 0, 1], [1, 0, 0, 0, 1], [1, 1, 2, 1, 1]],
+                startDir: 0, hint: "Level 5: ทางแยกวัดใจ เลือกซ้ายหรือขวา?"
+            },
+            // Level 6: บันได (6x6)
             {
                 map: [
-                    [3, 0, 0, 0, 0],
-                    [1, 1, 1, 1, 0],
-                    [0, 0, 0, 0, 0],
-                    [0, 1, 1, 1, 1],
-                    [2, 0, 0, 0, 0]
+                    [2, 0, 0, 0, 0, 0],
+                    [1, 1, 0, 0, 0, 0],
+                    [0, 1, 1, 0, 0, 0],
+                    [0, 0, 1, 1, 0, 0],
+                    [0, 0, 0, 1, 1, 0],
+                    [0, 0, 0, 0, 1, 3]
                 ],
-                startDir: 1,
-                hint: "ด่านสุดท้ายแล้ว!"
+                startDir: 1, hint: "Level 6: เดินลงบันได ระวังตกขอบ!"
+            },
+            // Level 7: วนกลับ (Spiral)
+            {
+                map: [
+                    [1, 1, 1, 1, 1],
+                    [1, 0, 0, 0, 1],
+                    [1, 0, 1, 0, 1],
+                    [1, 0, 3, 0, 1],
+                    [2, 0, 0, 0, 1]
+                ],
+                startDir: 1, hint: "Level 7: ก้นหอยมรณะ"
+            },
+            // Level 8: กำแพงลวงตา (6x6)
+            {
+                map: [
+                    [0, 0, 0, 1, 3, 0],
+                    [0, 1, 0, 1, 1, 0],
+                    [0, 1, 0, 0, 0, 0],
+                    [0, 1, 1, 1, 1, 0],
+                    [0, 0, 0, 0, 0, 0],
+                    [2, 1, 1, 1, 1, 0]
+                ],
+                startDir: 0, hint: "Level 8: หาช่องว่างให้เจอ"
+            },
+            // Level 9: เขาวงกตขนาดย่อม (7x7) - เพิ่มความยาก
+            {
+                map: [
+                    [1, 1, 1, 1, 1, 1, 1],
+                    [1, 2, 0, 1, 0, 0, 1],
+                    [1, 1, 0, 1, 0, 1, 1],
+                    [1, 0, 0, 0, 0, 0, 1],
+                    [1, 0, 1, 1, 1, 0, 1],
+                    [1, 0, 0, 0, 1, 3, 1],
+                    [1, 1, 1, 1, 1, 1, 1]
+                ],
+                startDir: 1, hint: "Level 9: อย่าหลงทางในเขาวงกต"
+            },
+            // Level 10: ทางยาว (Long Run)
+            {
+                map: [
+                    [2, 0, 0, 0, 0, 1, 0],
+                    [1, 1, 1, 1, 0, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0],
+                    [0, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 3]
+                ],
+                startDir: 1, hint: "Level 10: อ้อมโลกไปให้ถึงฝัน"
+            },
+            // Level 11: ห้องสี่เหลี่ยม
+            {
+                map: [
+                    [1, 1, 1, 1, 1, 1],
+                    [1, 2, 0, 1, 3, 1],
+                    [1, 0, 0, 1, 0, 1],
+                    [1, 0, 0, 0, 0, 1],
+                    [1, 1, 1, 1, 1, 1]
+                ],
+                startDir: 2, hint: "Level 11: ต้องถอยหลังกลับหรือเปล่านะ?"
+            },
+            // Level 12: ฟันปลา (ZigZag Hard)
+            {
+                map: [
+                    [2, 1, 0, 1, 0, 1, 3],
+                    [0, 1, 0, 1, 0, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0]
+                ],
+                startDir: 2, hint: "Level 12: หลบหลีกสิ่งกีดขวางแบบดิจิทัล"
+            },
+            // Level 13: สะพานข้ามแม่น้ำ
+            {
+                map: [
+                    [0, 0, 1, 0, 0, 1, 0],
+                    [2, 0, 1, 0, 0, 1, 3],
+                    [0, 0, 1, 1, 0, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0]
+                ],
+                startDir: 1, hint: "Level 13: หาทางข้ามกำแพงยาว"
+            },
+            // Level 14: กับดักตัว H
+            {
+                map: [
+                    [2, 0, 1, 0, 0],
+                    [1, 0, 1, 0, 1],
+                    [1, 0, 0, 0, 1],
+                    [1, 0, 1, 0, 1],
+                    [0, 0, 1, 3, 0]
+                ],
+                startDir: 1, hint: "Level 14: ตัว H เจ้าปัญหา"
+            },
+            // Level 15: The Final Exam (8x8)
+            {
+                map: [
+                    [1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 2, 0, 0, 0, 0, 0, 1],
+                    [1, 1, 1, 0, 1, 1, 0, 1],
+                    [1, 0, 0, 0, 1, 3, 0, 1],
+                    [1, 0, 1, 1, 1, 1, 1, 1],
+                    [1, 0, 0, 0, 0, 0, 0, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1]
+                ],
+                startDir: 1, hint: "Level 15: ด่านสุดท้าย! ขอให้โชคดี"
             }
         ];
 
@@ -201,6 +292,13 @@
             const rows = map.length;
             const cols = map[0].length;
             
+            // ปรับขนาด Grid อัตโนมัติถ้ายิ่งด่านใหญ่ ช่องยิ่งเล็กลงเพื่อให้พอดีจอ
+            if (cols > 6 || rows > 6) {
+                boardSize = 35;
+            } else {
+                boardSize = 45;
+            }
+
             const gridBoard = document.getElementById('grid-board');
             gridBoard.innerHTML = '';
             
@@ -256,6 +354,9 @@
             // ตั้งค่าตำแหน่งเริ่มต้น
             robotState.dir = levelData.startDir;
             updateRobotVisual();
+            
+            // แสดง Hint ใน Console หรือ UI (ถ้ามีที่ว่าง)
+            // console.log(levelData.hint);
         }
 
         function updateRobotVisual() {
@@ -265,18 +366,34 @@
             const top = robotState.y * (boardSize + gapSize);
             
             // คำนวณการหมุน (0=Up, 1=Right, 2=Down, 3=Left)
-            // หมายเหตุ: icon fas fa-robot หน้าตรงปกติ ถ้าเรามองเป็นทิศ 0 (Up) ก็โอเค
-            // แต่เพื่อให้ดูมีทิศทาง เราอาจจะต้องหมุน
             const rotation = (robotState.dir) * 90; 
 
             robot.style.transform = `translate(${left}px, ${top}px) rotate(${rotation}deg)`;
+            
+            // ปรับขนาดหุ่นตาม boardSize
+            robot.style.width = `${boardSize}px`;
+            robot.style.height = `${boardSize}px`;
+            // ปรับขนาด icon
+            const icon = robot.querySelector('i');
+            if (boardSize < 40) {
+                 icon.classList.remove('text-3xl');
+                 icon.classList.add('text-xl');
+            } else {
+                 icon.classList.remove('text-xl');
+                 icon.classList.add('text-3xl');
+            }
+        }
+        
+        function updateUI() {
+             document.getElementById('level-display').innerText = currentLevel + 1;
+             clearCommands();
         }
 
         // --- 3. ระบบคำสั่ง (Logic) ---
 
         function addCommand(cmd) {
             if (isRunning) return;
-            if (commands.length >= 20) return; // จำกัด 20 คำสั่ง
+            if (commands.length >= maxCommands) return; 
 
             commands.push(cmd);
             renderCommandList();
@@ -291,9 +408,8 @@
         function renderCommandList() {
             const listEl = document.getElementById('command-list');
             const countEl = document.getElementById('command-count');
-            const emptyMsg = document.querySelector('.empty-msg');
             
-            listEl.innerHTML = ''; // ล้างของเก่า แต่เก็บ emptyMsg ไว้เดี๋ยวเช็คใหม่
+            listEl.innerHTML = ''; 
 
             if (commands.length === 0) {
                  listEl.innerHTML = '<div class="text-gray-500 text-sm italic w-full text-center mt-4 empty-msg">เลือกคำสั่งด้านล่าง...</div>';
@@ -326,9 +442,7 @@
                 });
             }
             
-            countEl.innerText = `${commands.length}/20`;
-            
-            // Auto scroll to bottom
+            countEl.innerText = `${commands.length}/${maxCommands}`;
             listEl.scrollTop = listEl.scrollHeight;
         }
 
@@ -341,20 +455,17 @@
             document.getElementById('run-btn').classList.add('opacity-50', 'cursor-not-allowed');
             document.getElementById('run-btn').innerHTML = '<i class="fas fa-cog fa-spin"></i> กำลังทำงาน...';
 
-            // รีเซ็ตตำแหน่งหุ่นยนต์ก่อนเริ่ม (เพื่อให้ดูเหมือนเริ่มใหม่จากจุด start)
             resetRobotToStart();
-            await sleep(500); // รอแป๊บนึง
+            await sleep(500);
 
-            // วนลูปทำตามคำสั่งทีละขั้น
             for (let i = 0; i < commands.length; i++) {
-                if (!isRunning) break; // เผื่อมีการกดหยุดหรือ reset ระหว่างทาง (ยังไม่ได้ทำปุ่มหยุดแต่เผื่อไว้)
+                if (!isRunning) break; 
 
                 const cmd = commands[i];
-                highlightCommand(i); // ไฮไลท์คำสั่งที่กำลังทำ
+                highlightCommand(i); 
                 
                 await executeCommand(cmd);
                 
-                // ตรวจสอบเงื่อนไขแพ้/ชนะ หลังจบแต่ละคำสั่ง
                 const result = checkWinCondition();
                 if (result === 'win') {
                     showModal(true);
@@ -373,10 +484,9 @@
                     return;
                 }
 
-                await sleep(600); // หน่วงเวลาให้เห็น animation
+                await sleep(500); // เร่งความเร็วขึ้นนิดหน่อยสำหรับด่านยาวๆ
             }
 
-            // ถ้าทำครบทุกคำสั่งแล้วยังไม่ถึงเป้าหมาย
             if (isRunning) {
                  showModal(false, 'โปรแกรมจบแล้ว แต่ยังไม่ถึงเป้าหมาย');
                  isRunning = false;
@@ -389,11 +499,10 @@
                 const nextX = robotState.x + (robotState.dir === 1 ? 1 : robotState.dir === 3 ? -1 : 0);
                 const nextY = robotState.y + (robotState.dir === 2 ? 1 : robotState.dir === 0 ? -1 : 0);
                 
-                // อัพเดท state (ยังไม่เช็คชนตรงนี้ ปล่อยให้ move ไปก่อนแล้วเช็คทีหลัง หรือเช็คก่อนก็ได้)
                 robotState.x = nextX;
                 robotState.y = nextY;
             } else if (cmd === 'L') { // Turn Left
-                robotState.dir = (robotState.dir + 3) % 4; // (0->3, 1->0, etc.)
+                robotState.dir = (robotState.dir + 3) % 4; 
             } else if (cmd === 'R') { // Turn Right
                 robotState.dir = (robotState.dir + 1) % 4;
             }
@@ -439,17 +548,10 @@
         }
 
         function resetLevel() {
-            // หยุดการทำงานถ้าวิ่งอยู่
             isRunning = false;
             resetBtnState();
-            
-            // ล้างคำสั่ง
             clearCommands();
-            
-            // รีเซ็ตตำแหน่ง
             resetRobotToStart();
-            
-            // ซ่อน Modal
             document.getElementById('message-modal').classList.add('hidden');
         }
 
@@ -458,12 +560,11 @@
         function nextLevel() {
             currentLevel++;
             if (currentLevel >= levels.length) {
-                currentLevel = 0; // วนกลับด่านแรก หรือจะทำหน้าจบเกมก็ได้
-                alert("ยินดีด้วย! คุณผ่านทุกด่านแล้ว กลับไปเริ่มด่าน 1 ใหม่นะ");
+                currentLevel = 0; 
+                alert("ยินดีด้วย! คุณผ่านครบทั้ง 15 ด่านแล้ว! กลับไปเริ่มด่าน 1 ใหม่นะ");
             }
-            document.getElementById('level-display').innerText = currentLevel + 1;
-            resetLevel(); // รีเซ็ตทุกอย่างสำหรับด่านใหม่
-            initGame();   // วาดกระดานใหม่
+            resetLevel(); 
+            initGame();
         }
 
         function showModal(isSuccess, message) {
@@ -477,7 +578,7 @@
             if (isSuccess) {
                 title.innerText = "ภารกิจสำเร็จ! 🎉";
                 title.className = "text-3xl font-bold mb-4 text-green-400";
-                text.innerText = "คุณเขียนโค้ดพาหุ่นยนต์ไปถึงเป้าหมายได้เยี่ยมมาก";
+                text.innerText = "สุดยอดมาก! ไปด่านต่อไปกันเลย";
                 btn.innerText = "ด่านถัดไป";
                 btn.className = "bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full transition shadow-lg";
                 btn.onclick = nextLevel;
@@ -489,7 +590,7 @@
                 btn.className = "bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-full transition shadow-lg";
                 btn.onclick = () => {
                      modal.classList.add('hidden');
-                     resetRobotToStart(); // รีเซ็ตตำแหน่งให้ผู้เล่นลองใหม่ แต่ไม่ลบคำสั่ง (เพื่อให้แก้ debug ได้)
+                     resetRobotToStart(); 
                 };
             }
         }
@@ -497,12 +598,10 @@
         function highlightCommand(index) {
             const listEl = document.getElementById('command-list');
             const items = listEl.children;
-            // ล้าง highlight เก่า
             for(let item of items) {
                 item.style.opacity = '0.5';
                 item.style.transform = 'scale(1)';
             }
-            // highlight ใหม่
             if(items[index]) {
                 items[index].style.opacity = '1';
                 items[index].style.transform = 'scale(1.1)';
@@ -515,7 +614,6 @@
             btn.classList.remove('opacity-50', 'cursor-not-allowed');
             btn.innerHTML = '<i class="fas fa-play"></i> เริ่มทำงาน';
             
-            // คืนค่า Opacity รายการคำสั่ง
             const listEl = document.getElementById('command-list');
             for(let item of listEl.children) {
                 item.style.opacity = '1';
@@ -526,7 +624,6 @@
 
         const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-        // เริ่มเกม
         window.onload = initGame;
 
     </script>

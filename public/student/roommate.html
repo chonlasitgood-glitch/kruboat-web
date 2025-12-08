@@ -17,10 +17,8 @@
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
     
-    <!-- ย้าย Bootstrap มาไว้บนสุดเพื่อให้โหลดพร้อมใช้แน่นอน -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -28,10 +26,10 @@
         :root { --primary-color: #6366f1; --secondary-color: #ec4899; --bg-color: #f3f4f6; --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); --fab-text-bg: #374151; }
         body { font-family: 'Prompt', sans-serif; background-color: var(--bg-color); margin: 0; padding-bottom: 100px; }
         .mobile-container { max-width: 480px; margin: 0 auto; background-color: white; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.05); position: relative; }
-        .app-header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 20px; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; margin-bottom: 20px; position: relative; z-index: 10; }
+        .app-header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 20px; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; margin-bottom: 20px; position: relative; }
         .profile-section img { width: 60px; height: 60px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.5); object-fit: cover; background: white; }
         .xp-bar { height: 8px; background-color: rgba(255,255,255,0.3); border-radius: 10px; margin-top: 5px; overflow: hidden; }
-        .xp-progress { height: 100%; background-color: #fbbf24; width: 0%; transition: width 0.5s; }
+        .xp-progress { height: 100%; background-color: #fbbf24; width: 0%; transition: width 0.5s ease-in-out; }
         .custom-card { border: none; border-radius: 15px; box-shadow: var(--card-shadow); margin-bottom: 15px; overflow: hidden; background: white; }
         .card-header-custom { padding: 12px 15px; font-weight: 600; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
         .schedule-item { padding: 12px 15px; border-left: 4px solid #e5e7eb; margin-bottom: 8px; background-color: #f9fafb; border-radius: 0 8px 8px 0; transition: all 0.3s; }
@@ -56,14 +54,16 @@
         .fab-container.active ~ .fab-overlay { opacity: 1; pointer-events: auto; }
         .add-btn { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; border: none; }
         
-        /* แก้ไขปุ่มครู: ย้ายตำแหน่งและเพิ่ม z-index */
-        .teacher-btn { position: absolute; top: 20px; right: 20px; color: rgba(255,255,255,0.7); cursor: pointer; z-index: 20; padding: 10px; }
-        .teacher-btn:hover { color: white; background: rgba(255,255,255,0.1); border-radius: 50%; }
+        .teacher-btn { position: absolute; top: 20px; right: 20px; color: rgba(255,255,255,0.8); cursor: pointer; z-index: 50; padding: 8px; border-radius: 50%; transition: background 0.3s; }
+        .teacher-btn:hover { color: white; background: rgba(255,255,255,0.2); }
         
         .xp-badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background: #fbbf24; color: #78350f; font-weight: bold; margin-left: 5px;}
         .student-list-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #eee; }
         .nav-pills .nav-link { color: #6b7280; background-color: #f3f4f6; margin: 0 2px; }
         .nav-pills .nav-link.active { background-color: var(--primary-color); color: white; font-weight: bold; }
+        
+        .game-btn { font-size: 1.5rem; font-weight: bold; width: 100%; height: 60px; border-radius: 12px; }
+        .game-timer { font-size: 2rem; font-weight: bold; color: #ef4444; }
     </style>
 </head>
 <body>
@@ -74,69 +74,72 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="fw-bold fs-5"><i class="fa-solid fa-shapes me-2"></i>RoomMate</div>
         </div>
-        <!-- ย้ายปุ่มออกมาอยู่นอก Flex เพื่อไม่ให้โดนบัง -->
-        <div class="teacher-btn" onclick="unlockTeacherMode()" title="ตั้งค่าสำหรับครู"><i class="fa-solid fa-gear fa-lg"></i></div>
+        <div class="teacher-btn" onclick="unlockTeacherMode()"><i class="fa-solid fa-gear fa-lg"></i></div>
 
         <div class="d-flex align-items-center profile-section">
             <img src="https://ui-avatars.com/api/?name=Guest&background=random" alt="Profile" id="student-img">
             <div class="ms-3 flex-grow-1">
-                <div class="fw-bold" id="student-name">กำลังโหลด...</div>
-                <div class="d-flex justify-content-between align-items-end" style="font-size: 0.8rem;">
-                    <span id="student-lvl">Lv. 1</span>
-                    <span id="student-xp">0 XP</span>
+                <div class="fw-bold" id="student-name">ผู้มาเยือน</div>
+                
+                <!-- ส่วนแสดงสถานะ (ซ่อนถ้ายังไม่ล็อกอิน) -->
+                <div id="student-stats" class="d-none">
+                    <div class="d-flex justify-content-between align-items-end" style="font-size: 0.8rem;">
+                        <span id="student-lvl">Lv. 1</span>
+                        <span id="student-xp">0 XP</span>
+                    </div>
+                    <div class="xp-bar"><div class="xp-progress" id="student-xp-bar" style="width: 0%"></div></div>
                 </div>
-                <div class="xp-bar"><div class="xp-progress" id="student-xp-bar" style="width: 0%"></div></div>
+
+                <!-- ปุ่ม Login (แสดงถ้ายังไม่ล็อกอิน) -->
+                <div id="guest-login-btn">
+                    <button class="btn btn-sm btn-white text-primary fw-bold rounded-pill px-3 mt-1 shadow-sm" onclick="openRegisterModal()" style="background: rgba(255,255,255,0.9); border:none;">
+                        <i class="fa-solid fa-right-to-bracket me-1"></i> เข้าสู่ระบบ
+                    </button>
+                </div>
+
             </div>
         </div>
     </header>
 
     <div class="container px-3">
         
-        <!-- Schedule Card -->
-        <div class="custom-card">
-            <div class="card-header-custom">
-                <span><i class="fa-regular fa-calendar-days me-2 text-primary"></i>ตารางเรียนวันนี้</span>
-                <span class="badge bg-primary rounded-pill" id="today-day">-</span>
+        <!-- Game Cards (Grid) -->
+        <div class="row g-2 mb-3">
+            <div class="col-6">
+                <div class="custom-card bg-primary text-white border-0 h-100" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
+                    <div class="p-3 text-center" onclick="openGameModal('math')" style="cursor: pointer;">
+                        <div class="bg-white/20 w-10 h-10 rounded-circle flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-calculator text-lg text-white"></i></div>
+                        <h6 class="fw-bold mb-1" style="font-size: 0.9rem;">Math Dash</h6>
+                        <small class="text-white/70 d-block" style="font-size: 0.65rem;">คณิตคิดไว</small>
+                    </div>
+                </div>
             </div>
-            <div class="p-3" id="schedule-list">
-                <div class="text-center text-muted small py-3">กำลังโหลดตารางเรียน...</div>
+            <div class="col-6">
+                <div class="custom-card bg-success text-white border-0 h-100" style="background: linear-gradient(135deg, #10b981, #059669);">
+                    <div class="p-3 text-center" onclick="openGameModal('vocab')" style="cursor: pointer;">
+                        <div class="bg-white/20 w-10 h-10 rounded-circle flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-language text-lg text-white"></i></div>
+                        <h6 class="fw-bold mb-1" style="font-size: 0.9rem;">Vocab Quiz</h6>
+                        <small class="text-white/70 d-block" style="font-size: 0.65rem;">ทายศัพท์อังกฤษ</small>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Duty Card (แก้ไขส่วนหัว) -->
+        <!-- Schedule Card -->
+        <div class="custom-card">
+            <div class="card-header-custom"><span><i class="fa-regular fa-calendar-days me-2 text-primary"></i>ตารางเรียนวันนี้</span><span class="badge bg-primary rounded-pill" id="today-day">-</span></div>
+            <div class="p-3" id="schedule-list"><div class="text-center text-muted small py-3">กำลังโหลดตารางเรียน...</div></div>
+        </div>
+
+        <!-- Duty Card -->
         <div class="custom-card border-0" style="background: linear-gradient(to right, #fff1eb, #ace0f9);">
-            <div class="card-header-custom bg-transparent border-0">
-                <span><i class="fa-solid fa-broom me-2 text-success"></i>เวรประจำวัน</span>
-                <div class="d-flex align-items-center gap-2">
-                    <!-- ปุ่มดูสมาชิกเวร -->
-                    <button class="btn btn-light btn-sm rounded-pill px-3 py-1 border-0 shadow-sm text-success fw-bold" style="font-size: 0.7rem;" onclick="openDutyRosterModal()">
-                        <i class="fa-solid fa-users-viewfinder me-1"></i> ดูสมาชิก
-                    </button>
-                    <span class="badge bg-success" id="duty-group">-</span>
-                </div>
-            </div>
-            <div class="p-3 pt-0">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div id="duty-members">
-                        <small class="text-muted d-block mb-1">สมาชิกเวรวันนี้:</small>
-                        <div id="duty-list-text" class="small text-dark fw-bold">กำลังโหลด...</div>
-                    </div>
-                    <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="triggerCamera()">
-                        <i class="fa-solid fa-camera me-1"></i> ส่งงาน
-                    </button>
-                    <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;" onchange="uploadDutyPhoto(this)">
-                </div>
-            </div>
+            <div class="card-header-custom bg-transparent border-0"><span><i class="fa-solid fa-broom me-2 text-success"></i>เวรประจำวัน</span><div class="d-flex align-items-center gap-2"><button class="btn btn-light btn-sm rounded-pill px-3 py-1 border-0 shadow-sm text-success fw-bold" style="font-size: 0.7rem;" onclick="openDutyRosterModal()"><i class="fa-solid fa-users-viewfinder me-1"></i> ดูสมาชิก</button><span class="badge bg-success" id="duty-group">-</span></div></div>
+            <div class="p-3 pt-0"><div class="d-flex justify-content-between align-items-center"><div id="duty-members"><small class="text-muted d-block mb-1">สมาชิกเวรวันนี้:</small><div id="duty-list-text" class="small text-dark fw-bold">กำลังโหลด...</div></div><button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="triggerCamera()"><i class="fa-solid fa-camera me-1"></i> ส่งงาน</button><input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;" onchange="uploadDutyPhoto(this)"></div></div>
         </div>
 
         <!-- Homework List -->
-        <div class="d-flex justify-content-between align-items-center mb-2 mt-4">
-            <h6 class="fw-bold m-0"><i class="fa-solid fa-pen-to-square me-2 text-warning"></i>การบ้าน</h6>
-            <button class="btn btn-dark add-btn shadow-sm" data-bs-toggle="modal" data-bs-target="#addHomeworkModal"><i class="fa-solid fa-plus"></i></button>
-        </div>
-        <div id="homework-list">
-            <div class="text-center text-muted small py-3">กำลังโหลด...</div>
-        </div>
+        <div class="d-flex justify-content-between align-items-center mb-2 mt-4"><h6 class="fw-bold m-0"><i class="fa-solid fa-pen-to-square me-2 text-warning"></i>การบ้าน</h6><button class="btn btn-dark add-btn shadow-sm" data-bs-toggle="modal" data-bs-target="#addHomeworkModal"><i class="fa-solid fa-plus"></i></button></div>
+        <div id="homework-list"><div class="text-center text-muted small py-3">กำลังโหลด...</div></div>
 
     </div>
     <div style="height: 60px;"></div>
@@ -145,20 +148,43 @@
 <!-- FAB Menu -->
 <div class="fab-container" id="fabMenu">
     <div class="fab-menu">
-        <div class="fab-item" onclick="logoutStudent()">
-            <span class="fab-item-label">ออกจากระบบ</span>
-            <div class="fab-item-btn bg-danger text-white"><i class="fa-solid fa-right-from-bracket"></i></div>
-        </div>
-        <a href="../student/index.html" class="fab-item">
-            <span class="fab-item-label">หน้าหลัก</span>
-            <div class="fab-item-btn"><i class="fa-solid fa-house"></i></div>
-        </a>
+        <div class="fab-item" onclick="logoutStudent()"><span class="fab-item-label">ออกจากระบบ</span><div class="fab-item-btn bg-danger text-white"><i class="fa-solid fa-right-from-bracket"></i></div></div>
+        <a href="../student/index.html" class="fab-item"><span class="fab-item-label">หน้าหลัก</span><div class="fab-item-btn"><i class="fa-solid fa-house"></i></div></a>
     </div>
     <button class="fab-trigger" onclick="toggleFab()"><i class="fa-solid fa-bars"></i></button>
 </div>
 <div class="fab-overlay" onclick="toggleFab()"></div>
 
-<!-- Modal: Duty Roster (เพิ่มกลับเข้ามา) -->
+<!-- Game Modal -->
+<div class="modal fade" id="gameModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-header border-0 pb-0"><h6 class="modal-title fw-bold" id="game-title">🎮 Mini Game</h6><button type="button" class="btn-close" onclick="closeGameModal()"></button></div>
+            <div class="modal-body text-center" id="game-body">
+                <div id="game-start-screen">
+                    <div class="display-1 mb-3" id="game-icon">🎲</div>
+                    <p class="mb-4" id="game-desc">คำอธิบายเกม...</p>
+                    <div id="game-cooldown-msg" class="alert alert-danger d-none text-small">พักสมองก่อนนะ! <br>รออีก <span id="cooldown-timer">0</span> วินาที</div>
+                    <button class="btn btn-primary w-100 rounded-pill py-2" id="start-game-btn" onclick="startGame()">เริ่มเกม!</button>
+                </div>
+                <div id="game-play-screen" class="d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-4"><span class="badge bg-secondary">Score: <span id="game-score">0</span></span><div class="game-timer" id="game-time">30</div></div>
+                    <h1 class="display-4 fw-bold mb-4" id="game-question">?</h1>
+                    <div class="row g-2" id="game-options"></div>
+                </div>
+                <div id="game-result-screen" class="d-none">
+                     <div class="display-1 mb-3">🎉</div>
+                     <h3>หมดเวลา!</h3>
+                     <p>คุณทำได้ <span class="fw-bold text-primary" id="final-score">0</span> คะแนน</p>
+                     <div id="xp-earned-msg" class="alert alert-success mt-3">ได้รับ <span class="fw-bold">+0 XP</span></div>
+                     <button class="btn btn-secondary w-100 rounded-pill mt-3" onclick="closeGameModal()">ปิด</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Other Modals (Duty, Register, HW, Teacher) -->
 <div class="modal fade" id="dutyRosterModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content rounded-4 border-0" style="min-height: 500px;">
@@ -167,28 +193,25 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body bg-light">
-                <!-- Day Selector -->
                 <ul class="nav nav-pills nav-fill mb-3 gap-1 small" id="duty-tabs" role="tablist">
-                    <li class="nav-item" role="presentation"><button class="nav-link active rounded-pill py-1" id="d-mon-tab" data-bs-toggle="pill" data-bs-target="#d-mon" type="button">จันทร์</button></li>
-                    <li class="nav-item" role="presentation"><button class="nav-link rounded-pill py-1" id="d-tue-tab" data-bs-toggle="pill" data-bs-target="#d-tue" type="button">อังคาร</button></li>
-                    <li class="nav-item" role="presentation"><button class="nav-link rounded-pill py-1" id="d-wed-tab" data-bs-toggle="pill" data-bs-target="#d-wed" type="button">พุธ</button></li>
-                    <li class="nav-item" role="presentation"><button class="nav-link rounded-pill py-1" id="d-thu-tab" data-bs-toggle="pill" data-bs-target="#d-thu" type="button">พฤหัส</button></li>
-                    <li class="nav-item" role="presentation"><button class="nav-link rounded-pill py-1" id="d-fri-tab" data-bs-toggle="pill" data-bs-target="#d-fri" type="button">ศุกร์</button></li>
+                    <li class="nav-item"><button class="nav-link active rounded-pill py-1" id="d-mon-tab" data-bs-toggle="pill" data-bs-target="#d-mon">จันทร์</button></li>
+                    <li class="nav-item"><button class="nav-link rounded-pill py-1" id="d-tue-tab" data-bs-toggle="pill" data-bs-target="#d-tue">อังคาร</button></li>
+                    <li class="nav-item"><button class="nav-link rounded-pill py-1" id="d-wed-tab" data-bs-toggle="pill" data-bs-target="#d-wed">พุธ</button></li>
+                    <li class="nav-item"><button class="nav-link rounded-pill py-1" id="d-thu-tab" data-bs-toggle="pill" data-bs-target="#d-thu">พฤหัส</button></li>
+                    <li class="nav-item"><button class="nav-link rounded-pill py-1" id="d-fri-tab" data-bs-toggle="pill" data-bs-target="#d-fri">ศุกร์</button></li>
                 </ul>
-                
                 <div class="tab-content" id="duty-tabContent">
-                    <div class="tab-pane fade show active" id="d-mon" role="tabpanel"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
-                    <div class="tab-pane fade" id="d-tue" role="tabpanel"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
-                    <div class="tab-pane fade" id="d-wed" role="tabpanel"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
-                    <div class="tab-pane fade" id="d-thu" role="tabpanel"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
-                    <div class="tab-pane fade" id="d-fri" role="tabpanel"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
+                    <div class="tab-pane fade show active" id="d-mon"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
+                    <div class="tab-pane fade" id="d-tue"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
+                    <div class="tab-pane fade" id="d-wed"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
+                    <div class="tab-pane fade" id="d-thu"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
+                    <div class="tab-pane fade" id="d-fri"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal: Student Register -->
 <div class="modal fade" id="studentRegisterModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 p-4 text-center">
@@ -202,7 +225,6 @@
     </div>
 </div>
 
-<!-- Modal: Add Homework -->
 <div class="modal fade" id="addHomeworkModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content rounded-4 border-0">
@@ -222,7 +244,6 @@
     </div>
 </div>
 
-<!-- Modal: Teacher Login -->
 <div class="modal fade" id="teacherLoginModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content rounded-4 border-0">
@@ -235,7 +256,6 @@
     </div>
 </div>
 
-<!-- Modal: Teacher Dashboard -->
 <div class="modal fade" id="teacherDashboardModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content rounded-4 border-0" style="min-height: 600px;">
@@ -244,77 +264,35 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body bg-light p-0">
-                <!-- Teacher Menu -->
                 <div id="teacher-menu" class="p-3">
                     <div class="d-grid gap-2">
-                        <button class="btn btn-white shadow-sm text-start p-3 rounded-3 border" onclick="showSection('teacher-students')">
-                            <i class="fa-solid fa-users me-2 text-success"></i> จัดการนักเรียน / ให้คะแนน
-                        </button>
-                        <button class="btn btn-white shadow-sm text-start p-3 rounded-3 border" onclick="showSection('teacher-schedule')">
-                            <i class="fa-solid fa-calendar-days me-2 text-primary"></i> แก้ไขตารางเรียน
-                        </button>
-                        <button class="btn btn-white shadow-sm text-start p-3 rounded-3 border" onclick="viewDutyHistory()">
-                            <i class="fa-solid fa-images me-2 text-warning"></i> ดูรูปงานเวร
-                        </button>
+                        <button class="btn btn-white shadow-sm text-start p-3 rounded-3 border" onclick="showSection('teacher-students')"><i class="fa-solid fa-users me-2 text-success"></i> จัดการนักเรียน / ให้คะแนน</button>
+                        <button class="btn btn-white shadow-sm text-start p-3 rounded-3 border" onclick="showSection('teacher-schedule')"><i class="fa-solid fa-calendar-days me-2 text-primary"></i> แก้ไขตารางเรียน</button>
+                        <button class="btn btn-white shadow-sm text-start p-3 rounded-3 border" onclick="viewDutyHistory()"><i class="fa-solid fa-images me-2 text-warning"></i> ดูรูปงานเวร</button>
                     </div>
                 </div>
-
-                <!-- Section: Manage Students -->
                 <div id="teacher-students" class="d-none h-100 d-flex flex-column">
-                    <div class="p-2 border-bottom bg-white d-flex align-items-center">
-                        <button class="btn btn-sm btn-link text-decoration-none me-2" onclick="showSection('teacher-menu')"><i class="fa-solid fa-arrow-left"></i></button>
-                        <span class="fw-bold small">รายชื่อนักเรียน</span>
-                    </div>
+                    <div class="p-2 border-bottom bg-white d-flex align-items-center"><button class="btn btn-sm btn-link text-decoration-none me-2" onclick="showSection('teacher-menu')"><i class="fa-solid fa-arrow-left"></i></button><span class="fw-bold small">รายชื่อนักเรียน</span></div>
                     <div class="p-3 bg-white border-bottom">
                         <div class="mb-2">
-                            <input type="text" id="new-student-id" class="form-control form-control-sm mb-2" placeholder="รหัสประจำตัว (ID)">
-                            <input type="text" id="new-student-name" class="form-control form-control-sm mb-2" placeholder="ชื่อ-นามสกุล">
-                            <select id="new-student-group" class="form-select form-select-sm mb-2">
-                                <option value="">-- เลือกวันเวร --</option>
-                                <option value="1">เวรวันจันทร์</option>
-                                <option value="2">เวรวันอังคาร</option>
-                                <option value="3">เวรวันพุธ</option>
-                                <option value="4">เวรวันพฤหัสบดี</option>
-                                <option value="5">เวรวันศุกร์</option>
-                            </select>
-                            <label class="form-label small text-muted mb-1">รูปประจำตัว (ไม่บังคับ)</label>
-                            <input type="file" id="new-student-photo" class="form-control form-control-sm mb-2" accept="image/*">
-                            <button id="btn-add-student" class="btn btn-success btn-sm w-100 rounded-pill" onclick="addStudent()">
-                                <i class="fa-solid fa-plus"></i> เพิ่มนักเรียน
-                            </button>
+                            <input type="text" id="new-student-id" class="form-control form-control-sm mb-2" placeholder="รหัสประจำตัว (ID)"><input type="text" id="new-student-name" class="form-control form-control-sm mb-2" placeholder="ชื่อ-นามสกุล">
+                            <select id="new-student-group" class="form-select form-select-sm mb-2"><option value="">-- เลือกวันเวร --</option><option value="1">เวรวันจันทร์</option><option value="2">เวรวันอังคาร</option><option value="3">เวรวันพุธ</option><option value="4">เวรวันพฤหัสบดี</option><option value="5">เวรวันศุกร์</option></select>
+                            <label class="form-label small text-muted mb-1">รูปประจำตัว (ไม่บังคับ)</label><input type="file" id="new-student-photo" class="form-control form-control-sm mb-2" accept="image/*">
+                            <button id="btn-add-student" class="btn btn-success btn-sm w-100 rounded-pill" onclick="addStudent()"><i class="fa-solid fa-plus"></i> เพิ่มนักเรียน</button>
                         </div>
                     </div>
                     <div id="student-list-container" class="p-2 overflow-auto flex-grow-1"></div>
                 </div>
-
-                <!-- Section: Edit Schedule -->
                 <div id="teacher-schedule" class="d-none h-100 d-flex flex-column">
-                    <div class="p-2 border-bottom bg-white d-flex align-items-center">
-                        <button class="btn btn-sm btn-link text-decoration-none me-2" onclick="showSection('teacher-menu')"><i class="fa-solid fa-arrow-left"></i></button>
-                        <span class="fw-bold small">แก้ไขตารางเรียน</span>
-                    </div>
+                    <div class="p-2 border-bottom bg-white d-flex align-items-center"><button class="btn btn-sm btn-link text-decoration-none me-2" onclick="showSection('teacher-menu')"><i class="fa-solid fa-arrow-left"></i></button><span class="fw-bold small">แก้ไขตารางเรียน</span></div>
                     <div class="p-3 overflow-auto flex-grow-1">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">เลือกวันที่จะแก้ไข</label>
-                            <select id="edit-day-select" class="form-select form-select-sm" onchange="loadScheduleForDay()">
-                                <option value="mon">วันจันทร์</option>
-                                <option value="tue">วันอังคาร</option>
-                                <option value="wed">วันพุธ</option>
-                                <option value="thu">วันพฤหัสบดี</option>
-                                <option value="fri">วันศุกร์</option>
-                            </select>
-                        </div>
+                        <div class="mb-3"><label class="form-label small fw-bold">เลือกวันที่จะแก้ไข</label><select id="edit-day-select" class="form-select form-select-sm" onchange="loadScheduleForDay()"><option value="mon">วันจันทร์</option><option value="tue">วันอังคาร</option><option value="wed">วันพุธ</option><option value="thu">วันพฤหัสบดี</option><option value="fri">วันศุกร์</option></select></div>
                         <div id="period-forms-container" class="space-y-3"></div>
                         <button class="btn btn-primary w-100 rounded-pill btn-sm mt-3" onclick="saveScheduleByDay()">บันทึกข้อมูลวันนี้</button>
                     </div>
                 </div>
-
-                <!-- Section: Gallery -->
                 <div id="duty-photo-gallery" class="d-none h-100 d-flex flex-column">
-                     <div class="p-2 border-bottom bg-white d-flex align-items-center">
-                        <button class="btn btn-sm btn-link text-decoration-none me-2" onclick="showSection('teacher-menu')"><i class="fa-solid fa-arrow-left"></i></button>
-                        <span class="fw-bold small">รูปงานเวร</span>
-                    </div>
+                     <div class="p-2 border-bottom bg-white d-flex align-items-center"><button class="btn btn-sm btn-link text-decoration-none me-2" onclick="showSection('teacher-menu')"><i class="fa-solid fa-arrow-left"></i></button><span class="fw-bold small">รูปงานเวร</span></div>
                     <div id="gallery-grid" class="d-grid gap-2 p-2 overflow-auto" style="grid-template-columns: 1fr 1fr;"></div>
                 </div>
             </div>
@@ -326,7 +304,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp, getDoc, updateDoc, setDoc, limit, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp, getDoc, updateDoc, setDoc, limit, where, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
     // ⚠️ Config ของครู
@@ -346,41 +324,222 @@
 
     let currentUserData = null;
     let currentStudentId = null;
+    let currentGameType = '';
 
-    // เวลาเรียน 7 คาบ
-    const periodTimes = [
-        "08:30 - 09:20", "09:20 - 10:10", "10:10 - 11:00", 
-        "11:00 - 11:50", "13:00 - 13:50", "13:50 - 14:40", "14:40 - 15:30"
+    // --- GAME LOGIC ---
+    let gameTimer;
+    let timeLeft = 30;
+    let score = 0;
+    let currentQuestion = {};
+
+    const vocabList = [
+        {en: "Library", th: "ห้องสมุด"}, {en: "Teacher", th: "ครู"}, {en: "Student", th: "นักเรียน"},
+        {en: "School", th: "โรงเรียน"}, {en: "Computer", th: "คอมพิวเตอร์"}, {en: "Pencil", th: "ดินสอ"},
+        {en: "Book", th: "หนังสือ"}, {en: "Room", th: "ห้อง"}, {en: "Friend", th: "เพื่อน"},
+        {en: "Love", th: "รัก"}, {en: "Happy", th: "มีความสุข"}, {en: "Sad", th: "เสียใจ"},
+        {en: "Run", th: "วิ่ง"}, {en: "Eat", th: "กิน"}, {en: "Water", th: "น้ำ"},
+        {en: "Sun", th: "พระอาทิตย์"}, {en: "Moon", th: "พระจันทร์"}, {en: "Star", th: "ดาว"},
+        {en: "Sky", th: "ท้องฟ้า"}, {en: "Rain", th: "ฝน"}, {en: "Cat", th: "แมว"},
+        {en: "Dog", th: "สุนัข"}, {en: "Bird", th: "นก"}, {en: "Fish", th: "ปลา"},
+        {en: "Tree", th: "ต้นไม้"}, {en: "Flower", th: "ดอกไม้"}, {en: "Red", th: "สีแดง"},
+        {en: "Blue", th: "สีน้ำเงิน"}, {en: "Green", th: "สีเขียว"}, {en: "Yellow", th: "สีเหลือง"},
+        {en: "Hello", th: "สวัสดี"}, {en: "Goodbye", th: "ลาก่อน"}, {en: "Thank you", th: "ขอบคุณ"},
+        {en: "Yes", th: "ใช่"}, {en: "No", th: "ไม่"}, {en: "Play", th: "เล่น"},
+        {en: "Study", th: "เรียน"}, {en: "Sleep", th: "นอน"}, {en: "Walk", th: "เดิน"},
+        {en: "Read", th: "อ่าน"}, {en: "Write", th: "เขียน"}
     ];
 
-    // 1. Auth & Identity Logic
+    // ✅ Make Functions Available Globally (สำคัญมาก)
+    window.openGameModal = (type) => {
+        currentGameType = type;
+        const title = type === 'math' ? '🧠 Math Dash' : '🔤 Vocab Quiz';
+        const icon = type === 'math' ? '🔢' : '📚';
+        const desc = type === 'math' ? 'ตอบคำถามคณิตศาสตร์ให้ถูกต้อง' : 'ทายคำศัพท์ภาษาอังกฤษให้ถูกต้อง';
+
+        document.getElementById('game-title').innerText = title;
+        document.getElementById('game-icon').innerText = icon;
+        document.getElementById('game-desc').innerText = desc;
+
+        // Check Cooldown
+        if(currentUserData && currentUserData.lastGamePlayed) {
+            const lastPlayed = currentUserData.lastGamePlayed.toDate();
+            const diffMin = (new Date() - lastPlayed) / 60000;
+            
+            if(diffMin < 5) {
+                const waitSec = Math.ceil((5 - diffMin) * 60);
+                document.getElementById('game-cooldown-msg').classList.remove('d-none');
+                document.getElementById('cooldown-timer').innerText = waitSec;
+                document.getElementById('start-game-btn').disabled = true;
+            } else {
+                document.getElementById('game-cooldown-msg').classList.add('d-none');
+                document.getElementById('start-game-btn').disabled = false;
+            }
+        } else {
+             document.getElementById('game-cooldown-msg').classList.add('d-none');
+             document.getElementById('start-game-btn').disabled = false;
+        }
+        new bootstrap.Modal(document.getElementById('gameModal')).show();
+    }
+
+    window.startGame = () => {
+        score = 0;
+        timeLeft = 30;
+        document.getElementById('game-score').innerText = score;
+        document.getElementById('game-time').innerText = timeLeft;
+        document.getElementById('game-start-screen').classList.add('d-none');
+        document.getElementById('game-play-screen').classList.remove('d-none');
+        nextQuestion();
+        gameTimer = setInterval(() => {
+            timeLeft--;
+            document.getElementById('game-time').innerText = timeLeft;
+            if(timeLeft <= 0) endGame();
+        }, 1000);
+    }
+
+    function nextQuestion() {
+        let questionText, ans, options;
+        if (currentGameType === 'math') {
+            const num1 = Math.floor(Math.random() * 20) + 1;
+            const num2 = Math.floor(Math.random() * 20) + 1;
+            const isPlus = Math.random() > 0.5;
+            ans = isPlus ? num1 + num2 : num1 - num2;
+            questionText = `${num1} ${isPlus?'+':'-'} ${num2} = ?`;
+            options = [ans];
+            while(options.length < 4) {
+                const r = ans + Math.floor(Math.random() * 10) - 5;
+                if(!options.includes(r)) options.push(r);
+            }
+        } else {
+            const item = vocabList[Math.floor(Math.random() * vocabList.length)];
+            const mode = Math.random() > 0.5 ? 'en-th' : 'th-en';
+            if(mode === 'en-th') {
+                questionText = item.en; ans = item.th;
+                options = [ans];
+                while(options.length < 4) {
+                    const r = vocabList[Math.floor(Math.random() * vocabList.length)].th;
+                    if(!options.includes(r)) options.push(r);
+                }
+            } else {
+                questionText = item.th; ans = item.en;
+                options = [ans];
+                while(options.length < 4) {
+                    const r = vocabList[Math.floor(Math.random() * vocabList.length)].en;
+                    if(!options.includes(r)) options.push(r);
+                }
+            }
+        }
+        currentQuestion.ans = ans;
+        document.getElementById('game-question').innerText = questionText;
+        options.sort(() => Math.random() - 0.5);
+        document.getElementById('game-options').innerHTML = options.map(opt => 
+            `<div class="col-6"><button class="btn btn-outline-primary w-100 py-3 fw-bold fs-5 game-option-btn" onclick="checkAnswer(this, '${opt}')">${opt}</button></div>`
+        ).join('');
+    }
+
+    window.checkAnswer = (btn, val) => {
+        const allBtns = document.querySelectorAll('.game-option-btn');
+        allBtns.forEach(b => b.disabled = true); 
+
+        if(currentGameType === 'math') val = parseInt(val);
+
+        if(val === currentQuestion.ans) {
+            score++;
+            document.getElementById('game-score').innerText = score;
+            btn.classList.replace('btn-outline-primary', 'btn-success');
+        } else {
+            btn.classList.replace('btn-outline-primary', 'btn-danger');
+        }
+        setTimeout(() => nextQuestion(), 500);
+    }
+
+    function endGame() {
+        clearInterval(gameTimer);
+        document.getElementById('game-play-screen').classList.add('d-none');
+        document.getElementById('game-result-screen').classList.remove('d-none');
+        document.getElementById('final-score').innerText = score;
+        
+        // Calculate XP
+        let earnedXP = 0;
+        if(score >= 5) {
+            earnedXP = Math.min(score, 10);
+            const todayStr = new Date().toISOString().split('T')[0];
+            const lastDate = currentUserData.lastGameDate || '';
+            let currentDaily = lastDate === todayStr ? (currentUserData.dailyGameXP || 0) : 0;
+            
+            if(currentDaily < 50) {
+                 const canEarn = 50 - currentDaily;
+                 earnedXP = Math.min(earnedXP, canEarn);
+                 
+                 // Update DB using increment()
+                 if(currentStudentId && earnedXP > 0) {
+                     const ref = doc(db, "rm_students", currentStudentId);
+                     updateDoc(ref, {
+                         xp: increment(earnedXP),
+                         lastGamePlayed: serverTimestamp(),
+                         dailyGameXP: currentDaily === 0 ? earnedXP : increment(earnedXP),
+                         lastGameDate: todayStr
+                     });
+                 }
+            } else { earnedXP = 0; }
+        }
+        
+        const msg = document.getElementById('xp-earned-msg');
+        if(earnedXP > 0) {
+            msg.className = "alert alert-success mt-3";
+            msg.innerHTML = `ยินดีด้วย! ได้รับ <span class="fw-bold">+${earnedXP} XP</span>`;
+        } else if (score < 5) {
+             msg.className = "alert alert-warning mt-3";
+             msg.innerHTML = "พยายามอีกนิด! (ต้องถูก 5 ข้อขึ้นไป)";
+        } else {
+             msg.className = "alert alert-secondary mt-3";
+             msg.innerHTML = "ครบโควต้า XP วันนี้แล้ว (พรุ่งนี้มาใหม่นะ)";
+        }
+    }
+    
+    window.closeGameModal = () => {
+        bootstrap.Modal.getInstance(document.getElementById('gameModal')).hide();
+        setTimeout(() => {
+            document.getElementById('game-start-screen').classList.remove('d-none');
+            document.getElementById('game-result-screen').classList.add('d-none');
+        }, 500);
+    }
+    
+    // ✅ เพิ่มฟังก์ชันนี้กลับมา (สำคัญมาก!)
+    window.openRegisterModal = () => {
+        new bootstrap.Modal(document.getElementById('studentRegisterModal')).show();
+    }
+
+    // --- Core Logic ---
+    const periodTimes = ["08:30 - 09:20", "09:20 - 10:10", "10:10 - 11:00", "11:00 - 11:50", "13:00 - 13:50", "13:50 - 14:40", "14:40 - 15:30"];
+    
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             const storedId = localStorage.getItem('roommate_student_id');
             if (storedId) {
                 currentStudentId = storedId;
                 loadUserProfile(storedId);
+                // Show Stats, Hide Login Button
+                document.getElementById('student-stats').classList.remove('d-none');
+                document.getElementById('guest-login-btn').classList.add('d-none');
             } else {
-                const regModal = new bootstrap.Modal(document.getElementById('studentRegisterModal'));
-                regModal.show();
+                // Show Login Button, Hide Stats
+                document.getElementById('student-stats').classList.add('d-none');
+                document.getElementById('guest-login-btn').classList.remove('d-none');
             }
         } else {
-            signInAnonymously(auth).catch((error) => console.error("Auth Error", error));
+            signInAnonymously(auth).catch(console.error);
         }
     });
 
     window.registerStudent = async () => {
         const id = document.getElementById('reg-student-id').value.trim();
         if(!id) return alert("กรุณากรอกรหัสนักเรียน");
-        
         const docRef = doc(db, "rm_students", id);
         const docSnap = await getDoc(docRef);
-
         if (docSnap.exists()) {
             localStorage.setItem('roommate_student_id', id);
             bootstrap.Modal.getInstance(document.getElementById('studentRegisterModal')).hide();
-            currentStudentId = id;
-            loadUserProfile(id);
+            location.reload(); // Reload to update UI
         } else {
             alert("❌ ไม่พบรหัสนักเรียนนี้ในระบบ\nกรุณาติดต่อครูเพื่อเพิ่มรายชื่อก่อนใช้งานครับ");
         }
@@ -393,11 +552,23 @@
                 currentUserData = docSnap.data();
                 updateProfileUI();
             } else {
-                alert("ข้อมูลนักเรียนถูกลบออกจากระบบ");
                 localStorage.removeItem('roommate_student_id');
                 location.reload();
             }
         });
+    }
+
+    function getLevelInfo(xp) {
+        const level = Math.min(50, Math.floor(xp / 100) + 1);
+        const currentLevelXp = xp % 100;
+        const nextLevelXp = 100;
+        let rank = "🌱 ผู้เริ่มต้น";
+        if (level >= 10) rank = "🐣 ผู้ฝึกหัด";
+        if (level >= 20) rank = "🏹 นักผจญภัย";
+        if (level >= 30) rank = "⚔️ อัศวิน";
+        if (level >= 40) rank = "👑 ราชาแห่งปัญญา";
+        if (level >= 50) rank = "🌟 เทพเจ้า";
+        return { level, rank, currentLevelXp, nextLevelXp };
     }
 
     function updateProfileUI() {
@@ -405,9 +576,22 @@
         document.getElementById('student-name').innerText = currentUserData.name;
         const imgUrl = currentUserData.photoURL ? currentUserData.photoURL : `https://ui-avatars.com/api/?name=${currentUserData.name}&background=random`;
         document.getElementById('student-img').src = imgUrl;
-        document.getElementById('student-lvl').innerText = `Lv. ${currentUserData.level || 1}`;
-        document.getElementById('student-xp').innerText = `${currentUserData.xp || 0}/100 XP`;
-        document.getElementById('student-xp-bar').style.width = `${Math.min(currentUserData.xp || 0, 100)}%`;
+
+        // Force convert XP to Number
+        const rawXP = Number(currentUserData.xp) || 0;
+        const { level, rank, currentLevelXp, nextLevelXp } = getLevelInfo(rawXP);
+
+        document.getElementById('student-lvl').innerHTML = `Lv. ${level} <small class="opacity-75">(${rank})</small>`;
+        document.getElementById('student-xp').innerText = `${currentLevelXp}/${nextLevelXp} XP`;
+        
+        const percentage = level >= 50 ? 100 : (currentLevelXp / nextLevelXp) * 100;
+        
+        // Force style update
+        const bar = document.getElementById('student-xp-bar');
+        if(bar) {
+            bar.style.width = `${percentage}%`;
+            bar.setAttribute('aria-valuenow', percentage);
+        }
     }
     
     window.logoutStudent = () => {
@@ -417,7 +601,7 @@
         }
     }
 
-    // 2. Schedule Logic
+    // Schedule, Duty, Teacher Logic
     const daysMap = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
     const todayKey = daysMap[new Date().getDay()];
     
@@ -448,56 +632,29 @@
 
     function isCurrentPeriod(index) {
         const now = new Date();
-        const currentHour = now.getHours();
-        const currentMin = now.getMinutes();
-        const currentTime = currentHour * 60 + currentMin;
-        
+        const currentTime = now.getHours() * 60 + now.getMinutes();
         const times = periodTimes[index].split(' - ')[0].split(':');
         const start = parseInt(times[0]) * 60 + parseInt(times[1]);
         const endTimes = periodTimes[index].split(' - ')[1].split(':');
         const end = parseInt(endTimes[0]) * 60 + parseInt(endTimes[1]);
-        
         return currentTime >= start && currentTime < end;
     }
 
-    // Teacher: Schedule Editor Logic
     let currentScheduleData = {};
-
     window.loadScheduleForDay = () => {
         const day = document.getElementById('edit-day-select').value;
         const container = document.getElementById('period-forms-container');
         const dataForDay = currentScheduleData[day] || [];
-        
         container.innerHTML = periodTimes.map((time, i) => {
             const d = dataForDay[i] || {};
-            return `
-                <div class="card p-2 bg-light border mb-2">
-                    <div class="fw-bold small mb-1 text-primary">คาบที่ ${i+1} (${time})</div>
-                    <div class="row g-2">
-                        <div class="col-4">
-                            <input type="text" class="form-control form-control-sm p-code" placeholder="รหัสวิชา" value="${d.code || ''}">
-                        </div>
-                        <div class="col-8">
-                            <input type="text" class="form-control form-control-sm p-name" placeholder="ชื่อวิชา" value="${d.name || ''}">
-                        </div>
-                        <div class="col-6">
-                            <input type="text" class="form-control form-control-sm p-teacher" placeholder="ชื่อครู" value="${d.teacher || ''}">
-                        </div>
-                        <div class="col-6">
-                            <input type="text" class="form-control form-control-sm p-room" placeholder="ห้องเรียน" value="${d.room || ''}">
-                        </div>
-                    </div>
-                </div>
-            `;
+            return `<div class="card p-2 bg-light border mb-2"><div class="fw-bold small mb-1 text-primary">คาบที่ ${i+1} (${time})</div><div class="row g-2"><div class="col-4"><input type="text" class="form-control form-control-sm p-code" placeholder="รหัสวิชา" value="${d.code || ''}"></div><div class="col-8"><input type="text" class="form-control form-control-sm p-name" placeholder="ชื่อวิชา" value="${d.name || ''}"></div><div class="col-6"><input type="text" class="form-control form-control-sm p-teacher" placeholder="ชื่อครู" value="${d.teacher || ''}"></div><div class="col-6"><input type="text" class="form-control form-control-sm p-room" placeholder="ห้องเรียน" value="${d.room || ''}"></div></div></div>`;
         }).join('');
     }
 
     window.saveScheduleByDay = async () => {
         const day = document.getElementById('edit-day-select').value;
-        const container = document.getElementById('period-forms-container');
         const periods = [];
-        
-        container.querySelectorAll('.card').forEach(card => {
+        document.getElementById('period-forms-container').querySelectorAll('.card').forEach(card => {
             periods.push({
                 code: card.querySelector('.p-code').value.trim(),
                 name: card.querySelector('.p-name').value.trim(),
@@ -505,57 +662,31 @@
                 room: card.querySelector('.p-room').value.trim()
             });
         });
-
-        const updateData = {};
-        updateData[day] = periods;
-        
+        const updateData = {}; updateData[day] = periods;
         await setDoc(doc(db, "rm_config", "schedule"), updateData, { merge: true });
         alert(`บันทึกตารางวัน${day}เรียบร้อย!`);
     }
 
-    // Teacher: Add Student
     window.addStudent = async () => {
         const id = document.getElementById('new-student-id').value.trim();
         const name = document.getElementById('new-student-name').value.trim();
         const group = document.getElementById('new-student-group').value;
-        const fileInput = document.getElementById('new-student-photo');
-        const file = fileInput.files[0];
-        
-        if(!id || !name) return alert("กรอกรหัสและชื่อให้ครบ");
-        
+        const file = document.getElementById('new-student-photo').files[0];
+        if(!id || !name) return alert("กรอกข้อมูลให้ครบ");
         const btn = document.getElementById('btn-add-student');
         const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-        btn.disabled = true;
-
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; btn.disabled = true;
         try {
             let photoURL = "";
             if (file) {
-                const storageRef = ref(storage, `student_photos/${id}_${Date.now()}.jpg`);
-                const snapshot = await uploadBytes(storageRef, file);
-                photoURL = await getDownloadURL(snapshot.ref);
+                const snap = await uploadBytes(ref(storage, `student_photos/${id}_${Date.now()}.jpg`), file);
+                photoURL = await getDownloadURL(snap.ref);
             }
-
-            await setDoc(doc(db, "rm_students", id), {
-                name: name,
-                photoURL: photoURL,
-                group: group || "1",
-                xp: 0,
-                level: 1,
-                createdAt: serverTimestamp()
-            });
-            
+            await setDoc(doc(db, "rm_students", id), { name, photoURL, group: group || "1", xp: 0, level: 1, createdAt: serverTimestamp() });
             document.getElementById('new-student-id').value = "";
             document.getElementById('new-student-name').value = "";
-            document.getElementById('new-student-group').value = "";
-            fileInput.value = "";
-            
-        } catch(e) {
-            alert("Error: " + e.message);
-        } finally {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
+            document.getElementById('new-student-photo').value = "";
+        } catch(e) { alert("Error: " + e.message); } finally { btn.innerHTML = originalText; btn.disabled = false; }
     }
     
     window.updateStudentGroup = async (uid, newGroup) => {
@@ -563,7 +694,6 @@
         await updateDoc(ref, { group: newGroup });
     }
 
-    // 3. Homework Logic
     const hwList = document.getElementById('homework-list');
     const qHw = query(collection(db, "rm_homeworks"), orderBy("date", "asc"));
     onSnapshot(qHw, (snapshot) => {
@@ -573,11 +703,7 @@
             const hw = doc.data();
             const isUrgent = hw.type === 'urgent' ? 'hw-urgent' : 'hw-normal';
             const badge = hw.type === 'urgent' ? '<span class="badge bg-danger mb-1" style="font-size: 0.6rem;">ด่วน!</span>' : `<span class="badge bg-warning text-dark mb-1" style="font-size: 0.6rem;">ส่ง ${hw.date}</span>`;
-            hwList.innerHTML += `
-                <div class="custom-card hw-item ${isUrgent} p-3 mb-2 position-relative">
-                    <i class="fa-solid fa-trash btn-delete-hw" onclick="deleteHomework('${doc.id}')"></i>
-                    <div class="d-flex justify-content-between"><div>${badge}<div class="fw-bold">${hw.desc}</div><div class="text-muted small">${hw.subject}</div></div></div>
-                </div>`;
+            hwList.innerHTML += `<div class="custom-card hw-item ${isUrgent} p-3 mb-2 position-relative"><i class="fa-solid fa-trash btn-delete-hw" onclick="deleteHomework('${doc.id}')"></i><div class="d-flex justify-content-between"><div>${badge}<div class="fw-bold">${hw.desc}</div><div class="text-muted small">${hw.subject}</div></div></div></div>`;
         });
     });
 
@@ -593,15 +719,13 @@
     }
     window.deleteHomework = async (id) => { if(confirm("ลบรายการนี้?")) await deleteDoc(doc(db, "rm_homeworks", id)); }
 
-    // 5. Duty & Teacher Functions
     window.triggerCamera = () => document.getElementById('camera-input').click();
     window.uploadDutyPhoto = async (input) => {
         const file = input.files[0];
         if(!file) return;
         alert("กำลังอัปโหลด...");
         try {
-            const refFile = ref(storage, 'duty/'+Date.now()+'.jpg');
-            const snap = await uploadBytes(refFile, file);
+            const snap = await uploadBytes(ref(storage, 'duty/'+Date.now()+'.jpg'), file);
             const url = await getDownloadURL(snap.ref);
             await addDoc(collection(db, "rm_logs"), { type: 'duty', imageUrl: url, timestamp: serverTimestamp() });
             alert("ส่งงานแล้ว!");
@@ -613,18 +737,14 @@
         if(document.getElementById('teacher-pin').value === "1234") {
             bootstrap.Modal.getInstance(document.getElementById('teacherLoginModal')).hide();
             new bootstrap.Modal(document.getElementById('teacherDashboardModal')).show();
-            
-            // โหลดข้อมูลเพื่อเตรียมพร้อม (รายชื่อนักเรียน & ตารางเรียน)
             loadTeacherStudents(); 
             getDoc(doc(db, "rm_config", "schedule")).then(snap => {
                 if(snap.exists()) {
                     currentScheduleData = snap.data();
-                    // โหลดวันจันทร์เป็น Default
                     document.getElementById('edit-day-select').value = 'mon';
                     loadScheduleForDay(); 
                 }
             });
-            
         } else alert("รหัสผิด");
     }
     window.showSection = (id) => {
@@ -632,49 +752,19 @@
         document.getElementById(id).classList.remove('d-none');
     }
     
-    // Load Students for Teacher
     function loadTeacherStudents() {
         const container = document.getElementById('student-list-container');
         const q = query(collection(db, "rm_students")); 
-        
         onSnapshot(q, (snap) => {
             container.innerHTML = "";
             const students = [];
             snap.forEach(d => students.push({ id: d.id, ...d.data() }));
             students.sort((a, b) => a.id.localeCompare(b.id)); 
-
             students.forEach(s => {
                 const imgDisplay = s.photoURL ? s.photoURL : `https://ui-avatars.com/api/?name=${s.name}&background=random`;
-                const currentGroup = s.group || "1";
-                const groupSelect = `
-                    <select class="form-select form-select-sm border-0 bg-light" style="width: auto; font-size: 0.7rem;" onchange="updateStudentGroup('${s.id}', this.value)">
-                        <option value="1" ${currentGroup == '1' ? 'selected' : ''}>เวรวันจันทร์</option>
-                        <option value="2" ${currentGroup == '2' ? 'selected' : ''}>เวรวันอังคาร</option>
-                        <option value="3" ${currentGroup == '3' ? 'selected' : ''}>เวรวันพุธ</option>
-                        <option value="4" ${currentGroup == '4' ? 'selected' : ''}>เวรวันพฤหัสบดี</option>
-                        <option value="5" ${currentGroup == '5' ? 'selected' : ''}>เวรวันศุกร์</option>
-                    </select>`;
-
-                container.innerHTML += `
-                    <div class="d-flex justify-content-between align-items-center border-bottom p-2">
-                        <div class="d-flex align-items-center" style="overflow: hidden;">
-                            <img src="${imgDisplay}" class="student-list-img me-2 flex-shrink-0">
-                            <div style="min-width: 0;">
-                                <div class="d-flex align-items-center mb-1">
-                                    <span class="badge bg-secondary me-1" style="font-size:0.6rem">${s.id}</span>
-                                    <strong class="text-truncate" style="font-size:0.85rem">${s.name}</strong> 
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    ${groupSelect}
-                                    <span class="xp-badge ms-1">${s.xp} XP</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-flex flex-column gap-1 ms-2">
-                            <button class="btn btn-sm btn-outline-success py-0" style="font-size:0.7rem" onclick="giveXP('${s.id}', 10)">+10</button>
-                            <button class="btn btn-sm btn-outline-danger py-0" style="font-size:0.7rem" onclick="giveXP('${s.id}', -10)">-10</button>
-                        </div>
-                    </div>`;
+                const { level, rank } = getLevelInfo(s.xp || 0);
+                const groupSelect = `<select class="form-select form-select-sm border-0 bg-light" style="width: auto; font-size: 0.7rem;" onchange="updateStudentGroup('${s.id}', this.value)"><option value="1" ${s.group=='1'?'selected':''}>จันทร์</option><option value="2" ${s.group=='2'?'selected':''}>อังคาร</option><option value="3" ${s.group=='3'?'selected':''}>พุธ</option><option value="4" ${s.group=='4'?'selected':''}>พฤหัส</option><option value="5" ${s.group=='5'?'selected':''}>ศุกร์</option></select>`;
+                container.innerHTML += `<div class="d-flex justify-content-between align-items-center border-bottom p-2"><div class="d-flex align-items-center" style="overflow: hidden;"><img src="${imgDisplay}" class="student-list-img me-2 flex-shrink-0"><div style="min-width: 0;"><div class="d-flex align-items-center mb-1"><span class="badge bg-secondary me-1" style="font-size:0.6rem">${s.id}</span><strong class="text-truncate" style="font-size:0.85rem">${s.name}</strong></div><div class="d-flex align-items-center flex-wrap gap-1"><span class="badge bg-primary" style="font-size:0.6rem">Lv.${level}</span>${groupSelect}<span class="xp-badge">${s.xp} XP</span></div></div></div><div class="d-flex flex-column gap-1 ms-2"><button class="btn btn-sm btn-outline-success py-0" style="font-size:0.7rem" onclick="giveXP('${s.id}', 10)">+10</button><button class="btn btn-sm btn-outline-danger py-0" style="font-size:0.7rem" onclick="giveXP('${s.id}', -10)">-10</button></div></div>`;
             });
         });
     }
@@ -684,7 +774,9 @@
         const snap = await getDoc(ref);
         if(snap.exists()) {
             const current = snap.data().xp || 0;
-            await updateDoc(ref, { xp: current + amount });
+            const newXP = Math.max(0, current + amount);
+            const { level } = getLevelInfo(newXP);
+            await updateDoc(ref, { xp: newXP, level: level });
         }
     }
 
@@ -702,7 +794,7 @@
         });
     }
 
-    // Init UI
+    // Duty Roster
     const daysTH = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัส", "ศุกร์", "เสาร์"];
     const currentDayIndex = new Date().getDay();
     document.getElementById('today-day').innerText = daysTH[currentDayIndex];
@@ -721,7 +813,6 @@
     };
 
     const config = dutyConfig[todayGroup] || dutyConfig[1];
-    
     dutyGroupBadge.innerText = config.text;
     dutyGroupBadge.classList.remove('bg-success'); 
     dutyGroupBadge.style.backgroundColor = config.color;
@@ -731,7 +822,7 @@
     onSnapshot(qDuty, (snap) => {
         const container = document.getElementById('duty-list-text');
         if(snap.empty) {
-            container.innerHTML = '<span class="small text-muted">ไม่มีสมาชิกเวร</span>';
+            container.innerText = "ไม่มีสมาชิกเวร";
         } else {
             let html = '<div class="d-flex align-items-center ps-2">'; 
             snap.forEach(d => {
@@ -744,47 +835,29 @@
         }
     });
 
-    // ✅ เพิ่มฟังก์ชันนี้กลับมา (สำคัญมาก!)
     window.openDutyRosterModal = () => {
         new bootstrap.Modal(document.getElementById('dutyRosterModal')).show();
-        loadAllDutyMembers(); // เรียกฟังก์ชันโหลดรายชื่อ
+        loadAllDutyMembers();
     }
 
-    // ✅ เพิ่มฟังก์ชันโหลดรายชื่อสมาชิกเวรทั้งหมด (สำหรับ Modal)
     function loadAllDutyMembers() {
         const q = query(collection(db, "rm_students"));
         onSnapshot(q, (snap) => {
             const days = { '1': [], '2': [], '3': [], '4': [], '5': [] };
-            
             snap.forEach(d => {
                 const s = d.data();
                 const g = s.group || '1';
                 if(days[g]) days[g].push(s);
             });
-
             const targets = { '1': 'd-mon', '2': 'd-tue', '3': 'd-wed', '4': 'd-thu', '5': 'd-fri' };
-            
             for(let g in days) {
                 const container = document.getElementById(targets[g]);
                 if(!container) continue;
-                
-                if(days[g].length === 0) {
-                    container.innerHTML = '<div class="text-center py-4 text-muted opacity-50"><i class="fa-solid fa-user-slash mb-2 fs-4"></i><br>ไม่มีสมาชิก</div>';
-                    continue;
-                }
-
+                if(days[g].length === 0) { container.innerHTML = '<div class="text-center py-4 text-muted opacity-50"><i class="fa-solid fa-user-slash mb-2 fs-4"></i><br>ไม่มีสมาชิก</div>'; continue; }
                 let html = '<div class="list-group shadow-sm rounded-3 overflow-hidden border-0">';
                 days[g].forEach(s => {
                     const img = s.photoURL ? s.photoURL : `https://ui-avatars.com/api/?name=${s.name}&background=random`;
-                    html += `
-                        <div class="list-group-item border-0 border-bottom py-3 d-flex align-items-center">
-                            <img src="${img}" class="rounded-circle me-3 border" width="40" height="40" style="object-fit:cover;">
-                            <div>
-                                <div class="fw-bold text-dark">${s.name}</div>
-                                <div class="small text-muted"><i class="fa-solid fa-star text-warning me-1"></i>${s.xp || 0} XP</div>
-                            </div>
-                        </div>
-                    `;
+                    html += `<div class="list-group-item border-0 border-bottom py-3 d-flex align-items-center"><img src="${img}" class="rounded-circle me-3 border" width="40" height="40" style="object-fit:cover;"><div><div class="fw-bold text-dark">${s.name}</div><div class="small text-muted"><i class="fa-solid fa-star text-warning me-1"></i>${s.xp || 0} XP</div></div></div>`;
                 });
                 html += '</div>';
                 container.innerHTML = html;
