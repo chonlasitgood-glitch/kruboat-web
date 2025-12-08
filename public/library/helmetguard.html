@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HelmetGuard Demo</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #fefce8; /* Yellow-50 */ }
+        body { overscroll-behavior-y: none; }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10B981;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #10B981;
+        }
+        .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #fcd34d; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
+        
+        input, select, textarea { font-size: 16px !important; }
+        
+        .demo-badge {
+            position: absolute;
+            top: 10px; right: -30px;
+            background: #ef4444; color: white;
+            padding: 2px 30px; font-size: 10px;
+            transform: rotate(45deg); z-index: 50;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); font-weight: bold;
+        }
+    </style>
+</head>
+<body class="text-gray-800 bg-yellow-50 min-h-screen flex flex-col">
+
+    <!-- ================= Login Screen ================= -->
+    <div id="loginPage" class="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-600 px-4">
+        <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center animate-fade-in border-4 border-yellow-100 relative overflow-hidden">
+            <div class="demo-badge">DEMO</div>
+            <div class="mb-6">
+                <i class="fa-solid fa-shield-halved text-5xl text-amber-500"></i>
+                <h1 class="text-2xl font-bold mt-4 text-gray-800">HelmetCheck</h1>
+                <h2 class="text-sm sm:text-md font-semibold text-amber-600 mt-1">โรงเรียนครูโบ๊ทดอทคอมวิทยา</h2>
+                <p class="text-gray-400 text-xs mt-1">ระบบตรวจสอบการใส่หมวกกันน็อค (รุ่นทดลอง)</p>
+            </div>
+            <input type="password" id="passwordInput" placeholder="รหัสผ่าน (ใส่ 12345)" value="12345"
+                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-400 mb-4 transition-all text-center text-lg tracking-widest"
+                onkeyup="if(event.key === 'Enter') handleLogin()">
+            <button onclick="handleLogin()" 
+                class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-lg transition-colors shadow-lg text-lg active:scale-95 transform duration-150">
+                เข้าสู่ระบบ
+            </button>
+            <div class="mt-6 text-xs text-gray-400">
+                &copy; 2025 พัฒนาโดย <span class="text-amber-600 font-medium block sm:inline">ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์</span> <span class="hidden sm:inline">|</span> <span class="block sm:inline">www.kruboat.com</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= Main App ================= -->
+    <div id="appPage" class="hidden flex-col min-h-screen">
+        
+        <!-- Compact Fixed Header -->
+        <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-40 h-14 flex items-center justify-between px-3 border-b border-yellow-200">
+            <div class="flex items-center gap-2">
+                <div class="bg-yellow-100 p-1.5 rounded-lg text-amber-600">
+                    <i class="fa-solid fa-shield-halved text-lg"></i>
+                </div>
+                <div class="hidden xs:flex flex-col leading-none">
+                    <span class="font-bold text-sm text-gray-800">HelmetCheck</span>
+                    <span class="text-[9px] text-red-500 font-bold">DEMO VERSION</span>
+                </div>
+            </div>
+
+            <div class="flex bg-gray-100 p-1 rounded-lg">
+                <button onclick="switchTab('entry')" id="navEntry" class="flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-bold transition-all shadow-sm bg-white text-amber-600">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>ตรวจตรา</span>
+                </button>
+                <button onclick="switchTab('dashboard')" id="navDashboard" class="flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-medium text-gray-500 hover:text-amber-600 transition-all">
+                    <i class="fa-solid fa-chart-simple"></i>
+                    <span>สถิติ</span>
+                </button>
+            </div>
+
+            <button onclick="logout()" class="text-gray-400 hover:text-red-500 p-2 active:bg-gray-50 rounded-full transition-colors" title="ออกจากระบบ">
+                <i class="fa-solid fa-power-off text-lg"></i>
+            </button>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-grow p-4 pt-20 pb-10 w-full max-w-5xl mx-auto">
+            
+            <!-- VIEW: DATA ENTRY -->
+            <div id="entryView" class="animate-fade-in pb-4">
+                <div class="bg-white rounded-xl shadow-sm p-4 mb-4 border border-yellow-100">
+                    <h2 class="text-lg font-bold mb-4 flex items-center gap-2 text-amber-700">
+                        <i class="fa-solid fa-pen-to-square"></i> บันทึกข้อมูล
+                        <span class="text-xs font-normal text-gray-500 ml-auto">(สูงสุด 10 คน)</span>
+                    </h2>
+                    
+                    <div id="studentInputList" class="space-y-3"></div>
+
+                    <div class="mt-4 flex gap-3">
+                        <button onclick="addStudentRow()" id="btnAddRow" class="flex-1 border-2 border-dashed border-gray-300 text-gray-500 py-3 rounded-lg hover:bg-yellow-50 hover:border-amber-300 hover:text-amber-500 transition-all font-medium active:scale-95 transform duration-150">
+                            <i class="fa-solid fa-plus"></i> เพิ่มแถว
+                        </button>
+                        <button onclick="submitData()" class="flex-1 bg-gradient-to-r from-amber-500 to-yellow-500 text-white py-3 rounded-lg shadow-md hover:shadow-lg transition-all font-bold hover:from-amber-600 hover:to-yellow-600 active:scale-95 transform duration-150">
+                            <i class="fa-solid fa-save"></i> บันทึก
+                        </button>
+                    </div>
+                </div>
+                <div class="text-center mt-6 text-xs text-gray-400 pb-8">
+                    &copy; 2025 พัฒนาโดย ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์ <br>ผู้พัฒนาเว็บไซต์ www.kruboat.com (Demo Version)
+                </div>
+            </div>
+
+            <!-- VIEW: DASHBOARD -->
+            <div id="dashboardView" class="hidden animate-fade-in pb-4">
+                <!-- Filters -->
+                <div class="bg-white p-4 rounded-xl shadow-sm mb-4 border border-yellow-100">
+                    <div class="flex flex-col gap-3 mb-4">
+                        <h2 class="font-bold text-gray-700 flex items-center justify-between">
+                            <span class="flex items-center"><i class="fa-solid fa-chart-pie mr-2 text-amber-500"></i>สรุปสถิติ</span>
+                            <span id="currentDateDisplay" class="text-[10px] text-gray-400 font-normal">Loading...</span>
+                        </h2>
+                        
+                        <div class="flex flex-wrap gap-2">
+                            <!-- Class Filter -->
+                            <select id="classFilter" onchange="updateDashboard()" class="flex-1 min-w-[120px] bg-yellow-50 border border-yellow-200 text-sm rounded-lg px-3 py-2.5 focus:ring-amber-500 outline-none text-gray-600">
+                                <option value="all">ทุกห้องเรียน</option>
+                            </select>
+
+                            <!-- Time Filter -->
+                            <select id="timeFilter" onchange="handleTimeFilterChange()" class="flex-1 min-w-[120px] bg-yellow-50 border border-yellow-200 text-sm rounded-lg px-3 py-2.5 focus:ring-amber-500 outline-none text-gray-600">
+                                <option value="daily">รายวัน (วันนี้)</option>
+                                <option value="weekly">รายสัปดาห์</option>
+                                <option value="monthly">รายเดือน</option>
+                                <option value="term">รายเทอม (ปัจจุบัน)</option>
+                                <option value="yearly">รายปีการศึกษา</option>
+                            </select>
+
+                            <!-- Week Selector (Hidden by default) -->
+                            <select id="weekSelector" onchange="updateDashboard()" class="hidden flex-1 min-w-[160px] bg-white border border-amber-300 text-sm rounded-lg px-3 py-2.5 focus:ring-amber-500 outline-none text-amber-700 font-medium">
+                                <!-- Options populated by JS -->
+                            </select>
+                            
+                            <button onclick="loadDashboardData()" class="bg-amber-100 text-amber-600 px-4 py-2 rounded-lg hover:bg-amber-200 transition-colors flex-shrink-0 active:bg-amber-300">
+                                <i class="fa-solid fa-rotate-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- KPI Cards -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div class="bg-amber-50 p-3 rounded-lg text-center border border-amber-100">
+                            <p class="text-xs text-amber-600 mb-1">ตรวจแล้ว</p>
+                            <h3 id="statTotal" class="text-xl sm:text-2xl font-bold text-amber-800">0</h3>
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-lg text-center border border-green-100">
+                            <p class="text-xs text-green-600 mb-1">สวมหมวก</p>
+                            <h3 id="statWorn" class="text-xl sm:text-2xl font-bold text-green-700">0</h3>
+                        </div>
+                        <div class="bg-red-50 p-3 rounded-lg text-center border border-red-100">
+                            <p class="text-xs text-red-600 mb-1">ไม่สวม</p>
+                            <h3 id="statNotWorn" class="text-xl sm:text-2xl font-bold text-red-700">0</h3>
+                        </div>
+                        <div class="bg-orange-50 p-3 rounded-lg text-center border border-orange-100">
+                            <p class="text-xs text-orange-600 mb-1">% ไม่สวม</p>
+                            <h3 id="statPercent" class="text-xl sm:text-2xl font-bold text-orange-700">0%</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Area -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-yellow-100">
+                        <h3 class="font-semibold text-sm text-gray-600 mb-3">เปรียบเทียบห้องเรียน (จำนวนไม่สวม)</h3>
+                        <div class="h-64 relative w-full">
+                            <canvas id="classChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-yellow-100">
+                        <h3 class="font-semibold text-sm text-gray-600 mb-3">แนวโน้มการไม่สวมหมวก</h3>
+                        <div class="h-64 relative w-full">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABLE SECTION -->
+                 <div class="bg-white p-4 rounded-xl shadow-sm mt-4 border border-yellow-100">
+                    <h3 id="tableTitle" class="font-semibold text-sm text-gray-600 mb-3">รายการล่าสุด</h3>
+                    <div class="overflow-x-auto">
+                        <div id="tableContainer">
+                            <!-- Table will be injected here -->
+                        </div>
+                    </div>
+                 </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // --- 1. MOCK DATA GENERATION SYSTEM ---
+        const DEMO_STUDENTS = [
+            { id: "10001", title: "ด.ช.", name: "สมชาย ใจดี", class: "ม.1/1" },
+            { id: "10002", title: "ด.ช.", name: "วีระ รักเรียน", class: "ม.1/1" },
+            { id: "10003", title: "ด.ญ.", name: "ใจใส มีสุข", class: "ม.1/1" },
+            { id: "20001", title: "ด.ช.", name: "ปิติ พอเพียง", class: "ม.2/1" },
+            { id: "20002", title: "ด.ช.", name: "มานะ อดทน", class: "ม.2/2" },
+            { id: "30001", title: "ด.ช.", name: "เก่ง กล้าหาญ", class: "ม.3/1" },
+            { id: "40001", title: "นาย", name: "สมศักดิ์ รักดี", class: "ม.4/1" },
+            { id: "50001", title: "นาย", name: "วิชัย ชัยชนะ", class: "ม.5/1" },
+            { id: "60001", title: "นาย", name: "ธนา ร่ำรวย", class: "ม.6/1" },
+            { id: "60002", title: "นางสาว", name: "สุดา สวยงาม", class: "ม.6/2" }
+        ];
+        
+        let RECORDS = [];
+        const NOW = new Date();
+        
+        function generateMockData() {
+            RECORDS = [];
+            
+            // 1. Generate generic history
+            for (let i = 0; i < 800; i++) {
+                const daysAgo = Math.floor(Math.random() * 300) + 7;
+                const recordDate = new Date(NOW.getTime() - (daysAgo * 86400000));
+                recordDate.setHours(7 + Math.floor(Math.random() * 2), Math.floor(Math.random() * 60));
+                const randStudent = DEMO_STUDENTS[Math.floor(Math.random() * DEMO_STUDENTS.length)];
+                RECORDS.push({
+                    id: 1000 + i, studentId: randStudent.id, studentName: randStudent.title + randStudent.name, classRoom: randStudent.class,
+                    hasHelmet: Math.random() > 0.2, timestamp: recordDate.toISOString().replace('T', ' ').slice(0, 19)
+                });
+            }
+
+            // 2. Generate Data for last 8 weeks (Mon-Fri) for ALL demo students
+            // To ensure weekly selector works nicely
+            const currentDay = NOW.getDay(); 
+            const monday = new Date(NOW);
+            monday.setDate(NOW.getDate() - (currentDay === 0 ? 6 : currentDay - 1));
+            
+            // Go back 8 weeks
+            for (let w = 0; w < 8; w++) {
+                const weekStart = new Date(monday);
+                weekStart.setDate(monday.getDate() - (w * 7));
+                
+                DEMO_STUDENTS.forEach((student, idx) => {
+                    for(let d=0; d<5; d++) { // Mon-Fri
+                        const date = new Date(weekStart);
+                        date.setDate(weekStart.getDate() + d);
+                        if(date > NOW) continue;
+
+                        date.setHours(7, 30 + Math.floor(Math.random() * 30));
+                        RECORDS.push({
+                            id: 50000 + (w*1000) + (idx*10) + d,
+                            studentId: student.id,
+                            studentName: student.title + student.name,
+                            classRoom: student.class,
+                            hasHelmet: Math.random() > 0.3,
+                            timestamp: date.toISOString().replace('T', ' ').slice(0, 19)
+                        });
+                    }
+                });
+            }
+            
+            RECORDS.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        }
+
+        // --- 2. STATE ---
+        let currentRows = 0;
+        const MAX_ROWS = 10;
+        let classChartInstance = null;
+        let trendChartInstance = null;
+        const debounceTimers = {};
+
+        // --- 3. INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('isLoggedInDemo') === 'true') {
+                showApp();
+            }
+            generateMockData();
+            initWeekSelector(); // Initialize options
+            const options = { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
+            const dateEl = document.getElementById('currentDateDisplay');
+            if(dateEl) dateEl.textContent = new Date().toLocaleDateString('th-TH', options);
+        });
+
+        function handleLogin() {
+            if (document.getElementById('passwordInput').value === '12345') {
+                localStorage.setItem('isLoggedInDemo', 'true');
+                showApp();
+            } else {
+                Swal.fire({ icon: 'error', title: 'รหัสผิด', text: 'Hint: 12345', confirmButtonColor: '#f59e0b' });
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('isLoggedInDemo');
+            location.reload();
+        }
+
+        function showApp() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('appPage').classList.remove('hidden');
+            document.getElementById('appPage').classList.add('flex');
+            document.getElementById('studentInputList').innerHTML = '';
+            currentRows = 0;
+            addStudentRow(); 
+        }
+
+        function switchTab(tab) {
+            const entryView = document.getElementById('entryView');
+            const dashboardView = document.getElementById('dashboardView');
+            const navEntry = document.getElementById('navEntry');
+            const navDashboard = document.getElementById('navDashboard');
+            const activeClasses = ['bg-white', 'text-amber-600', 'shadow-sm', 'font-bold'];
+            const inactiveClasses = ['text-gray-500', 'font-medium', 'hover:text-amber-600'];
+
+            if (tab === 'entry') {
+                entryView.classList.remove('hidden');
+                dashboardView.classList.add('hidden');
+                navEntry.classList.add(...activeClasses);
+                navEntry.classList.remove(...inactiveClasses);
+                navDashboard.classList.remove(...activeClasses, 'shadow-sm', 'bg-white');
+                navDashboard.classList.add(...inactiveClasses);
+            } else {
+                entryView.classList.add('hidden');
+                dashboardView.classList.remove('hidden');
+                navDashboard.classList.add(...activeClasses);
+                navDashboard.classList.remove(...inactiveClasses);
+                navEntry.classList.remove(...activeClasses, 'shadow-sm', 'bg-white');
+                navEntry.classList.add(...inactiveClasses);
+                loadDashboardData(); 
+                setTimeout(() => {
+                    if (classChartInstance) classChartInstance.resize();
+                    if (trendChartInstance) trendChartInstance.resize();
+                }, 100);
+            }
+        }
+
+        // --- 4. DATA ENTRY (Same as before) ---
+        function addStudentRow() {
+            if (currentRows >= MAX_ROWS) { return; }
+            currentRows++;
+            const rowId = `row-${Date.now()}`;
+            const html = `
+                <div id="${rowId}" class="bg-gray-50 p-3 rounded-lg border border-gray-200 flex items-center gap-3 transition-all hover:shadow-md animate-fade-in hover:border-amber-200">
+                    <div class="flex-shrink-0 w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 font-bold text-sm">${currentRows}</div>
+                    <div class="flex-grow min-w-0">
+                        <input type="number" placeholder="รหัสนักเรียน (เช่น 10001)" class="w-full bg-white border border-gray-300 rounded px-3 py-3 text-base focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 student-id-input shadow-sm" oninput="checkStudent('${rowId}', this.value)">
+                        <div class="text-xs text-gray-500 mt-1 h-4 student-info truncate">รอระบุรหัส...</div>
+                    </div>
+                    <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer helmet-toggle" checked onchange="updateToggleUI('${rowId}', this)">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                        </label>
+                        <span class="text-[10px] font-bold text-green-600 status-text">สวมหมวก</span>
+                    </div>
+                    ${currentRows > 1 ? `<button onclick="removeRow('${rowId}')" class="text-gray-400 hover:text-red-500 p-2 ml-1 active:bg-gray-200 rounded-full"><i class="fa-solid fa-trash text-lg"></i></button>` : ''}
+                </div>`;
+            document.getElementById('studentInputList').insertAdjacentHTML('beforeend', html);
+            const btnAdd = document.getElementById('btnAddRow');
+            if(currentRows >= MAX_ROWS) btnAdd.style.display = 'none';
+        }
+
+        function removeRow(rowId) {
+            document.getElementById(rowId).remove();
+            currentRows--;
+            if(debounceTimers[rowId]) delete debounceTimers[rowId];
+            document.getElementById('btnAddRow').style.display = 'block';
+        }
+
+        function checkStudent(rowId, value) {
+            if (debounceTimers[rowId]) clearTimeout(debounceTimers[rowId]);
+            const infoDiv = document.getElementById(rowId).querySelector('.student-info');
+            if (value.length < 4) { infoDiv.textContent = 'รอระบุรหัส...'; delete infoDiv.dataset.valid; return; }
+            debounceTimers[rowId] = setTimeout(() => {
+                infoDiv.innerHTML = '<span class="text-amber-500"><i class="fa-solid fa-spinner fa-spin"></i> กำลังตรวจสอบ...</span>';
+                setTimeout(() => {
+                    const student = DEMO_STUDENTS.find(s => s.id === value);
+                    if (student) {
+                        infoDiv.innerHTML = `<span class="text-amber-600 font-bold"><i class="fa-solid fa-user-check"></i> ${student.title}${student.name} (${student.class})</span>`;
+                        infoDiv.dataset.valid = "true";
+                        infoDiv.dataset.sid = student.id;
+                        infoDiv.dataset.name = student.title + student.name;
+                        infoDiv.dataset.class = student.class;
+                    } else {
+                        infoDiv.innerHTML = `<span class="text-red-500"><i class="fa-solid fa-circle-exclamation"></i> ไม่พบข้อมูล (ลอง 10001)</span>`;
+                        delete infoDiv.dataset.valid;
+                    }
+                }, 200);
+            }, 300);
+        }
+
+        function updateToggleUI(rowId, checkbox) {
+            const text = document.getElementById(rowId).querySelector('.status-text');
+            if (checkbox.checked) { text.textContent = 'สวมหมวก'; text.className = 'text-[10px] font-bold text-green-600 status-text'; }
+            else { text.textContent = 'ไม่สวม'; text.className = 'text-[10px] font-bold text-red-600 status-text'; }
+        }
+
+        function submitData() {
+            let validCount = 0;
+            const newRecords = [];
+            document.querySelectorAll('#studentInputList > div').forEach(row => {
+                const info = row.querySelector('.student-info');
+                if (info.dataset.valid === "true") {
+                    newRecords.push({
+                        id: Date.now() + Math.random(),
+                        studentId: info.dataset.sid,
+                        studentName: info.dataset.name,
+                        classRoom: info.dataset.class,
+                        hasHelmet: row.querySelector('.helmet-toggle').checked,
+                        timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19)
+                    });
+                    validCount++;
+                }
+            });
+
+            if (validCount === 0) { Swal.fire('แจ้งเตือน', 'กรุณากรอกรหัสนักเรียน', 'warning'); return; }
+            Swal.fire({ title: 'กำลังบันทึก (Demo)...', didOpen: () => Swal.showLoading() });
+            setTimeout(() => {
+                RECORDS.unshift(...newRecords);
+                Swal.fire({ title: 'สำเร็จ!', text: `บันทึก ${validCount} รายการแล้ว`, icon: 'success', confirmButtonColor: '#f59e0b', timer: 1500, showConfirmButton: false });
+                document.getElementById('studentInputList').innerHTML = '';
+                currentRows = 0;
+                addStudentRow();
+            }, 500);
+        }
+
+        // --- 5. WEEK SELECTOR & DASHBOARD ---
+        function initWeekSelector() {
+            const selector = document.getElementById('weekSelector');
+            selector.innerHTML = '';
+            
+            const currentDay = NOW.getDay(); 
+            const monday = new Date(NOW);
+            monday.setDate(NOW.getDate() - (currentDay === 0 ? 6 : currentDay - 1));
+            
+            // Create 8 weeks history
+            for (let i = 0; i < 8; i++) {
+                const weekStart = new Date(monday);
+                weekStart.setDate(monday.getDate() - (i * 7));
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 4); // Friday
+                
+                const startStr = weekStart.toLocaleDateString('th-TH', {day:'numeric', month:'short'});
+                const endStr = weekEnd.toLocaleDateString('th-TH', {day:'numeric', month:'short'});
+                
+                const opt = document.createElement('option');
+                opt.value = weekStart.getTime(); // Use timestamp as value
+                opt.textContent = `${startStr} - ${endStr}`;
+                if (i === 0) opt.textContent += " (ปัจจุบัน)";
+                selector.appendChild(opt);
+            }
+        }
+
+        function handleTimeFilterChange() {
+            const timeFilter = document.getElementById('timeFilter');
+            const weekSelector = document.getElementById('weekSelector');
+            
+            if (timeFilter.value === 'weekly') {
+                weekSelector.classList.remove('hidden');
+            } else {
+                weekSelector.classList.add('hidden');
+            }
+            updateDashboard();
+        }
+
+        function loadDashboardData() {
+            const classes = new Set(RECORDS.map(r => r.classRoom).filter(Boolean));
+            updateClassFilterDropdown(Array.from(classes).sort());
+            updateDashboard();
+        }
+
+        function updateClassFilterDropdown(classes) {
+            const select = document.getElementById('classFilter');
+            const currentVal = select.value;
+            select.innerHTML = '<option value="all">ทุกห้องเรียน</option>';
+            classes.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c; opt.textContent = c; select.appendChild(opt);
+            });
+            if (classes.includes(currentVal)) select.value = currentVal;
+        }
+
+        function updateDashboard() {
+            const timeFilter = document.getElementById('timeFilter').value;
+            const classFilter = document.getElementById('classFilter').value;
+            
+            let filteredData = filterRecordsByTime(timeFilter);
+            if (classFilter !== 'all') {
+                filteredData = filteredData.filter(r => r.classRoom === classFilter);
+            }
+
+            const total = filteredData.length;
+            const worn = filteredData.filter(r => r.hasHelmet).length;
+            const notWorn = total - worn;
+            const percent = total > 0 ? ((notWorn / total) * 100).toFixed(1) : 0;
+
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statWorn').textContent = worn;
+            document.getElementById('statNotWorn').textContent = notWorn;
+            document.getElementById('statPercent').textContent = percent + '%';
+
+            renderClassChart(filteredData);
+            renderTrendChart(filteredData);
+
+            const tableTitle = document.getElementById('tableTitle');
+            if (timeFilter === 'weekly') {
+                const weekVal = document.getElementById('weekSelector').value;
+                const weekDate = new Date(parseInt(weekVal));
+                const weekStr = weekDate.toLocaleDateString('th-TH', {day:'numeric', month:'short'});
+                tableTitle.textContent = `สรุปสัปดาห์ ${weekStr} (แยกรายบุคคล)`;
+                renderWeeklyReport(filteredData);
+            } else {
+                tableTitle.textContent = 'รายการล่าสุด (50 รายการ)';
+                renderRecentTable(filteredData.slice(0, 50));
+            }
+        }
+
+        function filterRecordsByTime(type) {
+            const now = new Date();
+            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            // Special handling for Week Selector
+            if (type === 'weekly') {
+                const weekStartTs = parseInt(document.getElementById('weekSelector').value);
+                const weekStart = new Date(weekStartTs);
+                weekStart.setHours(0,0,0,0);
+                
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 7); // Include weekend in range logic usually, but Mon-Fri for table
+                
+                return RECORDS.filter(r => {
+                    const rDate = new Date(r.timestamp.replace(' ', 'T'));
+                    return rDate >= weekStart && rDate < weekEnd;
+                });
+            }
+
+            return RECORDS.filter(r => {
+                const rDate = new Date(r.timestamp.replace(' ', 'T'));
+                switch(type) {
+                    case 'daily': return rDate >= startOfDay;
+                    case 'monthly': return rDate.getMonth() === now.getMonth() && rDate.getFullYear() === now.getFullYear();
+                    case 'term':
+                        const month = now.getMonth(); 
+                        const rMonth = rDate.getMonth();
+                        if (month >= 4 && month <= 8) return rMonth >= 4 && rMonth <= 8 && rDate.getFullYear() === now.getFullYear();
+                        else return (rMonth >= 9 || rMonth <= 2);
+                    case 'yearly': return rDate.getFullYear() === now.getFullYear();
+                    default: return true;
+                }
+            });
+        }
+
+        // --- WEEKLY MATRIX ---
+        function renderWeeklyReport(data) {
+            const studentMap = {};
+            data.forEach(r => {
+                if (!studentMap[r.studentId]) {
+                    studentMap[r.studentId] = { id: r.studentId, name: r.studentName, class: r.classRoom, days: { 1:null, 2:null, 3:null, 4:null, 5:null } };
+                }
+                const d = new Date(r.timestamp.replace(' ', 'T')).getDay();
+                if (d >= 1 && d <= 5) {
+                    if (studentMap[r.studentId].days[d] === null) studentMap[r.studentId].days[d] = r.hasHelmet;
+                    else if (studentMap[r.studentId].days[d] === true && r.hasHelmet === false) studentMap[r.studentId].days[d] = false;
+                }
+            });
+
+            const students = Object.values(studentMap).sort((a, b) => a.class.localeCompare(b.class) || a.id.localeCompare(b.id));
+            const container = document.getElementById('tableContainer');
+            
+            if (students.length === 0) { container.innerHTML = '<div class="text-center text-gray-400 py-4">ไม่มีข้อมูลในสัปดาห์นี้</div>'; return; }
+
+            // Dynamic headers based on selected week
+            const weekStart = new Date(parseInt(document.getElementById('weekSelector').value));
+            const getDayHeader = (add) => {
+                const d = new Date(weekStart); d.setDate(weekStart.getDate() + add);
+                return d.toLocaleDateString('th-TH', {weekday:'short', day:'numeric'});
+            };
+
+            let html = `
+                <table class="w-full text-sm text-left text-gray-500 border-collapse">
+                    <thead class="text-xs text-gray-700 uppercase bg-yellow-100">
+                        <tr>
+                            <th class="px-3 py-3 border border-yellow-200">ชื่อ-สกุล</th>
+                            <th class="px-2 py-3 border border-yellow-200 text-center text-yellow-800">${getDayHeader(0)}</th>
+                            <th class="px-2 py-3 border border-yellow-200 text-center text-pink-600">${getDayHeader(1)}</th>
+                            <th class="px-2 py-3 border border-yellow-200 text-center text-green-700">${getDayHeader(2)}</th>
+                            <th class="px-2 py-3 border border-yellow-200 text-center text-orange-600">${getDayHeader(3)}</th>
+                            <th class="px-2 py-3 border border-yellow-200 text-center text-blue-600">${getDayHeader(4)}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            students.forEach(s => {
+                html += `<tr class="bg-white hover:bg-gray-50">
+                    <td class="px-3 py-2 border border-gray-100">
+                        <div class="font-bold text-gray-800">${s.name}</div>
+                        <div class="text-[10px] text-gray-400">${s.id} | ${s.class}</div>
+                    </td>
+                    ${[1,2,3,4,5].map(d => `<td class="px-1 py-2 border border-gray-100 text-center">${getStatusIcon(s.days[d])}</td>`).join('')}
+                </tr>`;
+            });
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        function getStatusIcon(status) {
+            if (status === true) return '<i class="fa-solid fa-circle-check text-green-500 text-lg"></i>';
+            if (status === false) return '<i class="fa-solid fa-circle-xmark text-red-500 text-lg"></i>';
+            return '<span class="text-gray-200">-</span>';
+        }
+
+        // --- COMMON RENDERERS (Same as before) ---
+        function renderRecentTable(data) {
+            const container = document.getElementById('tableContainer');
+            if (data.length === 0) { container.innerHTML = '<div class="text-center text-gray-400 py-4">ไม่มีข้อมูล</div>'; return; }
+            let html = `
+                <table class="w-full text-sm text-left text-gray-500 whitespace-nowrap">
+                    <thead class="text-xs text-gray-700 uppercase bg-yellow-50">
+                        <tr>
+                            <th class="px-4 py-3 rounded-l-lg text-amber-800">เวลา</th>
+                            <th class="px-4 py-3 text-amber-800">ชื่อ-สกุล</th>
+                            <th class="px-4 py-3 text-amber-800">ห้อง</th>
+                            <th class="px-4 py-3 text-center text-amber-800">สถานะ</th>
+                            <th class="px-4 py-3 rounded-r-lg text-center text-amber-800">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            html += data.map(r => {
+                const dateObj = new Date(r.timestamp.replace(' ', 'T'));
+                return `<tr class="bg-white border-b hover:bg-yellow-50">
+                    <td class="px-4 py-3 font-medium text-gray-900">${dateObj.toLocaleDateString('th-TH', {day:'numeric', month:'short'})} ${dateObj.toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'})}</td>
+                    <td class="px-4 py-3">${r.studentName}</td>
+                    <td class="px-4 py-3">${r.classRoom}</td>
+                    <td class="px-4 py-3 text-center"><span class="${r.hasHelmet ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} text-xs font-medium px-2.5 py-0.5 rounded border ${r.hasHelmet ? 'border-green-400' : 'border-red-400'}">${r.hasHelmet ? 'สวม' : 'ไม่สวม'}</span></td>
+                    <td class="px-4 py-3 text-center"><button onclick="deleteLog(${r.id})" class="text-red-500 hover:text-red-700 p-2"><i class="fa-solid fa-trash-can"></i></button></td>
+                </tr>`;
+            }).join('');
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function renderClassChart(data) {
+            const classCounts = {};
+            data.forEach(r => { if (!r.hasHelmet) classCounts[r.classRoom] = (classCounts[r.classRoom] || 0) + 1; });
+            const labels = Object.keys(classCounts).sort();
+            const values = labels.map(l => classCounts[l]);
+            const ctx = document.getElementById('classChart').getContext('2d');
+            if (classChartInstance) classChartInstance.destroy();
+            classChartInstance = new Chart(ctx, { type: 'bar', data: { labels: labels.length?labels:['ไม่มีข้อมูล'], datasets: [{ label: 'ไม่สวมหมวก', data: values.length?values:[0], backgroundColor: 'rgba(239, 68, 68, 0.7)', borderRadius: 4 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+        }
+
+        function renderTrendChart(data) {
+            const trendData = {};
+            data.forEach(r => { if (!r.hasHelmet) { const k = new Date(r.timestamp.replace(' ', 'T')).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }); trendData[k] = (trendData[k] || 0) + 1; } });
+            const labels = Object.keys(trendData).reverse().slice(-7); 
+            const values = labels.map(l => trendData[l]);
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            if (trendChartInstance) trendChartInstance.destroy();
+            trendChartInstance = new Chart(ctx, { type: 'line', data: { labels: labels.length?labels:['ไม่มีข้อมูล'], datasets: [{ label: 'ไม่สวมหมวก', data: values.length?values:[0], borderColor: 'rgb(249, 115, 22)', backgroundColor: 'rgba(249, 115, 22, 0.1)', tension: 0.4, fill: true }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+        }
+
+        function deleteLog(id) {
+            Swal.fire({ title: 'ลบรายการ?', icon: 'warning', showCancelButton: true, confirmButtonText: 'ลบ', confirmButtonColor: '#d33' }).then((r) => {
+                if (r.isConfirmed) {
+                    const idx = RECORDS.findIndex(x => x.id === id);
+                    if (idx !== -1) { RECORDS.splice(idx, 1); updateDashboard(); Swal.fire('ลบแล้ว', '', 'success'); }
+                }
+            })
+        }
+    </script>
+</body>
+</html>
