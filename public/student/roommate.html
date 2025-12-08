@@ -2,36 +2,39 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> <!-- ป้องกันการซูมเพื่อให้เหมือนแอพ -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RoomMate - Student App</title>
-    
-    <!-- PWA Settings -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#6366f1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://placehold.co/192x192/6366f1/ffffff?text=RM">
 
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4MQ3GL6CTB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-4MQ3GL6CTB');
+    </script>
+    
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
     
+    <!-- ย้าย Bootstrap มาไว้บนสุดเพื่อให้โหลดพร้อมใช้แน่นอน -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root { --primary-color: #6366f1; --secondary-color: #ec4899; --bg-color: #f3f4f6; --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); --fab-text-bg: #374151; }
-        body { font-family: 'Prompt', sans-serif; background-color: var(--bg-color); margin: 0; padding-bottom: 100px; -webkit-tap-highlight-color: transparent; }
-        
-        /* ปรับ Container ให้เต็มจอพอดีในมือถือ */
+        body { font-family: 'Prompt', sans-serif; background-color: var(--bg-color); margin: 0; padding-bottom: 100px; }
         .mobile-container { max-width: 480px; margin: 0 auto; background-color: white; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.05); position: relative; }
-        
-        .app-header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 20px; padding-top: 40px; /* เผื่อพื้นที่ Status bar */ border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; margin-bottom: 20px; position: relative; }
+        .app-header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 20px; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; margin-bottom: 20px; position: relative; z-index: 10; }
         .profile-section img { width: 60px; height: 60px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.5); object-fit: cover; background: white; }
         .xp-bar { height: 8px; background-color: rgba(255,255,255,0.3); border-radius: 10px; margin-top: 5px; overflow: hidden; }
         .xp-progress { height: 100%; background-color: #fbbf24; width: 0%; transition: width 0.5s; }
         .custom-card { border: none; border-radius: 15px; box-shadow: var(--card-shadow); margin-bottom: 15px; overflow: hidden; background: white; }
         .card-header-custom { padding: 12px 15px; font-weight: 600; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
-        .schedule-item { padding: 10px 15px; border-left: 4px solid #e5e7eb; margin-bottom: 8px; background-color: #f9fafb; border-radius: 0 8px 8px 0; transition: all 0.3s; }
+        .schedule-item { padding: 12px 15px; border-left: 4px solid #e5e7eb; margin-bottom: 8px; background-color: #f9fafb; border-radius: 0 8px 8px 0; transition: all 0.3s; }
         .schedule-item.active { border-left: 4px solid var(--primary-color); background-color: #eef2ff; transform: translateX(5px); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .time-badge { font-size: 0.7rem; color: #6b7280; display: block; margin-bottom: 2px; font-weight: 500; }
         .subject-code { font-size: 0.7rem; background: #e0e7ff; color: #4338ca; padding: 1px 6px; border-radius: 4px; margin-right: 5px; font-weight: 600; }
@@ -52,13 +55,15 @@
         .fab-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255,255,255,0.8); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); }
         .fab-container.active ~ .fab-overlay { opacity: 1; pointer-events: auto; }
         .add-btn { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; border: none; }
-        .teacher-btn { position: absolute; top: 30px; right: 20px; color: rgba(255,255,255,0.6); cursor: pointer; }
-        .teacher-btn:hover { color: white; }
+        
+        /* แก้ไขปุ่มครู: ย้ายตำแหน่งและเพิ่ม z-index */
+        .teacher-btn { position: absolute; top: 20px; right: 20px; color: rgba(255,255,255,0.7); cursor: pointer; z-index: 20; padding: 10px; }
+        .teacher-btn:hover { color: white; background: rgba(255,255,255,0.1); border-radius: 50%; }
+        
         .xp-badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background: #fbbf24; color: #78350f; font-weight: bold; margin-left: 5px;}
         .student-list-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #eee; }
-
-        /* Install PWA Prompt */
-        #pwa-install-btn { display: none; }
+        .nav-pills .nav-link { color: #6b7280; background-color: #f3f4f6; margin: 0 2px; }
+        .nav-pills .nav-link.active { background-color: var(--primary-color); color: white; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -68,8 +73,10 @@
     <header class="app-header">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="fw-bold fs-5"><i class="fa-solid fa-shapes me-2"></i>RoomMate</div>
-            <div class="teacher-btn" onclick="unlockTeacherMode()"><i class="fa-solid fa-gear"></i></div>
         </div>
+        <!-- ย้ายปุ่มออกมาอยู่นอก Flex เพื่อไม่ให้โดนบัง -->
+        <div class="teacher-btn" onclick="unlockTeacherMode()" title="ตั้งค่าสำหรับครู"><i class="fa-solid fa-gear fa-lg"></i></div>
+
         <div class="d-flex align-items-center profile-section">
             <img src="https://ui-avatars.com/api/?name=Guest&background=random" alt="Profile" id="student-img">
             <div class="ms-3 flex-grow-1">
@@ -85,11 +92,6 @@
 
     <div class="container px-3">
         
-        <!-- PWA Install Button (จะโชว์ถ้าติดตั้งได้) -->
-        <button id="pwa-install-btn" class="btn btn-outline-primary btn-sm w-100 mb-3 rounded-pill">
-            <i class="fa-solid fa-download me-2"></i> ติดตั้งแอพ RoomMate ไว้บนเครื่อง
-        </button>
-
         <!-- Schedule Card -->
         <div class="custom-card">
             <div class="card-header-custom">
@@ -101,11 +103,12 @@
             </div>
         </div>
 
-        <!-- Duty Card -->
+        <!-- Duty Card (แก้ไขส่วนหัว) -->
         <div class="custom-card border-0" style="background: linear-gradient(to right, #fff1eb, #ace0f9);">
             <div class="card-header-custom bg-transparent border-0">
                 <span><i class="fa-solid fa-broom me-2 text-success"></i>เวรประจำวัน</span>
                 <div class="d-flex align-items-center gap-2">
+                    <!-- ปุ่มดูสมาชิกเวร -->
                     <button class="btn btn-light btn-sm rounded-pill px-3 py-1 border-0 shadow-sm text-success fw-bold" style="font-size: 0.7rem;" onclick="openDutyRosterModal()">
                         <i class="fa-solid fa-users-viewfinder me-1"></i> ดูสมาชิก
                     </button>
@@ -115,7 +118,7 @@
             <div class="p-3 pt-0">
                 <div class="d-flex justify-content-between align-items-center">
                     <div id="duty-members">
-                        <small class="text-muted d-block mb-1">สมาชิกเวร:</small>
+                        <small class="text-muted d-block mb-1">สมาชิกเวรวันนี้:</small>
                         <div id="duty-list-text" class="small text-dark fw-bold">กำลังโหลด...</div>
                     </div>
                     <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="triggerCamera()">
@@ -155,10 +158,7 @@
 </div>
 <div class="fab-overlay" onclick="toggleFab()"></div>
 
-<!-- Modals (Register, Add HW, Teacher, Duty Roster) -->
-<!-- (ใช้โค้ด Modal เดิมที่มีอยู่ได้เลยครับ ผมไม่ได้แก้ส่วนนี้ในรอบนี้) -->
-<!-- ... [ใส่โค้ด Modal ทั้งหมดที่นี่] ... -->
-
+<!-- Modal: Duty Roster (เพิ่มกลับเข้ามา) -->
 <div class="modal fade" id="dutyRosterModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content rounded-4 border-0" style="min-height: 500px;">
@@ -167,25 +167,28 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body bg-light">
+                <!-- Day Selector -->
                 <ul class="nav nav-pills nav-fill mb-3 gap-1 small" id="duty-tabs" role="tablist">
-                    <li class="nav-item"><button class="nav-link active rounded-pill py-1" id="d-mon-tab" data-bs-toggle="pill" data-bs-target="#d-mon">จันทร์</button></li>
-                    <li class="nav-item"><button class="nav-link rounded-pill py-1" id="d-tue-tab" data-bs-toggle="pill" data-bs-target="#d-tue">อังคาร</button></li>
-                    <li class="nav-item"><button class="nav-link rounded-pill py-1" id="d-wed-tab" data-bs-toggle="pill" data-bs-target="#d-wed">พุธ</button></li>
-                    <li class="nav-item"><button class="nav-link rounded-pill py-1" id="d-thu-tab" data-bs-toggle="pill" data-bs-target="#d-thu">พฤหัส</button></li>
-                    <li class="nav-item"><button class="nav-link rounded-pill py-1" id="d-fri-tab" data-bs-toggle="pill" data-bs-target="#d-fri">ศุกร์</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link active rounded-pill py-1" id="d-mon-tab" data-bs-toggle="pill" data-bs-target="#d-mon" type="button">จันทร์</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link rounded-pill py-1" id="d-tue-tab" data-bs-toggle="pill" data-bs-target="#d-tue" type="button">อังคาร</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link rounded-pill py-1" id="d-wed-tab" data-bs-toggle="pill" data-bs-target="#d-wed" type="button">พุธ</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link rounded-pill py-1" id="d-thu-tab" data-bs-toggle="pill" data-bs-target="#d-thu" type="button">พฤหัส</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link rounded-pill py-1" id="d-fri-tab" data-bs-toggle="pill" data-bs-target="#d-fri" type="button">ศุกร์</button></li>
                 </ul>
-                <div class="tab-content">
-                    <div class="tab-pane fade show active" id="d-mon"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
-                    <div class="tab-pane fade" id="d-tue"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
-                    <div class="tab-pane fade" id="d-wed"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
-                    <div class="tab-pane fade" id="d-thu"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
-                    <div class="tab-pane fade" id="d-fri"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
+                
+                <div class="tab-content" id="duty-tabContent">
+                    <div class="tab-pane fade show active" id="d-mon" role="tabpanel"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
+                    <div class="tab-pane fade" id="d-tue" role="tabpanel"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
+                    <div class="tab-pane fade" id="d-wed" role="tabpanel"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
+                    <div class="tab-pane fade" id="d-thu" role="tabpanel"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
+                    <div class="tab-pane fade" id="d-fri" role="tabpanel"><div class="text-center py-3 text-muted">กำลังโหลด...</div></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal: Student Register -->
 <div class="modal fade" id="studentRegisterModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 p-4 text-center">
@@ -199,6 +202,7 @@
     </div>
 </div>
 
+<!-- Modal: Add Homework -->
 <div class="modal fade" id="addHomeworkModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content rounded-4 border-0">
@@ -218,6 +222,7 @@
     </div>
 </div>
 
+<!-- Modal: Teacher Login -->
 <div class="modal fade" id="teacherLoginModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content rounded-4 border-0">
@@ -230,6 +235,7 @@
     </div>
 </div>
 
+<!-- Modal: Teacher Dashboard -->
 <div class="modal fade" id="teacherDashboardModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content rounded-4 border-0" style="min-height: 600px;">
@@ -238,6 +244,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body bg-light p-0">
+                <!-- Teacher Menu -->
                 <div id="teacher-menu" class="p-3">
                     <div class="d-grid gap-2">
                         <button class="btn btn-white shadow-sm text-start p-3 rounded-3 border" onclick="showSection('teacher-students')">
@@ -252,6 +259,7 @@
                     </div>
                 </div>
 
+                <!-- Section: Manage Students -->
                 <div id="teacher-students" class="d-none h-100 d-flex flex-column">
                     <div class="p-2 border-bottom bg-white d-flex align-items-center">
                         <button class="btn btn-sm btn-link text-decoration-none me-2" onclick="showSection('teacher-menu')"><i class="fa-solid fa-arrow-left"></i></button>
@@ -279,6 +287,7 @@
                     <div id="student-list-container" class="p-2 overflow-auto flex-grow-1"></div>
                 </div>
 
+                <!-- Section: Edit Schedule -->
                 <div id="teacher-schedule" class="d-none h-100 d-flex flex-column">
                     <div class="p-2 border-bottom bg-white d-flex align-items-center">
                         <button class="btn btn-sm btn-link text-decoration-none me-2" onclick="showSection('teacher-menu')"><i class="fa-solid fa-arrow-left"></i></button>
@@ -300,6 +309,7 @@
                     </div>
                 </div>
 
+                <!-- Section: Gallery -->
                 <div id="duty-photo-gallery" class="d-none h-100 d-flex flex-column">
                      <div class="p-2 border-bottom bg-white d-flex align-items-center">
                         <button class="btn btn-sm btn-link text-decoration-none me-2" onclick="showSection('teacher-menu')"><i class="fa-solid fa-arrow-left"></i></button>
@@ -319,7 +329,7 @@
     import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, serverTimestamp, getDoc, updateDoc, setDoc, limit, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-    // ⚠️ Config
+    // ⚠️ Config ของครู
     const firebaseConfig = {
         apiKey: "AIzaSyAlfZHbCFxGK3p3nDoAPy3m9KqZzmX2s9I",
         authDomain: "kruboat-web.firebaseapp.com",
@@ -337,32 +347,13 @@
     let currentUserData = null;
     let currentStudentId = null;
 
-    // --- PWA Installation Logic ---
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        // แสดงปุ่มติดตั้ง
-        const installBtn = document.getElementById('pwa-install-btn');
-        installBtn.style.display = 'block';
-        
-        installBtn.addEventListener('click', () => {
-            installBtn.style.display = 'none';
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choiceResult) => {
-                if (choiceResult.outcome === 'accepted') {
-                    console.log('User accepted the A2HS prompt');
-                }
-                deferredPrompt = null;
-            });
-        });
-    });
+    // เวลาเรียน 7 คาบ
+    const periodTimes = [
+        "08:30 - 09:20", "09:20 - 10:10", "10:10 - 11:00", 
+        "11:00 - 11:50", "13:00 - 13:50", "13:50 - 14:40", "14:40 - 15:30"
+    ];
 
-    // ... (Logic เดิมทั้งหมด) ...
-    // ... Copy Logic จากไฟล์ roommate.html ก่อนหน้านี้มาใส่ตรงนี้ได้เลยครับ ...
-    // (เพื่อประหยัดพื้นที่ ผมจะละไว้ในฐานที่เข้าใจว่าใช้โค้ด JS เดิมที่สมบูรณ์แล้ว)
-    
-    // Auth
+    // 1. Auth & Identity Logic
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             const storedId = localStorage.getItem('roommate_student_id');
@@ -370,44 +361,42 @@
                 currentStudentId = storedId;
                 loadUserProfile(storedId);
             } else {
-                new bootstrap.Modal(document.getElementById('studentRegisterModal')).show();
+                const regModal = new bootstrap.Modal(document.getElementById('studentRegisterModal'));
+                regModal.show();
             }
         } else {
-            signInAnonymously(auth).catch(console.error);
+            signInAnonymously(auth).catch((error) => console.error("Auth Error", error));
         }
     });
-    
-    // ... (Functions: registerStudent, loadUserProfile, updateProfileUI, logoutStudent, saveScheduleByDay, addStudent, updateStudentGroup, saveHomework, deleteHomework, triggerCamera, uploadDutyPhoto, unlockTeacherMode, checkTeacherPin, showSection, loadTeacherStudents, giveXP, loadScheduleEdit, viewDutyHistory, toggleFab) ...
-    
-    // (ขออนุญาตใช้ JS เดิม เพราะ PWA ไม่กระทบ Logic ครับ)
-    
-    // [ใส่โค้ด JS เดิมทั้งหมดที่นี่]
 
-    // Schedule Logic
-    const periodTimes = ["08:30 - 09:20", "09:20 - 10:10", "10:10 - 11:00", "11:00 - 11:50", "13:00 - 13:50", "13:50 - 14:40", "14:40 - 15:30"];
-    
-    // ... (ส่วนอื่นๆ ของ JS คงเดิม) ...
-    // เพื่อให้ทำงานได้เลย ผมจะใส่ตัวอย่าง JS หลักๆ ให้ครับ
-    
     window.registerStudent = async () => {
         const id = document.getElementById('reg-student-id').value.trim();
-        if(!id) return alert("กรุณากรอกรหัส");
+        if(!id) return alert("กรุณากรอกรหัสนักเรียน");
+        
         const docRef = doc(db, "rm_students", id);
         const docSnap = await getDoc(docRef);
+
         if (docSnap.exists()) {
             localStorage.setItem('roommate_student_id', id);
             bootstrap.Modal.getInstance(document.getElementById('studentRegisterModal')).hide();
             currentStudentId = id;
             loadUserProfile(id);
         } else {
-            alert("ไม่พบรหัสนี้");
+            alert("❌ ไม่พบรหัสนักเรียนนี้ในระบบ\nกรุณาติดต่อครูเพื่อเพิ่มรายชื่อก่อนใช้งานครับ");
         }
     }
-    
+
     async function loadUserProfile(id) {
-        onSnapshot(doc(db, "rm_students", id), (docSnap) => {
-            if (docSnap.exists()) { currentUserData = docSnap.data(); updateProfileUI(); }
-            else { localStorage.removeItem('roommate_student_id'); location.reload(); }
+        const userRef = doc(db, "rm_students", id);
+        onSnapshot(userRef, (docSnap) => {
+            if (docSnap.exists()) {
+                currentUserData = docSnap.data();
+                updateProfileUI();
+            } else {
+                alert("ข้อมูลนักเรียนถูกลบออกจากระบบ");
+                localStorage.removeItem('roommate_student_id');
+                location.reload();
+            }
         });
     }
 
@@ -420,35 +409,86 @@
         document.getElementById('student-xp').innerText = `${currentUserData.xp || 0}/100 XP`;
         document.getElementById('student-xp-bar').style.width = `${Math.min(currentUserData.xp || 0, 100)}%`;
     }
+    
+    window.logoutStudent = () => {
+        if(confirm("ต้องการออกจากระบบใช่หรือไม่?")) {
+            localStorage.removeItem('roommate_student_id');
+            location.reload();
+        }
+    }
 
+    // 2. Schedule Logic
     const daysMap = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
     const todayKey = daysMap[new Date().getDay()];
     
     onSnapshot(doc(db, "rm_config", "schedule"), (docSnap) => {
         const list = document.getElementById('schedule-list');
         if (docSnap.exists() && docSnap.data()[todayKey]) {
-            const subjects = docSnap.data()[todayKey];
+            const subjects = docSnap.data()[todayKey]; 
             if(Array.isArray(subjects) && subjects.length > 0) {
                  list.innerHTML = subjects.map((subj, i) => `
-                    <div class="schedule-item">
+                    <div class="schedule-item ${isCurrentPeriod(i) ? 'active':''}">
                         <span class="time-badge">${periodTimes[i]}</span>
                         <div class="fw-bold text-dark">
                             <span class="subject-code">${subj.code || '-'}</span> ${subj.name || 'ว่าง'}
                         </div>
-                        <div class="teacher-room"><i class="fa-solid fa-user me-1"></i> ${subj.teacher || '-'} | <i class="fa-solid fa-location-dot me-1"></i> ${subj.room || '-'}</div>
-                    </div>`).join('');
-            } else { list.innerHTML = '<div class="text-center text-muted small py-3">วันนี้ไม่มีเรียน</div>'; }
-        } else { list.innerHTML = '<div class="text-center text-muted small py-3">ยังไม่มีตารางเรียน</div>'; }
+                        <div class="teacher-room">
+                            <i class="fa-solid fa-user me-1"></i> ${subj.teacher || '-'} | 
+                            <i class="fa-solid fa-location-dot me-1"></i> ${subj.room || '-'}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                 list.innerHTML = '<div class="text-center text-muted small py-3">วันนี้ไม่มีเรียน</div>';
+            }
+        } else {
+            list.innerHTML = '<div class="text-center text-muted small py-3">ยังไม่มีตารางเรียน</div>';
+        }
     });
 
+    function isCurrentPeriod(index) {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMin = now.getMinutes();
+        const currentTime = currentHour * 60 + currentMin;
+        
+        const times = periodTimes[index].split(' - ')[0].split(':');
+        const start = parseInt(times[0]) * 60 + parseInt(times[1]);
+        const endTimes = periodTimes[index].split(' - ')[1].split(':');
+        const end = parseInt(endTimes[0]) * 60 + parseInt(endTimes[1]);
+        
+        return currentTime >= start && currentTime < end;
+    }
+
+    // Teacher: Schedule Editor Logic
     let currentScheduleData = {};
+
     window.loadScheduleForDay = () => {
         const day = document.getElementById('edit-day-select').value;
         const container = document.getElementById('period-forms-container');
         const dataForDay = currentScheduleData[day] || [];
+        
         container.innerHTML = periodTimes.map((time, i) => {
             const d = dataForDay[i] || {};
-            return `<div class="card p-2 bg-light border mb-2"><div class="fw-bold small mb-1 text-primary">คาบที่ ${i+1} (${time})</div><div class="row g-2"><div class="col-4"><input type="text" class="form-control form-control-sm p-code" placeholder="รหัสวิชา" value="${d.code || ''}"></div><div class="col-8"><input type="text" class="form-control form-control-sm p-name" placeholder="ชื่อวิชา" value="${d.name || ''}"></div><div class="col-6"><input type="text" class="form-control form-control-sm p-teacher" placeholder="ชื่อครู" value="${d.teacher || ''}"></div><div class="col-6"><input type="text" class="form-control form-control-sm p-room" placeholder="ห้องเรียน" value="${d.room || ''}"></div></div></div>`;
+            return `
+                <div class="card p-2 bg-light border mb-2">
+                    <div class="fw-bold small mb-1 text-primary">คาบที่ ${i+1} (${time})</div>
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <input type="text" class="form-control form-control-sm p-code" placeholder="รหัสวิชา" value="${d.code || ''}">
+                        </div>
+                        <div class="col-8">
+                            <input type="text" class="form-control form-control-sm p-name" placeholder="ชื่อวิชา" value="${d.name || ''}">
+                        </div>
+                        <div class="col-6">
+                            <input type="text" class="form-control form-control-sm p-teacher" placeholder="ชื่อครู" value="${d.teacher || ''}">
+                        </div>
+                        <div class="col-6">
+                            <input type="text" class="form-control form-control-sm p-room" placeholder="ห้องเรียน" value="${d.room || ''}">
+                        </div>
+                    </div>
+                </div>
+            `;
         }).join('');
     }
 
@@ -456,6 +496,7 @@
         const day = document.getElementById('edit-day-select').value;
         const container = document.getElementById('period-forms-container');
         const periods = [];
+        
         container.querySelectorAll('.card').forEach(card => {
             periods.push({
                 code: card.querySelector('.p-code').value.trim(),
@@ -464,18 +505,29 @@
                 room: card.querySelector('.p-room').value.trim()
             });
         });
-        const updateData = {}; updateData[day] = periods;
+
+        const updateData = {};
+        updateData[day] = periods;
+        
         await setDoc(doc(db, "rm_config", "schedule"), updateData, { merge: true });
         alert(`บันทึกตารางวัน${day}เรียบร้อย!`);
     }
 
+    // Teacher: Add Student
     window.addStudent = async () => {
         const id = document.getElementById('new-student-id').value.trim();
         const name = document.getElementById('new-student-name').value.trim();
         const group = document.getElementById('new-student-group').value;
         const fileInput = document.getElementById('new-student-photo');
         const file = fileInput.files[0];
-        if(!id || !name) return alert("กรอกข้อมูลให้ครบ");
+        
+        if(!id || !name) return alert("กรอกรหัสและชื่อให้ครบ");
+        
+        const btn = document.getElementById('btn-add-student');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+
         try {
             let photoURL = "";
             if (file) {
@@ -483,10 +535,27 @@
                 const snapshot = await uploadBytes(storageRef, file);
                 photoURL = await getDownloadURL(snapshot.ref);
             }
-            await setDoc(doc(db, "rm_students", id), { name, photoURL, group: group || "1", xp: 0, level: 1, createdAt: serverTimestamp() });
+
+            await setDoc(doc(db, "rm_students", id), {
+                name: name,
+                photoURL: photoURL,
+                group: group || "1",
+                xp: 0,
+                level: 1,
+                createdAt: serverTimestamp()
+            });
+            
             document.getElementById('new-student-id').value = "";
             document.getElementById('new-student-name').value = "";
-        } catch(e) { alert("Error: " + e.message); }
+            document.getElementById('new-student-group').value = "";
+            fileInput.value = "";
+            
+        } catch(e) {
+            alert("Error: " + e.message);
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
     }
     
     window.updateStudentGroup = async (uid, newGroup) => {
@@ -494,6 +563,7 @@
         await updateDoc(ref, { group: newGroup });
     }
 
+    // 3. Homework Logic
     const hwList = document.getElementById('homework-list');
     const qHw = query(collection(db, "rm_homeworks"), orderBy("date", "asc"));
     onSnapshot(qHw, (snapshot) => {
@@ -503,7 +573,11 @@
             const hw = doc.data();
             const isUrgent = hw.type === 'urgent' ? 'hw-urgent' : 'hw-normal';
             const badge = hw.type === 'urgent' ? '<span class="badge bg-danger mb-1" style="font-size: 0.6rem;">ด่วน!</span>' : `<span class="badge bg-warning text-dark mb-1" style="font-size: 0.6rem;">ส่ง ${hw.date}</span>`;
-            hwList.innerHTML += `<div class="custom-card hw-item ${isUrgent} p-3 mb-2 position-relative"><i class="fa-solid fa-trash btn-delete-hw" onclick="deleteHomework('${doc.id}')"></i><div class="d-flex justify-content-between"><div>${badge}<div class="fw-bold">${hw.desc}</div><div class="text-muted small">${hw.subject}</div></div></div></div>`;
+            hwList.innerHTML += `
+                <div class="custom-card hw-item ${isUrgent} p-3 mb-2 position-relative">
+                    <i class="fa-solid fa-trash btn-delete-hw" onclick="deleteHomework('${doc.id}')"></i>
+                    <div class="d-flex justify-content-between"><div>${badge}<div class="fw-bold">${hw.desc}</div><div class="text-muted small">${hw.subject}</div></div></div>
+                </div>`;
         });
     });
 
@@ -519,6 +593,7 @@
     }
     window.deleteHomework = async (id) => { if(confirm("ลบรายการนี้?")) await deleteDoc(doc(db, "rm_homeworks", id)); }
 
+    // 5. Duty & Teacher Functions
     window.triggerCamera = () => document.getElementById('camera-input').click();
     window.uploadDutyPhoto = async (input) => {
         const file = input.files[0];
@@ -538,14 +613,18 @@
         if(document.getElementById('teacher-pin').value === "1234") {
             bootstrap.Modal.getInstance(document.getElementById('teacherLoginModal')).hide();
             new bootstrap.Modal(document.getElementById('teacherDashboardModal')).show();
+            
+            // โหลดข้อมูลเพื่อเตรียมพร้อม (รายชื่อนักเรียน & ตารางเรียน)
             loadTeacherStudents(); 
             getDoc(doc(db, "rm_config", "schedule")).then(snap => {
                 if(snap.exists()) {
                     currentScheduleData = snap.data();
+                    // โหลดวันจันทร์เป็น Default
                     document.getElementById('edit-day-select').value = 'mon';
                     loadScheduleForDay(); 
                 }
             });
+            
         } else alert("รหัสผิด");
     }
     window.showSection = (id) => {
@@ -553,19 +632,49 @@
         document.getElementById(id).classList.remove('d-none');
     }
     
+    // Load Students for Teacher
     function loadTeacherStudents() {
         const container = document.getElementById('student-list-container');
         const q = query(collection(db, "rm_students")); 
+        
         onSnapshot(q, (snap) => {
             container.innerHTML = "";
             const students = [];
             snap.forEach(d => students.push({ id: d.id, ...d.data() }));
             students.sort((a, b) => a.id.localeCompare(b.id)); 
+
             students.forEach(s => {
                 const imgDisplay = s.photoURL ? s.photoURL : `https://ui-avatars.com/api/?name=${s.name}&background=random`;
                 const currentGroup = s.group || "1";
-                const groupSelect = `<select class="form-select form-select-sm border-0 bg-light" style="width: auto; font-size: 0.7rem;" onchange="updateStudentGroup('${s.id}', this.value)"><option value="1" ${currentGroup == '1' ? 'selected' : ''}>เวรวันจันทร์</option><option value="2" ${currentGroup == '2' ? 'selected' : ''}>เวรวันอังคาร</option><option value="3" ${currentGroup == '3' ? 'selected' : ''}>เวรวันพุธ</option><option value="4" ${currentGroup == '4' ? 'selected' : ''}>เวรวันพฤหัสบดี</option><option value="5" ${currentGroup == '5' ? 'selected' : ''}>เวรวันศุกร์</option></select>`;
-                container.innerHTML += `<div class="d-flex justify-content-between align-items-center border-bottom p-2"><div class="d-flex align-items-center" style="overflow: hidden;"><img src="${imgDisplay}" class="student-list-img me-2 flex-shrink-0"><div style="min-width: 0;"><div class="d-flex align-items-center mb-1"><span class="badge bg-secondary me-1" style="font-size:0.6rem">${s.id}</span><strong class="text-truncate" style="font-size:0.85rem">${s.name}</strong></div><div class="d-flex align-items-center">${groupSelect}<span class="xp-badge ms-1">${s.xp} XP</span></div></div></div><div class="d-flex flex-column gap-1 ms-2"><button class="btn btn-sm btn-outline-success py-0" style="font-size:0.7rem" onclick="giveXP('${s.id}', 10)">+10</button><button class="btn btn-sm btn-outline-danger py-0" style="font-size:0.7rem" onclick="giveXP('${s.id}', -10)">-10</button></div></div>`;
+                const groupSelect = `
+                    <select class="form-select form-select-sm border-0 bg-light" style="width: auto; font-size: 0.7rem;" onchange="updateStudentGroup('${s.id}', this.value)">
+                        <option value="1" ${currentGroup == '1' ? 'selected' : ''}>เวรวันจันทร์</option>
+                        <option value="2" ${currentGroup == '2' ? 'selected' : ''}>เวรวันอังคาร</option>
+                        <option value="3" ${currentGroup == '3' ? 'selected' : ''}>เวรวันพุธ</option>
+                        <option value="4" ${currentGroup == '4' ? 'selected' : ''}>เวรวันพฤหัสบดี</option>
+                        <option value="5" ${currentGroup == '5' ? 'selected' : ''}>เวรวันศุกร์</option>
+                    </select>`;
+
+                container.innerHTML += `
+                    <div class="d-flex justify-content-between align-items-center border-bottom p-2">
+                        <div class="d-flex align-items-center" style="overflow: hidden;">
+                            <img src="${imgDisplay}" class="student-list-img me-2 flex-shrink-0">
+                            <div style="min-width: 0;">
+                                <div class="d-flex align-items-center mb-1">
+                                    <span class="badge bg-secondary me-1" style="font-size:0.6rem">${s.id}</span>
+                                    <strong class="text-truncate" style="font-size:0.85rem">${s.name}</strong> 
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    ${groupSelect}
+                                    <span class="xp-badge ms-1">${s.xp} XP</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column gap-1 ms-2">
+                            <button class="btn btn-sm btn-outline-success py-0" style="font-size:0.7rem" onclick="giveXP('${s.id}', 10)">+10</button>
+                            <button class="btn btn-sm btn-outline-danger py-0" style="font-size:0.7rem" onclick="giveXP('${s.id}', -10)">-10</button>
+                        </div>
+                    </div>`;
             });
         });
     }
@@ -593,6 +702,7 @@
         });
     }
 
+    // Init UI
     const daysTH = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัส", "ศุกร์", "เสาร์"];
     const currentDayIndex = new Date().getDay();
     document.getElementById('today-day').innerText = daysTH[currentDayIndex];
@@ -611,6 +721,7 @@
     };
 
     const config = dutyConfig[todayGroup] || dutyConfig[1];
+    
     dutyGroupBadge.innerText = config.text;
     dutyGroupBadge.classList.remove('bg-success'); 
     dutyGroupBadge.style.backgroundColor = config.color;
@@ -618,8 +729,9 @@
 
     const qDuty = query(collection(db, "rm_students"), where("group", "==", String(todayGroup)));
     onSnapshot(qDuty, (snap) => {
+        const container = document.getElementById('duty-list-text');
         if(snap.empty) {
-            dutyListText.innerText = "ไม่มีสมาชิกเวร";
+            container.innerHTML = '<span class="small text-muted">ไม่มีสมาชิกเวร</span>';
         } else {
             let html = '<div class="d-flex align-items-center ps-2">'; 
             snap.forEach(d => {
@@ -628,21 +740,58 @@
                 html += `<img src="${img}" class="rounded-circle border border-white" style="width:35px; height:35px; object-fit:cover; margin-left: -10px;" title="${s.name}">`;
             });
             html += '</div>';
-            dutyListText.innerHTML = html;
+            container.innerHTML = html;
         }
     });
 
-    window.logoutStudent = () => {
-        if(confirm("ต้องการออกจากระบบใช่หรือไม่?")) {
-            localStorage.removeItem('roommate_student_id');
-            location.reload();
-        }
+    // ✅ เพิ่มฟังก์ชันนี้กลับมา (สำคัญมาก!)
+    window.openDutyRosterModal = () => {
+        new bootstrap.Modal(document.getElementById('dutyRosterModal')).show();
+        loadAllDutyMembers(); // เรียกฟังก์ชันโหลดรายชื่อ
     }
-    
+
+    // ✅ เพิ่มฟังก์ชันโหลดรายชื่อสมาชิกเวรทั้งหมด (สำหรับ Modal)
+    function loadAllDutyMembers() {
+        const q = query(collection(db, "rm_students"));
+        onSnapshot(q, (snap) => {
+            const days = { '1': [], '2': [], '3': [], '4': [], '5': [] };
+            
+            snap.forEach(d => {
+                const s = d.data();
+                const g = s.group || '1';
+                if(days[g]) days[g].push(s);
+            });
+
+            const targets = { '1': 'd-mon', '2': 'd-tue', '3': 'd-wed', '4': 'd-thu', '5': 'd-fri' };
+            
+            for(let g in days) {
+                const container = document.getElementById(targets[g]);
+                if(!container) continue;
+                
+                if(days[g].length === 0) {
+                    container.innerHTML = '<div class="text-center py-4 text-muted opacity-50"><i class="fa-solid fa-user-slash mb-2 fs-4"></i><br>ไม่มีสมาชิก</div>';
+                    continue;
+                }
+
+                let html = '<div class="list-group shadow-sm rounded-3 overflow-hidden border-0">';
+                days[g].forEach(s => {
+                    const img = s.photoURL ? s.photoURL : `https://ui-avatars.com/api/?name=${s.name}&background=random`;
+                    html += `
+                        <div class="list-group-item border-0 border-bottom py-3 d-flex align-items-center">
+                            <img src="${img}" class="rounded-circle me-3 border" width="40" height="40" style="object-fit:cover;">
+                            <div>
+                                <div class="fw-bold text-dark">${s.name}</div>
+                                <div class="small text-muted"><i class="fa-solid fa-star text-warning me-1"></i>${s.xp || 0} XP</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }
+        });
+    }
+
     window.toggleFab = () => document.getElementById('fabMenu').classList.toggle('active');
 
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
