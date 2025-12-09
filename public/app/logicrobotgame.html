@@ -2,9 +2,9 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Logic Robot: ฝึกคิดแบบอัลกอริทึม</title>
-    
+
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4MQ3GL6CTB"></script>
     <script>
@@ -14,7 +14,7 @@
 
       gtag('config', 'G-4MQ3GL6CTB');
     </script>
-    
+
     <!-- ใช้ Tailwind CSS สำหรับตกแต่ง -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- ใช้ Font Awesome สำหรับไอคอน -->
@@ -26,7 +26,8 @@
             font-family: 'Kanit', sans-serif;
             background-color: #1a202c;
             color: white;
-            touch-action: manipulation; /* ป้องกันการซูมบนมือถือเวลากดปุ่มรัวๆ */
+            /* ป้องกัน Zoom บนมือถือ */
+            touch-action: manipulation; 
         }
 
         .grid-cell {
@@ -47,77 +48,97 @@
         /* Scrollbar สำหรับรายการคำสั่ง */
         .command-list::-webkit-scrollbar {
             height: 8px;
+            width: 8px;
         }
         .command-list::-webkit-scrollbar-thumb {
             background: #4a5568;
             border-radius: 4px;
         }
+        
+        /* ปรับแต่ง Scrollbar หลักสำหรับ Container บนมือถือ */
+        #main-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        #main-container::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 4px;
+        }
     </style>
 </head>
-<body class="h-screen flex flex-col items-center justify-center overflow-hidden">
+<!-- ปรับ body ให้เป็น flex column และ overflow-hidden เฉพาะบนจอใหญ่ -->
+<body class="h-screen w-full flex flex-col items-center bg-gray-900 overflow-hidden">
 
-    <!-- Header -->
-    <div class="w-full max-w-4xl px-4 py-2 flex justify-between items-center bg-gray-800 shadow-md">
-        <h1 class="text-xl md:text-2xl font-bold text-green-400"><i class="fas fa-robot mr-2"></i>Logic Robot</h1>
-        <div class="flex gap-4">
-            <span class="text-gray-300">ด่าน: <span id="level-display" class="font-bold text-white">1</span>/15</span>
-            <button onclick="resetLevel()" class="text-red-400 hover:text-red-300 text-sm"><i class="fas fa-rotate-right"></i> รีเซ็ต</button>
+    <!-- Header: Fixed Height -->
+    <div class="w-full max-w-4xl px-4 py-3 flex-none flex justify-between items-center bg-gray-800 shadow-md z-10 border-b border-gray-700">
+        <h1 class="text-lg md:text-2xl font-bold text-green-400 truncate"><i class="fas fa-robot mr-2"></i>Logic Robot</h1>
+        <div class="flex gap-3 flex-shrink-0">
+            <span class="text-gray-300 text-sm md:text-base flex items-center bg-gray-700 px-3 py-1 rounded-full">
+                ด่าน: <span id="level-display" class="font-bold text-white ml-1">1</span>/15
+            </span>
+            <button onclick="resetLevel()" class="text-red-400 hover:text-red-300 text-sm md:text-base px-2">
+                <i class="fas fa-rotate-right"></i>
+            </button>
         </div>
     </div>
 
-    <div class="flex flex-col md:flex-row w-full max-w-4xl flex-grow overflow-hidden p-2 gap-4">
+    <!-- Main Content: Scrollable on mobile (overflow-y-auto), Locked on Desktop (md:overflow-hidden) -->
+    <div id="main-container" class="w-full max-w-4xl flex-grow flex flex-col md:flex-row gap-4 p-4 overflow-y-auto md:overflow-hidden">
         
-        <!-- ส่วนแสดงผลเกม (Game Board) -->
-        <div class="flex-grow flex items-center justify-center bg-gray-900 rounded-xl border-2 border-gray-700 relative p-4 overflow-auto" id="game-container">
+        <!-- ส่วนแสดงผลเกม (Game Board): ย่อขยายได้ -->
+        <div class="flex-none md:flex-grow flex flex-col items-center justify-center bg-gray-800 rounded-xl border-2 border-gray-700 relative p-4 min-h-[350px] md:min-h-0 shadow-lg" id="game-container">
             <!-- Grid จะถูกสร้างโดย JavaScript -->
-            <div id="grid-board" class="relative transition-all"></div>
+            <div id="grid-board" class="relative transition-all shadow-2xl"></div>
             
             <!-- Overlay แจ้งเตือน -->
-            <div id="message-modal" class="hidden absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50 rounded-xl">
-                <h2 id="modal-title" class="text-3xl font-bold mb-4 text-green-400">สำเร็จ!</h2>
-                <p id="modal-text" class="mb-6 text-gray-300 text-center px-4">คุณเขียนโปรแกรมได้ถูกต้อง</p>
-                <button id="modal-btn" onclick="nextLevel()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full transition shadow-lg">
-                    ด่านถัดไป
+            <div id="message-modal" class="hidden absolute inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center z-50 rounded-xl p-4 text-center backdrop-blur-sm">
+                <i id="modal-icon" class="fas fa-check-circle text-6xl text-green-500 mb-4 animate-bounce"></i>
+                <h2 id="modal-title" class="text-3xl font-bold mb-2 text-green-400">สำเร็จ!</h2>
+                <p id="modal-text" class="mb-6 text-gray-300 px-4">คุณเขียนโปรแกรมได้ถูกต้อง</p>
+                <button id="modal-btn" onclick="nextLevel()" class="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-8 rounded-full transition shadow-[0_0_15px_rgba(34,197,94,0.5)] active:scale-95 text-lg">
+                    ด่านถัดไป <i class="fas fa-arrow-right ml-2"></i>
                 </button>
             </div>
         </div>
 
-        <!-- ส่วนควบคุม (Controls) -->
-        <div class="w-full md:w-80 flex flex-col gap-2 bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-xl">
+        <!-- ส่วนควบคุม (Controls): อยู่ล่างสุดบนมือถือ -->
+        <div class="flex-none w-full md:w-80 flex flex-col gap-3 bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-xl pb-8 md:pb-4">
             
             <!-- หน้าจอแสดงคำสั่ง -->
-            <div class="flex-grow bg-gray-900 rounded-lg p-3 border border-gray-600 flex flex-col min-h-[150px]">
-                <div class="flex justify-between items-center mb-2 border-b border-gray-700 pb-1">
-                    <span class="text-xs text-gray-400 uppercase tracking-wider">Main Function</span>
-                    <span id="command-count" class="text-xs text-gray-500">0/30</span>
+            <div class="bg-black/40 rounded-lg p-3 border border-gray-600 flex flex-col h-[180px] md:h-auto md:flex-grow">
+                <div class="flex justify-between items-center mb-2 border-b border-gray-700 pb-2">
+                    <span class="text-xs text-blue-400 uppercase tracking-widest font-bold"><i class="fas fa-code mr-1"></i> Program</span>
+                    <span id="command-count" class="text-xs text-gray-400 bg-gray-700 px-2 py-0.5 rounded">0/30</span>
                 </div>
-                <div id="command-list" class="command-list flex flex-wrap content-start gap-2 overflow-y-auto h-full">
+                <div id="command-list" class="command-list flex flex-wrap content-start gap-2 overflow-y-auto h-full pr-1">
                     <!-- คำสั่งจะมาโผล่ตรงนี้ -->
-                    <div class="text-gray-500 text-sm italic w-full text-center mt-4 empty-msg">เลือกคำสั่งด้านล่าง...</div>
+                    <div class="text-gray-500 text-sm italic w-full text-center mt-8 empty-msg flex flex-col items-center opacity-50">
+                        <i class="fas fa-hand-pointer mb-2 text-2xl"></i>
+                        เลือกคำสั่งด้านล่าง
+                    </div>
                 </div>
             </div>
 
             <!-- ปุ่มควบคุม -->
-            <div class="grid grid-cols-4 gap-2 mt-2">
-                <button onclick="addCommand('L')" class="btn-press bg-blue-600 hover:bg-blue-500 p-3 rounded-lg shadow-md flex flex-col items-center justify-center">
-                    <i class="fas fa-undo text-white mb-1"></i>
-                    <span class="text-[10px]">หันซ้าย</span>
+            <div class="grid grid-cols-4 gap-2">
+                <button onclick="addCommand('L')" class="btn-press bg-blue-600 hover:bg-blue-500 active:bg-blue-700 p-3 rounded-lg shadow-md flex flex-col items-center justify-center h-16 border-b-4 border-blue-800 active:border-b-0 active:translate-y-1 transition-all">
+                    <i class="fas fa-undo text-white text-lg mb-1"></i>
+                    <span class="text-[10px] font-bold">หันซ้าย</span>
                 </button>
-                <button onclick="addCommand('F')" class="btn-press bg-green-600 hover:bg-green-500 p-3 rounded-lg shadow-md flex flex-col items-center justify-center col-span-2">
-                    <i class="fas fa-arrow-up text-white mb-1"></i>
-                    <span class="text-[10px]">เดินหน้า</span>
+                <button onclick="addCommand('F')" class="btn-press bg-green-600 hover:bg-green-500 active:bg-green-700 p-3 rounded-lg shadow-md flex flex-col items-center justify-center col-span-2 h-16 border-b-4 border-green-800 active:border-b-0 active:translate-y-1 transition-all">
+                    <i class="fas fa-arrow-up text-white text-xl mb-1"></i>
+                    <span class="text-[10px] font-bold">เดินหน้า</span>
                 </button>
-                <button onclick="addCommand('R')" class="btn-press bg-blue-600 hover:bg-blue-500 p-3 rounded-lg shadow-md flex flex-col items-center justify-center">
-                    <i class="fas fa-redo text-white mb-1"></i>
-                    <span class="text-[10px]">หันขวา</span>
+                <button onclick="addCommand('R')" class="btn-press bg-blue-600 hover:bg-blue-500 active:bg-blue-700 p-3 rounded-lg shadow-md flex flex-col items-center justify-center h-16 border-b-4 border-blue-800 active:border-b-0 active:translate-y-1 transition-all">
+                    <i class="fas fa-redo text-white text-lg mb-1"></i>
+                    <span class="text-[10px] font-bold">หันขวา</span>
                 </button>
             </div>
 
-            <div class="grid grid-cols-2 gap-2 mt-2">
-                <button onclick="clearCommands()" class="btn-press bg-red-900 hover:bg-red-800 text-red-200 py-2 rounded-lg border border-red-700 text-sm">
-                    <i class="fas fa-trash"></i> ล้างคำสั่ง
+            <div class="grid grid-cols-2 gap-2 mt-1">
+                <button onclick="clearCommands()" class="btn-press bg-red-900/50 hover:bg-red-900 text-red-300 py-3 rounded-lg border border-red-800 text-sm font-bold flex items-center justify-center transition-colors">
+                    <i class="fas fa-trash mr-2"></i> ล้าง
                 </button>
-                <button id="run-btn" onclick="runProgram()" class="btn-press bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-2 rounded-lg shadow-lg text-sm flex items-center justify-center gap-2">
+                <button id="run-btn" onclick="runProgram()" class="btn-press bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-600 text-gray-900 font-bold py-3 rounded-lg shadow-lg text-sm flex items-center justify-center gap-2 border-b-4 border-yellow-700 active:border-b-0 active:translate-y-1 transition-all">
                     <i class="fas fa-play"></i> เริ่มทำงาน
                 </button>
             </div>
@@ -127,156 +148,31 @@
     <!-- Script หลักของเกม -->
     <script>
         // --- 1. การตั้งค่าและตัวแปรหลัก ---
-        let boardSize = 45; // ขนาดช่อง Grid (px) - จะปรับอัตโนมัติตามขนาดด่าน
-        const gapSize = 4;    // ช่องว่างระหว่าง Grid
+        let boardSize = 40; // เริ่มต้นเล็กลงหน่อยเผื่อมือถือ
+        const gapSize = 3;  
         
-        // สถานะของเกม
         let currentLevel = 0;
-        let robotState = { x: 0, y: 0, dir: 1 }; // dir: 0=Up, 1=Right, 2=Down, 3=Left
+        let robotState = { x: 0, y: 0, dir: 1 };
         let isRunning = false;
         let commands = [];
-        const maxCommands = 30; // เพิ่มจำนวนคำสั่งสูงสุดสำหรับด่านยาวๆ
+        const maxCommands = 30;
         
-        // นิยามของ Grid: 0=ว่าง, 1=กำแพง, 2=จุดเริ่ม, 3=เป้าหมาย
         const levels = [
-            // Level 1: พื้นฐาน เดินตรง
-            {
-                map: [[0, 0, 0, 0, 0], [2, 0, 0, 3, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]],
-                startDir: 1, hint: "Level 1: เดินหน้าตรงไปเลย!"
-            },
-            // Level 2: เลี้ยวครั้งแรก
-            {
-                map: [[0, 0, 0, 3, 0], [0, 1, 1, 0, 0], [2, 0, 0, 0, 0], [0, 1, 1, 1, 0], [0, 0, 0, 0, 0]],
-                startDir: 1, hint: "Level 2: เลี้ยวซ้ายเพื่อหลบกำแพง"
-            },
-            // Level 3: ซิกแซก
-            {
-                map: [[0, 0, 1, 3, 0], [0, 0, 1, 0, 0], [0, 0, 1, 0, 0], [0, 2, 0, 0, 1], [0, 1, 1, 1, 1]],
-                startDir: 0, hint: "Level 3: ซิกแซกไปตามทาง"
-            },
-            // Level 4: ตัว U
-            {
-                map: [[3, 0, 0, 0, 0], [1, 1, 1, 1, 0], [0, 0, 0, 0, 0], [0, 1, 1, 1, 1], [2, 0, 0, 0, 0]],
-                startDir: 1, hint: "Level 4: เดินอ้อมกำแพงเป็นตัว U"
-            },
-            // Level 5: ทางแคบ (5x5)
-            {
-                map: [[1, 1, 3, 1, 1], [1, 0, 0, 0, 1], [1, 0, 1, 0, 1], [1, 0, 0, 0, 1], [1, 1, 2, 1, 1]],
-                startDir: 0, hint: "Level 5: ทางแยกวัดใจ เลือกซ้ายหรือขวา?"
-            },
-            // Level 6: บันได (6x6)
-            {
-                map: [
-                    [2, 0, 0, 0, 0, 0],
-                    [1, 1, 0, 0, 0, 0],
-                    [0, 1, 1, 0, 0, 0],
-                    [0, 0, 1, 1, 0, 0],
-                    [0, 0, 0, 1, 1, 0],
-                    [0, 0, 0, 0, 1, 3]
-                ],
-                startDir: 1, hint: "Level 6: เดินลงบันได ระวังตกขอบ!"
-            },
-            // Level 7: วนกลับ (Spiral)
-            {
-                map: [
-                    [1, 1, 1, 1, 1],
-                    [1, 0, 0, 0, 1],
-                    [1, 0, 1, 0, 1],
-                    [1, 0, 3, 0, 1],
-                    [2, 0, 0, 0, 1]
-                ],
-                startDir: 1, hint: "Level 7: ก้นหอยมรณะ"
-            },
-            // Level 8: กำแพงลวงตา (6x6)
-            {
-                map: [
-                    [0, 0, 0, 1, 3, 0],
-                    [0, 1, 0, 1, 1, 0],
-                    [0, 1, 0, 0, 0, 0],
-                    [0, 1, 1, 1, 1, 0],
-                    [0, 0, 0, 0, 0, 0],
-                    [2, 1, 1, 1, 1, 0]
-                ],
-                startDir: 0, hint: "Level 8: หาช่องว่างให้เจอ"
-            },
-            // Level 9: เขาวงกตขนาดย่อม (7x7) - เพิ่มความยาก
-            {
-                map: [
-                    [1, 1, 1, 1, 1, 1, 1],
-                    [1, 2, 0, 1, 0, 0, 1],
-                    [1, 1, 0, 1, 0, 1, 1],
-                    [1, 0, 0, 0, 0, 0, 1],
-                    [1, 0, 1, 1, 1, 0, 1],
-                    [1, 0, 0, 0, 1, 3, 1],
-                    [1, 1, 1, 1, 1, 1, 1]
-                ],
-                startDir: 1, hint: "Level 9: อย่าหลงทางในเขาวงกต"
-            },
-            // Level 10: ทางยาว (Long Run)
-            {
-                map: [
-                    [2, 0, 0, 0, 0, 1, 0],
-                    [1, 1, 1, 1, 0, 1, 0],
-                    [0, 0, 0, 0, 0, 0, 0],
-                    [0, 1, 1, 1, 1, 1, 1],
-                    [0, 0, 0, 0, 0, 0, 3]
-                ],
-                startDir: 1, hint: "Level 10: อ้อมโลกไปให้ถึงฝัน"
-            },
-            // Level 11: ห้องสี่เหลี่ยม
-            {
-                map: [
-                    [1, 1, 1, 1, 1, 1],
-                    [1, 2, 0, 1, 3, 1],
-                    [1, 0, 0, 1, 0, 1],
-                    [1, 0, 0, 0, 0, 1],
-                    [1, 1, 1, 1, 1, 1]
-                ],
-                startDir: 2, hint: "Level 11: ต้องถอยหลังกลับหรือเปล่านะ?"
-            },
-            // Level 12: ฟันปลา (ZigZag Hard)
-            {
-                map: [
-                    [2, 1, 0, 1, 0, 1, 3],
-                    [0, 1, 0, 1, 0, 1, 0],
-                    [0, 0, 0, 0, 0, 0, 0]
-                ],
-                startDir: 2, hint: "Level 12: หลบหลีกสิ่งกีดขวางแบบดิจิทัล"
-            },
-            // Level 13: สะพานข้ามแม่น้ำ
-            {
-                map: [
-                    [0, 0, 1, 0, 0, 1, 0],
-                    [2, 0, 1, 0, 0, 1, 3],
-                    [0, 0, 1, 1, 0, 1, 0],
-                    [0, 0, 0, 0, 0, 0, 0]
-                ],
-                startDir: 1, hint: "Level 13: หาทางข้ามกำแพงยาว"
-            },
-            // Level 14: กับดักตัว H
-            {
-                map: [
-                    [2, 0, 1, 0, 0],
-                    [1, 0, 1, 0, 1],
-                    [1, 0, 0, 0, 1],
-                    [1, 0, 1, 0, 1],
-                    [0, 0, 1, 3, 0]
-                ],
-                startDir: 1, hint: "Level 14: ตัว H เจ้าปัญหา"
-            },
-            // Level 15: The Final Exam (8x8)
-            {
-                map: [
-                    [1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 2, 0, 0, 0, 0, 0, 1],
-                    [1, 1, 1, 0, 1, 1, 0, 1],
-                    [1, 0, 0, 0, 1, 3, 0, 1],
-                    [1, 0, 1, 1, 1, 1, 1, 1],
-                    [1, 0, 0, 0, 0, 0, 0, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1]
-                ],
-                startDir: 1, hint: "Level 15: ด่านสุดท้าย! ขอให้โชคดี"
-            }
+            { map: [[0, 0, 0, 0, 0], [2, 0, 0, 3, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]], startDir: 1, hint: "Level 1: เดินหน้าตรงไปเลย!" },
+            { map: [[0, 0, 0, 3, 0], [0, 1, 1, 0, 0], [2, 0, 0, 0, 0], [0, 1, 1, 1, 0], [0, 0, 0, 0, 0]], startDir: 1, hint: "Level 2: เลี้ยวซ้ายเพื่อหลบกำแพง" },
+            { map: [[0, 0, 1, 3, 0], [0, 0, 1, 0, 0], [0, 0, 1, 0, 0], [0, 2, 0, 0, 1], [0, 1, 1, 1, 1]], startDir: 0, hint: "Level 3: ซิกแซกไปตามทาง" },
+            { map: [[3, 0, 0, 0, 0], [1, 1, 1, 1, 0], [0, 0, 0, 0, 0], [0, 1, 1, 1, 1], [2, 0, 0, 0, 0]], startDir: 1, hint: "Level 4: เดินอ้อมกำแพงเป็นตัว U" },
+            { map: [[1, 1, 3, 1, 1], [1, 0, 0, 0, 1], [1, 0, 1, 0, 1], [1, 0, 0, 0, 1], [1, 1, 2, 1, 1]], startDir: 0, hint: "Level 5: ทางแยกวัดใจ เลือกซ้ายหรือขวา?" },
+            { map: [[2, 0, 0, 0, 0, 0], [1, 1, 0, 0, 0, 0], [0, 1, 1, 0, 0, 0], [0, 0, 1, 1, 0, 0], [0, 0, 0, 1, 1, 0], [0, 0, 0, 0, 1, 3]], startDir: 1, hint: "Level 6: เดินลงบันได ระวังตกขอบ!" },
+            { map: [[1, 1, 1, 1, 1], [1, 0, 0, 0, 1], [1, 0, 1, 0, 1], [1, 0, 3, 0, 1], [2, 0, 0, 0, 1]], startDir: 1, hint: "Level 7: ก้นหอยมรณะ" },
+            { map: [[0, 0, 0, 1, 3, 0], [0, 1, 0, 1, 1, 0], [0, 1, 0, 0, 0, 0], [0, 1, 1, 1, 1, 0], [0, 0, 0, 0, 0, 0], [2, 1, 1, 1, 1, 0]], startDir: 0, hint: "Level 8: หาช่องว่างให้เจอ" },
+            { map: [[1, 1, 1, 1, 1, 1, 1], [1, 2, 0, 1, 0, 0, 1], [1, 1, 0, 1, 0, 1, 1], [1, 0, 0, 0, 0, 0, 1], [1, 0, 1, 1, 1, 0, 1], [1, 0, 0, 0, 1, 3, 1], [1, 1, 1, 1, 1, 1, 1]], startDir: 1, hint: "Level 9: อย่าหลงทางในเขาวงกต" },
+            { map: [[2, 0, 0, 0, 0, 1, 0], [1, 1, 1, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0], [0, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 3]], startDir: 1, hint: "Level 10: อ้อมโลกไปให้ถึงฝัน" },
+            { map: [[1, 1, 1, 1, 1, 1], [1, 2, 0, 1, 3, 1], [1, 0, 0, 1, 0, 1], [1, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1]], startDir: 2, hint: "Level 11: ต้องถอยหลังกลับหรือเปล่านะ?" },
+            { map: [[2, 1, 0, 1, 0, 1, 3], [0, 1, 0, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0]], startDir: 2, hint: "Level 12: หลบหลีกสิ่งกีดขวางแบบดิจิทัล" },
+            { map: [[0, 0, 1, 0, 0, 1, 0], [2, 0, 1, 0, 0, 1, 3], [0, 0, 1, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0]], startDir: 1, hint: "Level 13: หาทางข้ามกำแพงยาว" },
+            { map: [[2, 0, 1, 0, 0], [1, 0, 1, 0, 1], [1, 0, 0, 0, 1], [1, 0, 1, 0, 1], [0, 0, 1, 3, 0]], startDir: 1, hint: "Level 14: ตัว H เจ้าปัญหา" },
+            { map: [[1, 1, 1, 1, 1, 1, 1, 1], [1, 2, 0, 0, 0, 0, 0, 1], [1, 1, 1, 0, 1, 1, 0, 1], [1, 0, 0, 0, 1, 3, 0, 1], [1, 0, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1]], startDir: 1, hint: "Level 15: ด่านสุดท้าย! ขอให้โชคดี" }
         ];
 
         // --- 2. ฟังก์ชันเริ่มเกมและการวาดกระดาน ---
@@ -284,6 +180,7 @@
         function initGame() {
             renderBoard();
             updateUI();
+            window.addEventListener('resize', renderBoard); // ปรับขนาดเมื่อหมุนจอหรือเปลี่ยนขนาด
         }
 
         function renderBoard() {
@@ -292,96 +189,85 @@
             const rows = map.length;
             const cols = map[0].length;
             
-            // ปรับขนาด Grid อัตโนมัติถ้ายิ่งด่านใหญ่ ช่องยิ่งเล็กลงเพื่อให้พอดีจอ
-            if (cols > 6 || rows > 6) {
-                boardSize = 35;
-            } else {
-                boardSize = 45;
-            }
+            // คำนวณขนาดบอร์ดให้พอดีกับ Container
+            const container = document.getElementById('game-container');
+            // ใช้ขนาดที่เล็กกว่าระหว่างความกว้างและความสูง
+            // ลบ padding ออกหน่อย
+            const maxW = container.clientWidth - 32; 
+            // บนมือถือเราอยากให้เห็นบอร์ดเต็มๆ แต่ไม่กินที่ปุ่ม
+            // บน PC ให้สูงได้
+            const isMobile = window.innerWidth < 768;
+            const maxH = isMobile ? 300 : container.clientHeight - 32;
+
+            const sizeByW = Math.floor(maxW / cols);
+            const sizeByH = Math.floor(maxH / rows);
+            
+            // เลือกค่าที่น้อยกว่าเพื่อให้พอดี และไม่เกิน 50px
+            boardSize = Math.min(sizeByW, sizeByH, 50);
+            
+            // ป้องกันเล็กเกินไปจนมองไม่เห็น
+            if(boardSize < 25) boardSize = 25;
 
             const gridBoard = document.getElementById('grid-board');
             gridBoard.innerHTML = '';
             
-            // ตั้งค่าขนาด Grid Container
             gridBoard.style.display = 'grid';
             gridBoard.style.gridTemplateColumns = `repeat(${cols}, ${boardSize}px)`;
             gridBoard.style.gridTemplateRows = `repeat(${rows}, ${boardSize}px)`;
             gridBoard.style.gap = `${gapSize}px`;
 
-            // วาดช่องต่างๆ
             for (let r = 0; r < rows; r++) {
                 for (let c = 0; c < cols; c++) {
                     const cellVal = map[r][c];
                     const cell = document.createElement('div');
-                    cell.className = 'w-full h-full rounded flex items-center justify-center relative';
+                    cell.className = 'w-full h-full rounded-sm md:rounded flex items-center justify-center relative';
                     
                     if (cellVal === 1) { // กำแพง
-                        cell.className += ' bg-gray-700 border border-gray-600 shadow-inner';
-                        cell.innerHTML = '<i class="fas fa-cube text-gray-500"></i>';
-                    } else if (cellVal === 3) { // เป้าหมาย (Battery)
-                        cell.className += ' bg-gray-800 border border-gray-700';
-                        cell.innerHTML = '<i class="fas fa-bolt text-yellow-400 text-xl animate-pulse"></i>';
+                        cell.className += ' bg-gray-600 border border-gray-500 shadow-inner';
+                        cell.innerHTML = '<i class="fas fa-cube text-gray-400 text-[50%]"></i>';
+                    } else if (cellVal === 3) { // เป้าหมาย
+                        cell.className += ' bg-gray-700/50 border border-gray-600';
+                        cell.innerHTML = '<i class="fas fa-bolt text-yellow-400 text-[60%] animate-pulse drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]"></i>';
                     } else { // ทางเดิน
                         cell.className += ' bg-gray-800 border border-gray-700';
-                        // จุด Grid เล็กๆ เพื่อความสวยงาม
                         const dot = document.createElement('div');
                         dot.className = 'w-1 h-1 bg-gray-700 rounded-full';
                         cell.appendChild(dot);
                     }
                     
-                    if (cellVal === 2) { // จุดเริ่ม (จำค่าไว้ แต่แสดงผลเหมือนทางเดิน)
+                    if (cellVal === 2) { 
                         robotState.x = c;
                         robotState.y = r;
                     }
                     
-                    // เก็บค่าพิกัดใน ID เพื่อใช้เช็คตอนเดิน
                     cell.id = `cell-${c}-${r}`;
                     gridBoard.appendChild(cell);
                 }
             }
 
-            // สร้างตัวหุ่นยนต์ (Overlay บน Grid)
-            // เราใช้ Absolute Position เทียบกับ Container ของ GridBoard
             const robot = document.createElement('div');
             robot.id = 'robot';
-            robot.className = 'absolute flex items-center justify-center text-green-400 drop-shadow-lg';
+            robot.className = 'absolute flex items-center justify-center text-green-400 drop-shadow-lg z-20 pointer-events-none';
             robot.style.width = `${boardSize}px`;
             robot.style.height = `${boardSize}px`;
-            robot.innerHTML = '<i class="fas fa-robot text-3xl"></i>'; // ไอคอนหุ่นยนต์
+            // ใช้ SVG หรือ icon ที่คมชัด
+            robot.innerHTML = '<i class="fas fa-robot text-[70%] filter drop-shadow-md"></i>';
             
             gridBoard.appendChild(robot);
             
-            // ตั้งค่าตำแหน่งเริ่มต้น
             robotState.dir = levelData.startDir;
             updateRobotVisual();
-            
-            // แสดง Hint ใน Console หรือ UI (ถ้ามีที่ว่าง)
-            // console.log(levelData.hint);
         }
 
         function updateRobotVisual() {
             const robot = document.getElementById('robot');
-            // คำนวณตำแหน่ง pixel (ช่อง * (ขนาด+ช่องว่าง))
             const left = robotState.x * (boardSize + gapSize);
             const top = robotState.y * (boardSize + gapSize);
-            
-            // คำนวณการหมุน (0=Up, 1=Right, 2=Down, 3=Left)
             const rotation = (robotState.dir) * 90; 
 
             robot.style.transform = `translate(${left}px, ${top}px) rotate(${rotation}deg)`;
-            
-            // ปรับขนาดหุ่นตาม boardSize
             robot.style.width = `${boardSize}px`;
             robot.style.height = `${boardSize}px`;
-            // ปรับขนาด icon
-            const icon = robot.querySelector('i');
-            if (boardSize < 40) {
-                 icon.classList.remove('text-3xl');
-                 icon.classList.add('text-xl');
-            } else {
-                 icon.classList.remove('text-xl');
-                 icon.classList.add('text-3xl');
-            }
         }
         
         function updateUI() {
@@ -397,6 +283,9 @@
 
             commands.push(cmd);
             renderCommandList();
+            
+            // สั่นเล็กน้อยเมื่อกดปุ่ม (สำหรับมือถือ)
+            if (navigator.vibrate) navigator.vibrate(10);
         }
 
         function clearCommands() {
@@ -412,25 +301,27 @@
             listEl.innerHTML = ''; 
 
             if (commands.length === 0) {
-                 listEl.innerHTML = '<div class="text-gray-500 text-sm italic w-full text-center mt-4 empty-msg">เลือกคำสั่งด้านล่าง...</div>';
+                 listEl.innerHTML = `
+                    <div class="text-gray-500 text-sm italic w-full text-center mt-8 empty-msg flex flex-col items-center opacity-50">
+                        <i class="fas fa-hand-pointer mb-2 text-2xl animate-bounce"></i>
+                        เลือกคำสั่งด้านล่าง
+                    </div>`;
             } else {
                 commands.forEach((cmd, index) => {
                     const item = document.createElement('div');
-                    item.className = 'w-8 h-8 rounded flex items-center justify-center text-sm font-bold shadow-sm cursor-pointer hover:bg-red-500 hover:text-white transition';
+                    item.className = 'w-9 h-9 md:w-10 md:h-10 rounded-md flex items-center justify-center text-sm font-bold shadow-sm cursor-pointer hover:bg-red-500 hover:text-white transition transform hover:scale-105 border-b-2 active:border-b-0 active:translate-y-[2px]';
                     
-                    // สีและไอคอนตามประเภทคำสั่ง
                     if (cmd === 'F') {
-                        item.classList.add('bg-green-700', 'text-white', 'border', 'border-green-500');
+                        item.classList.add('bg-green-700', 'text-white', 'border-green-900', 'border');
                         item.innerHTML = '<i class="fas fa-arrow-up"></i>';
                     } else if (cmd === 'L') {
-                        item.classList.add('bg-blue-700', 'text-white', 'border', 'border-blue-500');
+                        item.classList.add('bg-blue-700', 'text-white', 'border-blue-900', 'border');
                         item.innerHTML = '<i class="fas fa-undo"></i>';
                     } else if (cmd === 'R') {
-                        item.classList.add('bg-blue-700', 'text-white', 'border', 'border-blue-500');
+                        item.classList.add('bg-blue-700', 'text-white', 'border-blue-900', 'border');
                         item.innerHTML = '<i class="fas fa-redo"></i>';
                     }
                     
-                    // คลิกเพื่อลบคำสั่งตัวนั้น
                     item.onclick = () => {
                         if(!isRunning) {
                             commands.splice(index, 1);
@@ -446,14 +337,17 @@
             listEl.scrollTop = listEl.scrollHeight;
         }
 
-        // --- 4. การทำงานของโปรแกรม (Execution) ---
+        // --- 4. การทำงานของโปรแกรม ---
 
         async function runProgram() {
             if (isRunning || commands.length === 0) return;
             
             isRunning = true;
-            document.getElementById('run-btn').classList.add('opacity-50', 'cursor-not-allowed');
-            document.getElementById('run-btn').innerHTML = '<i class="fas fa-cog fa-spin"></i> กำลังทำงาน...';
+            const runBtn = document.getElementById('run-btn');
+            const originalContent = runBtn.innerHTML;
+            
+            runBtn.classList.add('opacity-70', 'cursor-not-allowed');
+            runBtn.innerHTML = '<i class="fas fa-cog fa-spin"></i>';
 
             resetRobotToStart();
             await sleep(500);
@@ -470,40 +364,39 @@
                 if (result === 'win') {
                     showModal(true);
                     isRunning = false;
-                    resetBtnState();
+                    resetBtnState(originalContent);
                     return;
                 } else if (result === 'crash') {
                     showModal(false, 'หุ่นยนต์ชนกำแพง!');
                     isRunning = false;
-                    resetBtnState();
+                    resetBtnState(originalContent);
                     return;
                 } else if (result === 'out') {
                     showModal(false, 'หุ่นยนต์หลุดออกนอกแผนที่!');
                     isRunning = false;
-                    resetBtnState();
+                    resetBtnState(originalContent);
                     return;
                 }
 
-                await sleep(500); // เร่งความเร็วขึ้นนิดหน่อยสำหรับด่านยาวๆ
+                await sleep(400); 
             }
 
             if (isRunning) {
                  showModal(false, 'โปรแกรมจบแล้ว แต่ยังไม่ถึงเป้าหมาย');
                  isRunning = false;
-                 resetBtnState();
+                 resetBtnState(originalContent);
             }
         }
 
         async function executeCommand(cmd) {
-            if (cmd === 'F') { // Forward
+            if (cmd === 'F') { 
                 const nextX = robotState.x + (robotState.dir === 1 ? 1 : robotState.dir === 3 ? -1 : 0);
                 const nextY = robotState.y + (robotState.dir === 2 ? 1 : robotState.dir === 0 ? -1 : 0);
-                
                 robotState.x = nextX;
                 robotState.y = nextY;
-            } else if (cmd === 'L') { // Turn Left
+            } else if (cmd === 'L') { 
                 robotState.dir = (robotState.dir + 3) % 4; 
-            } else if (cmd === 'R') { // Turn Right
+            } else if (cmd === 'R') { 
                 robotState.dir = (robotState.dir + 1) % 4;
             }
             updateRobotVisual();
@@ -514,20 +407,9 @@
             const r = robotState.y;
             const c = robotState.x;
 
-            // 1. ออกนอก Map
-            if (r < 0 || r >= map.length || c < 0 || c >= map[0].length) {
-                return 'out';
-            }
-
-            // 2. ชนกำแพง
-            if (map[r][c] === 1) {
-                return 'crash';
-            }
-
-            // 3. ถึงเป้าหมาย
-            if (map[r][c] === 3) {
-                return 'win';
-            }
+            if (r < 0 || r >= map.length || c < 0 || c >= map[0].length) return 'out';
+            if (map[r][c] === 1) return 'crash';
+            if (map[r][c] === 3) return 'win';
 
             return 'continue';
         }
@@ -549,13 +431,11 @@
 
         function resetLevel() {
             isRunning = false;
-            resetBtnState();
+            resetBtnState('<i class="fas fa-play"></i> เริ่มทำงาน');
             clearCommands();
             resetRobotToStart();
             document.getElementById('message-modal').classList.add('hidden');
         }
-
-        // --- 5. Helper Functions & UI Utilities ---
 
         function nextLevel() {
             currentLevel++;
@@ -572,22 +452,26 @@
             const title = document.getElementById('modal-title');
             const text = document.getElementById('modal-text');
             const btn = document.getElementById('modal-btn');
+            const icon = document.getElementById('modal-icon');
 
             modal.classList.remove('hidden');
             
             if (isSuccess) {
-                title.innerText = "ภารกิจสำเร็จ! 🎉";
-                title.className = "text-3xl font-bold mb-4 text-green-400";
+                title.innerText = "ภารกิจสำเร็จ!";
+                title.className = "text-3xl font-bold mb-2 text-green-400";
+                icon.className = "fas fa-check-circle text-6xl text-green-500 mb-4 animate-bounce";
                 text.innerText = "สุดยอดมาก! ไปด่านต่อไปกันเลย";
-                btn.innerText = "ด่านถัดไป";
-                btn.className = "bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full transition shadow-lg";
+                btn.innerHTML = 'ด่านถัดไป <i class="fas fa-arrow-right ml-2"></i>';
+                btn.className = "bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-8 rounded-full transition shadow-lg";
                 btn.onclick = nextLevel;
+                // Play success sound logic here if wanted
             } else {
-                title.innerText = "ภารกิจล้มเหลว 💥";
-                title.className = "text-3xl font-bold mb-4 text-red-400";
+                title.innerText = "ล้มเหลว";
+                title.className = "text-3xl font-bold mb-2 text-red-400";
+                icon.className = "fas fa-times-circle text-6xl text-red-500 mb-4 animate-pulse";
                 text.innerText = message || "ลองตรวจสอบคำสั่งดูใหม่อีกครั้งนะ";
                 btn.innerText = "ลองใหม่";
-                btn.className = "bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-full transition shadow-lg";
+                btn.className = "bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-8 rounded-full transition shadow-lg";
                 btn.onclick = () => {
                      modal.classList.add('hidden');
                      resetRobotToStart(); 
@@ -601,6 +485,7 @@
             for(let item of items) {
                 item.style.opacity = '0.5';
                 item.style.transform = 'scale(1)';
+                item.style.borderColor = 'transparent';
             }
             if(items[index]) {
                 items[index].style.opacity = '1';
@@ -609,16 +494,16 @@
             }
         }
 
-        function resetBtnState() {
+        function resetBtnState(originalContent) {
             const btn = document.getElementById('run-btn');
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-            btn.innerHTML = '<i class="fas fa-play"></i> เริ่มทำงาน';
+            btn.classList.remove('opacity-70', 'cursor-not-allowed');
+            btn.innerHTML = originalContent || '<i class="fas fa-play"></i> เริ่มทำงาน';
             
             const listEl = document.getElementById('command-list');
             for(let item of listEl.children) {
                 item.style.opacity = '1';
-                item.style.borderColor = '';
                 item.style.transform = '';
+                item.style.borderColor = '';
             }
         }
 
