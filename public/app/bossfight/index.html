@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Defeat the Grinch! 🎄</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Mali', cursive; }
+        
+        .snow-bg {
+            background-color: #0f172a;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 3px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 2px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 3px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            background-position: 0 0, 0 0, 0 0;
+            animation: snow 10s linear infinite;
+        }
+        @keyframes snow {
+            0% { background-position: 0 0, 0 0, 0 0; }
+            100% { background-position: 550px 1000px, 350px 400px, 250px 300px; }
+        }
+
+        .shake-animation {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            filter: drop-shadow(0 0 10px red);
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        .animate-fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+
+    <!-- Firebase SDK (ใช้เวอร์ชัน 10.12.2 ที่เสถียร) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { 
+            getFirestore, collection, doc, onSnapshot, 
+            updateDoc, setDoc, increment, getDoc,
+            serverTimestamp, query, orderBy, limit 
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // ⚠️ Config (ใช้ตัวเดียวกับ RoomMate)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAlfZHbCFxGK3p3nDoAPy3m9KqZzmX2s9I",
+            authDomain: "kruboat-web.firebaseapp.com",
+            projectId: "kruboat-web",
+            storageBucket: "kruboat-web.firebasestorage.app",
+            messagingSenderId: "61868765546",
+            appId: "1:61868765546:web:683b18ddf68c89dd317513"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        let currentUser = null;
+        let currentRoomId = null;
+        let myName = "";
+        
+        // Game Constants
+        const MAX_HP = 5000;
+        const DAMAGE_PER_HIT = 10;
+        const CRIT_DAMAGE = 50;
+
+        const getGameStatePath = (roomId) => `events/${roomId}/gamestate`;
+        const getPlayersPath = (roomId) => `events/${roomId}/players`;
+
+        // ✅ Expose Functions Globally
+        window.startGame = startGame;
+        window.resetGame = resetGame;
+        window.joinGame = joinGame;
+        window.attackBoss = attackBoss;
+        window.closeReward = closeReward;
+
+        // --- Init ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const isHost = urlParams.get('mode') === 'host';
+        const urlRoom = urlParams.get('room');
+
+        async function init() {
+            const joinBtn = document.getElementById('join-btn');
+            if(joinBtn) {
+                joinBtn.disabled = true;
+                joinBtn.innerText = "กำลังเชื่อมต่อระบบ...";
+                joinBtn.classList.add('opacity-50');
+            }
+
+            try {
+                await signInAnonymously(auth);
+            } catch (e) {
+                console.error("Auth Error", e);
+                alert("เชื่อมต่อ Firebase ไม่ได้: " + e.message);
+            }
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    currentUser = user;
+                    console.log("Logged in:", user.uid);
+                    
+                    if (isHost) {
+                        initHost();
+                    } else {
+                        // Player Side
+                        if (urlRoom) document.getElementById('room-code-input').value = urlRoom;
+                        
+                        if(joinBtn) {
+                            joinBtn.disabled = false;
+                            joinBtn.innerText = "เข้าร่วมเกม 🚀";
+                            joinBtn.classList.remove('opacity-50');
+                        }
+                        document.getElementById('player-view').classList.remove('hidden');
+                    }
+                }
+            });
+        }
+
+        // --- Host Logic ---
+        async function initHost() {
+            document.getElementById('host-view').classList.remove('hidden');
+            currentRoomId = urlRoom || Math.floor(100000 + Math.random() * 900000).toString();
+            document.getElementById('display-room-code').innerText = currentRoomId;
+            
+            const newUrl = new URL(window.location);
+            newUrl.searchParams.set('room', currentRoomId);
+            window.history.pushState({}, '', newUrl);
+
+            const stateRef = doc(db, getGameStatePath(currentRoomId), 'current');
+            
+            try {
+                const docSnap = await getDoc(stateRef);
+                if (!docSnap.exists()) {
+                    await setDoc(stateRef, { hp: MAX_HP, maxHp: MAX_HP, status: 'LOBBY' });
+                }
+            } catch(e) {
+                console.error("Setup Error", e);
+                alert("สร้างห้องไม่ได้: " + e.message);
+            }
+
+            onSnapshot(stateRef, (docSnap) => {
+                if (docSnap.exists()) renderHostGame(docSnap.data());
+            });
+
+            const q = query(collection(db, getPlayersPath(currentRoomId)), orderBy("score", "desc"), limit(5));
+            onSnapshot(q, (snapshot) => {
+                const leaderboard = document.getElementById('host-leaderboard');
+                leaderboard.innerHTML = '';
+                snapshot.forEach((doc) => {
+                    const p = doc.data();
+                    const li = document.createElement('div');
+                    li.className = 'flex justify-between items-center bg-black/20 p-2 rounded mb-1 text-white animate-fade-in';
+                    li.innerHTML = `<span class="font-bold">🎖️ ${p.name}</span><span class="text-yellow-300 font-mono">${p.score}</span>`;
+                    leaderboard.appendChild(li);
+                });
+                document.getElementById('player-count').innerText = `${snapshot.size} Players`;
+            });
+        }
+
+        function renderHostGame(data) {
+            const hpPercent = Math.max(0, (data.hp / data.maxHp) * 100);
+            document.getElementById('hp-bar-fill').style.width = `${hpPercent}%`;
+            document.getElementById('hp-text').innerText = `${Math.max(0, data.hp)} / ${data.maxHp}`;
+            
+            const screens = ['lobby-screen', 'game-screen', 'win-screen'];
+            screens.forEach(id => document.getElementById(id).classList.add('hidden'));
+
+            if (data.status === 'ENDED') {
+                document.getElementById('win-screen').classList.remove('hidden');
+                document.getElementById('winner-name').innerText = `Last Hit: ${data.lastHitBy || '-'}`;
+            } else if (data.status === 'PLAYING') {
+                document.getElementById('game-screen').classList.remove('hidden');
+                if (data.hp < MAX_HP) {
+                    const boss = document.getElementById('boss-svg');
+                    boss.classList.add('shake-animation');
+                    setTimeout(() => boss.classList.remove('shake-animation'), 200);
+                }
+            } else {
+                document.getElementById('lobby-screen').classList.remove('hidden');
+            }
+        }
+
+        async function startGame() {
+            await updateDoc(doc(db, getGameStatePath(currentRoomId), 'current'), { status: 'PLAYING' });
+        }
+
+        async function resetGame() {
+            if(!confirm("รีเซ็ต?")) return;
+            await setDoc(doc(db, getGameStatePath(currentRoomId), 'current'), {
+                hp: MAX_HP, maxHp: MAX_HP, status: 'LOBBY', winner: null, lastHitBy: null
+            }, { merge: true });
+        }
+
+        // --- Player Logic ---
+        let myScore = 0;
+
+        async function joinGame() {
+            const inputName = document.getElementById('player-name').value.trim();
+            const inputRoom = document.getElementById('room-code-input').value.trim();
+            if (!inputName || !inputRoom) return alert("กรอกข้อมูลให้ครบ");
+
+            myName = inputName;
+            currentRoomId = inputRoom;
+            
+            const btn = document.getElementById('join-btn');
+            btn.disabled = true;
+            btn.innerText = "กำลังเข้า...";
+
+            try {
+                const roomRef = doc(db, getGameStatePath(currentRoomId), 'current');
+                const roomSnap = await getDoc(roomRef);
+                if (!roomSnap.exists()) throw new Error("ไม่พบห้องนี้");
+
+                await setDoc(doc(db, getPlayersPath(currentRoomId), currentUser.uid), {
+                    name: myName, score: 0, gotDrop: false, lastActive: serverTimestamp()
+                }, { merge: true });
+
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('controller-screen').classList.remove('hidden');
+
+                onSnapshot(roomRef, (docSnap) => {
+                    const data = docSnap.data();
+                    const atkBtn = document.getElementById('attack-btn');
+                    if(data.status === 'PLAYING') {
+                        atkBtn.disabled = false;
+                        atkBtn.innerText = "โจมตี!!";
+                        atkBtn.classList.remove('bg-gray-500');
+                        atkBtn.classList.add('bg-red-600');
+                    } else {
+                        atkBtn.disabled = true;
+                        atkBtn.innerText = data.status === 'ENDED' ? "จบเกม" : "รอเริ่ม...";
+                        atkBtn.classList.add('bg-gray-500');
+                        atkBtn.classList.remove('bg-red-600');
+                    }
+                });
+
+            } catch (e) {
+                alert(e.message);
+                btn.disabled = false;
+                btn.innerText = "เข้าร่วมเกม 🚀";
+            }
+        }
+
+        async function attackBoss() {
+            if (!currentRoomId || !currentUser) return;
+            
+            // Visual Feedback
+            const btn = document.getElementById('attack-btn');
+            btn.style.transform = "scale(0.9)";
+            setTimeout(() => btn.style.transform = "scale(1)", 50);
+            if(navigator.vibrate) navigator.vibrate(20);
+
+            const isCrit = Math.random() > 0.9;
+            const dmg = isCrit ? CRIT_DAMAGE : DAMAGE_PER_HIT;
+            
+            myScore++;
+            document.getElementById('my-score').innerText = `Score: ${myScore}`;
+            showFloatingText(dmg, isCrit);
+
+            // ✅ ใช้ await และ try-catch เพื่อจับ Error
+            try {
+                await updateDoc(doc(db, getGameStatePath(currentRoomId), 'current'), {
+                    hp: increment(-dmg),
+                    lastHitBy: myName
+                });
+                
+                await updateDoc(doc(db, getPlayersPath(currentRoomId), currentUser.uid), {
+                    score: increment(1)
+                });
+            } catch(e) { 
+                console.error("Attack Failed:", e);
+                // ไม่ต้อง alert ทุกครั้งที่กด เดี๋ยวจะรำคาญ แต่ log ไว้ดู
+            }
+        }
+
+        function showFloatingText(amount, isCrit) {
+            const el = document.createElement('div');
+            el.innerText = isCrit ? `CRIT! -${amount}` : `-${amount}`;
+            el.className = `fixed pointer-events-none font-bold select-none ${isCrit ? 'text-yellow-300 text-4xl' : 'text-white text-2xl'}`;
+            el.style.left = (window.innerWidth/2 + (Math.random()*60-30)) + 'px';
+            el.style.top = (window.innerHeight/2 + (Math.random()*60-30)) + 'px';
+            el.style.zIndex = 100;
+            document.body.appendChild(el);
+            setTimeout(() => { el.style.opacity = 0; el.style.transform = 'translateY(-50px)'; }, 50);
+            setTimeout(() => el.remove(), 500);
+        }
+
+        function closeReward() {
+            document.getElementById('reward-popup').classList.add('hidden');
+        }
+
+        init();
+    </script>
+</head>
+<body class="snow-bg text-white h-screen overflow-hidden relative">
+
+    <!-- HOST VIEW -->
+    <div id="host-view" class="hidden h-full flex flex-col items-center justify-center relative">
+        <div class="absolute top-5 left-5 right-5 flex justify-between items-start z-10">
+            <div>
+                <h1 class="text-3xl md:text-5xl font-bold text-yellow-400 drop-shadow-lg">🎄 Defeat the Grinch!</h1>
+                <div class="mt-2 bg-white/20 px-4 py-2 rounded-lg inline-block backdrop-blur">
+                    <span class="text-gray-300 text-lg mr-2">ROOM CODE:</span>
+                    <span id="display-room-code" class="text-4xl font-mono font-bold text-white tracking-widest">---</span>
+                </div>
+                <p class="text-sm mt-2 text-gray-400" id="player-count">Waiting...</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md p-4 rounded-lg border border-white/20 w-64 hidden md:block">
+                <h3 class="text-xl font-bold mb-2 text-green-300">🏆 Top Damage</h3>
+                <div id="host-leaderboard"></div>
+            </div>
+        </div>
+
+        <div class="flex flex-col items-center w-full max-w-4xl z-0 mt-32">
+            <div class="w-full bg-gray-800 h-12 rounded-full border-4 border-gray-600 relative overflow-hidden mb-8 shadow-2xl">
+                <div id="hp-bar-fill" class="bg-red-600 h-full transition-all duration-200 ease-out" style="width: 100%;"></div>
+                <div id="hp-text" class="absolute inset-0 flex items-center justify-center font-bold text-2xl drop-shadow-md">Loading...</div>
+            </div>
+
+            <div id="lobby-screen" class="text-center animate-bounce">
+                <p class="text-2xl mb-4 text-gray-300">เข้าเว็บแล้วใส่รหัสห้อง</p>
+                <button onclick="startGame()" class="bg-green-600 hover:bg-green-500 text-white font-bold py-4 px-10 rounded-full text-2xl shadow-lg border-b-4 border-green-800 active:border-b-0 active:translate-y-1 transition-all">START GAME ▶</button>
+            </div>
+
+            <div id="game-screen" class="hidden">
+                 <svg id="boss-svg" class="w-64 h-64 md:w-96 md:h-96 transition-transform" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <g>
+                        <path d="M60,150 Q50,200 100,200 Q150,200 140,150 Q160,100 100,50 Q40,100 60,150" fill="#4ade80" stroke="#166534" stroke-width="3"/>
+                        <path d="M50,60 Q100,20 150,60 L140,40 Q100,0 60,40 Z" fill="#dc2626" />
+                        <circle cx="80" cy="100" r="5" fill="#166534"/><circle cx="120" cy="100" r="5" fill="#166534"/>
+                        <path d="M80,130 Q100,150 120,130" fill="none" stroke="#166534" stroke-width="3" />
+                    </g>
+                </svg>
+            </div>
+
+            <div id="win-screen" class="hidden text-center">
+                <h2 class="text-6xl font-bold text-yellow-300 mb-4 animate-pulse">MISSION COMPLETE!</h2>
+                <p id="winner-name" class="text-3xl bg-black/50 p-4 rounded-xl inline-block border-2 border-yellow-500">...</p>
+                <div class="mt-8"><button onclick="resetGame()" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-500">Reset Game</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PLAYER VIEW -->
+    <div id="player-view" class="hidden h-full flex flex-col relative">
+        <div id="login-screen" class="absolute inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center p-6">
+            <h2 class="text-3xl font-bold text-green-400 mb-6">🎄 Join the Fight!</h2>
+            <div class="w-full max-w-xs space-y-4">
+                <div><label class="text-gray-400 text-sm ml-1">Room Code</label><input type="text" id="room-code-input" placeholder="เลขห้อง 6 หลัก" class="w-full p-4 rounded-lg text-black text-xl text-center border-4 border-blue-500 focus:outline-none font-mono" maxlength="6"></div>
+                <div><label class="text-gray-400 text-sm ml-1">Nickname</label><input type="text" id="player-name" placeholder="ชื่อเล่นของคุณ" class="w-full p-4 rounded-lg text-black text-xl text-center border-4 border-green-600 focus:outline-none"></div>
+                <button id="join-btn" onclick="joinGame()" class="w-full bg-red-600 text-white font-bold py-4 rounded-lg text-xl shadow-lg active:scale-95 transition-transform opacity-50" disabled>กำลังเชื่อมต่อ...</button>
+            </div>
+        </div>
+
+        <div id="controller-screen" class="hidden flex flex-col h-full p-4">
+            <div class="flex justify-between items-center bg-white/10 p-3 rounded-lg mb-4">
+                <span class="font-bold text-green-300">YOU</span>
+                <span id="my-score" class="font-mono text-xl text-yellow-300">Score: 0</span>
+            </div>
+            <div class="flex-1 flex flex-col items-center justify-center">
+                <div class="text-center mb-4 text-gray-400 text-sm">รัวนิ้วเพื่อโจมตี!</div>
+                <button id="attack-btn" disabled onclick="attackBoss()" class="w-64 h-64 rounded-full bg-gray-500 border-8 border-gray-700 shadow-2xl flex flex-col items-center justify-center active:scale-90 transition-transform select-none touch-manipulation disabled:opacity-50">
+                    <span class="text-6xl">❄️</span><span class="text-2xl font-bold mt-2">WAIT...</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="reward-popup" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+            <div class="bg-white text-black p-8 rounded-2xl text-center max-w-sm animate-bounce">
+                <div class="text-6xl mb-4">🎁</div>
+                <h3 class="text-2xl font-bold text-red-600 mb-2">LUCKY DROP!</h3>
+                <button onclick="closeReward()" class="bg-green-600 text-white px-6 py-2 rounded-full font-bold">ตกลง</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
