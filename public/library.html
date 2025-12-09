@@ -3,29 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KruBoat.com - Project Library</title>
-
+    <title>KruBoat - Code Library</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
+    
+    <meta name="referrer" content="no-referrer">
+    
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4MQ3GL6CTB"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-4MQ3GL6CTB');
     </script>
 
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
-    
-    <meta name="referrer" content="no-referrer">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
-    <style> body { font-family: 'Sarabun', sans-serif; } </style>
-</head>
-<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+    
+    <!-- Fonts: Sarabun + JetBrains Mono (Coding Font) -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style> 
+        body { font-family: 'Sarabun', sans-serif; } 
+        .font-code { font-family: 'JetBrains Mono', monospace; }
 
+        /* Scrollbar */
+        .hide-scroll::-webkit-scrollbar { display: none; } 
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Grid Background Pattern */
+        .bg-tech-grid {
+            background-color: #f8fafc;
+            background-image: linear-gradient(#e2e8f0 1px, transparent 1px), linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* Filter Buttons Style */
+        .filter-btn { 
+            transition: all 0.2s; 
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .filter-btn.active { 
+            background-color: #0f172a; /* Slate 900 */
+            color: #4ade80; /* Green 400 */
+            border-color: #4ade80;
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
+        }
+        .filter-btn:not(.active):hover { 
+            background-color: #1e293b; 
+            color: white;
+            border-color: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-tech-grid text-gray-800 flex flex-col min-h-screen">
+
+    <!-- Navbar -->
     <nav class="bg-white shadow-md sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <a href="/" class="text-xl font-bold text-blue-600"><i class="fa-solid fa-graduation-cap"></i> KruBoat</a>
@@ -49,27 +83,91 @@
         </div>
     </nav>
 
-    <header class="bg-gradient-to-r from-slate-800 to-slate-900 py-12 text-center text-white">
-        <div class="container mx-auto px-4">
-            <h1 class="text-3xl md:text-4xl font-bold mb-2"><i class="fa-solid fa-laptop-code mr-2 text-blue-400"></i>Code Library</h1>
-            <p class="text-slate-300 mb-6">พื้นที่แบ่งปัน Source Code และนวัตกรรมสำหรับครูและนักพัฒนา</p>
-            <div class="max-w-2xl mx-auto relative">
-                <input type="text" placeholder="ค้นหา..." class="w-full pl-12 pr-4 py-3 rounded-full text-gray-800 shadow focus:ring-4 focus:ring-blue-500 outline-none">
-                <i class="fa-solid fa-magnifying-glass absolute left-5 top-3.5 text-gray-400"></i>
+    <!-- Header (Coding Theme) -->
+    <header class="relative bg-slate-900 text-white py-16 overflow-hidden border-b border-slate-700">
+        <!-- Decorative Background -->
+        <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none select-none">
+            <div class="absolute top-10 left-10 text-6xl text-blue-500 font-code">{ }</div>
+            <div class="absolute bottom-10 right-10 text-6xl text-green-500 font-code">&lt;/&gt;</div>
+            <div class="absolute top-1/2 left-1/4 w-32 h-32 bg-blue-500 rounded-full blur-[100px]"></div>
+            <div class="absolute bottom-1/3 right-1/4 w-40 h-40 bg-purple-500 rounded-full blur-[100px]"></div>
+        </div>
+
+        <div class="container mx-auto px-4 relative z-10 text-center">
+            
+            <div class="inline-block bg-slate-800 rounded-full px-4 py-1 mb-4 border border-slate-700 shadow-lg">
+                <span class="text-xs font-code text-green-400">git pull origin knowledge</span>
+            </div>
+            
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 font-code tracking-tight">
+                <span class="text-blue-400">&lt;</span>Code Library<span class="text-blue-400">/&gt;</span>
+            </h1>
+            <p class="text-slate-400 mb-10 max-w-2xl mx-auto text-lg leading-relaxed">
+                คลังแสงสำหรับนักพัฒนาและคุณครูยุคใหม่ <br class="hidden md:inline">รวบรวม Source Code, Web App และสื่อการสอนที่พร้อมใช้งาน
+            </p>
+            
+            <!-- Filter Section (Glassmorphism) -->
+            <div class="max-w-4xl mx-auto bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-2xl">
+                
+                <!-- 1. Categories -->
+                <div class="flex flex-wrap justify-center gap-3 mb-6" id="category-filters">
+                    <button onclick="filterLibrary('all')" class="filter-btn active px-6 py-2 rounded-lg border border-slate-600 bg-slate-800 text-sm font-bold text-gray-300 hover:text-white">
+                        ALL
+                    </button>
+                    <!-- ปุ่มอื่น ๆ จะถูกสร้างโดย JS หรือจะใส่ Hardcode ก็ได้ -->
+                    <button onclick="filterLibrary('cat', 'Web Application')" class="filter-btn px-5 py-2 rounded-lg border border-slate-600 text-sm font-medium text-slate-300">Web App</button>
+                    <button onclick="filterLibrary('cat', 'Game')" class="filter-btn px-5 py-2 rounded-lg border border-slate-600 text-sm font-medium text-slate-300">Game</button>
+                    <button onclick="filterLibrary('cat', 'App Script')" class="filter-btn px-5 py-2 rounded-lg border border-slate-600 text-sm font-medium text-slate-300">App Script</button>
+                    <button onclick="filterLibrary('cat', 'Utility')" class="filter-btn px-5 py-2 rounded-lg border border-slate-600 text-sm font-medium text-slate-300">Utility</button>
+                </div>
+
+                <!-- 2. Tags -->
+                <div class="flex flex-wrap justify-center items-center gap-2 text-xs" id="tag-filters-container">
+                    <span class="text-slate-500 font-code mr-2">filterByTags:</span>
+                    <span class="text-slate-600 italic font-code">loading...</span>
+                </div>
+
             </div>
         </div>
     </header>
 
-    <main class="container mx-auto px-4 py-12">
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12 flex-grow">
+        <div class="flex justify-between items-center mb-8 border-b border-gray-200 pb-4">
+            <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <span id="filter-status">รายการทั้งหมด</span>
+            </h2>
+            <span class="text-sm font-code bg-slate-200 text-slate-700 px-3 py-1 rounded-full font-bold" id="item-count">0 items</span>
+        </div>
+        
         <div id="library-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Data from Firestore -->
+            <div class="col-span-full text-center py-12 text-gray-400">
+                <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-4 text-blue-500"></i>
+                <p>Connecting to Database...</p>
+            </div>
         </div>
     </main>
 
-    <footer class="bg-slate-900 text-white py-6 text-center mt-auto">
-        <p class="text-sm">&copy; 2025 พัฒนาโดย ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์ | ติดต่อ chonlasitgood@gmail.com</p>
+    <footer class="bg-slate-900 text-white py-8 text-center mt-auto border-t border-slate-800">
+        <div class="container mx-auto">
+            <p class="text-sm text-slate-400 font-code mb-2">&copy; 2025 KruBoat.com</p>
+            <p class="text-xs text-slate-600">Create by <span class="text-yellow-500">KruBoat Chonlasit Wichainpan</span> | <span class="text-blue-400">chonlasitgood@gmail.com</span></p>
+        </div>
     </footer>
 
-    <!-- 🔴 แก้ไข: ใส่ type="module" -->
+    <!-- type="module" -->
     <script type="module" src="js/script.js"></script>
+    <script>
+        // Mobile Menu Logic (Inline fallback)
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('mobile-menu-btn');
+            const menu = document.getElementById('mobile-menu');
+            if(btn && menu) btn.onclick = () => menu.classList.toggle('hidden');
+        });
+    </script>
 </body>
 </html>

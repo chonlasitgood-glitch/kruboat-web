@@ -1,4 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc, addDoc, serverTimestamp, getDocs, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ⚠️ Config
@@ -12,16 +13,16 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app); // ✅ เพิ่ม Auth
 const db = getFirestore(app);
 
 const ADMIN_PIN = "0903498148";
 
-// ✅ Expose Functions Globally (ประกาศให้ HTML เรียกใช้ได้)
+// ✅ Expose Functions Globally
 window.checkLogin = checkLogin;
 window.performLogin = performLogin;
 window.logout = logout;
-
-// Project Functions
+// Projects
 window.openAddProjectModal = openAddProjectModal;
 window.closeAddProjectModal = closeAddProjectModal;
 window.saveProject = saveProject;
@@ -29,8 +30,7 @@ window.openManageModal = openManageModal;
 window.closeManageModal = closeManageModal;
 window.deleteProject = deleteProject;
 window.editProject = editProject;
-
-// News Functions
+// News
 window.openAddNewsModal = openAddNewsModal;
 window.closeAddNewsModal = closeAddNewsModal;
 window.saveNews = saveNews;
@@ -38,8 +38,7 @@ window.openManageNewsModal = openManageNewsModal;
 window.closeManageNewsModal = closeManageNewsModal;
 window.deleteNews = deleteNews;
 window.editNews = editNews;
-
-// Apps Functions
+// Apps
 window.openAddAppModal = openAddAppModal;
 window.closeAddAppModal = closeAddAppModal;
 window.saveApp = saveApp;
@@ -47,8 +46,7 @@ window.openManageAppsModal = openManageAppsModal;
 window.closeManageAppsModal = closeManageAppsModal;
 window.deleteApp = deleteApp;
 window.editApp = editApp;
-
-// System & Note & Inbox Functions
+// System
 window.checkSystemStatus = checkSystemStatus;
 window.saveNote = saveNote;
 window.openInboxModal = openInboxModal;
@@ -56,8 +54,20 @@ window.closeInboxModal = closeInboxModal;
 window.loadMessages = loadMessages;
 window.deleteMessage = deleteMessage;
 
+// --- Init ---
 document.addEventListener('DOMContentLoaded', () => {
-    checkLogin();
+    // ✅ ต้อง Login Firebase ก่อน ถึงจะดึงข้อมูลได้
+    signInAnonymously(auth).catch((error) => {
+        console.error("Firebase Auth Error:", error);
+        alert("ไม่สามารถเชื่อมต่อฐานข้อมูลได้: " + error.message);
+    });
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            console.log("Firebase Connected as:", user.uid);
+            checkLogin(); // เช็ครหัส Admin ต่อ
+        }
+    });
 });
 
 // --- Helper Functions ---
@@ -74,23 +84,22 @@ function convertDriveImage(url) {
 
 function formatDate(dateString) {
     if(!dateString) return "-";
-    if(dateString.includes('/')) return dateString;
-    // Check timestamp
+    if(typeof dateString === 'string' && dateString.includes('/')) return dateString;
     let date;
     if(dateString.toDate) date = dateString.toDate();
     else date = new Date(dateString);
-    
+    if (isNaN(date.getTime())) return "-";
     return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
 }
 
-// --- 1. Login Logic ---
+// --- Login Logic ---
 function checkLogin() {
     const savedPassword = sessionStorage.getItem('admin_password');
     if (savedPassword === ADMIN_PIN) {
         document.getElementById('login-modal').classList.add('hidden');
         showDashboard();
-        loadNote();
-        listenToMessages();
+        loadNote(); // โหลดโน้ต
+        listenToMessages(); // ฟังข้อความใหม่
     } else {
         document.getElementById('login-modal').classList.remove('hidden');
     }
@@ -99,7 +108,6 @@ function checkLogin() {
 function performLogin() {
     const input = document.getElementById('password-input').value;
     const errorMsg = document.getElementById('login-error');
-    
     if (input === ADMIN_PIN) {
         sessionStorage.setItem('admin_password', input);
         checkLogin();
@@ -113,21 +121,30 @@ function logout() {
     window.location.reload();
 }
 
-// --- 2. Dashboard Logic ---
+// --- Dashboard ---
 function showDashboard() {
     onSnapshot(collection(db, "projects"), (snap) => {
-        document.getElementById('stat-projects').innerText = snap.size.toLocaleString();
+        const el = document.getElementById('stat-projects');
+        if(el) el.innerText = snap.size.toLocaleString();
         let dl=0, vw=0;
-        snap.forEach(d=>{ dl += (d.data().downloads||0); vw += (d.data().views||0); });
-        document.getElementById('stat-downloads').innerText = dl.toLocaleString();
-        document.getElementById('stat-views').innerText = vw.toLocaleString();
+        snap.forEach(d=>{ 
+            const data = d.data();
+            dl += (data.downloads||0); 
+            vw += (data.views||0); 
+        });
+        const elDl = document.getElementById('stat-downloads');
+        if(elDl) elDl.innerText = dl.toLocaleString();
+        const elVw = document.getElementById('stat-views');
+        if(elVw) elVw.innerText = vw.toLocaleString();
     });
-    onSnapshot(collection(db, "news"), (snap) => document.getElementById('stat-news').innerText = snap.size.toLocaleString());
+    onSnapshot(collection(db, "news"), (snap) => {
+        const el = document.getElementById('stat-news');
+        if(el) el.innerText = snap.size.toLocaleString();
+    });
 }
 
-// --- 3. Project Management ---
+// --- Projects ---
 function openAddProjectModal() { document.getElementById('project-modal').classList.remove('hidden'); }
-
 function closeAddProjectModal() { 
     document.getElementById('project-modal').classList.add('hidden'); 
     document.getElementById('p-id').value = "";
@@ -135,7 +152,6 @@ function closeAddProjectModal() {
     document.getElementById('save-project-btn').innerText = 'บันทึกข้อมูล';
     document.getElementById('p-modal-title').innerHTML = '<i class="fa-solid fa-plus-circle mr-2"></i>เพิ่มโปรเจกต์ใหม่';
 }
-
 function closeManageModal() { document.getElementById('manage-modal').classList.add('hidden'); }
 
 async function saveProject() {
@@ -150,8 +166,8 @@ async function saveProject() {
     
     const images = [];
     for(let i=1; i<=5; i++) {
-        const val = document.getElementById('p-image-'+i).value.trim();
-        if(val) images.push(val);
+        const el = document.getElementById('p-image-'+i);
+        if(el && el.value.trim()) images.push(el.value.trim());
     }
 
     if(!title || !tags || images.length === 0 || !desc) return alert("กรอกข้อมูลให้ครบ");
@@ -176,6 +192,7 @@ async function saveProject() {
             alert("เพิ่มสำเร็จ!");
         }
         closeAddProjectModal();
+        // ถ้าหน้าจัดการเปิดอยู่ ให้รีเฟรช
         if(!document.getElementById('manage-modal').classList.contains('hidden')) openManageModal();
     } catch(e) { alert(e.message); } 
     finally { btn.innerText = "บันทึกข้อมูล"; btn.disabled = false; }
@@ -212,12 +229,12 @@ async function openManageModal() {
 }
 
 async function editProject(id) {
+    // ปิดหน้าจัดการก่อน
+    closeManageModal();
+    
     try {
         const snap = await getDoc(doc(db, "projects", id));
-        if(!snap.exists()) {
-            alert("ไม่พบข้อมูลโปรเจกต์นี้");
-            return;
-        }
+        if(!snap.exists()) return alert("ไม่พบข้อมูล");
         
         const p = snap.data();
         document.getElementById('p-id').value = id;
@@ -231,19 +248,16 @@ async function editProject(id) {
         
         const imgs = p.images || (p.image ? [p.image] : []);
         for(let i=1; i<=5; i++) { 
-            document.getElementById('p-image-'+i).value = imgs[i-1] || ""; 
+            const el = document.getElementById('p-image-'+i);
+            if(el) el.value = imgs[i-1] || ""; 
         }
         
         document.getElementById('p-modal-title').innerHTML = 'แก้ไขโปรเจกต์';
         document.getElementById('save-project-btn').innerText = 'อัปเดต';
         
-        closeManageModal();
         openAddProjectModal();
         
-    } catch(e) {
-        console.error(e);
-        alert("เกิดข้อผิดพลาด: " + e.message);
-    }
+    } catch(e) { console.error(e); alert("เกิดข้อผิดพลาด: " + e.message); }
 }
 
 async function deleteProject(id, title) {
@@ -253,7 +267,7 @@ async function deleteProject(id, title) {
     }
 }
 
-// --- 4. News Management ---
+// --- News ---
 function openAddNewsModal() { document.getElementById('add-news-modal').classList.remove('hidden'); }
 function closeAddNewsModal() { 
     document.getElementById('add-news-modal').classList.add('hidden'); 
@@ -271,52 +285,30 @@ async function saveNews() {
     const content = document.getElementById('n-content').value;
 
     if(!title || !content) return alert("กรอกข้อมูลให้ครบ");
-    
     const btn = document.getElementById('save-news-btn');
-    btn.innerText = "กำลังบันทึก...";
-    btn.disabled = true;
+    btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
 
     const payload = { title, tag, content };
-
     try {
-        if (id) {
-            await updateDoc(doc(db, "news", id), payload);
-            alert("แก้ไขข่าวสำเร็จ!");
-        } else {
-            payload.createdAt = serverTimestamp();
-            await addDoc(collection(db, "news"), payload);
-            alert("ประกาศข่าวสำเร็จ!");
-        }
+        if (id) { await updateDoc(doc(db, "news", id), payload); alert("แก้ไขข่าวสำเร็จ!"); } 
+        else { payload.createdAt = serverTimestamp(); await addDoc(collection(db, "news"), payload); alert("ประกาศข่าวสำเร็จ!"); }
         closeAddNewsModal();
         if(!document.getElementById('manage-news-modal').classList.contains('hidden')) openManageNewsModal();
-    } catch(e) {
-        alert("Error: " + e.message);
-    } finally {
-        btn.innerText = "บันทึก";
-        btn.disabled = false;
-    }
+    } catch(e) { alert("Error: " + e.message); } finally { btn.innerText = "บันทึก"; btn.disabled = false; }
 }
 
 async function openManageNewsModal() {
     document.getElementById('manage-news-modal').classList.remove('hidden');
     const tbody = document.getElementById('manage-news-body');
     tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading...</td></tr>';
-
     try {
         const q = query(collection(db, "news"), orderBy("createdAt", "desc"));
         const snap = await getDocs(q);
-        
-        if (snap.empty) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">ไม่มีข้อมูล</td></tr>';
-            return;
-        }
-
+        if (snap.empty) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">ไม่มีข้อมูล</td></tr>'; return; }
         tbody.innerHTML = "";
         snap.forEach(docSnap => {
             const n = docSnap.data();
-            let dateStr = "-";
-            if(n.createdAt) dateStr = new Date(n.createdAt.toDate()).toLocaleDateString('th-TH');
-
+            let dateStr = formatDate(n.createdAt);
             tbody.innerHTML += `
                 <tr class="bg-white border-b">
                     <td class="px-6 py-4">${dateStr}</td>
@@ -332,35 +324,24 @@ async function openManageNewsModal() {
 }
 
 async function editNews(id) {
+    closeManageNewsModal();
     try {
         const docSnap = await getDoc(doc(db, "news", id));
-        if (!docSnap.exists()) return alert("ไม่พบข้อมูลข่าว");
-        
+        if (!docSnap.exists()) return alert("ไม่พบข้อมูล");
         const n = docSnap.data();
         document.getElementById('n-id').value = id;
         document.getElementById('n-title').value = n.title;
         document.getElementById('n-tag').value = n.tag;
         document.getElementById('n-content').value = n.content;
-        
-        document.getElementById('n-modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2"></i>แก้ไขข่าว';
+        document.getElementById('n-modal-title').innerHTML = 'แก้ไขข่าว';
         document.getElementById('save-news-btn').innerText = "อัปเดตข่าว";
-        
-        closeManageNewsModal();
         openAddNewsModal();
-    } catch(e) {
-        alert("Error loading news: " + e.message);
-    }
+    } catch(e) { alert("Error: " + e.message); }
 }
 
-async function deleteNews(id) {
-    if(confirm("ลบข่าวนี้?")) {
-        await deleteDoc(doc(db, "news", id));
-        openManageNewsModal();
-    }
-}
+async function deleteNews(id) { if(confirm("ลบข่าวนี้?")) { await deleteDoc(doc(db, "news", id)); openManageNewsModal(); } }
 
-
-// --- 5. Apps Management (Full) ---
+// --- Apps ---
 function openAddAppModal() { document.getElementById('app-modal').classList.remove('hidden'); }
 function closeAddAppModal() { 
     document.getElementById('app-modal').classList.add('hidden');
@@ -381,75 +362,48 @@ async function saveApp() {
     const link = document.getElementById('a-link').value;
 
     if(!name || !desc || !image || !link) return alert("กรอกข้อมูลให้ครบ");
-
     const btn = document.getElementById('save-app-btn');
-    btn.innerText = "กำลังบันทึก...";
-    btn.disabled = true;
+    btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
 
-    const payload = {
-        name, category, description: desc, 
-        tag: category === 'game' ? tag : '',
-        image: image, 
-        link
-    };
+    const payload = { name, category, description: desc, tag: category === 'game' ? tag : '', image, link };
 
     try {
-        if(id) {
-            await updateDoc(doc(db, "apps", id), payload);
-            alert("แก้ไขแอพสำเร็จ!");
-        } else {
-            payload.createdAt = serverTimestamp();
-            await addDoc(collection(db, "apps"), payload);
-            alert("เพิ่มแอพสำเร็จ!");
-        }
-        
+        if(id) { await updateDoc(doc(db, "apps", id), payload); alert("แก้ไขแอพสำเร็จ!"); } 
+        else { payload.createdAt = serverTimestamp(); await addDoc(collection(db, "apps"), payload); alert("เพิ่มแอพสำเร็จ!"); }
         closeAddAppModal();
         if(!document.getElementById('manage-apps-modal').classList.contains('hidden')) openManageAppsModal();
-    } catch(e) {
-        alert("Error: " + e.message);
-    } finally {
-        btn.innerText = "บันทึก";
-        btn.disabled = false;
-    }
+    } catch(e) { alert("Error: " + e.message); } finally { btn.innerText = "บันทึก"; btn.disabled = false; }
 }
 
 async function openManageAppsModal() {
     document.getElementById('manage-apps-modal').classList.remove('hidden');
     const tbody = document.getElementById('manage-apps-body');
     tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4">Loading...</td></tr>';
-    
-    const q = query(collection(db, "apps"), orderBy("createdAt", "desc"));
-    const snap = await getDocs(q);
-    
-    if(snap.empty) {
-        tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4">ไม่มีข้อมูล</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = "";
-    snap.forEach(docSnap => {
-        const a = docSnap.data();
-        tbody.innerHTML += `
-            <tr class="bg-white border-b hover:bg-gray-50">
-                <td class="px-6 py-4 flex items-center gap-3">
-                    <img src="${convertDriveImage(a.image)}" class="w-10 h-10 rounded object-cover">
-                    <span class="font-medium">${a.name}</span>
-                </td>
-                <td class="px-6 py-4 capitalize">${a.category}</td>
-                <td class="px-6 py-4 text-right flex justify-end gap-2">
-                    <button onclick="editApp('${docSnap.id}')" class="text-blue-600 bg-blue-50 px-2 py-1 rounded"><i class="fa-solid fa-pen"></i> แก้ไข</button>
-                    <button onclick="deleteApp('${docSnap.id}', '${a.name}')" class="text-red-600 bg-red-50 px-2 py-1 rounded"><i class="fa-solid fa-trash"></i> ลบ</button>
-                </td>
-            </tr>
-        `;
-    });
+    try {
+        const q = query(collection(db, "apps"), orderBy("createdAt", "desc"));
+        const snap = await getDocs(q);
+        if(snap.empty) { tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4">ไม่มีข้อมูล</td></tr>'; return; }
+        tbody.innerHTML = "";
+        snap.forEach(docSnap => {
+            const a = docSnap.data();
+            tbody.innerHTML += `
+                <tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="px-6 py-4 flex items-center gap-3"><img src="${convertDriveImage(a.image)}" class="w-10 h-10 rounded object-cover"><span class="font-medium">${a.name}</span></td>
+                    <td class="px-6 py-4 capitalize">${a.category}</td>
+                    <td class="px-6 py-4 text-right flex justify-end gap-2">
+                        <button onclick="editApp('${docSnap.id}')" class="text-blue-600 bg-blue-50 px-2 py-1 rounded"><i class="fa-solid fa-pen"></i> แก้ไข</button>
+                        <button onclick="deleteApp('${docSnap.id}', '${a.name}')" class="text-red-600 bg-red-50 px-2 py-1 rounded"><i class="fa-solid fa-trash"></i> ลบ</button>
+                    </td>
+                </tr>`;
+        });
+    } catch(e) { console.error(e); }
 }
 
 async function editApp(id) {
+    closeManageAppsModal();
     try {
         const docSnap = await getDoc(doc(db, "apps", id));
-        if (!docSnap.exists()) return alert("ไม่พบข้อมูลแอพ");
-        
+        if (!docSnap.exists()) return alert("ไม่พบข้อมูล");
         const a = docSnap.data();
         document.getElementById('a-id').value = id;
         document.getElementById('a-name').value = a.name;
@@ -458,110 +412,68 @@ async function editApp(id) {
         document.getElementById('a-tag').value = a.tag || '';
         document.getElementById('a-image').value = a.image;
         document.getElementById('a-link').value = a.link;
-        
         document.getElementById('a-modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2"></i>แก้ไขแอพ';
         document.getElementById('save-app-btn').innerText = "อัปเดต";
-        
-        closeManageAppsModal();
         openAddAppModal();
-    } catch(e) {
-        alert("Error loading app: " + e.message);
-    }
+    } catch(e) { alert("Error: " + e.message); }
 }
 
-async function deleteApp(id, name) {
-    if(confirm(`ลบแอพ "${name}"?`)) {
-        await deleteDoc(doc(db, "apps", id));
-        openManageAppsModal();
-    }
-}
+async function deleteApp(id, name) { if(confirm(`ลบแอพ "${name}"?`)) { await deleteDoc(doc(db, "apps", id)); openManageAppsModal(); } }
 
-
-// --- 6. Inbox & System ---
-
+// --- Inbox ---
 function listenToMessages() {
     const q = query(collection(db, "messages"), orderBy("timestamp", "desc"));
     onSnapshot(q, (snapshot) => {
         let unread = 0;
         snapshot.forEach(d => { if(!d.data().read) unread++; });
         const badges = [document.getElementById('sidebar-inbox-badge'), document.getElementById('quick-inbox-badge')];
-        badges.forEach(b => {
-            if(b) {
-                if(unread > 0) {
-                    b.classList.remove('hidden');
-                    b.innerText = unread > 9 ? '9+' : unread;
-                } else {
-                    b.classList.add('hidden');
-                }
-            }
-        });
+        badges.forEach(b => { if(b) { b.classList.toggle('hidden', unread===0); b.innerText = unread > 9 ? '9+' : unread; } });
     });
 }
-
-function openInboxModal() {
-    document.getElementById('inbox-modal').classList.remove('hidden');
-    loadMessages();
-}
+function openInboxModal() { document.getElementById('inbox-modal').classList.remove('hidden'); loadMessages(); }
 function closeInboxModal() { document.getElementById('inbox-modal').classList.add('hidden'); }
-
 function loadMessages() {
     const list = document.getElementById('inbox-list');
     const q = query(collection(db, "messages"), orderBy("timestamp", "desc"));
     onSnapshot(q, (snap) => {
-        if(snap.empty) {
-            list.innerHTML = '<div class="text-center py-10 text-gray-400">ยังไม่มีข้อความ</div>';
-            return;
-        }
+        if(snap.empty) { list.innerHTML = '<div class="text-center py-10 text-gray-400">ยังไม่มีข้อความ</div>'; return; }
         list.innerHTML = "";
         snap.forEach(d => {
             const m = d.data();
             const date = m.timestamp ? new Date(m.timestamp.toDate()).toLocaleString('th-TH') : "-";
             const bg = m.read ? "bg-white opacity-60" : "bg-blue-50 border-l-4 border-blue-500";
             if(!m.read) updateDoc(doc(db, "messages", d.id), { read: true }); 
-            
             list.innerHTML += `
                 <div class="p-4 ${bg} hover:bg-gray-50 border-b flex justify-between items-start">
-                    <div>
-                        <div class="font-bold text-sm">${m.name} <span class="text-xs font-normal text-gray-400 ml-2">${date}</span></div>
-                        <div class="text-sm text-gray-600 mt-1 whitespace-pre-wrap">${m.message}</div>
-                    </div>
-                    <button onclick="deleteMessage('${d.id}')" class="text-gray-300 hover:text-red-500 transition p-2"><i class="fa-solid fa-trash"></i></button>
-                </div>
-            `;
+                    <div><div class="font-bold text-sm">${m.name} <span class="text-xs font-normal text-gray-400 ml-2">${date}</span></div><div class="text-sm text-gray-600 mt-1">${m.message}</div></div>
+                    <button onclick="deleteMessage('${d.id}')" class="text-gray-300 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+                </div>`;
         });
     });
 }
+async function deleteMessage(id) { if(confirm("ลบข้อความ?")) await deleteDoc(doc(db, "messages", id)); }
 
-async function deleteMessage(id) {
-    if(confirm("ลบข้อความ?")) await deleteDoc(doc(db, "messages", id));
-}
-
-function checkSystemStatus() {
-    const start = Date.now();
-    getDoc(doc(db, "config", "admin_note")).then(() => {
-        const ping = Date.now() - start;
-        alert(`✅ System Online\nLatency: ${ping}ms\nDatabase: Connected`);
-    }).catch(e => alert("❌ Error: " + e.message));
-}
-
+// --- System ---
 async function loadNote() {
     const el = document.getElementById('admin-note-input');
-    el.value = "กำลังโหลด...";
-    el.disabled = true;
+    el.value = "กำลังโหลด..."; el.disabled = true;
     try {
-        const docRef = doc(db, "config", "admin_note");
-        const snap = await getDoc(docRef);
-        if (snap.exists()) { el.value = snap.data().text || ""; }
-    } catch (error) { el.value = "โหลดบันทึกไม่สำเร็จ"; } 
-    finally { el.disabled = false; }
+        const snap = await getDoc(doc(db, "config", "admin_note"));
+        if (snap.exists()) { el.value = snap.data().text || ""; } else { el.value = ""; }
+    } catch (error) { el.value = "โหลดไม่สำเร็จ"; } finally { el.disabled = false; }
 }
-
 async function saveNote() {
     const val = document.getElementById('admin-note-input').value;
     const btn = document.getElementById('save-note-btn');
     btn.innerText = "...";
     await setDoc(doc(db, "config", "admin_note"), { text: val });
     btn.innerText = "บันทึก";
+}
+function checkSystemStatus() {
+    const start = Date.now();
+    getDoc(doc(db, "config", "admin_note")).then(() => {
+        alert(`✅ System Online\nPing: ${Date.now() - start}ms`);
+    }).catch(e => alert("❌ Error: " + e.message));
 }
 
 document.getElementById('password-input')?.addEventListener('keypress', function (e) {
