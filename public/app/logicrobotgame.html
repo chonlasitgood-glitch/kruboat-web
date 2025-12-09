@@ -4,17 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Logic Robot: ฝึกคิดแบบอัลกอริทึม</title>
-
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4MQ3GL6CTB"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-4MQ3GL6CTB');
-    </script>
-
     <!-- ใช้ Tailwind CSS สำหรับตกแต่ง -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- ใช้ Font Awesome สำหรับไอคอน -->
@@ -34,9 +23,9 @@
             transition: all 0.3s ease;
         }
 
-        /* หุ่นยนต์ */
+        /* หุ่นยนต์ - ปรับความเร็ว Animation เป็น 0.8s (ช้าลง) */
         #robot {
-            transition: transform 0.5s ease-in-out, top 0.5s ease-in-out, left 0.5s ease-in-out;
+            transition: transform 0.8s ease-in-out, top 0.8s ease-in-out, left 0.8s ease-in-out;
             z-index: 10;
         }
 
@@ -148,11 +137,12 @@
     <!-- Script หลักของเกม -->
     <script>
         // --- 1. การตั้งค่าและตัวแปรหลัก ---
-        let boardSize = 40; // เริ่มต้นเล็กลงหน่อยเผื่อมือถือ
+        let boardSize = 40; 
         const gapSize = 3;  
         
         let currentLevel = 0;
         let robotState = { x: 0, y: 0, dir: 1 };
+        let robotRotation = 0; // เพิ่มตัวแปรเก็บองศาการหมุนแบบสะสม
         let isRunning = false;
         let commands = [];
         const maxCommands = 30;
@@ -180,7 +170,7 @@
         function initGame() {
             renderBoard();
             updateUI();
-            window.addEventListener('resize', renderBoard); // ปรับขนาดเมื่อหมุนจอหรือเปลี่ยนขนาด
+            window.addEventListener('resize', renderBoard); 
         }
 
         function renderBoard() {
@@ -189,23 +179,15 @@
             const rows = map.length;
             const cols = map[0].length;
             
-            // คำนวณขนาดบอร์ดให้พอดีกับ Container
             const container = document.getElementById('game-container');
-            // ใช้ขนาดที่เล็กกว่าระหว่างความกว้างและความสูง
-            // ลบ padding ออกหน่อย
             const maxW = container.clientWidth - 32; 
-            // บนมือถือเราอยากให้เห็นบอร์ดเต็มๆ แต่ไม่กินที่ปุ่ม
-            // บน PC ให้สูงได้
             const isMobile = window.innerWidth < 768;
             const maxH = isMobile ? 300 : container.clientHeight - 32;
 
             const sizeByW = Math.floor(maxW / cols);
             const sizeByH = Math.floor(maxH / rows);
             
-            // เลือกค่าที่น้อยกว่าเพื่อให้พอดี และไม่เกิน 50px
             boardSize = Math.min(sizeByW, sizeByH, 50);
-            
-            // ป้องกันเล็กเกินไปจนมองไม่เห็น
             if(boardSize < 25) boardSize = 25;
 
             const gridBoard = document.getElementById('grid-board');
@@ -250,12 +232,15 @@
             robot.className = 'absolute flex items-center justify-center text-green-400 drop-shadow-lg z-20 pointer-events-none';
             robot.style.width = `${boardSize}px`;
             robot.style.height = `${boardSize}px`;
-            // ใช้ SVG หรือ icon ที่คมชัด
-            robot.innerHTML = '<i class="fas fa-robot text-[70%] filter drop-shadow-md"></i>';
+            
+            // เพิ่มขนาดไอคอนหุ่นยนต์ให้ใหญ่ขึ้น (text-[90%])
+            robot.innerHTML = '<i class="fas fa-robot text-[90%] filter drop-shadow-md"></i>';
             
             gridBoard.appendChild(robot);
             
+            // ตั้งค่าเริ่มต้น
             robotState.dir = levelData.startDir;
+            robotRotation = levelData.startDir * 90; // ตั้งค่าองศาเริ่มต้น
             updateRobotVisual();
         }
 
@@ -263,9 +248,10 @@
             const robot = document.getElementById('robot');
             const left = robotState.x * (boardSize + gapSize);
             const top = robotState.y * (boardSize + gapSize);
-            const rotation = (robotState.dir) * 90; 
-
-            robot.style.transform = `translate(${left}px, ${top}px) rotate(${rotation}deg)`;
+            
+            // ใช้ค่าสะสม robotRotation แทนการคำนวณจาก robotState.dir
+            // เพื่อให้หมุนซ้ายขวาอย่างเป็นธรรมชาติ
+            robot.style.transform = `translate(${left}px, ${top}px) rotate(${robotRotation}deg)`;
             robot.style.width = `${boardSize}px`;
             robot.style.height = `${boardSize}px`;
         }
@@ -283,8 +269,6 @@
 
             commands.push(cmd);
             renderCommandList();
-            
-            // สั่นเล็กน้อยเมื่อกดปุ่ม (สำหรับมือถือ)
             if (navigator.vibrate) navigator.vibrate(10);
         }
 
@@ -378,7 +362,8 @@
                     return;
                 }
 
-                await sleep(400); 
+                // เพิ่มเวลาหน่วงเป็น 1 วินาที (จาก 0.4s) ให้เดินช้าลง
+                await sleep(1000); 
             }
 
             if (isRunning) {
@@ -395,8 +380,12 @@
                 robotState.x = nextX;
                 robotState.y = nextY;
             } else if (cmd === 'L') { 
+                // หมุนซ้าย: ลดองศาลง 90
+                robotRotation -= 90;
                 robotState.dir = (robotState.dir + 3) % 4; 
             } else if (cmd === 'R') { 
+                // หมุนขวา: เพิ่มองศาขึ้น 90
+                robotRotation += 90;
                 robotState.dir = (robotState.dir + 1) % 4;
             }
             updateRobotVisual();
@@ -426,6 +415,7 @@
                 }
             }
             robotState.dir = levelData.startDir;
+            robotRotation = levelData.startDir * 90; // รีเซ็ตองศาเริ่มต้น
             updateRobotVisual();
         }
 
@@ -464,7 +454,6 @@
                 btn.innerHTML = 'ด่านถัดไป <i class="fas fa-arrow-right ml-2"></i>';
                 btn.className = "bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-8 rounded-full transition shadow-lg";
                 btn.onclick = nextLevel;
-                // Play success sound logic here if wanted
             } else {
                 title.innerText = "ล้มเหลว";
                 title.className = "text-3xl font-bold mb-2 text-red-400";

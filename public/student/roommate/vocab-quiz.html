@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocab Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        body { font-family: 'Prompt', sans-serif; user-select: none; }
+    </style>
+</head>
+<body class="bg-emerald-600 flex items-center justify-center h-screen overflow-hidden">
+
+    <div class="text-center w-full max-w-md p-4">
+        
+        <!-- Start Screen -->
+        <div id="start-screen" class="bg-white rounded-3xl p-8 shadow-2xl animate__animated animate__zoomIn">
+            <div class="text-6xl mb-4">📚</div>
+            <h1 class="text-3xl font-bold text-emerald-800 mb-2">Vocab Quiz</h1>
+            <p class="text-gray-500 mb-6">ทดสอบคลังคำศัพท์ภาษาอังกฤษของคุณ</p>
+            <button onclick="startGame()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xl font-bold py-4 rounded-xl shadow-lg transition transform hover:scale-105">
+                เริ่มเกม
+            </button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="hidden">
+            <div class="flex justify-between items-center mb-6 text-white">
+                <div class="bg-white/20 px-4 py-2 rounded-lg backdrop-blur">
+                    <span class="text-sm opacity-80">คะแนน</span>
+                    <div class="text-2xl font-bold" id="score">0</div>
+                </div>
+                <div class="bg-white/20 px-4 py-2 rounded-lg backdrop-blur">
+                    <span class="text-sm opacity-80">เวลา</span>
+                    <div class="text-2xl font-bold" id="timer">30</div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-8 shadow-2xl mb-4 min-h-[200px] flex flex-col justify-center items-center relative overflow-hidden">
+                <div id="progress-bar" class="absolute top-0 left-0 h-2 bg-green-500 w-full transition-all duration-1000 ease-linear"></div>
+                <p class="text-gray-400 text-sm mb-2 uppercase tracking-widest font-bold">แปลคำนี้</p>
+                <h2 id="question" class="text-4xl font-bold text-gray-800 mb-2">Hello</h2>
+            </div>
+
+            <div id="options" class="grid grid-cols-1 gap-3">
+                <!-- ตัวเลือก -->
+            </div>
+        </div>
+
+        <!-- End Screen -->
+        <div id="end-screen" class="hidden bg-white rounded-3xl p-8 shadow-2xl animate__animated animate__fadeInUp">
+            <div class="text-6xl mb-4">🇬🇧</div>
+            <h2 class="text-2xl font-bold text-gray-800">จบเกม!</h2>
+            <p class="text-gray-500 mb-4">คะแนนของคุณ</p>
+            <div class="text-6xl font-bold text-emerald-600 mb-6" id="final-score">0</div>
+            
+            <button id="claim-btn" onclick="claimReward()" class="w-full bg-green-500 hover:bg-green-600 text-white text-lg font-bold py-3 rounded-xl shadow-lg mb-3">
+                รับ XP และปิดเกม
+            </button>
+            <button onclick="location.reload()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-xl">
+                เล่นอีกครั้ง
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        const vocabList = [
+            {en: "Teacher", th: "ครู"}, {en: "Student", th: "นักเรียน"}, {en: "School", th: "โรงเรียน"},
+            {en: "Library", th: "ห้องสมุด"}, {en: "Computer", th: "คอมพิวเตอร์"}, {en: "Pencil", th: "ดินสอ"},
+            {en: "Friend", th: "เพื่อน"}, {en: "Happy", th: "มีความสุข"}, {en: "Sad", th: "เสียใจ"},
+            {en: "Run", th: "วิ่ง"}, {en: "Eat", th: "กิน"}, {en: "Sleep", th: "นอน"},
+            {en: "Cat", th: "แมว"}, {en: "Dog", th: "สุนัข"}, {en: "Bird", th: "นก"},
+            {en: "Red", th: "สีแดง"}, {en: "Blue", th: "สีน้ำเงิน"}, {en: "Green", th: "สีเขียว"},
+            {en: "Sun", th: "พระอาทิตย์"}, {en: "Moon", th: "พระจันทร์"}, {en: "Star", th: "ดาว"}
+        ];
+
+        let score = 0;
+        let timeLeft = 30;
+        let timerInterval;
+        let currentAnswer;
+
+        function startGame() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            score = 0;
+            timeLeft = 30;
+            updateUI();
+            nextQuestion();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateUI();
+                if (timeLeft <= 0) endGame();
+            }, 1000);
+        }
+
+        function updateUI() {
+            document.getElementById('score').innerText = score;
+            document.getElementById('timer').innerText = timeLeft;
+            const percent = (timeLeft / 30) * 100;
+            const bar = document.getElementById('progress-bar');
+            bar.style.width = percent + '%';
+            if(percent < 30) bar.className = "absolute top-0 left-0 h-2 bg-red-500 w-full transition-all duration-1000 ease-linear";
+        }
+
+        function nextQuestion() {
+            const item = vocabList[Math.floor(Math.random() * vocabList.length)];
+            const mode = Math.random() > 0.5 ? 'en' : 'th';
+
+            if (mode === 'en') {
+                document.getElementById('question').innerText = item.en;
+                currentAnswer = item.th;
+            } else {
+                document.getElementById('question').innerText = item.th;
+                currentAnswer = item.en;
+            }
+
+            let options = [currentAnswer];
+            while (options.length < 4) {
+                let randomItem = vocabList[Math.floor(Math.random() * vocabList.length)];
+                let wrong = mode === 'en' ? randomItem.th : randomItem.en;
+                if (!options.includes(wrong) && wrong !== currentAnswer) options.push(wrong);
+            }
+            options.sort(() => Math.random() - 0.5);
+
+            const container = document.getElementById('options');
+            container.innerHTML = '';
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "bg-white/90 hover:bg-emerald-100 text-emerald-800 font-bold py-3 rounded-xl shadow-sm text-lg transition transform active:scale-95 border-b-4 border-emerald-200 hover:border-emerald-300";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(val, btn) {
+            const buttons = document.querySelectorAll('#options button');
+            buttons.forEach(b => b.disabled = true);
+
+            if (val === currentAnswer) {
+                score++;
+                btn.classList.remove('bg-white/90', 'text-emerald-800');
+                btn.classList.add('bg-green-500', 'text-white', 'border-green-600');
+            } else {
+                btn.classList.remove('bg-white/90', 'text-emerald-800');
+                btn.classList.add('bg-red-500', 'text-white', 'border-red-600', 'animate__animated', 'animate__shakeX');
+            }
+            updateUI();
+            setTimeout(nextQuestion, 500);
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('end-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+            
+            if(score < 5) {
+                document.getElementById('claim-btn').classList.add('hidden');
+                alert("ต้องได้คะแนน 5 ขึ้นไปถึงจะได้รับ XP นะ!");
+            }
+        }
+
+        function claimReward() {
+            const btn = document.getElementById('claim-btn');
+            if(btn.disabled) return;
+            btn.disabled = true;
+            btn.innerText = "กำลังรับรางวัล...";
+            
+            window.parent.postMessage({
+                type: 'GAME_COMPLETE',
+                game: 'vocab-quiz',
+                score: score,
+                xp: Math.min(score, 10)
+            }, '*');
+        }
+    </script>
+</body>
+</html>

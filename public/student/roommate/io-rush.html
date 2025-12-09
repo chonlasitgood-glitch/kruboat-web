@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>I/O Rush</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        body { font-family: 'Prompt', sans-serif; overflow: hidden; background-color: #1e293b; color: white; user-select: none; touch-action: none; }
+        
+        #game-area { position: relative; width: 100%; height: 100vh; overflow: hidden; }
+        
+        .falling-item { 
+            position: absolute; 
+            width: 80px; height: 80px; 
+            background: white; 
+            border-radius: 12px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            font-size: 2rem; color: #334155;
+            transition: transform 0.1s;
+        }
+        .falling-item p { font-size: 0.6rem; font-weight: bold; margin-top: 2px; }
+
+        .zone { position: absolute; bottom: 0; width: 50%; height: 150px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; opacity: 0.8; transition: all 0.2s; }
+        .zone-input { left: 0; background: linear-gradient(to top, #3b82f6, transparent); border-right: 1px dashed rgba(255,255,255,0.2); }
+        .zone-output { right: 0; background: linear-gradient(to top, #ef4444, transparent); }
+        
+        .zone:active { opacity: 1; height: 160px; }
+        .zone-icon { font-size: 3rem; opacity: 0.5; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/95">
+        <div class="text-center p-6 max-w-sm animate__animated animate__zoomIn">
+            <div class="text-7xl mb-4">⌨️</div>
+            <h1 class="text-4xl font-bold text-blue-400 mb-2">I/O Rush</h1>
+            <p class="text-gray-400 mb-8">แยกแยะอุปกรณ์คอมพิวเตอร์<br>กดซ้าย = Input | กดขวา = Output</p>
+            <button onclick="startGame()" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-xl font-bold py-4 rounded-xl shadow-lg transition transform hover:scale-105">
+                เริ่มเกมทันที
+            </button>
+        </div>
+    </div>
+
+    <!-- UI -->
+    <div class="absolute top-4 left-4 z-40 bg-slate-800/80 px-4 py-2 rounded-lg backdrop-blur">
+        <div class="text-xs text-gray-400">SCORE</div>
+        <div class="text-2xl font-bold text-white" id="score">0</div>
+    </div>
+    <div class="absolute top-4 right-4 z-40 bg-slate-800/80 px-4 py-2 rounded-lg backdrop-blur">
+        <div class="text-xs text-gray-400">LIVES</div>
+        <div class="text-2xl font-bold text-red-500" id="lives">❤️❤️❤️</div>
+    </div>
+
+    <!-- Game Area -->
+    <div id="game-area">
+        <!-- Zones -->
+        <div class="zone zone-input" id="btn-input" onclick="handleButton('input')">
+            <div class="text-center">
+                <i class="fa-solid fa-arrow-left-long zone-icon"></i><br>
+                INPUT<br><span class="text-xs font-normal">รับเข้า</span>
+            </div>
+        </div>
+        <div class="zone zone-output" id="btn-output" onclick="handleButton('output')">
+            <div class="text-center">
+                <i class="fa-solid fa-arrow-right-long zone-icon"></i><br>
+                OUTPUT<br><span class="text-xs font-normal">ส่งออก</span>
+            </div>
+        </div>
+        
+        <!-- Items will spawn here -->
+    </div>
+
+    <!-- End Screen -->
+    <div id="end-screen" class="hidden absolute inset-0 z-50 flex items-center justify-center bg-slate-900/95">
+        <div class="text-center animate__animated animate__fadeInUp p-6">
+            <div class="text-6xl mb-4">💥</div>
+            <h2 class="text-3xl font-bold text-white">จบเกม!</h2>
+            <p class="text-gray-400 mb-4">คะแนนของคุณ</p>
+            <div class="text-6xl font-bold text-yellow-400 mb-8" id="final-score">0</div>
+            
+            <button id="claim-btn" onclick="claimReward()" class="w-full bg-green-500 hover:bg-green-600 text-white text-lg font-bold py-3 rounded-xl shadow-lg mb-3">
+                รับ XP และปิดเกม
+            </button>
+            <button onclick="location.reload()" class="w-full bg-gray-800 hover:bg-gray-700 text-gray-400 font-bold py-3 rounded-xl border border-gray-700">
+                เล่นอีกครั้ง
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ข้อมูลอุปกรณ์
+        const itemsData = [
+            { name: "Keyboard", type: "input", icon: "fa-keyboard" },
+            { name: "Mouse", type: "input", icon: "fa-computer-mouse" },
+            { name: "Microphone", type: "input", icon: "fa-microphone" },
+            { name: "Webcam", type: "input", icon: "fa-video" },
+            { name: "Scanner", type: "input", icon: "fa-print" }, // Using print icon as proxy
+            { name: "Monitor", type: "output", icon: "fa-desktop" },
+            { name: "Speaker", type: "output", icon: "fa-volume-high" },
+            { name: "Printer", type: "output", icon: "fa-print" },
+            { name: "Projector", type: "output", icon: "fa-film" },
+            { name: "Headphones", type: "output", icon: "fa-headphones" }
+        ];
+
+        let score = 0;
+        let lives = 3;
+        let gameLoop;
+        let spawnRate = 2000;
+        let speed = 2;
+        let activeItems = [];
+        let isPlaying = false;
+
+        function startGame() {
+            document.getElementById('start-screen').classList.add('hidden');
+            isPlaying = true;
+            spawnItem();
+            gameLoop = setInterval(gameTick, 16);
+            setTimeout(spawnLoop, spawnRate);
+        }
+
+        function spawnLoop() {
+            if (!isPlaying) return;
+            spawnItem();
+            // เร็วขึ้นเรื่อยๆ
+            spawnRate = Math.max(800, spawnRate - 50);
+            speed += 0.05;
+            setTimeout(spawnLoop, spawnRate);
+        }
+
+        function spawnItem() {
+            const data = itemsData[Math.floor(Math.random() * itemsData.length)];
+            const el = document.createElement('div');
+            el.className = 'falling-item';
+            el.innerHTML = `<i class="fa-solid ${data.icon}"></i><p>${data.name}</p>`;
+            
+            // Random X position (but keep center clear)
+            const x = Math.random() * (window.innerWidth - 100) + 10;
+            el.style.left = x + 'px';
+            el.style.top = '-100px';
+            
+            document.getElementById('game-area').appendChild(el);
+            
+            activeItems.push({
+                el: el,
+                y: -100,
+                type: data.type,
+                id: Date.now()
+            });
+        }
+
+        function gameTick() {
+            if (!isPlaying) return;
+
+            activeItems.forEach((item, index) => {
+                item.y += speed;
+                item.el.style.top = item.y + 'px';
+
+                // Check collision with bottom (Missed)
+                if (item.y > window.innerHeight - 150) {
+                    // ถ้าลงมาถึงโซนแล้วยังไม่กด ถือว่าพลาด (หรือจะให้กดตอนอยู่ในโซนก็ได้)
+                    // ในที่นี้ให้ตกพื้นแล้วเสียชีวิต
+                }
+                
+                if (item.y > window.innerHeight) {
+                    item.el.remove();
+                    activeItems.splice(index, 1);
+                    loseLife();
+                }
+            });
+        }
+
+        // กดปุ่ม
+        function handleButton(side) {
+            if (!isPlaying) return;
+
+            // Flash effect
+            const btn = document.getElementById(side === 'input' ? 'btn-input' : 'btn-output');
+            btn.style.opacity = '1';
+            setTimeout(() => btn.style.opacity = '0.8', 100);
+
+            // Check lowest item in range (0 - height-150)
+            // เอาไอเท็มที่อยู่ล่างสุด (Index 0 มักจะเป็นตัวแรกที่เกิด แต่ต้องเช็ค Y)
+            
+            if (activeItems.length === 0) return;
+
+            const targetItem = activeItems[0]; // ตัวล่างสุด
+            
+            if (targetItem.y > 50) { // ต้องลงมานิดนึงก่อนถึงจะกดได้
+                if (targetItem.type === side) {
+                    // Correct
+                    score += 10;
+                    document.getElementById('score').innerText = score;
+                    targetItem.el.remove();
+                    activeItems.shift();
+                } else {
+                    // Wrong
+                    loseLife();
+                    targetItem.el.classList.add('animate__animated', 'animate__shakeX', 'bg-red-200');
+                    // ไม่ลบออก ให้ตกไปตายเอง หรือจะลบเลยก็ได้
+                    setTimeout(() => {
+                         if(targetItem.el.parentNode) {
+                             targetItem.el.remove();
+                             activeItems.shift();
+                         }
+                    }, 200);
+                }
+            }
+        }
+
+        // Support Keyboard
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') handleButton('input');
+            if (e.key === 'ArrowRight') handleButton('output');
+        });
+
+        function loseLife() {
+            lives--;
+            let heartStr = "";
+            for(let i=0; i<lives; i++) heartStr += "❤️";
+            document.getElementById('lives').innerText = heartStr;
+            
+            // Screen flash red
+            document.body.style.backgroundColor = '#450a0a';
+            setTimeout(() => document.body.style.backgroundColor = '#1e293b', 100);
+
+            if (lives <= 0) endGame();
+        }
+
+        function endGame() {
+            isPlaying = false;
+            clearInterval(gameLoop);
+            document.getElementById('end-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+            
+            if(score < 50) {
+                 document.getElementById('claim-btn').classList.add('hidden');
+                 alert("ต้องได้ 50 คะแนนขึ้นไปถึงจะได้ XP!");
+            }
+        }
+
+        function claimReward() {
+            const btn = document.getElementById('claim-btn');
+            btn.innerText = "กำลังรับรางวัล...";
+            btn.disabled = true;
+
+            // 50 คะแนน = 1 XP (Max 10 XP)
+            const xp = Math.min(Math.floor(score / 50), 10);
+            
+            window.parent.postMessage({
+                type: 'GAME_COMPLETE',
+                game: 'io-rush',
+                score: score,
+                xp: xp
+            }, '*');
+        }
+    </script>
+</body>
+</html>
