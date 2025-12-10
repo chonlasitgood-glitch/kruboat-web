@@ -393,7 +393,7 @@ async function saveApp() {
     const btn = document.getElementById('save-app-btn');
     btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
 
-    const payload = { name, category, description: desc, tag: category === 'game' ? tag : '', image, link };
+    const payload = { name, category, description: desc, tag, image, link };
 
     try {
         if(id) { await updateDoc(doc(db, "apps", id), payload); alert("แก้ไขแอพสำเร็จ!"); } 
