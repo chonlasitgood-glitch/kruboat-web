@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduMedia Hub - Educational Media Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        /* Main Content */
+        main {
+            padding: 2rem 0;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .content-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .card-description {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .duration {
+            background: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 15px;
+        }
+
+        /* Search Bar */
+        .search-container {
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .search-bar {
+            width: 100%;
+            max-width: 500px;
+            padding: 12px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-bar:focus {
+            border-color: #667eea;
+        }
+
+        /* Categories */
+        .category-filters {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            background: white;
+            border: 2px solid #e9ecef;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .category-btn:hover,
+        .category-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* About Section */
+        .about-content {
+            background: white;
+            padding: 3rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .about-content h2 {
+            color: #667eea;
+            margin-bottom: 2rem;
+        }
+
+        /* Footer */
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">🎓 EduMedia Hub</div>
+            <ul class="nav-links">
+                <li><a onclick="showSection('home')">Home</a></li>
+                <li><a onclick="showSection('courses')">Courses</a></li>
+                <li><a onclick="showSection('videos')">Videos</a></li>
+                <li><a onclick="showSection('about')">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <!-- Home Section -->
+        <section id="home" class="section active">
+            <div class="hero">
+                <h1>Welcome to EduMedia Hub</h1>
+                <p>Your gateway to quality educational content and interactive learning experiences</p>
+                <button class="cta-button" onclick="showSection('courses')">Explore Courses</button>
+            </div>
+
+            <div class="search-container">
+                <input type="text" class="search-bar" placeholder="Search for courses, videos, or topics..." onkeyup="searchContent(this.value)">
+            </div>
+
+            <div class="category-filters">
+                <button class="category-btn active" onclick="filterByCategory('all')">All</button>
+                <button class="category-btn" onclick="filterByCategory('science')">Science</button>
+                <button class="category-btn" onclick="filterByCategory('math')">Mathematics</button>
+                <button class="category-btn" onclick="filterByCategory('programming')">Programming</button>
+                <button class="category-btn" onclick="filterByCategory('language')">Languages</button>
+            </div>
+
+            <div class="content-grid" id="featured-content">
+                <!-- Featured content will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Courses Section -->
+        <section id="courses" class="section">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #667eea;">Available Courses</h2>
+            <div class="content-grid" id="courses-content">
+                <!-- Courses will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Videos Section -->
+        <section id="videos" class="section">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #667eea;">Educational Videos</h2>
+            <div class="content-grid" id="videos-content">
+                <!-- Videos will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="section">
+            <div class="about-content">
+                <h2>About EduMedia Hub</h2>
+                <p>EduMedia Hub is a comprehensive educational platform designed to provide high-quality learning resources for students, educators, and lifelong learners. Our mission is to make education accessible, engaging, and effective through innovative digital media and interactive content.</p>
+                <br>
+                <p>We offer a wide range of courses, video tutorials, and educational materials across various subjects including Science, Mathematics, Programming, and Languages. Our content is carefully curated by education experts to ensure the highest standards of learning.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 EduMedia Hub. All rights reserved. | Empowering minds through digital education.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Mock Data
+        const mockData = {
+            courses: [
+                {
+                    id: 1,
+                    title: "Introduction to Physics",
+                    description: "Explore the fundamental principles of physics including mechanics, thermodynamics, and waves.",
+                    category: "science",
+                    duration: "8 weeks",
+                    instructor: "Dr. Sarah Johnson",
+                    icon: "⚛️"
+                },
+                {
+                    id: 2,
+                    title: "Advanced Calculus",
+                    description: "Master advanced calculus concepts including multivariable calculus and differential equations.",
+                    category: "math",
+                    duration: "12 weeks",
+                    instructor: "Prof. Michael Chen",
+                    icon: "∫"
+                },
+                {
+                    id: 3,
+                    title: "JavaScript Fundamentals",
+                    description: "Learn JavaScript from basics to advanced concepts including ES6+ features and async programming.",
+                    category: "programming",
+                    duration: "10 weeks",
+                    instructor: "Alex Rodriguez",
+                    icon: "💻"
+                },
+                {
+                    id: 4,
+                    title: "Spanish for Beginners",
+                    description: "Start your Spanish learning journey with essential vocabulary, grammar, and conversation skills.",
+                    category: "language",
+                    duration: "16 weeks",
+                    instructor: "Maria Garcia",
+                    icon: "🗣️"
+                },
+                {
+                    id: 5,
+                    title: "Organic Chemistry",
+                    description: "Dive deep into organic chemistry reactions, mechanisms, and molecular structures.",
+                    category: "science",
+                    duration: "14 weeks",
+                    instructor: "Dr. Robert Kim",
+                    icon: "🧪"
+                },
+                {
+                    id: 6,
+                    title: "Data Structures & Algorithms",
+                    description: "Master fundamental data structures and algorithms essential for programming interviews.",
+                    category: "programming",
+                    duration: "8 weeks",
+                    instructor: "Jennifer Liu",
+                    icon: "🔗"
+                }
+            ],
+            videos: [
+                {
+                    id: 1,
+                    title: "Understanding Quantum Mechanics",
+                    description: "A comprehensive introduction to quantum mechanics principles and applications.",
+                    category: "science",
+                    duration: "45 min",
+                    views: "125K",
+                    icon: "🌌"
+                },
+                {
+                    id: 2,
+                    title: "Linear Algebra Essentials",
+                    description: "Master vectors, matrices, and linear transformations in this detailed tutorial.",
+                    category: "math",
+                    duration: "60 min",
+                    views: "89K",
+                    icon: "📐"
+                },
+                {
+                    id: 3,
+                    title: "React Hooks Explained",
+                    description: "Learn how to use React hooks effectively in your modern web applications.",
+                    category: "programming",
+                    duration: "35 min",
+                    views: "203K",
+                    icon: "⚛️"
+                },
+                {
+                    id: 4,
+                    title: "French Pronunciation Guide",
+                    description: "Perfect your French pronunciation with native speaker examples and exercises.",
+                    category: "language",
+                    duration: "25 min",
+                    views: "67K",
+                    icon: "🇫🇷"
+                }
+            ]
+        };
+
+        // Application State
+        let currentFilter = 'all';
+        let searchTerm = '';
+
+        // Navigation Functions
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(sectionName).classList.add('active');
+            
+            // Load content based on section
+            if (sectionName === 'courses') {
+                renderContent(mockData.courses, 'courses-content');
+            } else if (sectionName === 'videos') {
+                renderContent(mockData.videos, 'videos-content');
+            } else if (sectionName === 'home') {
+                renderFeaturedContent();
+            }
+        }
+
+        // Content Rendering Functions
+        function renderContent(data, containerId) {
+            const container = document.getElementById(containerId);
+            const filteredData = filterData(data);
+            
+            container.innerHTML = filteredData.map(item => `
+                <div class="content-card">
+                    <div class="card-image">${item.icon}</div>
+                    <div class="card-content">
+                        <h3 class="card-title">${item.title}</h3>
+                        <p class="card-description">${item.description}</p>
+                        <div class="card-meta">
+                            <span>${item.instructor || item.views || 'EduMedia Hub'}</span>
+                            <span class="duration">${item.duration}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderFeaturedContent() {
+            const allContent = [...mockData.courses.slice(0, 3), ...mockData.videos.slice(0, 3)];
+            renderContent(allContent, 'featured-content');
+        }
+
+        // Filter Functions
+        function filterByCategory(category) {
+            currentFilter = category;
+            
+            // Update active button
+            const buttons = document.querySelectorAll('.category-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Re-render content
+            const activeSection = document.querySelector('.section.active');
+            if (activeSection.id === 'home') {
+                renderFeaturedContent();
+            } else if (activeSection.id === 'courses') {
+                renderContent(mockData.courses, 'courses-content');
+            } else if (activeSection.id === 'videos') {
+                renderContent(mockData.videos, 'videos-content');
+            }
+        }
+
+        function searchContent(term) {
+            searchTerm = term.toLowerCase();
+            
+            const activeSection = document.querySelector('.section.active');
+            if (activeSection.id === 'home') {
+                renderFeaturedContent();
+            } else if (activeSection.id === 'courses') {
+                renderContent(mockData.courses, 'courses-content');
+            } else if (activeSection.id === 'videos') {
+                renderContent(mockData.videos, 'videos-content');
+            }
+        }
+
+        function filterData(data) {
+            return data.filter(item => {
+                const matchesCategory = currentFilter === 'all' || item.category === currentFilter;
+                const matchesSearch = searchTerm === '' || 
+                    item.title.toLowerCase().includes(searchTerm) ||
+                    item.description.toLowerCase().includes(searchTerm);
+                return matchesCategory && matchesSearch;
+            });
+        }
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function() {
+            renderFeaturedContent();
+        });
+    </script>
+</body>
+</html>

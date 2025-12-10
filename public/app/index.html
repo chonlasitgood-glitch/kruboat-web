@@ -1,42 +1,39 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KruBoat Apps - รวมแอพพลิเคชัน</title>
-    
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4MQ3GL6CTB"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-4MQ3GL6CTB');
-    </script>
-    
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
+    <title>KruBoat Apps - คลังแอปพลิเคชัน</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style> 
         body { font-family: 'Sarabun', sans-serif; } 
-        .app-card:hover { transform: translateY(-5px); }
+        .app-card { transition: all 0.2s ease-in-out; }
+        .app-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1); }
+        .hide-scroll::-webkit-scrollbar { display: none; } 
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Category Active State */
+        .cat-btn.active { background-color: #0f172a; color: white; }
     </style>
 </head>
 <body class="bg-slate-50 text-gray-800 flex flex-col min-h-screen">
 
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="../index.html" class="text-xl font-bold text-teal-600 flex items-center gap-2">
-                <i class="fa-solid fa-rocket"></i> KruBoat Apps
+            <a href="../index.html" class="text-lg font-bold text-teal-600 flex items-center gap-2 hover:opacity-80 transition">
+                <i class="fa-solid fa-chevron-left text-sm"></i> กลับหน้าหลัก
             </a>
             
-            <div class="hidden md:flex space-x-6">
+            <div class="hidden md:flex space-x-6 text-sm font-medium">
                 <a href="../index.html" class="hover:text-teal-600 transition">หน้าแรก</a>
+                <a href="../app/" class="text-teal-600 font-bold">แอพทั้งหมด</a>
                 <a href="../student/" class="hover:text-blue-600 transition">นักเรียน</a>
-                <a href="../app/" class="text-teal-600 font-bold">แอพครูโบ๊ท</a>
                 <a href="../library.html" class="hover:text-purple-600 transition">คลังโค้ด</a>
             </div>
 
@@ -44,70 +41,125 @@
                 <i class="fa-solid fa-bars text-xl"></i>
             </button>
         </div>
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 shadow-lg">
-            <div class="flex flex-col px-4 py-2 space-y-2">
-                <a href="../index.html" class="block py-2 text-gray-600 hover:bg-gray-50 rounded px-2">หน้าแรก</a>
-                <a href="../student/" class="block py-2 text-gray-600 hover:bg-gray-50 rounded px-2">นักเรียน</a>
-                <a href="../app/" class="block py-2 text-teal-600 font-bold bg-teal-50 rounded px-2">แอพครูโบ๊ท</a>
-                <a href="../library.html" class="block py-2 text-gray-600 hover:bg-gray-50 rounded px-2">คลังโค้ด</a>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 shadow-lg absolute w-full left-0">
+            <div class="flex flex-col px-4 py-3 space-y-3 text-sm">
+                <a href="../index.html" class="block text-gray-600">หน้าแรก</a>
+                <a href="../app/" class="block text-teal-600 font-bold">แอพทั้งหมด</a>
+                <a href="../student/" class="block text-gray-600">นักเรียน</a>
+                <a href="../library.html" class="block text-gray-600">คลังโค้ด</a>
             </div>
         </div>
     </nav>
 
-    <header class="bg-gradient-to-br from-teal-500 to-emerald-600 text-white py-16 relative overflow-hidden">
-        <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-            <i class="fa-solid fa-microchip absolute top-10 left-10 text-8xl"></i>
-            <i class="fa-solid fa-mobile-screen absolute bottom-10 right-10 text-8xl"></i>
-        </div>
-        <div class="container mx-auto px-4 text-center relative z-10">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4">KruBoat Applications</h1>
-            <p class="text-teal-100 text-lg max-w-2xl mx-auto">
-                รวมเว็บแอปพลิเคชันและเครื่องมือดิจิทัลที่พัฒนาโดยครูโบ๊ท <br class="hidden md:inline">
-                เพื่ออำนวยความสะดวกในการทำงานและการเรียนรู้
-            </p>
+    <!-- Header (Compact) -->
+    <header class="bg-white pt-10 pb-6 text-center">
+        <div class="container mx-auto px-4">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-teal-100 text-teal-600 rounded-2xl mb-4 text-3xl shadow-sm">
+                <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">KruBoat Store</h1>
+            <p class="text-gray-500 text-sm md:text-base">คลังแอพพลิเคชันเพื่อการศึกษาและเครื่องมือสำหรับครูยุคใหม่</p>
         </div>
     </header>
 
-    <main class="container mx-auto px-4 py-12 flex-grow">
-        
-        <!-- Section 1: เครื่องมือ (Tools) -->
-        <div class="mb-12">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-l-4 border-teal-500 pl-3 flex items-center">
-                <i class="fa-solid fa-toolbox mr-2 text-teal-600"></i> เครื่องมือใช้งานทั่วไป
-            </h2>
-            <div id="tools-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Data from Firestore -->
+    <!-- Sticky Category Bar (เรียงใหม่: เกม -> สื่อ -> เครื่องมือ) -->
+    <div class="sticky top-[60px] z-40 bg-white/90 backdrop-blur-md border-b border-gray-200 py-3 shadow-sm">
+        <div class="container mx-auto px-4 overflow-x-auto hide-scroll">
+            <div class="flex justify-center min-w-max gap-2">
+                <a href="#games-section" class="cat-btn active px-4 py-2 rounded-full text-sm font-bold border border-gray-200 hover:bg-gray-100 transition flex items-center gap-2">
+                    <i class="fa-solid fa-gamepad text-purple-500"></i> เกม
+                </a>
+                <a href="#media-section" class="cat-btn px-4 py-2 rounded-full text-sm font-bold border border-gray-200 bg-white hover:bg-gray-100 transition flex items-center gap-2">
+                    <i class="fa-solid fa-photo-film text-orange-500"></i> สื่อ
+                </a>
+                <a href="#tools-section" class="cat-btn px-4 py-2 rounded-full text-sm font-bold border border-gray-200 bg-white hover:bg-gray-100 transition flex items-center gap-2">
+                    <i class="fa-solid fa-toolbox text-teal-500"></i> เครื่องมือ
+                </a>
             </div>
         </div>
+    </div>
 
-        <!-- Section 2: เกมการศึกษา (Games) -->
-        <div>
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-l-4 border-indigo-500 pl-3 flex items-center">
-                <i class="fa-solid fa-gamepad mr-2 text-indigo-600"></i> เกมการศึกษา
-            </h2>
-            <div id="games-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 flex-grow space-y-12">
+        
+        <!-- 1. หมวดเกม (Games) -->
+        <section id="games-section" class="scroll-mt-32">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-1 h-8 bg-purple-500 rounded-full"></div>
+                <h2 class="text-xl font-bold text-gray-800">เกมการศึกษา</h2>
+                <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-md">Games</span>
+            </div>
+            <div id="games-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <!-- Data from Firestore -->
+                <div class="col-span-full py-8 text-center text-gray-400 text-sm">
+                    <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> กำลังโหลดข้อมูล...
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. หมวดสื่อ (Media) -->
+        <section id="media-section" class="scroll-mt-32">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-1 h-8 bg-orange-500 rounded-full"></div>
+                <h2 class="text-xl font-bold text-gray-800">สื่อและมัลติมีเดีย</h2>
+                <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-md">Media</span>
+            </div>
+            <div id="media-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 <!-- Data from Firestore -->
             </div>
-        </div>
+        </section>
+
+        <!-- 3. หมวดเครื่องมือ (Tools) -->
+        <section id="tools-section" class="scroll-mt-32">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-1 h-8 bg-teal-500 rounded-full"></div>
+                <h2 class="text-xl font-bold text-gray-800">เครื่องมือใช้งานทั่วไป</h2>
+                <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-md">Tools</span>
+            </div>
+            <div id="tools-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <!-- Data from Firestore -->
+            </div>
+        </section>
 
     </main>
 
-    <footer class="bg-slate-800 text-white py-8 text-center mt-auto">
+    <footer class="bg-white border-t border-gray-200 py-8 text-center mt-auto">
         <div class="container mx-auto px-4">
-            <h3 class="font-bold text-xl mb-2">KruBoat Apps</h3>
-            <p class="text-slate-400 text-sm mb-4">Need some coffee ? ☕️</p>
-            <p class="text-xs text-slate-500">&copy; 2025 พัฒนาโดย ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์ | ติดต่อ chonlasitgood@gmail.com</p>
+            <p class="text-sm text-gray-500">&copy; 2025 KruBoat. All rights reserved.</p>
         </div>
     </footer>
 
-    <!-- ใส่ script.js เพื่อโหลดข้อมูล -->
+    <!-- Script -->
     <script type="module" src="../js/script.js"></script>
     <script>
-        // Mobile Menu Logic (Inline fallback)
-        document.addEventListener('DOMContentLoaded', () => {
-            const btn = document.getElementById('mobile-menu-btn');
-            const menu = document.getElementById('mobile-menu');
-            if(btn && menu) btn.onclick = () => menu.classList.toggle('hidden');
+        // Mobile Menu
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+        if(btn && menu) btn.onclick = () => menu.classList.toggle('hidden');
+
+        // Active State for Category Buttons
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('.cat-btn');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (scrollY >= sectionTop - 150) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active', 'bg-slate-900', 'text-white');
+                link.classList.add('bg-white', 'text-gray-800');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active', 'bg-slate-900', 'text-white');
+                    link.classList.remove('bg-white', 'text-gray-800');
+                }
+            });
         });
     </script>
 </body>

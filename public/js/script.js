@@ -107,19 +107,21 @@ function renderSkeleton(count) {
 
 // 1. Load KruBoat Apps
 async function loadKruboatApps() {
-    // ... (Code เดิม ไม่ได้แก้) ...
     const toolsGrid = document.getElementById('tools-grid');
     const gamesGrid = document.getElementById('games-grid');
-    if(!toolsGrid && !gamesGrid) return;
+    const mediaGrid = document.getElementById('media-grid');
+    
+    if(!toolsGrid && !gamesGrid && !mediaGrid) return;
+    
     if(toolsGrid) toolsGrid.innerHTML = renderSkeleton(3);
     if(gamesGrid) gamesGrid.innerHTML = renderSkeleton(3);
+    if(mediaGrid) mediaGrid.innerHTML = renderSkeleton(3);
 
     try {
         const q = query(collection(db, "apps"), orderBy("createdAt", "desc"));
         const snap = await getDocs(q);
         
-        let toolsHTML = "";
-        let gamesHTML = "";
+        let toolsHTML = "", gamesHTML = "", mediaHTML = "";
         
         snap.forEach(doc => {
             const app = doc.data();
@@ -147,12 +149,14 @@ async function loadKruboatApps() {
 
             if (app.category === 'tool') toolsHTML += cardHTML;
             else if (app.category === 'game') gamesHTML += cardHTML;
+            else if (app.category === 'media') mediaHTML += cardHTML; // ✅ เพิ่มหมวด Media
         });
 
         if(toolsGrid) toolsGrid.innerHTML = toolsHTML || '<div class="col-span-full text-center text-gray-400 py-10">ยังไม่มีเครื่องมือ</div>';
         if(gamesGrid) gamesGrid.innerHTML = gamesHTML || '<div class="col-span-full text-center text-gray-400 py-10">ยังไม่มีเกม</div>';
+        if(mediaGrid) mediaGrid.innerHTML = mediaHTML || '<div class="col-span-full text-center text-gray-400 py-10">ยังไม่มีสื่อ</div>'; // ✅ แสดงผล
 
-    } catch (e) { console.error("Load Apps Error:", e); }
+    } catch (e) { console.error(e); }
 }
 
 // 2. Load Home Portfolio
