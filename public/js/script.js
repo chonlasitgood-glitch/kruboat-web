@@ -189,7 +189,7 @@ async function loadKruboatApps() {
                 <a href="${app.link}" class="app-card bg-white rounded-2xl p-0 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 group overflow-hidden flex flex-col h-full" target="_blank">
                     <div class="w-full aspect-video bg-gray-100 relative overflow-hidden flex items-center justify-center">
                          <img src="${convertDriveImage(app.image)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy">
-                        ${app.tag ? `<span class="absolute top-2 right-2 bg-teal-50 text-teal-600 text-[10px] font-bold px-2 py-1 rounded shadow-sm">${app.tag}</span>` : ''}
+                        ${app.tag ? `<span class="absolute top-2 right-2 bg-teal-50 text-teal-600 border border-teal-200 text-[10px] font-bold px-2 py-1 rounded shadow-sm">${app.tag}</span>` : ''}
                     </div>
                     <div class="p-5 flex-1 flex flex-col">
                         <div class="flex items-start justify-between mb-2">
