@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kruboat.com - Learning Hub</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts (Prompt for Thai) -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                        body: ['Sarabun', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb', // Royal Blue
+                            700: '#1d4ed8',
+                        },
+                        secondary: {
+                            500: '#06b6d4', // Cyan
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f8fafc; /* Slate-50: Cool white */
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #2563eb, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 25px -5px rgba(37, 99, 235, 0.1), 0 8px 10px -6px rgba(37, 99, 235, 0.1);
+            border-color: #bfdbfe;
+        }
+        .custom-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 1rem center;
+            background-repeat: no-repeat;
+            background-size: 1.25em 1.25em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        /* Pattern Background for Header */
+        .hero-pattern {
+            background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.15) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen font-body text-slate-600">
+
+    <!-- Navbar -->
+    <nav class="glass-nav shadow-sm sticky top-0 z-50 border-b border-slate-200/60">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="bg-gradient-to-br from-primary-600 to-secondary-500 p-2 rounded-xl shadow-md">
+                        <i data-lucide="sparkles" class="text-white w-5 h-5"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold font-sans tracking-tight text-slate-800">
+                        Learning<span class="gradient-text">Hub</span>
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="relative bg-gradient-to-r from-primary-600 to-secondary-500 text-white pt-16 pb-20 mb-[-60px]">
+        <div class="absolute inset-0 hero-pattern opacity-50"></div>
+        <div class="relative max-w-7xl mx-auto px-4 text-center z-10">
+            <span class="inline-block py-1 px-3 rounded-full bg-white/20 backdrop-blur-sm text-white/90 text-sm font-medium mb-4 border border-white/20">
+                ✨ Innovation for Education
+            </span>
+            <h2 class="text-3xl md:text-5xl font-bold font-sans mb-4 leading-tight">
+                เปิดโลกการเรียนรู้<br/><span class="text-blue-50">สู่ห้องเรียนยุคใหม่</span>
+            </h2>
+            <p class="text-blue-100 text-lg max-w-2xl mx-auto font-light leading-relaxed">
+                คลังสื่อการสอน Presentation, Video และนวัตกรรมทางการศึกษา<br class="hidden md:block"/>
+                ที่คัดสรรมาเพื่อยกระดับคุณภาพการเรียนรู้
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 pb-12 pt-8 z-20">
+        
+        <!-- Filter Section -->
+        <div class="max-w-5xl mx-auto bg-white/90 backdrop-blur rounded-3xl shadow-lg border border-white/50 p-6 md:p-8 mb-10 ring-1 ring-slate-900/5">
+            
+            <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2 font-sans">
+                    <i data-lucide="search" class="w-5 h-5 text-secondary-500"></i> ค้นหาสื่อการสอน
+                </h3>
+                <button id="resetBtn" class="group text-sm text-slate-400 hover:text-red-500 flex items-center gap-1.5 transition-colors px-3 py-1.5 rounded-full hover:bg-red-50">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4 group-hover:-rotate-180 transition-transform duration-500"></i> ล้างค่า
+                </button>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <!-- Row 1: Subject Dropdown -->
+                <div class="w-full">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2 font-sans">รายวิชา</label>
+                    <div class="relative">
+                         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <i data-lucide="book" class="text-primary-500 w-5 h-5"></i>
+                        </div>
+                        <select id="subjectSelect" class="custom-select w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-500 transition-all cursor-pointer hover:bg-white hover:shadow-sm">
+                            <option value="">ทั้งหมด (เลือกรายวิชา)</option>
+                            <!-- Options injected via JS -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Row 2: Type Buttons -->
+                <div class="w-full">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2 font-sans">ประเภทสื่อ</label>
+                    <div id="typeContainer" class="flex flex-wrap gap-2.5">
+                        <!-- Buttons injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div id="mediaGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Cards will be injected here -->
+        </div>
+
+        <!-- No Results State -->
+        <div id="noResults" class="hidden text-center py-20">
+            <div class="relative inline-block">
+                <div class="absolute inset-0 bg-blue-100 rounded-full blur-xl opacity-50"></div>
+                <div class="relative inline-flex items-center justify-center w-24 h-24 rounded-full bg-white shadow-sm mb-4 border border-slate-100">
+                    <i data-lucide="search-x" class="w-10 h-10 text-slate-300"></i>
+                </div>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 font-sans mt-2">ไม่พบสื่อตามเงื่อนไข</h3>
+            <p class="text-slate-500 mt-1">ลองเปลี่ยนรายวิชา หรือประเภทสื่อใหม่อีกครั้ง</p>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 text-slate-500 py-10 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="flex justify-center gap-2 mb-4 opacity-50">
+                <i data-lucide="book-open" class="w-5 h-5"></i>
+                <i data-lucide="lightbulb" class="w-5 h-5"></i>
+                <i data-lucide="share-2" class="w-5 h-5"></i>
+            </div>
+            <p class="font-medium font-sans text-slate-700">Learning Hub by Kruboat.com</p>
+            <p class="text-sm mt-1 text-slate-400">&copy; 2025 พัฒนาโดย ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์ | ติดต่อ chonlasitgood@gmail.com</p>
+        </div>
+    </footer>
+
+    <!-- Logic -->
+    <script>
+        // --- 1. MOCK DATA (Updated Colors for "Comfort" Theme) ---
+        const mockMediaData = [
+            // --- วิทย์ & เทคโน ---
+            {
+                id: '1', title: 'สรุปสูตรฟิสิกส์ ม.ปลาย: การเคลื่อนที่', 
+                description: 'รวมสูตรฟิสิกส์เรื่องการเคลื่อนที่แนวตรงและโพรเจกไทล์ พร้อมโจทย์ตัวอย่าง', 
+                type: 'Document', subject: 'ฟิสิกส์', 
+                thumbnail: 'bg-blue-50 text-blue-600', icon: 'atom', date: '2024-01-15', url: '#'
+            },
+            {
+                id: '2', title: 'ตารางธาตุและสมบัติของธาตุ', 
+                description: 'Infographic สรุปตารางธาตุ แนวโน้มความเป็นโลหะ-อโลหะ และขนาดอะตอม', 
+                type: 'Infographic', subject: 'เคมี', 
+                thumbnail: 'bg-teal-50 text-teal-600', icon: 'flask-conical', date: '2024-02-10', url: '#'
+            },
+            {
+                id: '13', title: 'Virtual Lab: การไทเทรตกรด-เบส', 
+                description: 'การทดลองเสมือนจริง (Virtual Lab) เรื่องการไทเทรตหาความเข้มข้นของสารละลาย', 
+                type: 'Interactive Media', subject: 'เคมี', 
+                thumbnail: 'bg-violet-50 text-violet-600', icon: 'test-tube-2', date: '2024-03-10', url: '#'
+            },
+            {
+                id: '3', title: 'การแบ่งเซลล์ (Mitosis & Meiosis)', 
+                description: 'สไลด์ประกอบการสอนเรื่องวัฏจักรเซลล์ การแบ่งเซลล์แบบไมโทซิสและไมโอซิส', 
+                type: 'Presentation', subject: 'ชีววิทยา', 
+                thumbnail: 'bg-emerald-50 text-emerald-600', icon: 'dna', date: '2023-11-20', url: '#'
+            },
+            {
+                id: '4', title: 'Python for Beginners: โครงสร้างข้อมูล', 
+                description: 'วิดีโอสอนเขียนโปรแกรม Python เรื่อง List, Tuple, Dictionary', 
+                type: 'Video', subject: 'วิทยาการคำนวณ', 
+                thumbnail: 'bg-slate-100 text-slate-700', icon: 'terminal', date: '2024-03-05', url: '#'
+            },
+            {
+                id: '5', title: 'ระบบสุริยะและดาราศาสตร์เบื้องต้น', 
+                description: 'สื่อการสอนเรื่องดาวเคราะห์ในระบบสุริยะและการเกิดฤดูกาล สามารถหมุนดูได้ 360 องศา', 
+                type: 'Interactive Media', subject: 'วิทยาศาสตร์ (ทั่วไป)', 
+                thumbnail: 'bg-sky-50 text-sky-600', icon: 'orbit', date: '2023-12-12', url: '#'
+            },
+            // --- คณิต ---
+            {
+                id: '6', title: 'ตะลุยโจทย์แคลคูลัส 1', 
+                description: 'เอกสารรวมโจทย์ฝึกหัดเรื่องลิมิต ความต่อเนื่อง และอนุพันธ์', 
+                type: 'Document', subject: 'คณิตศาสตร์', 
+                thumbnail: 'bg-orange-50 text-orange-600', icon: 'calculator', date: '2024-02-28', url: '#'
+            },
+            // --- ภาษา ---
+            {
+                id: '7', title: 'หลักภาษาไทย: คำราชาศัพท์', 
+                description: 'Infographic สรุปหมวดหมู่คำราชาศัพท์ที่ควรรู้และการใช้งานที่ถูกต้อง', 
+                type: 'Infographic', subject: 'ภาษาไทย', 
+                thumbnail: 'bg-yellow-50 text-yellow-600', icon: 'book-open', date: '2023-10-30', url: '#'
+            },
+            {
+                id: '8', title: '12 English Tenses Summary', 
+                description: 'สรุปโครงสร้างประโยค 12 Tense ในหน้าเดียว เข้าใจง่าย', 
+                type: 'Document', subject: 'ภาษาต่างประเทศ', 
+                thumbnail: 'bg-rose-50 text-rose-600', icon: 'languages', date: '2024-01-20', url: '#'
+            },
+            // --- สังคม ---
+            {
+                id: '9', title: 'ประวัติศาสตร์ไทยสมัยอยุธยา', 
+                description: 'วิดีโอเล่าเรื่องประวัติศาสตร์และการปกครองในสมัยอยุธยา', 
+                type: 'Video', subject: 'สังคมศึกษา', 
+                thumbnail: 'bg-amber-50 text-amber-700', icon: 'landmark', date: '2023-09-15', url: '#'
+            },
+            // --- ศิลปะ ---
+            {
+                id: '10', title: 'ทฤษฎีสีและการจัดองค์ประกอบศิลป์', 
+                description: 'สไลด์เรื่องวงล้อสี การใช้สีคู่ตรงข้าม และกฎสามส่วน', 
+                type: 'Presentation', subject: 'ศิลปะ', 
+                thumbnail: 'bg-pink-50 text-pink-600', icon: 'palette', date: '2024-02-15', url: '#'
+            },
+            // --- สุขศึกษา ---
+            {
+                id: '11', title: 'การปฐมพยาบาลเบื้องต้น (CPR)', 
+                description: 'คู่มือการทำ CPR และการช่วยเหลือผู้ป่วยหมดสติอย่างถูกวิธี', 
+                type: 'Document', subject: 'สุขศึกษาและพลศึกษา', 
+                thumbnail: 'bg-red-50 text-red-600', icon: 'heart-pulse', date: '2023-11-05', url: '#'
+            },
+            // --- การงาน ---
+            {
+                id: '12', title: 'การเขียนเรซูเม่สมัครงาน', 
+                description: 'เทคนิคการเขียน Resume และ Portfolio ให้โดนใจกรรมการ', 
+                type: 'Presentation', subject: 'การงานอาชีพ', 
+                thumbnail: 'bg-lime-50 text-lime-600', icon: 'briefcase', date: '2024-03-01', url: '#'
+            }
+        ];
+
+        // --- 2. STATE ---
+        let selectedSubject = "";
+        let selectedTypes = new Set();
+
+        // --- 3. DOM ---
+        const mediaGrid = document.getElementById('mediaGrid');
+        const noResults = document.getElementById('noResults');
+        const subjectSelect = document.getElementById('subjectSelect');
+        const typeContainer = document.getElementById('typeContainer');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // --- 4. FUNCTIONS ---
+
+        function populateFilterUI() {
+            const subjectPriority = [
+                "วิทยาศาสตร์ (ทั่วไป)", "ฟิสิกส์", "เคมี", "ชีววิทยา", "วิทยาการคำนวณ",
+                "คณิตศาสตร์", "ภาษาไทย", "ภาษาต่างประเทศ", "สังคมศึกษา",
+                "สุขศึกษาและพลศึกษา", "ศิลปะ", "การงานอาชีพ"
+            ];
+
+            const subjects = [...new Set(mockMediaData.map(item => item.subject))].sort((a, b) => {
+                const indexA = subjectPriority.indexOf(a);
+                const indexB = subjectPriority.indexOf(b);
+                if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+                if (indexA !== -1) return -1;
+                if (indexB !== -1) return 1;
+                return a.localeCompare(b, 'th');
+            });
+
+            const types = [...new Set(mockMediaData.map(item => item.type))].sort();
+
+            while (subjectSelect.options.length > 1) {
+                subjectSelect.remove(1);
+            }
+            subjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                subjectSelect.appendChild(option);
+            });
+
+            typeContainer.innerHTML = '';
+            types.forEach(type => {
+                const btn = document.createElement('button');
+                btn.className = getButtonClass(selectedTypes.has(type));
+                
+                // Add icons to buttons
+                let iconName = 'file';
+                if(type === 'Video') iconName = 'play-circle';
+                if(type === 'Presentation') iconName = 'projector';
+                if(type === 'Document') iconName = 'file-text';
+                if(type === 'Infographic') iconName = 'image';
+                if(type === 'Interactive Media') iconName = 'mouse-pointer-2';
+
+                btn.innerHTML = `<i data-lucide="${iconName}" class="w-4 h-4"></i> ${type}`;
+                btn.onclick = () => toggleTypeFilter(type);
+                typeContainer.appendChild(btn);
+            });
+        }
+
+        function getButtonClass(isActive) {
+            // New Theme Button Style: Pill shaped, soft colors
+            const baseClass = "px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border cursor-pointer flex items-center gap-2";
+            if (isActive) {
+                return `${baseClass} bg-primary-600 text-white border-primary-600 shadow-lg shadow-blue-200 transform scale-105`;
+            } else {
+                return `${baseClass} bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-primary-300 hover:text-primary-600`;
+            }
+        }
+
+        subjectSelect.addEventListener('change', (e) => {
+            selectedSubject = e.target.value;
+            filterData();
+        });
+
+        function toggleTypeFilter(value) {
+            if (selectedTypes.has(value)) {
+                selectedTypes.delete(value);
+            } else {
+                selectedTypes.clear(); 
+                selectedTypes.add(value);
+            }
+            Array.from(typeContainer.children).forEach(btn => {
+                const typeName = btn.innerText.trim();
+                btn.className = getButtonClass(selectedTypes.has(typeName));
+            });
+            filterData();
+            lucide.createIcons(); // Re-render icons inside buttons
+        }
+
+        function filterData() {
+            const filtered = mockMediaData.filter(item => {
+                const subjectMatch = selectedSubject === "" || item.subject === selectedSubject;
+                const typeMatch = selectedTypes.size === 0 || selectedTypes.has(item.type);
+                return subjectMatch && typeMatch;
+            });
+            renderMedia(filtered);
+        }
+
+        function renderMedia(data) {
+            mediaGrid.innerHTML = '';
+            
+            if (data.length === 0) {
+                noResults.classList.remove('hidden');
+                return;
+            } else {
+                noResults.classList.add('hidden');
+            }
+
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-2xl border border-slate-100 overflow-hidden card-hover flex flex-col h-full cursor-pointer group relative';
+                card.onclick = (e) => handleView(e, item.title);
+                
+                const iconBgColor = item.thumbnail; 
+
+                card.innerHTML = `
+                    <div class="h-48 ${iconBgColor} flex items-center justify-center relative overflow-hidden">
+                        <!-- Abstract bg circle -->
+                        <div class="absolute w-40 h-40 bg-white opacity-20 rounded-full blur-2xl -top-10 -right-10"></div>
+                        
+                        <i data-lucide="${item.icon}" class="w-20 h-20 opacity-90 group-hover:scale-110 transition-transform duration-500 ease-out z-10"></i>
+                        
+                        <span class="absolute top-4 right-4 bg-white/90 backdrop-blur-md text-[10px] font-bold px-3 py-1.5 rounded-full text-slate-700 shadow-sm border border-white/50 tracking-wide uppercase">
+                            ${item.type}
+                        </span>
+                    </div>
+                    <div class="p-6 flex-grow flex flex-col">
+                        <div class="mb-3">
+                             <span class="text-[11px] font-bold tracking-wider uppercase text-primary-600 bg-blue-50 px-3 py-1 rounded-md border border-blue-100">
+                                ${item.subject}
+                            </span>
+                        </div>
+                        <h3 class="text-lg font-bold font-sans text-slate-800 mb-2 leading-snug group-hover:text-primary-600 transition-colors">${item.title}</h3>
+                        <p class="text-slate-500 text-sm mb-6 line-clamp-2 flex-grow font-light leading-relaxed">${item.description}</p>
+                        
+                        <div class="mt-auto pt-5 border-t border-slate-50 flex justify-between items-center">
+                            <span class="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5"></i> ${item.date}
+                            </span>
+                            <span class="bg-slate-50 group-hover:bg-primary-50 text-slate-600 group-hover:text-primary-600 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all">
+                                เข้าชม <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                            </span>
+                        </div>
+                    </div>
+                `;
+                mediaGrid.appendChild(card);
+            });
+            
+            lucide.createIcons();
+        }
+
+        function handleView(e, title) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'เข้าสู่บทเรียน',
+                html: `<span class="text-slate-500 text-sm">คุณกำลังเปิดสื่อ:</span><br/><b>${title}</b>`,
+                icon: 'info',
+                iconColor: '#3b82f6',
+                confirmButtonText: 'เริ่มเรียนรู้ทันที',
+                confirmButtonColor: '#2563eb',
+                showCancelButton: true,
+                cancelButtonText: 'ยกเลิก',
+                background: '#fff',
+                customClass: {
+                    title: 'text-xl font-bold font-sans text-slate-800',
+                    popup: 'rounded-3xl shadow-xl',
+                    confirmButton: 'rounded-xl px-6',
+                    cancelButton: 'rounded-xl px-6'
+                }
+            });
+        }
+
+        resetBtn.addEventListener('click', () => {
+            selectedSubject = "";
+            subjectSelect.value = "";
+            selectedTypes.clear();
+            
+            Array.from(typeContainer.children).forEach(btn => {
+                const typeName = btn.innerText.trim();
+                btn.className = getButtonClass(false);
+            });
+            lucide.createIcons();
+            
+            filterData();
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            populateFilterUI();
+            renderMedia(mockMediaData);
+            lucide.createIcons();
+        });
+
+    </script>
+</body>
+</html>
