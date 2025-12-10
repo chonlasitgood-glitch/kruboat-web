@@ -13,7 +13,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app); // ✅ เพิ่ม Auth
+const auth = getAuth(app); 
 const db = getFirestore(app);
 
 const ADMIN_PIN = "0903498148";
@@ -56,7 +56,6 @@ window.deleteMessage = deleteMessage;
 
 // --- Init ---
 document.addEventListener('DOMContentLoaded', () => {
-    // ✅ ต้อง Login Firebase ก่อน ถึงจะดึงข้อมูลได้
     signInAnonymously(auth).catch((error) => {
         console.error("Firebase Auth Error:", error);
         alert("ไม่สามารถเชื่อมต่อฐานข้อมูลได้: " + error.message);
@@ -64,8 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            console.log("Firebase Connected as:", user.uid);
-            checkLogin(); // เช็ครหัส Admin ต่อ
+            console.log("Firebase Connected");
+            checkLogin(); // ตรวจสอบรหัส Admin
         }
     });
 });
@@ -92,16 +91,36 @@ function formatDate(dateString) {
     return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
 }
 
+// --- Security Helper ---
+function isAuthenticated() {
+    // ตรวจสอบว่ามี session password หรือไม่
+    // ถ้าไม่มี -> คืนค่า false เพื่อบล็อกการทำงาน
+    return sessionStorage.getItem('admin_password') === ADMIN_PIN;
+}
+
+function authGuard() {
+    if (!isAuthenticated()) {
+        alert("⛔ Unauthorized Access!\nกรุณาเข้าสู่ระบบก่อนทำรายการ");
+        window.location.reload();
+        return false;
+    }
+    return true;
+}
+
 // --- Login Logic ---
 function checkLogin() {
     const savedPassword = sessionStorage.getItem('admin_password');
     if (savedPassword === ADMIN_PIN) {
+        // ✅ Login Success: ซ่อน Modal, โชว์ Content
         document.getElementById('login-modal').classList.add('hidden');
+        document.getElementById('protected-content').classList.remove('hidden'); // <-- โชว์เนื้อหาตรงนี้
         showDashboard();
-        loadNote(); // โหลดโน้ต
-        listenToMessages(); // ฟังข้อความใหม่
+        loadNote();
+        listenToMessages();
     } else {
+        // ❌ Not Logged In: โชว์ Modal, ซ่อน Content
         document.getElementById('login-modal').classList.remove('hidden');
+        document.getElementById('protected-content').classList.add('hidden'); // <-- ซ่อนเนื้อหาให้มิด
     }
 }
 
@@ -123,6 +142,8 @@ function logout() {
 
 // --- Dashboard ---
 function showDashboard() {
+    if(!isAuthenticated()) return; // กันการโหลดข้อมูลถ้ายังไม่ล็อกอิน
+
     onSnapshot(collection(db, "projects"), (snap) => {
         const el = document.getElementById('stat-projects');
         if(el) el.innerText = snap.size.toLocaleString();
@@ -144,7 +165,7 @@ function showDashboard() {
 }
 
 // --- Projects ---
-function openAddProjectModal() { document.getElementById('project-modal').classList.remove('hidden'); }
+function openAddProjectModal() { if(authGuard()) document.getElementById('project-modal').classList.remove('hidden'); }
 function closeAddProjectModal() { 
     document.getElementById('project-modal').classList.add('hidden'); 
     document.getElementById('p-id').value = "";
@@ -155,6 +176,8 @@ function closeAddProjectModal() {
 function closeManageModal() { document.getElementById('manage-modal').classList.add('hidden'); }
 
 async function saveProject() {
+    if(!authGuard()) return; // 🔒 Guard
+
     const id = document.getElementById('p-id').value;
     const title = document.getElementById('p-title').value;
     const category = document.getElementById('p-category').value;
@@ -192,13 +215,13 @@ async function saveProject() {
             alert("เพิ่มสำเร็จ!");
         }
         closeAddProjectModal();
-        // ถ้าหน้าจัดการเปิดอยู่ ให้รีเฟรช
         if(!document.getElementById('manage-modal').classList.contains('hidden')) openManageModal();
     } catch(e) { alert(e.message); } 
     finally { btn.innerText = "บันทึกข้อมูล"; btn.disabled = false; }
 }
 
 async function openManageModal() {
+    if(!authGuard()) return; // 🔒 Guard
     document.getElementById('manage-modal').classList.remove('hidden');
     const tbody = document.getElementById('manage-list-body');
     tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading...</td></tr>';
@@ -229,7 +252,7 @@ async function openManageModal() {
 }
 
 async function editProject(id) {
-    // ปิดหน้าจัดการก่อน
+    if(!authGuard()) return; // 🔒 Guard
     closeManageModal();
     
     try {
@@ -261,6 +284,7 @@ async function editProject(id) {
 }
 
 async function deleteProject(id, title) {
+    if(!authGuard()) return; // 🔒 Guard
     if(confirm(`ลบโปรเจกต์ "${title}"?`)) {
         await deleteDoc(doc(db, "projects", id));
         openManageModal(); 
@@ -268,7 +292,7 @@ async function deleteProject(id, title) {
 }
 
 // --- News ---
-function openAddNewsModal() { document.getElementById('add-news-modal').classList.remove('hidden'); }
+function openAddNewsModal() { if(authGuard()) document.getElementById('add-news-modal').classList.remove('hidden'); }
 function closeAddNewsModal() { 
     document.getElementById('add-news-modal').classList.add('hidden'); 
     document.getElementById('n-id').value = "";
@@ -279,6 +303,7 @@ function closeAddNewsModal() {
 function closeManageNewsModal() { document.getElementById('manage-news-modal').classList.add('hidden'); }
 
 async function saveNews() {
+    if(!authGuard()) return; // 🔒 Guard
     const id = document.getElementById('n-id').value;
     const title = document.getElementById('n-title').value;
     const tag = document.getElementById('n-tag').value;
@@ -298,6 +323,7 @@ async function saveNews() {
 }
 
 async function openManageNewsModal() {
+    if(!authGuard()) return; // 🔒 Guard
     document.getElementById('manage-news-modal').classList.remove('hidden');
     const tbody = document.getElementById('manage-news-body');
     tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading...</td></tr>';
@@ -324,6 +350,7 @@ async function openManageNewsModal() {
 }
 
 async function editNews(id) {
+    if(!authGuard()) return; // 🔒 Guard
     closeManageNewsModal();
     try {
         const docSnap = await getDoc(doc(db, "news", id));
@@ -339,10 +366,10 @@ async function editNews(id) {
     } catch(e) { alert("Error: " + e.message); }
 }
 
-async function deleteNews(id) { if(confirm("ลบข่าวนี้?")) { await deleteDoc(doc(db, "news", id)); openManageNewsModal(); } }
+async function deleteNews(id) { if(authGuard() && confirm("ลบข่าวนี้?")) { await deleteDoc(doc(db, "news", id)); openManageNewsModal(); } }
 
 // --- Apps ---
-function openAddAppModal() { document.getElementById('app-modal').classList.remove('hidden'); }
+function openAddAppModal() { if(authGuard()) document.getElementById('app-modal').classList.remove('hidden'); }
 function closeAddAppModal() { 
     document.getElementById('app-modal').classList.add('hidden');
     document.getElementById('a-id').value = "";
@@ -353,6 +380,7 @@ function closeAddAppModal() {
 function closeManageAppsModal() { document.getElementById('manage-apps-modal').classList.add('hidden'); }
 
 async function saveApp() {
+    if(!authGuard()) return; // 🔒 Guard
     const id = document.getElementById('a-id').value;
     const name = document.getElementById('a-name').value;
     const category = document.getElementById('a-category').value;
@@ -376,6 +404,7 @@ async function saveApp() {
 }
 
 async function openManageAppsModal() {
+    if(!authGuard()) return; // 🔒 Guard
     document.getElementById('manage-apps-modal').classList.remove('hidden');
     const tbody = document.getElementById('manage-apps-body');
     tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4">Loading...</td></tr>';
@@ -400,6 +429,7 @@ async function openManageAppsModal() {
 }
 
 async function editApp(id) {
+    if(!authGuard()) return; // 🔒 Guard
     closeManageAppsModal();
     try {
         const docSnap = await getDoc(doc(db, "apps", id));
@@ -418,10 +448,11 @@ async function editApp(id) {
     } catch(e) { alert("Error: " + e.message); }
 }
 
-async function deleteApp(id, name) { if(confirm(`ลบแอพ "${name}"?`)) { await deleteDoc(doc(db, "apps", id)); openManageAppsModal(); } }
+async function deleteApp(id, name) { if(authGuard() && confirm(`ลบแอพ "${name}"?`)) { await deleteDoc(doc(db, "apps", id)); openManageAppsModal(); } }
 
 // --- Inbox ---
 function listenToMessages() {
+    if(!isAuthenticated()) return;
     const q = query(collection(db, "messages"), orderBy("timestamp", "desc"));
     onSnapshot(q, (snapshot) => {
         let unread = 0;
@@ -430,7 +461,7 @@ function listenToMessages() {
         badges.forEach(b => { if(b) { b.classList.toggle('hidden', unread===0); b.innerText = unread > 9 ? '9+' : unread; } });
     });
 }
-function openInboxModal() { document.getElementById('inbox-modal').classList.remove('hidden'); loadMessages(); }
+function openInboxModal() { if(authGuard()) { document.getElementById('inbox-modal').classList.remove('hidden'); loadMessages(); } }
 function closeInboxModal() { document.getElementById('inbox-modal').classList.add('hidden'); }
 function loadMessages() {
     const list = document.getElementById('inbox-list');
@@ -451,10 +482,11 @@ function loadMessages() {
         });
     });
 }
-async function deleteMessage(id) { if(confirm("ลบข้อความ?")) await deleteDoc(doc(db, "messages", id)); }
+async function deleteMessage(id) { if(authGuard() && confirm("ลบข้อความ?")) await deleteDoc(doc(db, "messages", id)); }
 
 // --- System ---
 async function loadNote() {
+    if(!isAuthenticated()) return;
     const el = document.getElementById('admin-note-input');
     el.value = "กำลังโหลด..."; el.disabled = true;
     try {
@@ -463,6 +495,7 @@ async function loadNote() {
     } catch (error) { el.value = "โหลดไม่สำเร็จ"; } finally { el.disabled = false; }
 }
 async function saveNote() {
+    if(!authGuard()) return; // 🔒 Guard
     const val = document.getElementById('admin-note-input').value;
     const btn = document.getElementById('save-note-btn');
     btn.innerText = "...";
