@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RoomMate - Student App</title>
     
-    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4MQ3GL6CTB"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -14,10 +13,6 @@
 
       gtag('config', 'G-4MQ3GL6CTB');
     </script>
-
-    <!-- ✅ Google AdSense (Official ID) -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1153070485202875"
-     crossorigin="anonymous"></script>
 
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
     
@@ -75,7 +70,6 @@
 <body>
 
 <div class="mobile-container">
-    <!-- Header -->
     <header class="app-header">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="fw-bold fs-5"><i class="fa-solid fa-shapes me-2"></i>RoomMate</div>
@@ -105,23 +99,19 @@
     </header>
 
     <div class="container px-3">
-        <!-- Schedule Card -->
         <div class="custom-card mt-3">
             <div class="card-header-custom"><span><i class="fa-regular fa-calendar-days me-2 text-primary"></i>ตารางเรียนวันนี้</span><span class="badge bg-primary rounded-pill" id="today-day">-</span></div>
             <div class="p-3" id="schedule-list"><div class="text-center text-muted small py-3">กำลังโหลดตารางเรียน...</div></div>
         </div>
 
-        <!-- Duty Card -->
         <div class="custom-card border-0" style="background: linear-gradient(to right, #fff1eb, #ace0f9);">
             <div class="card-header-custom bg-transparent border-0"><span><i class="fa-solid fa-broom me-2 text-success"></i>เวรประจำวัน</span><div class="d-flex align-items-center gap-2"><button class="btn btn-light btn-sm rounded-pill px-3 py-1 border-0 shadow-sm text-success fw-bold" style="font-size: 0.7rem;" onclick="openDutyRosterModal()"><i class="fa-solid fa-users-viewfinder me-1"></i> ดูสมาชิก</button><span class="badge bg-success" id="duty-group">-</span></div></div>
-            <div class="p-3 pt-0"><div class="d-flex justify-content-between align-items-center"><div id="duty-members"><small class="text-muted d-block mb-1">สมาชิกเวรวันนี้:</small><div id="duty-list-text" class="small text-dark fw-bold">กำลังโหลด...</div></div><button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="triggerCamera()"><i class="fa-solid fa-camera me-1"></i> ส่งงาน</button><input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;" onchange="uploadDutyPhoto(this)"></div></div>
+            <div class="p-3 pt-0"><div class="d-flex justify-content-between align-items-center"><div id="duty-members"><small class="text-muted d-block mb-1">สมาชิกเวรวันนี้:</small><div id="duty-list-text" class="small text-dark fw-bold">กำลังโหลด...</div></div><button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="triggerCamera()"><i class="fa-solid fa-camera me-1"></i> ส่งงาน</button><input type="file" id="camera-input" accept="image/*" style="display: none;" onchange="uploadDutyPhoto(this)"></div></div>
         </div>
 
-        <!-- Homework List -->
         <div class="d-flex justify-content-between align-items-center mb-2 mt-4"><h6 class="fw-bold m-0"><i class="fa-solid fa-pen-to-square me-2 text-warning"></i>การบ้าน</h6><button class="btn btn-dark add-btn shadow-sm" data-bs-toggle="modal" data-bs-target="#addHomeworkModal"><i class="fa-solid fa-plus"></i></button></div>
         <div id="homework-list"><div class="text-center text-muted small py-3">กำลังโหลด...</div></div>
 
-        <!-- Game Center -->
         <div class="d-flex justify-content-between align-items-center mb-2 mt-4">
             <h6 class="fw-bold m-0 text-primary"><i class="fa-solid fa-gamepad me-2"></i>Game Center</h6>
         </div>
@@ -132,7 +122,6 @@
     <div style="height: 60px;"></div>
 </div>
 
-<!-- FAB Menu -->
 <div class="fab-container" id="fabMenu">
     <div class="fab-menu">
         <div class="fab-item" onclick="logoutStudent()"><span class="fab-item-label">ออกจากระบบ</span><div class="fab-item-btn bg-danger text-white"><i class="fa-solid fa-right-from-bracket"></i></div></div>
@@ -142,7 +131,6 @@
 </div>
 <div class="fab-overlay" onclick="toggleFab()"></div>
 
-<!-- Game Launcher Modal -->
 <div class="modal fade" id="gameLauncherModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content bg-dark">
@@ -157,11 +145,9 @@
     </div>
 </div>
 
-<!-- Other Modals (Duty, Register, HW, Teacher) -->
 <div class="modal fade" id="dutyRosterModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content rounded-4 border-0" style="min-height: 500px;"><div class="modal-header border-0 bg-success text-white"><h6 class="modal-title fw-bold"><i class="fa-solid fa-broom me-2"></i>สมาชิกเวรประจำวัน</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body bg-light"><ul class="nav nav-pills nav-fill mb-3 gap-1 small" id="duty-tabs" role="tablist"><li class="nav-item"><button class="nav-link active rounded-pill py-1" id="d-mon-tab" data-bs-toggle="pill" data-bs-target="#d-mon">จันทร์</button></li><li class="nav-item"><button class="nav-link rounded-pill py-1" id="d-tue-tab" data-bs-toggle="pill" data-bs-target="#d-tue">อังคาร</button></li><li class="nav-item"><button class="nav-link rounded-pill py-1" id="d-wed-tab" data-bs-toggle="pill" data-bs-target="#d-wed">พุธ</button></li><li class="nav-item"><button class="nav-link rounded-pill py-1" id="d-thu-tab" data-bs-toggle="pill" data-bs-target="#d-thu">พฤหัส</button></li><li class="nav-item"><button class="nav-link rounded-pill py-1" id="d-fri-tab" data-bs-toggle="pill" data-bs-target="#d-fri">ศุกร์</button></li></ul><div class="tab-content" id="duty-tabContent"><div class="tab-pane fade show active" id="d-mon"></div><div class="tab-pane fade" id="d-tue"></div><div class="tab-pane fade" id="d-wed"></div><div class="tab-pane fade" id="d-thu"></div><div class="tab-pane fade" id="d-fri"></div></div></div></div></div></div>
 <div class="modal fade" id="studentRegisterModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 border-0 p-4 text-center"><div class="mb-3"><i class="fa-solid fa-user-lock text-5xl text-primary"></i></div><h4 class="fw-bold mb-2">ยินดีต้อนรับสู่ RoomMate!</h4><p class="text-muted small mb-4">กรุณากรอกรหัสประจำตัวนักเรียนเพื่อเข้าใช้งาน</p><input type="text" id="reg-student-id" class="form-control text-center mb-3" placeholder="รหัสนักเรียน (เช่น 12345)"><button class="btn btn-primary w-100 rounded-pill" onclick="registerStudent()">เข้าใช้งาน</button></div></div></div>
 
-<!-- Add Homework Modal (Fix Save Button) -->
 <div class="modal fade" id="addHomeworkModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content rounded-4 border-0">
@@ -182,7 +168,167 @@
 <div class="modal fade" id="teacherLoginModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content rounded-4 border-0"><div class="modal-header border-0 pb-0"><h6 class="modal-title fw-bold">สำหรับครู</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body text-center"><input type="password" id="teacher-pin" class="form-control form-control-lg text-center tracking-widest mb-3" placeholder="PIN" maxlength="4"><button class="btn btn-primary w-100 rounded-pill" onclick="checkTeacherPin()">เข้าสู่ระบบ</button></div></div></div></div>
 <div class="modal fade" id="teacherDashboardModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content rounded-4 border-0" style="min-height: 600px;"><div class="modal-header border-0 bg-primary text-white"><h6 class="modal-title fw-bold" id="teacher-modal-title">จัดการห้องเรียน</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body bg-light p-0"><div id="teacher-menu" class="p-3"><div class="d-grid gap-2"><button class="btn btn-white shadow-sm text-start p-3 rounded-3 border" onclick="showSection('teacher-students')"><i class="fa-solid fa-users me-2 text-success"></i> จัดการนักเรียน / ให้คะแนน</button><button class="btn btn-white shadow-sm text-start p-3 rounded-3 border" onclick="showSection('teacher-schedule')"><i class="fa-solid fa-calendar-days me-2 text-primary"></i> แก้ไขตารางเรียน</button><button class="btn btn-white shadow-sm text-start p-3 rounded-3 border" onclick="viewDutyHistory()"><i class="fa-solid fa-images me-2 text-warning"></i> ดูรูปงานเวร</button></div></div><div id="teacher-students" class="d-none h-100 d-flex flex-column"><div class="p-2 border-bottom bg-white d-flex align-items-center"><button class="btn btn-sm btn-link text-decoration-none me-2" onclick="showSection('teacher-menu')"><i class="fa-solid fa-arrow-left"></i></button><span class="fw-bold small">รายชื่อนักเรียน</span></div><div class="p-3 bg-white border-bottom"><div class="mb-2"><input type="text" id="new-student-id" class="form-control form-control-sm mb-2" placeholder="รหัสประจำตัว"><input type="text" id="new-student-name" class="form-control form-control-sm mb-2" placeholder="ชื่อ-นามสกุล"><select id="new-student-group" class="form-select form-select-sm mb-2"><option value="">-- เลือกวันเวร --</option><option value="1">จันทร์</option><option value="2">อังคาร</option><option value="3">พุธ</option><option value="4">พฤหัส</option><option value="5">ศุกร์</option></select><input type="file" id="new-student-photo" class="form-control form-control-sm mb-2" accept="image/*"><button id="btn-add-student" class="btn btn-success btn-sm w-100 rounded-pill" onclick="addStudent()">เพิ่ม</button></div></div><div id="student-list-container" class="p-2 overflow-auto flex-grow-1"></div></div><div id="teacher-schedule" class="d-none h-100 d-flex flex-column"><div class="p-2 border-bottom bg-white d-flex align-items-center"><button class="btn btn-sm btn-link text-decoration-none me-2" onclick="showSection('teacher-menu')"><i class="fa-solid fa-arrow-left"></i></button><span class="fw-bold small">แก้ไขตารางเรียน</span></div><div class="p-3 overflow-auto flex-grow-1"><div class="mb-3"><label class="form-label small fw-bold">เลือกวัน</label><select id="edit-day-select" class="form-select form-select-sm" onchange="loadScheduleForDay()"><option value="mon">จันทร์</option><option value="tue">อังคาร</option><option value="wed">พุธ</option><option value="thu">พฤหัส</option><option value="fri">ศุกร์</option></select></div><div id="period-forms-container" class="space-y-3"></div><button class="btn btn-primary w-100 rounded-pill btn-sm mt-3" onclick="saveScheduleByDay()">บันทึก</button></div></div><div id="duty-photo-gallery" class="d-none h-100 d-flex flex-column"><div class="p-2 border-bottom bg-white d-flex align-items-center"><button class="btn btn-sm btn-link text-decoration-none me-2" onclick="showSection('teacher-menu')"><i class="fa-solid fa-arrow-left"></i></button><span class="fw-bold small">รูปงานเวร</span></div><div id="gallery-grid" class="d-grid gap-2 p-2 overflow-auto" style="grid-template-columns: 1fr 1fr;"></div></div></div></div></div>
 
-<!-- FIREBASE & LOGIC -->
+<div id="backdrop" onclick="closeAllModals()" class="fixed inset-0 bg-black/40 z-40 hidden transition-opacity duration-300 opacity-0"></div>
+
+<div id="classModal" class="modal fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none">
+    <div class="modal-content relative bg-white w-full max-w-[420px] rounded-t-3xl p-6 pb-10 pointer-events-auto">
+        <button onclick="closeAllModals()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-800 transition p-2 bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center">
+            <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+
+        <div class="flex items-center gap-4 mb-6 mt-2">
+             <div class="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-blue-600 text-2xl shadow-sm border border-gray-100"><i class="fa-solid fa-calculator"></i></div>
+             <div>
+                 <h3 class="text-xl font-bold text-gray-800">คณิตศาสตร์พื้นฐาน</h3>
+                 <p class="text-gray-500 text-sm">รหัสวิชา ค31101</p>
+             </div>
+        </div>
+        
+        <div class="space-y-4 mb-6">
+            <div class="flex justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl shadow-sm">
+                <span class="text-gray-500 text-sm">ผู้สอน</span>
+                <span class="font-semibold text-gray-800">อ.สมชาย ใจดี</span>
+            </div>
+            <div class="flex justify-between p-4 bg-gray-50 border border-gray-100 rounded-xl shadow-sm">
+                <span class="text-gray-500 text-sm">สถานะเช็คชื่อ</span>
+                <span class="font-semibold text-green-600 flex items-center gap-2"><i class="fa-solid fa-check-circle"></i> มาเรียน</span>
+            </div>
+        </div>
+
+        <button onclick="alert('เช็คชื่อเรียบร้อยแล้วครับ ✅')" class="w-full py-3.5 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition">เช็คชื่อเข้าเรียน (QR)</button>
+    </div>
+</div>
+
+<div id="gradeModal" class="modal fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none">
+    <div class="modal-content relative bg-white w-full max-w-[420px] rounded-t-3xl p-6 pb-10 pointer-events-auto">
+        <button onclick="closeAllModals()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-800 transition p-2 bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center">
+            <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+
+        <h3 class="text-xl font-bold mb-2 text-gray-800 mt-2">ผลการเรียน (GPA)</h3>
+        <p class="text-gray-500 text-sm mb-6">ภาคเรียนที่ 1/2567</p>
+
+        <div class="flex justify-center mb-8">
+            <div class="w-40 h-40 rounded-full border-[6px] border-gray-50 bg-white shadow-sm flex flex-col items-center justify-center relative">
+                <div class="absolute inset-0 border-[6px] border-blue-600 rounded-full border-l-transparent border-b-transparent rotate-45"></div>
+                <span class="text-4xl font-black text-gray-800">3.85</span>
+                <span class="text-xs text-gray-400 mt-1">เกรดเฉลี่ยสะสม</span>
+            </div>
+        </div>
+
+        <div class="space-y-2 bg-gray-50 rounded-2xl p-4 shadow-sm border border-gray-100">
+            <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                <span class="text-sm text-gray-600">ภาษาไทย</span>
+                <span class="font-bold text-gray-800">4.0</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                <span class="text-sm text-gray-600">คณิตศาสตร์</span>
+                <span class="font-bold text-gray-800">3.5</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b-0 border-gray-200">
+                <span class="text-sm text-gray-600">วิทยาศาสตร์</span>
+                <span class="font-bold text-gray-800">4.0</span>
+            </div>
+        </div>
+        
+        <button onclick="closeAllModals()" class="mt-6 w-full py-3 bg-white border border-gray-200 rounded-xl text-gray-600 font-bold hover:bg-gray-100">ปิด</button>
+    </div>
+</div>
+
+ <div id="canteenModal" class="modal fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none">
+    <div class="modal-content relative bg-white w-full max-w-[420px] rounded-t-3xl p-6 pb-10 pointer-events-auto">
+        <button onclick="closeAllModals()" class="absolute top-5 right-5 text-white/80 hover:text-white transition p-2 z-10 bg-black/20 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm">
+            <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+        
+        <div class="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-2xl p-6 text-white shadow-lg mb-6 relative overflow-hidden mt-2">
+            <div class="absolute -right-6 -bottom-6 text-white opacity-20 text-8xl"><i class="fa-solid fa-wallet"></i></div>
+            <p class="text-sm opacity-90 mb-1">ยอดเงินคงเหลือ</p>
+            <h2 class="text-4xl font-bold">฿ 145.00</h2>
+            <p class="text-xs mt-4 opacity-75">ID: 65012345</p>
+        </div>
+
+        <h4 class="font-bold text-gray-800 mb-3">เมนูแนะนำวันนี้ 🍜</h4>
+        <div class="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+            <div class="min-w-[140px] bg-gray-50 border border-gray-100 rounded-xl p-3 shadow-sm">
+                <div class="h-24 bg-gray-200 rounded-lg mb-2 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80')"></div>
+                <p class="text-sm font-bold truncate">ข้าวมันไก่</p>
+                <p class="text-xs text-orange-500 font-bold">40 บาท</p>
+            </div>
+             <div class="min-w-[140px] bg-gray-50 border border-gray-100 rounded-xl p-3 shadow-sm">
+                <div class="h-24 bg-gray-200 rounded-lg mb-2 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80')"></div>
+                <p class="text-sm font-bold truncate">สลัดผัก</p>
+                <p class="text-xs text-orange-500 font-bold">35 บาท</p>
+            </div>
+        </div>
+
+        <button onclick="alert('เปิดกล้องสแกน QR... 📷')" class="mt-6 w-full py-3.5 bg-gray-900 text-white rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition shadow-lg shadow-gray-300">
+            <i class="fa-solid fa-qrcode"></i> สแกนจ่ายเงิน
+        </button>
+    </div>
+</div>
+
+<div id="newsModal" class="modal fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none">
+    <div class="modal-content relative bg-white w-full max-w-[420px] rounded-t-3xl p-0 pb-10 pointer-events-auto h-[80vh] flex flex-col overflow-hidden">
+        <button onclick="closeAllModals()" class="absolute top-4 right-4 z-20 w-8 h-8 bg-black/40 backdrop-blur-md rounded-full text-white flex items-center justify-center hover:bg-black/60 transition shadow-lg">
+            <i class="fa-solid fa-times text-sm"></i>
+        </button>
+        
+        <div class="h-64 bg-gray-200 flex-shrink-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1546410531-bb4caa6b424d?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80');"></div>
+        
+        <div class="p-6 overflow-y-auto">
+            <span class="text-xs text-blue-600 font-bold bg-blue-50 px-2.5 py-1 rounded-md mb-3 inline-block">กิจกรรมโรงเรียน</span>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">สรุปผลการแข่งขันฟุตบอลกีฬาสี ประจำปี 2568</h2>
+            <div class="flex items-center gap-2 text-gray-400 text-xs mb-6">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" class="w-5 h-5 rounded-full border border-gray-200">
+                <span>แอดมินโรงเรียน • 25 พ.ย. 68</span>
+            </div>
+            
+            <p class="text-gray-600 leading-relaxed text-sm mb-4">
+                ขอแสดงความยินดีกับสีแดง (Red Dragon) ที่สามารถคว้าแชมป์ฟุตบอลชายรุ่นอายุไม่เกิน 18 ปีไปครองได้สำเร็จ หลังจากการดวลจุดโทษชนะสีเขียวไปอย่างสุดมันส์ 5-4 ประตู
+            </p>
+            <p class="text-gray-600 leading-relaxed text-sm">
+                โดยบรรยากาศภายในงานเต็มไปด้วยความสนุกสนานและความสามัคคีของนักเรียนทุกคน ทางโรงเรียนขอขอบคุณนักกีฬาทุกคนที่ทุ่มเทฝึกซ้อมอย่างหนัก
+            </p>
+        </div>
+        
+        <div class="p-4 border-t border-gray-100 bg-white">
+            <button onclick="closeAllModals()" class="w-full py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-200">ปิดข่าว</button>
+        </div>
+    </div>
+</div>
+
+<div id="profileModal" class="modal fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none">
+    <div class="modal-content relative bg-white w-full max-w-[420px] rounded-t-3xl p-6 pb-10 pointer-events-auto">
+        <button onclick="closeAllModals()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-800 transition p-2 bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center">
+            <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+
+        <div class="text-center mb-6 mt-4">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4" class="w-24 h-24 rounded-full mx-auto mb-3 border-4 border-white shadow-lg">
+            <h3 class="text-xl font-bold text-gray-800">ด.ช. ครูโบ๊ท ดอทคอม</h3>
+            <p class="text-gray-500 text-sm">ชั้นมัธยมศึกษาปีที่ 4/1 เลขที่ 9</p>
+        </div>
+        
+        <div class="space-y-3">
+            <button class="w-full p-4 bg-gray-50 border border-gray-100 rounded-xl flex items-center gap-3 hover:bg-gray-100 transition shadow-sm">
+                <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-600 border border-gray-100"><i class="fa-solid fa-user-pen"></i></div>
+                <span class="font-medium text-gray-700">แก้ไขข้อมูลส่วนตัว</span>
+            </button>
+            <button class="w-full p-4 bg-gray-50 border border-gray-100 rounded-xl flex items-center gap-3 hover:bg-gray-100 transition shadow-sm">
+                <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-600 border border-gray-100"><i class="fa-solid fa-gear"></i></div>
+                <span class="font-medium text-gray-700">ตั้งค่าการใช้งาน</span>
+            </button>
+            <button onclick="closeAllModals()" class="w-full p-4 bg-white border border-red-100 rounded-xl flex items-center gap-3 hover:bg-red-50 transition text-red-600 shadow-sm">
+                <div class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500"><i class="fa-solid fa-right-from-bracket"></i></div>
+                <span class="font-medium">ออกจากระบบ</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+</div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -636,6 +782,13 @@
         }
     });
 
+    // 🔔 New Notification Function (Using Alert)
+    window.showNotificationsAlert = () => {
+        alert("🔔 การแจ้งเตือน \n\n1. ส่งการบ้านด่วน! (ภาษาไทย) - ครบกำหนดวันนี้\n2. เติมเงินสำเร็จ - คุณเติมเงิน 100 บาท");
+    }
+
     window.toggleFab = () => document.getElementById('fabMenu').classList.toggle('active');
 
 </script>
+</body>
+</html>
