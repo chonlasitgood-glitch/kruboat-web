@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Chain Simulator - เกมจำลองห่วงโซ่อาหาร</title>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4MQ3GL6CTB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-4MQ3GL6CTB');
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap');
+        body {
+            font-family: 'Prompt', sans-serif;
+            touch-action: manipulation; /* ป้องกันการซูมบนมือถือตอนกดรัวๆ */
+        }
+        canvas {
+            cursor: crosshair;
+            background-color: #f0fdf4; /* สีพื้นหลังเขียวอ่อน */
+            background-image: radial-gradient(#dcfce7 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+
+    <!-- Header -->
+    <header class="text-center mb-4">
+        <h1 class="text-3xl font-bold text-green-700">🌲 จำลองห่วงโซ่อาหาร</h1>
+        <p class="text-gray-600 text-sm">รักษาสมดุล: หญ้า 🌿 ➔ กระต่าย 🐰 ➔ หมาป่า 🐺</p>
+    </header>
+
+    <!-- Stats Display -->
+    <div class="flex gap-4 mb-4 w-full max-w-2xl justify-center text-sm md:text-base">
+        <div class="bg-white px-4 py-2 rounded-lg shadow-sm border-b-4 border-green-500 text-center flex-1">
+            <div class="font-bold text-gray-500">🌿 หญ้า</div>
+            <span id="grassCount" class="text-xl font-bold text-green-600">0</span>
+        </div>
+        <div class="bg-white px-4 py-2 rounded-lg shadow-sm border-b-4 border-gray-400 text-center flex-1">
+            <div class="font-bold text-gray-500">🐰 กระต่าย</div>
+            <span id="rabbitCount" class="text-xl font-bold text-gray-700">0</span>
+        </div>
+        <div class="bg-white px-4 py-2 rounded-lg shadow-sm border-b-4 border-red-500 text-center flex-1">
+            <div class="font-bold text-gray-500">🐺 หมาป่า</div>
+            <span id="wolfCount" class="text-xl font-bold text-red-600">0</span>
+        </div>
+    </div>
+
+    <!-- Game Canvas -->
+    <div class="relative shadow-lg rounded-xl overflow-hidden border-2 border-gray-300 bg-white">
+        <canvas id="gameCanvas" width="800" height="450" class="w-full h-auto max-w-[800px]"></canvas>
+        
+        <!-- Pause Overlay -->
+        <div id="pauseOverlay" class="absolute inset-0 bg-black/30 flex items-center justify-center text-white font-bold text-2xl backdrop-blur-sm" style="display: flex;">
+            กด "เริ่มระบบ" เพื่อเล่น
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="mt-6 grid grid-cols-2 md:grid-cols-5 gap-3 w-full max-w-2xl">
+        <button onclick="toggleGame()" id="toggleBtn" class="col-span-2 md:col-span-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow active:scale-95">
+            ▶ เริ่มระบบ
+        </button>
+
+        <button onclick="spawnEntity('grass', 5)" class="bg-green-100 hover:bg-green-200 text-green-800 font-bold py-3 px-4 rounded-lg border border-green-300 transition active:scale-95 flex items-center justify-center gap-2">
+            <span>🌿</span> +หญ้า
+        </button>
+        
+        <button onclick="spawnEntity('rabbit', 1)" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg border border-gray-300 transition active:scale-95 flex items-center justify-center gap-2">
+            <span>🐰</span> +กระต่าย
+        </button>
+        
+        <button onclick="spawnEntity('wolf', 1)" class="bg-red-100 hover:bg-red-200 text-red-800 font-bold py-3 px-4 rounded-lg border border-red-300 transition active:scale-95 flex items-center justify-center gap-2">
+            <span>🐺</span> +หมาป่า
+        </button>
+
+        <button onclick="resetGame()" class="col-span-2 md:col-span-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition shadow active:scale-95">
+            🔄 รีเซ็ต
+        </button>
+    </div>
+
+    <!-- Explanation Box -->
+    <div class="mt-6 bg-yellow-50 border border-yellow-200 p-4 rounded-lg max-w-2xl text-sm text-yellow-800 shadow-sm">
+        <h3 class="font-bold mb-1">📝 เกร็ดความรู้:</h3>
+        <ul class="list-disc pl-5 space-y-1">
+            <li><strong>หญ้า (ผู้ผลิต):</strong> เกิดขึ้นเองตามธรรมชาติ ยิ่งมีพื้นที่ว่าง ยิ่งเกิดเยอะ</li>
+            <li><strong>กระต่าย (ผู้บริโภคพืช):</strong> ต้องกินหญ้าเพื่อเพิ่มพลังงาน ถ้าพลังงานหมดจะตาย ถ้าพลังงานเยอะจะแพร่พันธุ์</li>
+            <li><strong>หมาป่า (ผู้บริโภคสัตว์):</strong> ต้องล่ากระต่ายเพื่ออยู่รอด ถ้าไม่มีกระต่าย หมาป่าจะสูญพันธุ์</li>
+        </ul>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const pauseOverlay = document.getElementById('pauseOverlay');
+        const toggleBtn = document.getElementById('toggleBtn');
+
+        // Game State
+        let isRunning = false;
+        let animationId;
+        
+        // Entities Lists
+        let grasses = [];
+        let rabbits = [];
+        let wolves = [];
+
+        // Parameters
+        const CONFIG = {
+            grassSpawnRate: 0.05, // โอกาสเกิดหญ้าในแต่ละเฟรม
+            grassEnergy: 30, // พลังงานที่ได้จากการกินหญ้า
+            rabbitStartEnergy: 100,
+            rabbitReproductionThreshold: 200, // พลังงานที่ต้องมีเพื่อแบ่งตัว
+            wolfStartEnergy: 150,
+            wolfReproductionThreshold: 300,
+            wolfEnergyGain: 80, // พลังงานที่ได้จากการกินกระต่าย
+            entitySize: 12 // ขนาดตัว
+        };
+
+        // --- Classes ---
+
+        class Grass {
+            constructor(x, y) {
+                this.x = x || Math.random() * canvas.width;
+                this.y = y || Math.random() * canvas.height;
+                this.size = CONFIG.entitySize;
+            }
+            draw() {
+                ctx.font = "16px Arial";
+                ctx.fillText("🌿", this.x - 6, this.y + 6);
+            }
+        }
+
+        class Animal {
+            constructor(x, y, type) {
+                this.x = x || Math.random() * canvas.width;
+                this.y = y || Math.random() * canvas.height;
+                this.type = type;
+                this.size = CONFIG.entitySize;
+                this.speed = type === 'rabbit' ? 1.5 : 2.0;
+                this.energy = type === 'rabbit' ? CONFIG.rabbitStartEnergy : CONFIG.wolfStartEnergy;
+                this.age = 0;
+                
+                // Random movement vector
+                this.dx = (Math.random() - 0.5) * this.speed;
+                this.dy = (Math.random() - 0.5) * this.speed;
+            }
+
+            move(targetList) {
+                // Change direction randomly sometimes
+                if (Math.random() < 0.05) {
+                    this.dx = (Math.random() - 0.5) * this.speed;
+                    this.dy = (Math.random() - 0.5) * this.speed;
+                }
+
+                // Simple AI: Move towards food if visible (within range)
+                let nearestFood = null;
+                let minDist = 150; // Vision range
+
+                if (targetList) {
+                    for (let food of targetList) {
+                        let d = Math.hypot(food.x - this.x, food.y - this.y);
+                        if (d < minDist) {
+                            minDist = d;
+                            nearestFood = food;
+                        }
+                    }
+                }
+
+                if (nearestFood) {
+                    let angle = Math.atan2(nearestFood.y - this.y, nearestFood.x - this.x);
+                    this.dx = Math.cos(angle) * this.speed;
+                    this.dy = Math.sin(angle) * this.speed;
+                }
+
+                // Update Position
+                this.x += this.dx;
+                this.y += this.dy;
+
+                // Bounce off walls
+                if (this.x < 0 || this.x > canvas.width) this.dx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.dy *= -1;
+                
+                // Keep inside
+                this.x = Math.max(0, Math.min(canvas.width, this.x));
+                this.y = Math.max(0, Math.min(canvas.height, this.y));
+
+                // Metabolism
+                this.energy -= 0.2;
+                this.age++;
+            }
+
+            draw() {
+                ctx.font = "16px Arial";
+                let icon = this.type === 'rabbit' ? "🐰" : "🐺";
+                // Opacity fades as energy drops
+                ctx.globalAlpha = Math.max(0.3, Math.min(1, this.energy / 50));
+                ctx.fillText(icon, this.x - 8, this.y + 6);
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        // --- Game Logic ---
+
+        function init() {
+            // Initial Population
+            for(let i=0; i<40; i++) grasses.push(new Grass());
+            for(let i=0; i<10; i++) rabbits.push(new Animal(null, null, 'rabbit'));
+            // Start with no wolves to let rabbits grow first, or maybe 1
+            // User adds wolves manually for better learning curve
+            
+            updateStats();
+            draw();
+        }
+
+        function spawnEntity(type, count) {
+            for (let i = 0; i < count; i++) {
+                if (type === 'grass') grasses.push(new Grass());
+                else if (type === 'rabbit') rabbits.push(new Animal(null, null, 'rabbit'));
+                else if (type === 'wolf') wolves.push(new Animal(null, null, 'wolf'));
+            }
+            updateStats();
+            draw(); // Redraw immediately so user sees spawn even if paused
+        }
+
+        function checkCollisions() {
+            // Rabbits eat Grass
+            for (let i = rabbits.length - 1; i >= 0; i--) {
+                let r = rabbits[i];
+                for (let j = grasses.length - 1; j >= 0; j--) {
+                    let g = grasses[j];
+                    if (Math.hypot(r.x - g.x, r.y - g.y) < r.size) {
+                        grasses.splice(j, 1);
+                        r.energy += CONFIG.grassEnergy;
+                        break; // Eat one grass per frame max
+                    }
+                }
+            }
+
+            // Wolves eat Rabbits
+            for (let i = wolves.length - 1; i >= 0; i--) {
+                let w = wolves[i];
+                for (let j = rabbits.length - 1; j >= 0; j--) {
+                    let r = rabbits[j];
+                    if (Math.hypot(w.x - r.x, w.y - r.y) < w.size) {
+                        rabbits.splice(j, 1); // Rabbit dies
+                        w.energy += CONFIG.wolfEnergyGain;
+                        break; // Eat one rabbit per frame max
+                    }
+                }
+            }
+        }
+
+        function handleLifecycle() {
+            // Grass Spawning (Natural growth)
+            if (grasses.length < 200 && Math.random() < CONFIG.grassSpawnRate) {
+                grasses.push(new Grass());
+            }
+
+            // Rabbit Logic
+            for (let i = rabbits.length - 1; i >= 0; i--) {
+                let r = rabbits[i];
+                r.move(grasses);
+                
+                // Reproduction
+                if (r.energy > CONFIG.rabbitReproductionThreshold) {
+                    r.energy /= 2;
+                    let baby = new Animal(r.x, r.y, 'rabbit');
+                    baby.energy = r.energy;
+                    rabbits.push(baby);
+                }
+                
+                // Death
+                if (r.energy <= 0) {
+                    rabbits.splice(i, 1);
+                }
+            }
+
+            // Wolf Logic
+            for (let i = wolves.length - 1; i >= 0; i--) {
+                let w = wolves[i];
+                w.move(rabbits); // Hunt rabbits
+                
+                // Reproduction
+                if (w.energy > CONFIG.wolfReproductionThreshold) {
+                    w.energy /= 2;
+                    let baby = new Animal(w.x, w.y, 'wolf');
+                    baby.energy = w.energy;
+                    wolves.push(baby);
+                }
+                
+                // Death
+                if (w.energy <= 0) {
+                    wolves.splice(i, 1);
+                }
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('grassCount').innerText = grasses.length;
+            document.getElementById('rabbitCount').innerText = rabbits.length;
+            document.getElementById('wolfCount').innerText = wolves.length;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            grasses.forEach(g => g.draw());
+            rabbits.forEach(r => r.draw());
+            wolves.forEach(w => w.draw());
+        }
+
+        function gameLoop() {
+            if (!isRunning) return;
+
+            handleLifecycle();
+            checkCollisions();
+            updateStats();
+            draw();
+
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        // --- Controls ---
+
+        function toggleGame() {
+            isRunning = !isRunning;
+            toggleBtn.innerText = isRunning ? "⏸ หยุดชั่วคราว" : "▶ เริ่มระบบ";
+            toggleBtn.className = isRunning 
+                ? "col-span-2 md:col-span-1 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-4 rounded-lg transition shadow active:scale-95"
+                : "col-span-2 md:col-span-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow active:scale-95";
+            
+            pauseOverlay.style.display = isRunning ? "none" : "flex";
+
+            if (isRunning) {
+                gameLoop();
+            } else {
+                cancelAnimationFrame(animationId);
+            }
+        }
+
+        function resetGame() {
+            isRunning = false;
+            cancelAnimationFrame(animationId);
+            grasses = [];
+            rabbits = [];
+            wolves = [];
+            toggleBtn.innerText = "▶ เริ่มระบบ";
+            toggleBtn.className = "col-span-2 md:col-span-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow active:scale-95";
+            pauseOverlay.style.display = "flex";
+            
+            // Re-init
+            for(let i=0; i<40; i++) grasses.push(new Grass());
+            for(let i=0; i<10; i++) rabbits.push(new Animal(null, null, 'rabbit'));
+            updateStats();
+            draw();
+        }
+
+        // Initialize on load
+        window.onload = init;
+
+        // Interaction: Click to add grass at cursor position
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            // Scaling for canvas display size vs actual size
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+
+            grasses.push(new Grass(x, y));
+            draw();
+            updateStats();
+        });
+
+    </script>
+</body>
+</html>

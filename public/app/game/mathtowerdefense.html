@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Tower Defense - คิดเลขพิทักษ์ฐาน</title>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4MQ3GL6CTB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-4MQ3GL6CTB');
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;800&display=swap');
+        body {
+            font-family: 'Prompt', sans-serif;
+            overflow: hidden; /* Prevent scrolling */
+        }
+        canvas {
+            background-color: #ecfccb; /* Lime-100 */
+            cursor: crosshair;
+        }
+        .math-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gray-800 h-screen w-screen flex flex-col md:flex-row">
+
+    <!-- Game Area (Left/Top) -->
+    <div class="relative flex-grow h-2/3 md:h-full md:w-2/3 bg-gray-900 flex items-center justify-center overflow-hidden">
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- Game Over Overlay -->
+        <div id="gameOverScreen" class="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-50 hidden">
+            <h2 class="text-5xl font-bold text-red-500 mb-4">GAME OVER</h2>
+            <p class="text-white text-xl mb-6">คะแนนรวม: <span id="finalScore">0</span></p>
+            <button onclick="restartGame()" class="bg-white text-red-600 font-bold py-3 px-8 rounded-full hover:scale-105 transition">เล่นใหม่อีกครั้ง</button>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="startScreen" class="absolute inset-0 bg-gray-900/90 flex flex-col items-center justify-center z-50">
+            <h1 class="text-4xl md:text-6xl font-extrabold text-yellow-400 mb-2 text-center">🧮 Math Tower Defense</h1>
+            <p class="text-gray-300 mb-8 text-center max-w-md px-4">คิดเลขเพื่อหาเงิน ➔ สร้างป้อมปืนเพื่อป้องกันฐาน <br>ศัตรูจะแข็งแกร่งขึ้นเรื่อยๆ!</p>
+            <button onclick="startGame()" class="bg-yellow-400 text-gray-900 font-bold py-4 px-10 rounded-full text-xl hover:bg-yellow-300 shadow-lg hover:scale-105 transition">เริ่มเกม</button>
+        </div>
+        
+        <!-- Info Overlay -->
+        <div class="absolute top-4 left-4 text-white bg-black/50 p-3 rounded-lg pointer-events-none select-none">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="text-red-400">❤ ชีวิต:</span>
+                <span id="livesDisplay" class="font-bold text-xl">10</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-yellow-400">🌊 เวฟ:</span>
+                <span id="waveDisplay" class="font-bold text-xl">1</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Control Panel (Right/Bottom) -->
+    <div class="h-1/3 md:h-full md:w-1/3 bg-white p-6 flex flex-col shadow-2xl z-10">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6 border-b pb-4">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">ศูนย์บัญชาการ</h2>
+                <p class="text-xs text-gray-500">ตอบคำถามเพื่อรับทุนสร้างป้อม</p>
+            </div>
+            <div class="text-right">
+                <div class="text-sm text-gray-600">ทองคำ</div>
+                <div class="text-3xl font-extrabold text-yellow-600 flex items-center gap-1 justify-end">
+                    <span id="goldDisplay">0</span> 💰
+                </div>
+            </div>
+        </div>
+
+        <!-- Math Problem Section -->
+        <div class="flex-grow flex flex-col justify-center items-center bg-blue-50 rounded-xl p-4 border-2 border-blue-100 mb-4 relative overflow-hidden">
+            <!-- Floating particles effect container (managed by JS if needed, simplified here) -->
+            
+            <div class="text-gray-500 text-sm mb-2 font-semibold">โจทย์คณิตศาสตร์ (รับ +<span id="rewardDisplay">50</span> Gold)</div>
+            <div id="questionText" class="text-4xl md:text-5xl font-bold text-blue-800 mb-6">พร้อมไหม?</div>
+            
+            <div class="w-full max-w-xs flex gap-2">
+                <input type="number" id="answerInput" class="math-input w-full bg-white border-2 border-gray-300 rounded-lg py-3 px-4 text-center text-2xl font-bold text-gray-800" placeholder="คำตอบ..." disabled onkeydown="checkEnter(event)">
+                <button onclick="checkAnswer()" id="submitBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>ส่ง</button>
+            </div>
+            
+            <div id="feedbackText" class="h-6 mt-2 text-sm font-bold opacity-0 transition-opacity">ถูกต้อง!</div>
+        </div>
+
+        <!-- Build Info -->
+        <div class="bg-gray-100 rounded-lg p-4 flex items-center justify-between border border-gray-200">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-500 rounded flex items-center justify-center text-white shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="font-bold text-gray-700">ป้อมปืนมาตรฐาน</div>
+                    <div class="text-xs text-gray-500">คลิกพื้นที่ว่างในแผนที่เพื่อสร้าง</div>
+                </div>
+            </div>
+            <div class="text-right">
+                <div class="font-bold text-red-600 text-lg">50 💰</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // UI Elements
+        const goldDisplay = document.getElementById('goldDisplay');
+        const livesDisplay = document.getElementById('livesDisplay');
+        const waveDisplay = document.getElementById('waveDisplay');
+        const questionText = document.getElementById('questionText');
+        const answerInput = document.getElementById('answerInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const feedbackText = document.getElementById('feedbackText');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const finalScore = document.getElementById('finalScore');
+        const rewardDisplay = document.getElementById('rewardDisplay');
+
+        // Game State
+        let gameState = {
+            gold: 0,
+            lives: 10,
+            score: 0,
+            wave: 1,
+            isRunning: false,
+            lastTime: 0,
+            enemySpawnTimer: 0,
+            spawnInterval: 2000,
+            difficulty: 1, // 1=Easy (+), 2=Medium (-), 3=Hard (x)
+            enemiesKilled: 0
+        };
+
+        // Entities
+        let enemies = [];
+        let towers = [];
+        let projectiles = [];
+        let particles = [];
+
+        // Map Configuration
+        let path = [];
+        const tileSize = 40; // Size for grid placement logic
+
+        // Resize Canvas
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            generatePath();
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        // Path Generation (Simple S-Curve adapted to screen size)
+        function generatePath() {
+            const w = canvas.width;
+            const h = canvas.height;
+            const pad = 50;
+            
+            // Define waypoints relative to screen size
+            path = [
+                {x: 0, y: h * 0.2},
+                {x: w * 0.2, y: h * 0.2},
+                {x: w * 0.2, y: h * 0.8},
+                {x: w * 0.5, y: h * 0.8},
+                {x: w * 0.5, y: h * 0.2},
+                {x: w * 0.8, y: h * 0.2},
+                {x: w * 0.8, y: h * 0.8},
+                {x: w, y: h * 0.8}
+            ];
+        }
+
+        // --- Math Logic ---
+        let currentProblem = {};
+
+        function generateProblem() {
+            let num1, num2, operator, answer, reward;
+            
+            // Increase difficulty based on Wave
+            let difficulty = 1;
+            if (gameState.wave > 3) difficulty = 2;
+            if (gameState.wave > 6) difficulty = 3;
+
+            switch(difficulty) {
+                case 1: // Addition
+                    num1 = Math.floor(Math.random() * 20) + 1;
+                    num2 = Math.floor(Math.random() * 20) + 1;
+                    operator = '+';
+                    answer = num1 + num2;
+                    reward = 50;
+                    break;
+                case 2: // Subtraction
+                    num1 = Math.floor(Math.random() * 30) + 10;
+                    num2 = Math.floor(Math.random() * num1); // Ensure positive result
+                    operator = '-';
+                    answer = num1 - num2;
+                    reward = 75;
+                    break;
+                case 3: // Multiplication (Simple)
+                    num1 = Math.floor(Math.random() * 10) + 2;
+                    num2 = Math.floor(Math.random() * 9) + 2;
+                    operator = '×';
+                    answer = num1 * num2;
+                    reward = 100;
+                    break;
+            }
+
+            currentProblem = { answer, reward };
+            questionText.innerText = `${num1} ${operator} ${num2} = ?`;
+            rewardDisplay.innerText = reward;
+            answerInput.value = '';
+            answerInput.focus();
+        }
+
+        function checkEnter(e) {
+            if (e.key === 'Enter') checkAnswer();
+        }
+
+        function checkAnswer() {
+            const userAns = parseInt(answerInput.value);
+            if (userAns === currentProblem.answer) {
+                // Correct
+                gameState.gold += currentProblem.reward;
+                updateUI();
+                feedbackText.innerText = `เยี่ยมมาก! +${currentProblem.reward} Gold`;
+                feedbackText.className = "h-6 mt-2 text-sm font-bold text-green-600 transition-opacity opacity-100";
+                
+                // Spawn gold particle effect
+                for(let i=0; i<5; i++) {
+                    // Visual effect on canvas would be complex to sync coordinates, let's keep it simple
+                }
+
+                setTimeout(() => feedbackText.classList.add('opacity-0'), 1000);
+                generateProblem();
+            } else {
+                // Wrong
+                feedbackText.innerText = "ลองใหม่อีกครั้ง!";
+                feedbackText.className = "h-6 mt-2 text-sm font-bold text-red-500 transition-opacity opacity-100 shake";
+                answerInput.value = '';
+                answerInput.focus();
+            }
+        }
+
+        // --- Game Logic ---
+
+        class Enemy {
+            constructor(wave) {
+                this.pathIndex = 0;
+                this.x = path[0].x;
+                this.y = path[0].y;
+                this.radius = 15;
+                // Stats scale with wave
+                this.speed = 1.5 + (wave * 0.1); 
+                this.maxHp = 20 + (wave * 10);
+                this.hp = this.maxHp;
+                this.color = `hsl(${0 + (wave * 10)}, 70%, 50%)`; // Color shifts red to yellow
+                this.reachedEnd = false;
+            }
+
+            update() {
+                // Move along path
+                const target = path[this.pathIndex + 1];
+                if (!target) {
+                    this.reachedEnd = true;
+                    return;
+                }
+
+                const dx = target.x - this.x;
+                const dy = target.y - this.y;
+                const dist = Math.hypot(dx, dy);
+
+                if (dist < this.speed) {
+                    this.x = target.x;
+                    this.y = target.y;
+                    this.pathIndex++;
+                } else {
+                    this.x += (dx / dist) * this.speed;
+                    this.y += (dy / dist) * this.speed;
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Health bar
+                const hpPercent = this.hp / this.maxHp;
+                ctx.fillStyle = 'red';
+                ctx.fillRect(this.x - 15, this.y - 25, 30, 5);
+                ctx.fillStyle = '#10b981';
+                ctx.fillRect(this.x - 15, this.y - 25, 30 * hpPercent, 5);
+            }
+        }
+
+        class Tower {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.range = 150;
+                this.damage = 10;
+                this.cooldown = 0;
+                this.fireRate = 40; // Frames between shots
+                this.color = '#3b82f6';
+            }
+
+            update() {
+                if (this.cooldown > 0) this.cooldown--;
+
+                // Find target
+                if (this.cooldown <= 0) {
+                    // Find nearest enemy
+                    let nearest = null;
+                    let minDist = this.range;
+
+                    for (let enemy of enemies) {
+                        const dist = Math.hypot(enemy.x - this.x, enemy.y - this.y);
+                        if (dist < minDist) {
+                            minDist = dist;
+                            nearest = enemy;
+                        }
+                    }
+
+                    if (nearest) {
+                        this.shoot(nearest);
+                        this.cooldown = this.fireRate;
+                    }
+                }
+            }
+
+            shoot(target) {
+                projectiles.push(new Projectile(this.x, this.y, target));
+            }
+
+            draw() {
+                // Base
+                ctx.fillStyle = '#1e3a8a'; // Dark blue
+                ctx.fillRect(this.x - 15, this.y - 15, 30, 30);
+                
+                // Turret Top
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Range (Only on hover - simplified: always very faint)
+                ctx.strokeStyle = 'rgba(59, 130, 246, 0.1)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        class Projectile {
+            constructor(x, y, target) {
+                this.x = x;
+                this.y = y;
+                this.target = target;
+                this.speed = 8;
+                this.damage = 10;
+                this.active = true;
+            }
+
+            update() {
+                if (!this.target || this.target.hp <= 0) {
+                    this.active = false; // Target dead
+                    return;
+                }
+
+                const dx = this.target.x - this.x;
+                const dy = this.target.y - this.y;
+                const dist = Math.hypot(dx, dy);
+
+                if (dist < this.speed) {
+                    // Hit
+                    this.target.hp -= this.damage;
+                    this.active = false;
+                    // Spark effect
+                    particles.push(new Particle(this.x, this.y, 'orange'));
+                } else {
+                    this.x += (dx / dist) * this.speed;
+                    this.y += (dy / dist) * this.speed;
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = 'yellow';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.life = 20;
+                this.dx = (Math.random() - 0.5) * 4;
+                this.dy = (Math.random() - 0.5) * 4;
+            }
+            update() {
+                this.x += this.dx;
+                this.y += this.dy;
+                this.life--;
+            }
+            draw() {
+                ctx.globalAlpha = this.life / 20;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        // Main Loop
+        function gameLoop(timestamp) {
+            if (!gameState.isRunning) return;
+
+            const dt = timestamp - gameState.lastTime;
+            gameState.lastTime = timestamp;
+
+            // Clear
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Path
+            if (path.length > 0) {
+                ctx.lineWidth = 40;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#d9f99d'; // lighter grass
+                ctx.beginPath();
+                ctx.moveTo(path[0].x, path[0].y);
+                for(let i=1; i<path.length; i++) ctx.lineTo(path[i].x, path[i].y);
+                ctx.stroke();
+
+                ctx.lineWidth = 30;
+                ctx.strokeStyle = '#a16207'; // dirt
+                ctx.beginPath();
+                ctx.moveTo(path[0].x, path[0].y);
+                for(let i=1; i<path.length; i++) ctx.lineTo(path[i].x, path[i].y);
+                ctx.stroke();
+            }
+
+            // Spawn Enemies
+            gameState.enemySpawnTimer -= 16; // approx 60fps
+            if (gameState.enemySpawnTimer <= 0) {
+                enemies.push(new Enemy(gameState.wave));
+                gameState.enemySpawnTimer = Math.max(500, gameState.spawnInterval - (gameState.wave * 100));
+            }
+
+            // Update & Draw Towers
+            towers.forEach(t => {
+                t.update();
+                t.draw();
+            });
+
+            // Update & Draw Enemies
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                let e = enemies[i];
+                e.update();
+                e.draw();
+
+                if (e.reachedEnd) {
+                    gameState.lives--;
+                    updateUI();
+                    enemies.splice(i, 1);
+                    if (gameState.lives <= 0) endGame();
+                } else if (e.hp <= 0) {
+                    enemies.splice(i, 1);
+                    gameState.enemiesKilled++;
+                    // Wave progression
+                    if (gameState.enemiesKilled % 10 === 0) {
+                        gameState.wave++;
+                        gameState.spawnInterval = Math.max(500, 2000 - (gameState.wave * 100));
+                        updateUI();
+                    }
+                }
+            }
+
+            // Update & Draw Projectiles
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                let p = projectiles[i];
+                p.update();
+                p.draw();
+                if (!p.active) projectiles.splice(i, 1);
+            }
+
+            // Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.update();
+                p.draw();
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Functions
+        function startGame() {
+            startScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            answerInput.disabled = false;
+            submitBtn.disabled = false;
+            
+            // Reset state
+            gameState = {
+                gold: 0,
+                lives: 10,
+                score: 0,
+                wave: 1,
+                isRunning: true,
+                lastTime: performance.now(),
+                enemySpawnTimer: 0,
+                spawnInterval: 2000,
+                enemiesKilled: 0
+            };
+            enemies = [];
+            towers = [];
+            projectiles = [];
+            particles = [];
+            
+            resizeCanvas(); // Ensure path is correct
+            generateProblem();
+            updateUI();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        function endGame() {
+            gameState.isRunning = false;
+            gameOverScreen.style.display = 'flex';
+            finalScore.innerText = gameState.enemiesKilled * 100;
+            answerInput.disabled = true;
+            submitBtn.disabled = true;
+        }
+
+        function updateUI() {
+            goldDisplay.innerText = gameState.gold;
+            livesDisplay.innerText = gameState.lives;
+            waveDisplay.innerText = gameState.wave;
+        }
+
+        // Input: Build Tower
+        canvas.addEventListener('click', (e) => {
+            if (!gameState.isRunning) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Check cost
+            const towerCost = 50;
+            if (gameState.gold < towerCost) {
+                alert("ทองไม่พอ! (ต้องการ 50 Gold) \nตอบคำถามคณิตศาสตร์เพื่อหาเงินเพิ่ม!");
+                answerInput.focus();
+                return;
+            }
+
+            // Check placement validity (Not on path, not on other tower)
+            // 1. Check Path (Simple approximation: distance to segments)
+            let onPath = false;
+            for (let i = 0; i < path.length - 1; i++) {
+                const p1 = path[i];
+                const p2 = path[i+1];
+                // Distance from point to line segment
+                const dist = distToSegment({x, y}, p1, p2);
+                if (dist < 30) { onPath = true; break; } // Path width clearance
+            }
+
+            // 2. Check other towers
+            let onTower = false;
+            for (let t of towers) {
+                if (Math.hypot(t.x - x, t.y - y) < 40) { onTower = true; break; }
+            }
+
+            if (!onPath && !onTower) {
+                towers.push(new Tower(x, y));
+                gameState.gold -= towerCost;
+                updateUI();
+                particles.push(new Particle(x, y, 'blue'));
+            } else {
+                // Show error visual?
+            }
+        });
+
+        // Helper: Distance from point p to line segment v-w
+        function sqr(x) { return x * x }
+        function distToSegment(p, v, w) {
+            function dist2(v, w) { return sqr(v.x - w.x) + sqr(v.y - w.y) }
+            var l2 = dist2(v, w);
+            if (l2 == 0) return Math.sqrt(dist2(p, v));
+            var t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+            t = Math.max(0, Math.min(1, t));
+            return Math.sqrt(dist2(p, { x: v.x + t * (w.x - v.x), y: v.y + t * (w.y - v.y) }));
+        }
+
+        // Init
+        resizeCanvas();
+        updateUI();
+
+    </script>
+</body>
+</html>
