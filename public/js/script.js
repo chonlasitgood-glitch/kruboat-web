@@ -401,7 +401,7 @@ function renderDetailHTML(p) {
             btnPreview.href = p.link_preview;
             btnPreview.classList.remove('opacity-50', 'pointer-events-none', 'cursor-not-allowed', 'border-gray-300', 'text-gray-300');
             btnPreview.classList.add('border-blue-600', 'text-blue-600', 'hover:bg-blue-50');
-            btnPreview.innerHTML = '<i class="fa-solid fa-desktop mr-2"></i> ดูตัวอย่างจริง';
+            btnPreview.innerHTML = '<i class="fa-solid fa-desktop mr-2"></i> ดูตัวอย่าง';
         } else {
             btnPreview.innerHTML = '<i class="fa-solid fa-ban mr-2"></i> ไม่มีตัวอย่าง';
             btnPreview.removeAttribute('href');

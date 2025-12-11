@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Grammar Rain: English Game</title>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4MQ3GL6CTB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-4MQ3GL6CTB');
+    </script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Sarabun:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #87CEEB; /* Sky Blue */
+            font-family: 'Fredoka', sans-serif;
+            touch-action: none;
+            user-select: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(to bottom, #87CEEB 0%, #E0F7FA 100%);
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* UI Overlay */
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .score-box {
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-size: 1.2rem;
+            color: #ff6b6b;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .question-box {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            text-align: center;
+            max-width: 95%;
+            width: 600px;
+            border-bottom: 5px solid #48dbfb;
+            transition: transform 0.3s;
+            z-index: 20; /* อยู่เหนือเมฆ */
+        }
+
+        .question-text {
+            font-size: 1.5rem;
+            color: #2d3436;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .hint-text {
+            font-size: 1rem;
+            color: #636e72;
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        /* Lane Indicators (Mobile Touch Areas - Vertical Columns) */
+        .lane-controls {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: row; /* เรียงแนวนอน */
+            pointer-events: auto; 
+            z-index: 10;
+        }
+
+        .lane-zone {
+            flex: 1;
+            /* border-right: 1px solid rgba(0,0,0,0.1); Debug lines */ 
+        }
+
+        /* Modal */
+        .modal {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            pointer-events: auto;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .hidden { display: none !important; }
+
+        .btn-start {
+            background: #ff6b6b;
+            color: white;
+            font-size: 1.5rem;
+            padding: 15px 50px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Fredoka', sans-serif;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+            transition: transform 0.1s;
+            margin-top: 20px;
+        }
+        .btn-start:active { transform: scale(0.95); }
+
+        h1 { font-size: 3rem; color: white; text-shadow: 2px 2px 0 #ff6b6b; margin: 0; }
+        p { color: white; font-size: 1.2rem; margin-top: 10px; }
+
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+
+        <div class="ui-layer">
+            <div class="header">
+                <div class="score-box">
+                    <span>❤️ <span id="lives-display">3</span></span>
+                </div>
+                <div class="score-box" style="color: #48dbfb;">
+                    <span>SCORE: <span id="score-display">0</span></span>
+                </div>
+            </div>
+
+            <div id="question-panel" class="question-box hidden">
+                <div id="q-text" class="question-text">She ___ to school yesterday.</div>
+                <div id="q-hint" class="hint-text">(Past Tense - เหตุการณ์ในอดีต)</div>
+            </div>
+        </div>
+
+        <!-- Touch Controls Overlay (Left / Center / Right) -->
+        <div class="lane-controls">
+            <div class="lane-zone" onclick="movePlayer(0)"></div>
+            <div class="lane-zone" onclick="movePlayer(1)"></div>
+            <div class="lane-zone" onclick="movePlayer(2)"></div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="startScreen" class="modal">
+            <h1>GRAMMAR RAIN</h1>
+            <p>รับคำตอบที่ถูกต้องที่ตกลงมา</p>
+            <p style="font-size: 1rem; opacity: 0.8;">แตะหน้าจอ ซ้าย/กลาง/ขวา เพื่อขยับตัวละคร</p>
+            <button class="btn-start" onclick="startGame()">START!</button>
+        </div>
+
+        <!-- Game Over -->
+        <div id="gameOverScreen" class="modal hidden">
+            <h1 style="color: #ff6b6b;">GAME OVER</h1>
+            <p>Final Score: <span id="final-score">0</span></p>
+            <button class="btn-start" onclick="startGame()">TRY AGAIN</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- Config ---
+        let width, height;
+        const LANES = 3;
+        let LANE_WIDTH = 0;
+        
+        // --- Game State ---
+        let gameRunning = false;
+        let score = 0;
+        let lives = 3;
+        let speed = 3; // Vertical speed
+        let questionActive = false;
+        let questionTimer = 0;
+
+        // Player
+        let player = {
+            lane: 1, // 0=Left, 1=Center, 2=Right
+            x: 0,
+            targetX: 0,
+            y: 0, // Fixed at bottom
+            radius: 30,
+            frame: 0
+        };
+
+        // Entities
+        let drops = []; // The falling answers
+        let clouds = [];
+        let particles = [];
+
+        // Question Database
+        const questionsDB = [
+            // --- Tenses ---
+            { q: "She ___ to school yesterday.", hint: "Past Simple (อดีต)", answers: ["go", "went", "gone"], correct: 1 },
+            { q: "They ___ playing football now.", hint: "Present Continuous (กำลังทำ)", answers: ["is", "am", "are"], correct: 2 },
+            { q: "He ___ pizza every Friday.", hint: "Present Simple (กิจวัตร)", answers: ["eat", "eats", "eating"], correct: 1 },
+            { q: "I ___ finished my homework.", hint: "Present Perfect (เพิ่งจบ)", answers: ["have", "has", "had"], correct: 0 },
+            { q: "We ___ visit Japan next year.", hint: "Future Simple (อนาคต)", answers: ["will", "did", "does"], correct: 0 },
+            // เพิ่ม Tense
+            { q: "I ___ sleeping when you called.", hint: "Past Continuous (กำลังทำในอดีต)", answers: ["was", "were", "am"], correct: 0 },
+            { q: "She ___ never been to Paris.", hint: "Present Perfect (ประสบการณ์)", answers: ["has", "have", "had"], correct: 0 },
+            { q: "Look! It ___ raining.", hint: "Present Continuous (กำลังเกิดขึ้น)", answers: ["is", "are", "was"], correct: 0 },
+            
+            // --- Prepositions ---
+            { q: "The book is ___ the table.", hint: "บนโต๊ะ", answers: ["in", "on", "at"], correct: 1 },
+            { q: "I was born ___ 1999.", hint: "ปีใช้ preposition อะไร?", answers: ["in", "on", "at"], correct: 0 },
+            { q: "See you ___ Monday.", hint: "วันใช้ preposition อะไร?", answers: ["in", "on", "at"], correct: 1 },
+            // เพิ่ม Preposition
+            { q: "The class starts ___ 9:00 AM.", hint: "เวลานาฬิกาใช้อะไร?", answers: ["at", "on", "in"], correct: 0 },
+            { q: "The cat is ___ the chair.", hint: "ข้างใต้", answers: ["under", "on", "in"], correct: 0 },
+            { q: "I live ___ Bangkok.", hint: "เมือง/จังหวัดใช้อะไร?", answers: ["in", "at", "on"], correct: 0 },
+            
+            // --- Vocab ---
+            { q: "Opposite of 'Big'", hint: "ตรงข้ามกับใหญ่", answers: ["Large", "Huge", "Small"], correct: 2 },
+            { q: "A ___ has a long neck.", hint: "สัตว์คอยาว", answers: ["Lion", "Giraffe", "Pig"], correct: 1 },
+            // เพิ่ม Vocab
+            { q: "Synonym of 'Happy'", hint: "ความหมายเหมือน Happy", answers: ["Sad", "Glad", "Angry"], correct: 1 },
+            { q: "Opposite of 'Hot'", hint: "ตรงข้ามกับร้อน", answers: ["Cold", "Warm", "Fire"], correct: 0 },
+            { q: "A ___ can fly.", hint: "สัตว์ที่บินได้", answers: ["Bird", "Dog", "Cat"], correct: 0 },
+            { q: "Which one is a fruit?", hint: "ข้อไหนคือผลไม้", answers: ["Apple", "Carrot", "Potato"], correct: 0 }
+        ];
+
+        // --- Core ---
+
+        function init() {
+            window.addEventListener('resize', resize);
+            resize();
+            
+            // Init Clouds
+            for(let i=0; i<8; i++) {
+                clouds.push({
+                    x: Math.random() * width,
+                    y: Math.random() * (height/2), // Clouds only at top half
+                    speed: Math.random() * 0.5 + 0.2,
+                    size: Math.random() * 40 + 40
+                });
+            }
+        }
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            LANE_WIDTH = width / LANES;
+            
+            // Update Player Position
+            if(!gameRunning) {
+                player.targetX = player.lane * LANE_WIDTH + LANE_WIDTH/2;
+                player.x = player.targetX;
+                player.y = height - 100;
+            } else {
+                // Keep relative position during resize
+                player.targetX = player.lane * LANE_WIDTH + LANE_WIDTH/2;
+                player.y = height - 100;
+            }
+        }
+
+        function startGame() {
+            gameRunning = true;
+            score = 0;
+            lives = 3;
+            speed = 3; 
+            drops = [];
+            particles = [];
+            player.lane = 1;
+            player.targetX = player.lane * LANE_WIDTH + LANE_WIDTH/2;
+            player.x = player.targetX;
+            player.y = height - 100;
+            
+            questionActive = false;
+            questionTimer = 0; 
+
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('question-panel').classList.add('hidden');
+            updateUI();
+
+            requestAnimationFrame(loop);
+        }
+
+        function spawnQuestion() {
+            const q = questionsDB[Math.floor(Math.random() * questionsDB.length)];
+            
+            // Show UI
+            document.getElementById('q-text').innerText = q.q;
+            document.getElementById('q-hint').innerText = q.hint;
+            document.getElementById('question-panel').classList.remove('hidden');
+            
+            // Create 3 Falling Drops
+            // Start above screen
+            const startY = -100; 
+            
+            for(let i=0; i<3; i++) {
+                drops.push({
+                    x: i * LANE_WIDTH + LANE_WIDTH/2,
+                    y: startY - (Math.random() * 100), // Stagger slightly
+                    lane: i,
+                    text: q.answers[i],
+                    isCorrect: (i === q.correct),
+                    hit: false,
+                    color: getRandomColor()
+                });
+            }
+            
+            questionActive = true;
+        }
+        
+        function getRandomColor() {
+            const colors = ['#a29bfe', '#74b9ff', '#81ecec', '#fab1a0', '#ffeaa7'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function loop() {
+            if(!gameRunning) return;
+
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        function update() {
+            // 1. Move Player (Lerp X)
+            player.targetX = player.lane * LANE_WIDTH + LANE_WIDTH/2;
+            player.x += (player.targetX - player.x) * 0.2;
+            player.frame += 0.2;
+
+            // 2. Background Clouds
+            clouds.forEach(c => {
+                c.x += c.speed;
+                if(c.x > width + 50) c.x = -50;
+            });
+
+            // 3. Question Logic
+            if (!questionActive) {
+                questionTimer++;
+                if(questionTimer > 100) { 
+                    spawnQuestion();
+                }
+            } else {
+                // Move Drops
+                let anyActive = false;
+                
+                drops.forEach(d => {
+                    if (d.hit) return;
+                    
+                    d.y += speed;
+                    anyActive = true;
+                    
+                    // Collision Check (Circle vs Box approximation)
+                    // Check if close enough in Y and in correct Lane
+                    if (Math.abs(d.y - player.y) < 60 && d.lane === player.lane) {
+                        d.hit = true;
+                        handleAnswer(d.isCorrect);
+                    }
+                    
+                    // Missed (went off screen)
+                    if (d.y > height) {
+                        d.hit = true; 
+                        // If it was correct answer and we missed it?
+                        // For simplicity, just reset question if all passed
+                    }
+                });
+
+                // Check if all drops are gone
+                const remaining = drops.filter(d => !d.hit && d.y < height);
+                if (remaining.length === 0) {
+                    drops = [];
+                    questionActive = false;
+                    questionTimer = 0;
+                    document.getElementById('question-panel').classList.add('hidden');
+                }
+                
+                // Speed up slightly
+                speed = Math.min(10, 3 + Math.floor(score/3));
+            }
+            
+            // 4. Particles
+            for(let i=particles.length-1; i>=0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.03;
+                if(p.life <= 0) particles.splice(i, 1);
+            }
+        }
+
+        function handleAnswer(isCorrect) {
+            if (isCorrect) {
+                score++;
+                spawnParticles(player.x, player.y - 40, '#00ff00', 15); // Green
+            } else {
+                lives--;
+                spawnParticles(player.x, player.y - 40, '#ff0000', 15); // Red
+                // Shake
+                const container = document.getElementById('game-container');
+                container.style.transform = 'translate(5px, 0)';
+                setTimeout(() => container.style.transform = 'none', 100);
+            }
+            updateUI();
+            
+            if (lives <= 0) gameOver();
+        }
+
+        function spawnParticles(x, y, color, count) {
+            for(let i=0; i<count; i++) {
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random()-0.5) * 8,
+                    vy: (Math.random()-0.5) * 8 - 2,
+                    life: 1.0,
+                    color: color
+                });
+            }
+        }
+
+        // --- Input ---
+        
+        function movePlayer(laneIndex) {
+            if(gameRunning) {
+                player.lane = laneIndex;
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if(!gameRunning) return;
+            if(e.key === 'ArrowLeft') player.lane = Math.max(0, player.lane - 1);
+            if(e.key === 'ArrowRight') player.lane = Math.min(2, player.lane + 1);
+        });
+
+        // --- Draw ---
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw Sky/Bg
+            // (Handled by CSS Gradient, but we draw clouds here)
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            clouds.forEach(c => {
+                ctx.beginPath();
+                ctx.arc(c.x, c.y, c.size, 0, Math.PI*2);
+                ctx.arc(c.x + c.size*0.6, c.y + c.size*0.1, c.size*0.7, 0, Math.PI*2);
+                ctx.fill();
+            });
+
+            // Draw Lane Dividers (Dashed lines)
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([10, 10]);
+            for(let i=1; i<LANES; i++) {
+                const x = i * LANE_WIDTH;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+
+            // Draw Drops (Answers)
+            drops.forEach(d => {
+                if(d.hit) return;
+
+                // Balloon / Drop Shape
+                ctx.fillStyle = d.color;
+                
+                const w = 120; // Width of box
+                const h = 60;  // Height of box
+                const x = d.x - w/2;
+                const y = d.y - h/2;
+                
+                // Shadow
+                ctx.shadowColor = 'rgba(0,0,0,0.1)';
+                ctx.shadowBlur = 10;
+                
+                // Box
+                ctx.beginPath();
+                ctx.roundRect(x, y, w, h, 15);
+                ctx.fill();
+                
+                // Border
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                ctx.shadowBlur = 0;
+
+                // Text
+                ctx.fillStyle = '#2d3436';
+                ctx.font = 'bold 20px Fredoka';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(d.text, d.x, d.y);
+                
+                // String (optional visual)
+                ctx.beginPath();
+                ctx.moveTo(d.x, d.y - h/2);
+                ctx.lineTo(d.x, d.y - h/2 - 50);
+                ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            });
+
+            // Draw Player
+            const px = player.x;
+            const py = player.y;
+            
+            // Simple Basket/Catcher or Character? Let's keep Character
+            
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.beginPath();
+            ctx.ellipse(px, py + 45, 20, 5, 0, 0, Math.PI*2);
+            ctx.fill();
+
+            // Bobbing
+            const bob = Math.sin(player.frame) * 5;
+            
+            // Head
+            ctx.fillStyle = '#ff7675';
+            ctx.beginPath();
+            ctx.arc(px, py + bob, 25, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Body
+            ctx.fillStyle = '#ff9ff3';
+            ctx.beginPath();
+            ctx.moveTo(px, py + 20 + bob);
+            ctx.lineTo(px - 15, py + 50 + bob);
+            ctx.lineTo(px + 15, py + 50 + bob);
+            ctx.fill();
+            
+            // Eyes
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(px - 8, py + bob - 5, 6, 0, Math.PI*2);
+            ctx.arc(px + 8, py + bob - 5, 6, 0, Math.PI*2);
+            ctx.fill();
+            
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.arc(px - 8, py + bob - 5, 2, 0, Math.PI*2);
+            ctx.arc(px + 8, py + bob - 5, 2, 0, Math.PI*2);
+            ctx.fill();
+
+            // Arms (Holding up to catch)
+            ctx.strokeStyle = '#fab1a0';
+            ctx.lineWidth = 6;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(px - 10, py + 30 + bob);
+            ctx.lineTo(px - 25, py + 10 + bob);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(px + 10, py + 30 + bob);
+            ctx.lineTo(px + 25, py + 10 + bob);
+            ctx.stroke();
+
+            // Draw Particles
+            particles.forEach(p => {
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 5, 0, Math.PI*2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+        }
+
+        // --- UI ---
+
+        function updateUI() {
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('lives-display').innerText = lives;
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('gameOverScreen').classList.remove('hidden');
+        }
+
+        window.onload = init;
+
+    </script>
+</body>
+</html>

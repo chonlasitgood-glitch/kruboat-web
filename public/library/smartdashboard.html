@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Dashboard - School Management Dashboard</title>
+    
+    <!-- 1. External Libraries (CDNs) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- 2. Configuration & Custom CSS -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#1e3a8a', secondary: '#7c3aed' },
+                    fontFamily: { sans: ['Noto Sans Thai', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Styles */
+        body { background-color: #f3f4f6; }
+        
+        /* UI Utilities */
+        .gradient-text {
+            background: linear-gradient(to right, #2563eb, #9333ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Interactive Elements */
+        .nav-item { transition: all 0.2s ease; cursor: pointer; border-right: 4px solid transparent; }
+        .nav-item:hover, .nav-item.active {
+            background: linear-gradient(to right, #eff6ff, #f3e8ff);
+            border-color: #4f46e5;
+            color: #4f46e5;
+        }
+        
+        .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+        .card-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1); }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed; bottom: 20px; right: 20px; z-index: 100;
+            background: white; border-left: 4px solid #2563eb;
+            padding: 1rem 1.5rem; border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateX(120%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; align-items: center; gap: 0.75rem;
+        }
+        .toast.show { transform: translateX(0); }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased overflow-hidden h-screen flex">
+
+    <!-- 3. Sidebar Navigation -->
+    <aside id="sidebar" class="bg-white w-64 h-full flex flex-col border-r border-gray-200 hidden md:flex transition-all z-30 fixed md:relative shadow-xl md:shadow-none">
+        <!-- Logo -->
+        <div class="h-16 flex items-center px-6 border-b border-gray-100 cursor-pointer" onclick="App.router.go('dashboard')">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white mr-3">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <span class="font-bold text-xl gradient-text">SmartDashboard</span>
+            <button onclick="App.ui.toggleSidebar()" class="md:hidden ml-auto text-gray-400 hover:text-red-500"><i class="fa-solid fa-times"></i></button>
+        </div>
+
+        <!-- Menu -->
+        <nav class="flex-1 overflow-y-auto py-4 space-y-1">
+            <div onclick="App.router.go('dashboard')" id="nav-dashboard" class="nav-item active flex items-center gap-3 px-6 py-3 text-sm font-medium text-gray-600">
+                <i class="fa-solid fa-chart-pie w-5"></i> ภาพรวม
+            </div>
+            <div onclick="App.router.go('students')" id="nav-students" class="nav-item flex items-center gap-3 px-6 py-3 text-sm font-medium text-gray-600">
+                <i class="fa-solid fa-user-graduate w-5"></i> ข้อมูลนักเรียน
+            </div>
+            <div onclick="App.router.go('teachers')" id="nav-teachers" class="nav-item flex items-center gap-3 px-6 py-3 text-sm font-medium text-gray-600">
+                <i class="fa-solid fa-chalkboard-user w-5"></i> บุคลากรครู
+            </div>
+            
+            <div class="mt-8 px-6 text-xs font-semibold text-gray-400 uppercase tracking-wider">System</div>
+            <div onclick="App.ui.toast('เปิดการตั้งค่าระบบ')" class="nav-item flex items-center gap-3 px-6 py-3 text-sm font-medium text-gray-600">
+                <i class="fa-solid fa-gear w-5"></i> ตั้งค่าระบบ
+            </div>
+            <div onclick="if(confirm('ยืนยันการออกจากระบบ?')) location.reload()" class="nav-item flex items-center gap-3 px-6 py-3 text-sm font-medium text-gray-600">
+                <i class="fa-solid fa-right-from-bracket w-5"></i> ออกจากระบบ
+            </div>
+        </nav>
+        
+        <!-- User Profile -->
+        <div class="p-4 border-t border-gray-100 bg-gray-50">
+            <div class="flex items-center gap-3">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" class="w-10 h-10 rounded-full border border-gray-200 bg-white">
+                <div>
+                    <p class="text-sm font-bold text-gray-700">ครูโบ๊ท ดอทคอม</p>
+                    <p class="text-xs text-gray-500">ผู้ดูแลระบบ</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 4. Main Content Wrapper -->
+    <main class="flex-1 flex flex-col h-full bg-[#f8fafc] relative w-full">
+        
+        <!-- Header -->
+        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 z-20 shrink-0">
+            <button onclick="App.ui.toggleSidebar()" class="md:hidden text-gray-600 p-2"><i class="fa-solid fa-bars text-xl"></i></button>
+            
+            <!-- Search -->
+            <div class="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2 w-96 group focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+                <i class="fa-solid fa-search text-gray-400 mr-2 group-focus-within:text-blue-500"></i>
+                <input type="text" id="globalSearch" placeholder="ค้นหาชื่อ, รหัสนักเรียน..." class="bg-transparent border-none outline-none text-sm w-full text-gray-700 placeholder-gray-400">
+            </div>
+
+            <!-- Header Actions -->
+            <div class="flex items-center gap-4">
+                <button onclick="App.ui.toggleNotifications()" class="relative p-2 text-gray-400 hover:text-blue-600 transition">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white animate-pulse"></span>
+                </button>
+                <div class="text-right hidden sm:block">
+                    <p class="text-xs text-gray-500" id="currentDate">Loading...</p>
+                    <p class="text-sm font-semibold text-primary">ภาคเรียนที่ 2/2566</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 relative scroll-smooth">
+            
+            <!-- VIEW: DASHBOARD -->
+            <section id="view-dashboard" class="fade-in space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">ภาพรวมสถานศึกษา</h1>
+                        <p class="text-gray-500 text-sm">สถิติและข้อมูลสรุปประจำวัน</p>
+                    </div>
+                    <button onclick="App.actions.downloadReport(this)" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg hover:shadow-blue-500/30 transition flex items-center gap-2">
+                        <i class="fa-solid fa-download"></i> ดาวน์โหลดรายงาน
+                    </button>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                    <!-- Helper function generates these to keep HTML clean? No, let's keep HTML for readability here -->
+                    <div onclick="App.router.go('students')" class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 card-hover cursor-pointer relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 h-full w-1 bg-blue-500 group-hover:w-1.5 transition-all"></div>
+                        <div class="flex justify-between items-start">
+                            <div><p class="text-sm text-gray-500">นักเรียนทั้งหมด</p><h3 class="text-3xl font-bold text-gray-800 mt-1">1,542</h3><p class="text-xs text-green-500 mt-1 flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up"></i> +2.5%</p></div>
+                            <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center"><i class="fa-solid fa-user-graduate"></i></div>
+                        </div>
+                    </div>
+                    <!-- More cards would go here, simplified for brevity but kept functional structure -->
+                     <div onclick="App.router.go('teachers')" class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 card-hover cursor-pointer relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 h-full w-1 bg-purple-500 group-hover:w-1.5 transition-all"></div>
+                        <div class="flex justify-between items-start">
+                            <div><p class="text-sm text-gray-500">บุคลากร</p><h3 class="text-3xl font-bold text-gray-800 mt-1">128</h3><p class="text-xs text-gray-400 mt-1">ครู 98 | จนท. 30</p></div>
+                            <div class="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center"><i class="fa-solid fa-chalkboard-user"></i></div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 card-hover relative overflow-hidden">
+                        <div class="absolute right-0 top-0 h-full w-1 bg-green-500"></div>
+                        <div class="flex justify-between items-start">
+                            <div><p class="text-sm text-gray-500">การเข้าเรียน</p><h3 class="text-3xl font-bold text-gray-800 mt-1">96.8%</h3><div class="w-24 bg-gray-200 rounded-full h-1 mt-2"><div class="bg-green-500 h-1 rounded-full" style="width: 96.8%"></div></div></div>
+                            <div class="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center"><i class="fa-solid fa-check"></i></div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 card-hover relative overflow-hidden">
+                        <div class="absolute right-0 top-0 h-full w-1 bg-orange-400"></div>
+                        <div class="flex justify-between items-start">
+                            <div><p class="text-sm text-gray-500">ความประพฤติ</p><h3 class="text-3xl font-bold text-gray-800 mt-1">4.85</h3><p class="text-xs text-orange-400 mt-1">เฉลี่ยรวม</p></div>
+                            <div class="w-10 h-10 rounded-full bg-orange-50 text-orange-400 flex items-center justify-center"><i class="fa-solid fa-star"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 lg:col-span-2">
+                        <h3 class="font-bold text-gray-700 mb-4">สถิตินักเรียนแยกตามชั้นเรียน</h3>
+                        <div class="h-64"><canvas id="chartStudents"></canvas></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-gray-700 mb-4">สถานะความประพฤติ</h3>
+                        <div class="h-48 flex justify-center"><canvas id="chartConduct"></canvas></div>
+                        <div class="mt-4 space-y-2 text-sm text-gray-600" id="conductLegend">
+                            <!-- Legend generated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: STUDENTS LIST -->
+            <section id="view-students" class="fade-in hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-gray-800">รายชื่อนักเรียน</h1>
+                    <button onclick="App.ui.toast('เปิดฟอร์มเพิ่มข้อมูล')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> เพิ่มนักเรียน
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b">
+                                <tr>
+                                    <th class="px-6 py-4">รหัส</th>
+                                    <th class="px-6 py-4">ชื่อ-นามสกุล</th>
+                                    <th class="px-6 py-4">ระดับชั้น</th>
+                                    <th class="px-6 py-4">GPA</th>
+                                    <th class="px-6 py-4">สถานะ</th>
+                                    <th class="px-6 py-4">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableStudents" class="divide-y divide-gray-100">
+                                <!-- Data injected by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: TEACHERS LIST -->
+            <section id="view-teachers" class="fade-in hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-gray-800">บุคลากรครู</h1>
+                    <button onclick="App.ui.toast('เปิดฟอร์มเพิ่มบุคลากร')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm transition flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> เพิ่มบุคลากร
+                    </button>
+                </div>
+                <div id="gridTeachers" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Data injected by JS -->
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Toast Component -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check text-green-500 text-lg"></i>
+        <span id="toast-msg" class="text-sm font-medium text-gray-700">Message</span>
+    </div>
+
+    <!-- 5. Application Logic -->
+    <script>
+        /** * APP NAMESPACE
+         * จัดการ logic ทั้งหมดไว้ใน Object เดียวเพื่อความเป็นระเบียบและลด Global Variable scope pollution
+         */
+        const App = {
+            // Configuration
+            config: {
+                colors: { blue: '#3b82f6', purple: '#a855f7', green: '#22c55e', red: '#ef4444', yellow: '#eab308' },
+                fonts: "'Noto Sans Thai', sans-serif"
+            },
+
+            // Mock Data Generator
+            data: {
+                students: [],
+                teachers: [
+                    { name: "อ.สมชาย ใจดี", dept: "วิทยาศาสตร์", img: "https://api.dicebear.com/7.x/avataaars/svg?seed=T1" },
+                    { name: "อ.ปราณี มีสุข", dept: "ภาษาไทย", img: "https://api.dicebear.com/7.x/avataaars/svg?seed=T2" },
+                    { name: "อ.วิชัย เก่งกาจ", dept: "คณิตศาสตร์", img: "https://api.dicebear.com/7.x/avataaars/svg?seed=T3" },
+                    { name: "อ.สุดา รักเด็ก", dept: "ภาษาอังกฤษ", img: "https://api.dicebear.com/7.x/avataaars/svg?seed=T4" },
+                    { name: "อ.มานะ อดทน", dept: "พลศึกษา", img: "https://api.dicebear.com/7.x/avataaars/svg?seed=T5" },
+                    { name: "อ.วีระ กล้าหาญ", dept: "สังคมศึกษา", img: "https://api.dicebear.com/7.x/avataaars/svg?seed=T6" },
+                ],
+                init() {
+                    // Generate Mock Students
+                    const firstNames = ["กานต์", "ณัฐ", "ปริญ", "วรินทร์", "ธีร", "พิม", "จิร", "อริส", "ภูริ", "ธน"];
+                    const lastNames = ["วิเศษ", "ใจดี", "มีสุข", "รักเรียน", "ปัญญา", "สวัสดิ์", "มั่นคง", "เจริญ"];
+                    const grades = ["ม.1", "ม.2", "ม.3", "ม.4", "ม.5", "ม.6"];
+                    
+                    this.students = Array.from({ length: 25 }, (_, i) => ({
+                        id: `STD${66000 + i}`,
+                        name: `${firstNames[Math.floor(Math.random()*firstNames.length)]} ${lastNames[Math.floor(Math.random()*lastNames.length)]}`,
+                        grade: `${grades[Math.floor(Math.random()*grades.length)]}/${Math.floor(Math.random()*5)+1}`,
+                        gpa: (2.00 + Math.random() * 2.00).toFixed(2),
+                        status: Math.random() > 0.15 ? 'ปกติ' : 'เฝ้าระวัง'
+                    }));
+                }
+            },
+
+            // Navigation Router
+            router: {
+                current: 'dashboard',
+                go(viewId) {
+                    // Hide all views
+                    document.querySelectorAll('section[id^="view-"]').forEach(el => el.classList.add('hidden'));
+                    // Show target
+                    document.getElementById(`view-${viewId}`).classList.remove('hidden');
+                    // Update Menu State
+                    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                    const navEl = document.getElementById(`nav-${viewId}`);
+                    if(navEl) navEl.classList.add('active');
+                    
+                    // Mobile: Close sidebar automatically
+                    if(window.innerWidth < 768) App.ui.toggleSidebar(false);
+                }
+            },
+
+            // UI Actions & Renderers
+            ui: {
+                toggleSidebar(forceState) {
+                    const sb = document.getElementById('sidebar');
+                    const isHidden = sb.classList.contains('hidden');
+                    
+                    if (forceState === false || (forceState === undefined && !isHidden)) {
+                        sb.classList.add('hidden');
+                        sb.classList.remove('fixed', 'inset-0', 'z-50', 'w-full');
+                    } else {
+                        sb.classList.remove('hidden');
+                        sb.classList.add('fixed', 'inset-0', 'z-50', 'w-full');
+                    }
+                },
+
+                toastTimeout: null,
+                toast(msg) {
+                    const el = document.getElementById('toast');
+                    document.getElementById('toast-msg').innerText = msg;
+                    el.classList.add('show');
+                    
+                    if(this.toastTimeout) clearTimeout(this.toastTimeout);
+                    this.toastTimeout = setTimeout(() => el.classList.remove('show'), 3000);
+                },
+
+                renderStudents(data) {
+                    const html = data.map(s => `
+                        <tr class="hover:bg-gray-50 transition border-b border-gray-50 last:border-0">
+                            <td class="px-6 py-4 font-mono text-gray-500">${s.id}</td>
+                            <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">${s.name.charAt(0)}</div>
+                                ${s.name}
+                            </td>
+                            <td class="px-6 py-4 text-gray-600">${s.grade}</td>
+                            <td class="px-6 py-4 font-semibold text-gray-700">${s.gpa}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 rounded-full text-xs font-medium ${s.status === 'ปกติ' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                                    ${s.status}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <button class="text-blue-600 hover:text-blue-800 text-xs font-medium" onclick="App.ui.toast('แก้ไข: ${s.name}')">แก้ไข</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                    document.getElementById('tableStudents').innerHTML = html;
+                },
+
+                renderTeachers(data) {
+                    const html = data.map(t => `
+                        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 card-hover cursor-pointer" onclick="App.ui.toast('โปรไฟล์: ${t.name}')">
+                            <img src="${t.img}" class="w-16 h-16 rounded-full bg-gray-100 object-cover">
+                            <div>
+                                <h3 class="font-bold text-gray-800">${t.name}</h3>
+                                <p class="text-sm text-gray-500">${t.dept}</p>
+                                <div class="mt-2 flex gap-1">
+                                    <span class="bg-blue-50 text-blue-600 text-[10px] px-2 py-0.5 rounded">ครูประจำชั้น</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                    document.getElementById('gridTeachers').innerHTML = html;
+                }
+            },
+
+            // Charts Management
+            charts: {
+                init() {
+                    Chart.defaults.font.family = App.config.fonts;
+                    Chart.defaults.color = '#64748b';
+
+                    // 1. Student Bar Chart
+                    new Chart(document.getElementById('chartStudents'), {
+                        type: 'bar',
+                        data: {
+                            labels: ['ม.1', 'ม.2', 'ม.3', 'ม.4', 'ม.5', 'ม.6'],
+                            datasets: [
+                                { label: 'ชาย', data: [120, 135, 140, 110, 125, 115], backgroundColor: App.config.colors.blue, borderRadius: 4 },
+                                { label: 'หญิง', data: [130, 125, 135, 115, 130, 120], backgroundColor: App.config.colors.purple, borderRadius: 4 }
+                            ]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, grid: {display: false} }, y: { stacked: true, border: {display: false} } } }
+                    });
+
+                    // 2. Conduct Doughnut Chart
+                    const conductData = [65, 25, 8, 2];
+                    const conductColors = [App.config.colors.green, App.config.colors.blue, App.config.colors.yellow, App.config.colors.red];
+                    const conductLabels = ['ดีเยี่ยม', 'ดี', 'ปานกลาง', 'ต้องปรับปรุง'];
+                    
+                    new Chart(document.getElementById('chartConduct'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: conductLabels,
+                            datasets: [{ data: conductData, backgroundColor: conductColors, borderWidth: 0, hoverOffset: 4 }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } } }
+                    });
+
+                    // Generate Custom Legend
+                    const legendHtml = conductLabels.map((label, i) => `
+                        <div class="flex justify-between items-center">
+                            <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:${conductColors[i]}"></span> ${label}</span>
+                            <span class="font-bold">${conductData[i]}%</span>
+                        </div>
+                    `).join('');
+                    document.getElementById('conductLegend').innerHTML = legendHtml;
+                }
+            },
+
+            // User Interactions
+            actions: {
+                downloadReport(btn) {
+                    const original = btn.innerHTML;
+                    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังประมวลผล...`;
+                    btn.disabled = true;
+                    setTimeout(() => {
+                        btn.innerHTML = original;
+                        btn.disabled = false;
+                        App.ui.toast('ดาวน์โหลดรายงานเรียบร้อยแล้ว');
+                    }, 1500);
+                },
+                
+                setupSearch() {
+                    document.getElementById('globalSearch').addEventListener('input', (e) => {
+                        const term = e.target.value.toLowerCase();
+                        const filtered = App.data.students.filter(s => s.name.toLowerCase().includes(term) || s.id.toLowerCase().includes(term));
+                        
+                        App.ui.renderStudents(filtered);
+                        if (term && document.getElementById('view-students').classList.contains('hidden')) {
+                            App.router.go('students');
+                        }
+                    });
+                }
+            },
+
+            // App Initialization
+            init() {
+                // Set Date
+                document.getElementById('currentDate').innerText = new Date().toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                
+                // Initialize Data & UI
+                this.data.init();
+                this.ui.renderStudents(this.data.students);
+                this.ui.renderTeachers(this.data.teachers);
+                this.charts.init();
+                this.actions.setupSearch();
+            }
+        };
+
+        // Start App when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => App.init());
+
+    </script>
+</body>
+</html>

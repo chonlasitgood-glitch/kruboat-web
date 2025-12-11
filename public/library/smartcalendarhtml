@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Calendar Workspace</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Prompt -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        },
+                        accent: {
+                            meeting: '#8b5cf6', // Violet
+                            teaching: '#f59e0b', // Amber
+                            personal: '#10b981', // Emerald
+                            urgent: '#ef4444',   // Red
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(14, 165, 233, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f3f4f6;
+            overflow: hidden; /* Hide main scrollbar */
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px; /* Slimmer scrollbar */
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Glassmorphism Sidebar */
+        .glass-sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Grid Transitions - FIXED LAYOUT */
+        .calendar-grid-month {
+            display: grid;
+            /* Use minmax(0, 1fr) to force equal width ignoring content */
+            grid-template-columns: repeat(7, minmax(0, 1fr)); 
+            /* Header fixed 40px, rest divide equally */
+            grid-template-rows: 40px repeat(6, minmax(0, 1fr)); 
+            gap: 1px;
+            background-color: #e2e8f0; 
+            height: 100%;
+            overflow: hidden; /* Prevent grid blowout */
+        }
+
+        .calendar-day-cell {
+            background-color: white;
+            transition: background-color 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Container hides overflow */
+        }
+        
+        .day-content-scroll {
+            flex: 1;
+            overflow-y: auto; /* Scroll internally if many events */
+            padding-bottom: 4px;
+            pointer-events: none; /* Let drag events bubble to cell, but re-enable for children */
+        }
+        .day-content-scroll > * {
+            pointer-events: auto; /* Re-enable pointer events for cards */
+        }
+
+        .calendar-day-cell:hover {
+            background-color: #f8fafc;
+        }
+        .calendar-day-cell.drag-over {
+            background-color: #e0f2fe;
+            border: 2px dashed #0ea5e9;
+        }
+
+        /* Event Card Styling */
+        .event-card {
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+            user-select: none;
+            white-space: nowrap; /* Force single line */
+            overflow: hidden;
+            text-overflow: ellipsis; /* ... if text too long */
+        }
+        .event-card:active {
+            cursor: grabbing;
+            transform: scale(1.02);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+        }
+        .event-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            border-radius: 4px 0 0 4px;
+        }
+        .type-meeting::before { background-color: #8b5cf6; }
+        .type-meeting { background-color: #f3e8ff; color: #5b21b6; }
+        
+        .type-teaching::before { background-color: #f59e0b; }
+        .type-teaching { background-color: #fef3c7; color: #92400e; }
+        
+        .type-personal::before { background-color: #10b981; }
+        .type-personal { background-color: #d1fae5; color: #065f46; }
+
+        .type-urgent::before { background-color: #ef4444; }
+        .type-urgent { background-color: #fee2e2; color: #991b1b; }
+
+        /* Animation */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Week View Specifics */
+        .time-slot-grid {
+            display: grid;
+            grid-template-columns: 60px repeat(7, minmax(0, 1fr)); /* Fixed columns here too */
+            overflow-y: auto;
+            height: calc(100vh - 180px);
+        }
+    </style>
+</head>
+<body class="flex h-screen text-slate-700 font-sans antialiased">
+
+    <!-- Sidebar -->
+    <aside class="w-80 glass-sidebar flex flex-col h-full shadow-xl z-20 hidden md:flex transition-all">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-calendar-check text-brand-500"></i>
+                Smart Calendar
+            </h1>
+            <p class="text-xs text-slate-400 mt-1 uppercase tracking-wider">Schedule yor passion</p>
+        </div>
+
+        <div class="px-6 pb-6">
+            <button onclick="openModal()" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium py-3 px-4 rounded-xl shadow-lg shadow-brand-500/30 transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plus"></i> สร้างนัดหมายใหม่
+            </button>
+        </div>
+
+        <!-- Mini Calendar (Static for visual context) -->
+        <div class="px-6 mb-6">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="font-bold text-sm text-slate-700" id="mini-calendar-month"></span>
+                </div>
+                <div class="grid grid-cols-7 text-center text-xs gap-y-3 text-slate-500" id="mini-calendar-grid">
+                    <!-- JS Injected -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="flex-1 overflow-y-auto px-6 pb-4">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">เร็วๆ นี้</h3>
+            <div id="upcoming-list" class="space-y-3">
+                <!-- JS Injected -->
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="p-6 border-t border-slate-200 bg-slate-50/50">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">ประเภท</h3>
+            <div class="space-y-2 text-sm">
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-violet-500"></span> ประชุม (Meeting)</div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-500"></span> การสอน (Teaching)</div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> ส่วนตัว (Personal)</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full relative overflow-hidden bg-white/50">
+        <!-- Header -->
+        <header class="h-20 bg-white border-b border-slate-200 px-6 flex justify-between items-center shrink-0 shadow-sm z-10">
+            <div class="flex items-center gap-4">
+                <button onclick="changeMonth(-1)" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <h2 id="current-month-display" class="text-xl font-bold text-slate-800 w-48 text-center select-none"></h2>
+                <button onclick="changeMonth(1)" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+                <button onclick="resetToToday()" class="text-sm font-medium text-brand-600 bg-brand-50 px-3 py-1 rounded-lg hover:bg-brand-100 transition-colors ml-2">
+                    วันนี้
+                </button>
+            </div>
+
+            <div class="flex bg-slate-100 p-1 rounded-lg">
+                <button onclick="switchView('month')" id="btn-month" class="px-4 py-1.5 rounded-md text-sm font-medium transition-all shadow-sm bg-white text-slate-800">เดือน</button>
+                <button onclick="switchView('week')" id="btn-week" class="px-4 py-1.5 rounded-md text-sm font-medium transition-all text-slate-500 hover:text-slate-700">สัปดาห์</button>
+                <button onclick="switchView('day')" id="btn-day" class="px-4 py-1.5 rounded-md text-sm font-medium transition-all text-slate-500 hover:text-slate-700">วัน</button>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-500 to-indigo-500 text-white flex items-center justify-center font-bold text-sm shadow-glow">
+                    A
+                </div>
+            </div>
+        </header>
+
+        <!-- Calendar Container -->
+        <div id="calendar-container" class="flex-1 overflow-hidden relative bg-white">
+            <!-- Content Injected by JS -->
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div id="eventModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-transform duration-300" id="modalContent">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-2xl">
+                <h3 class="text-lg font-bold text-slate-800" id="modalTitle">เพิ่มนัดหมายใหม่</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">หัวข้อ</label>
+                    <input type="text" id="evtTitle" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all" placeholder="เช่น ประชุมแผนงาน Q3">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">วันที่</label>
+                        <input type="date" id="evtDate" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">เวลา</label>
+                        <input type="time" id="evtTime" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">ประเภท</label>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="selectType('meeting')" class="type-btn flex-1 py-2 rounded-lg border border-slate-200 text-sm hover:bg-violet-50 hover:border-violet-300 hover:text-violet-700 transition-all" data-type="meeting">ประชุม</button>
+                        <button type="button" onclick="selectType('teaching')" class="type-btn flex-1 py-2 rounded-lg border border-slate-200 text-sm hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 transition-all" data-type="teaching">สอน</button>
+                        <button type="button" onclick="selectType('personal')" class="type-btn flex-1 py-2 rounded-lg border border-slate-200 text-sm hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 transition-all" data-type="personal">ส่วนตัว</button>
+                    </div>
+                    <input type="hidden" id="evtType" value="meeting">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">รายละเอียด</label>
+                    <textarea id="evtDesc" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"></textarea>
+                </div>
+            </div>
+            <div class="p-6 pt-0 flex justify-end gap-3">
+                <button onclick="closeModal()" class="px-4 py-2 rounded-lg text-slate-500 hover:bg-slate-100 font-medium transition-colors">ยกเลิก</button>
+                <button onclick="saveEvent()" class="px-6 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-medium shadow-lg shadow-brand-500/30 transition-all">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Configuration & State ---
+        const thMonthNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+        const thDayNamesFull = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+        const thDayNamesShort = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
+
+        let currentDate = new Date();
+        let currentView = 'month'; // month, week, day
+        let events = [];
+        let draggedEventId = null;
+        let draggedElement = null; // New state to hold the dragged DOM element
+
+        // --- Mock Data Generator ---
+        function generateMockData() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = today.getMonth();
+            const d = today.getDate();
+
+            // Create random events based on current date
+            return [
+                { id: 1, title: 'ประชุมทีมประจำสัปดาห์', date: new Date(year, month, d, 9, 30), type: 'meeting', desc: 'คุยเรื่อง KPI Q4' },
+                { id: 2, title: 'สอนวิชา UX/UI Design', date: new Date(year, month, d, 13, 0), type: 'teaching', desc: 'Class B, Room 404' },
+                { id: 3, title: 'ส่งรายงาน Project A', date: new Date(year, month, d + 2, 17, 0), type: 'urgent', desc: 'Deadline!' },
+                { id: 4, title: 'นัดทานข้าวกับลูกค้า', date: new Date(year, month, d - 2, 12, 0), type: 'meeting', desc: 'คุณสมชาย บ.ABC' },
+                { id: 5, title: 'ตรวจสุขภาพประจำปี', date: new Date(year, month, d + 5, 8, 0), type: 'personal', desc: 'โรงพยาบาลกรุงเทพ' },
+                { id: 6, title: 'Workshop Design System', date: new Date(year, month, d + 1, 10, 0), type: 'teaching', desc: 'เตรียม Laptop มาด้วย' },
+                { id: 7, title: 'Brainstorm ไอเดียใหม่', date: new Date(year, month, d + 1, 14, 0), type: 'meeting', desc: 'ห้อง Glass Box' },
+                { id: 8, title: 'วันหยุดพักผ่อน', date: new Date(year, month, d + 7, 0, 0), type: 'personal', desc: 'ลาพักร้อน' },
+            ];
+        }
+
+        // --- Initialization ---
+        window.addEventListener('DOMContentLoaded', () => {
+            events = generateMockData();
+            renderCalendar();
+            renderSidebar();
+        });
+
+        // --- Core Rendering ---
+        function renderCalendar() {
+            const container = document.getElementById('calendar-container');
+            container.innerHTML = '';
+            
+            updateHeader();
+
+            if (currentView === 'month') renderMonthView(container);
+            else if (currentView === 'week') renderWeekView(container);
+            else if (currentView === 'day') renderDayView(container);
+
+            animateView();
+        }
+
+        function updateHeader() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const day = currentDate.getDate();
+            
+            let displayText = `${thMonthNames[month]} ${year + 543}`;
+            if (currentView === 'day') {
+                displayText = `${day} ${thMonthNames[month]} ${year + 543}`;
+            }
+            document.getElementById('current-month-display').textContent = displayText;
+
+            // Update Mini Calendar
+            document.getElementById('mini-calendar-month').textContent = `${thMonthNames[month]} ${year + 543}`;
+            renderMiniCalendar();
+
+            // Update View Buttons
+            document.querySelectorAll('#btn-month, #btn-week, #btn-day').forEach(btn => {
+                btn.className = "px-4 py-1.5 rounded-md text-sm font-medium transition-all text-slate-500 hover:text-slate-700";
+            });
+            const activeBtn = document.getElementById(`btn-${currentView}`);
+            activeBtn.className = "px-4 py-1.5 rounded-md text-sm font-medium transition-all shadow-sm bg-white text-brand-600";
+        }
+
+        // --- Helper: Format Date YYYY-MM-DD (Local) ---
+        function formatDateLocal(year, month, day) {
+            // Month is 0-indexed in JS, but human readable is 1-indexed
+            const m = String(month + 1).padStart(2, '0');
+            const d = String(day).padStart(2, '0');
+            return `${year}-${m}-${d}`;
+        }
+
+        // --- Month View ---
+        function renderMonthView(container) {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const prevMonthDays = new Date(year, month, 0).getDate();
+
+            const grid = document.createElement('div');
+            grid.className = 'calendar-grid-month fade-in';
+
+            // Headers
+            thDayNamesShort.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'bg-slate-50 p-2 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider sticky top-0 z-10 border-b border-slate-200 flex items-center justify-center';
+                header.textContent = day;
+                grid.appendChild(header);
+            });
+
+            // Days
+            let dayCount = 1;
+            let nextMonthDay = 1;
+
+            // 6 rows * 7 cols = 42 cells
+            for (let i = 0; i < 42; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'calendar-day-cell relative border-b border-r border-slate-100';
+                
+                // Content Wrapper for scrolling
+                const contentWrapper = document.createElement('div');
+                contentWrapper.className = 'day-content-scroll px-1';
+
+                // Date Number Container
+                const dateHeader = document.createElement('div');
+                dateHeader.className = 'flex justify-end p-2 sticky top-0 bg-white/80 backdrop-blur-sm z-10 pointer-events-none'; // Click through header
+
+                // Set Date Attribute for Drag & Drop
+                let cellDateStr = '';
+
+                if (i < firstDay) {
+                    // Previous Month
+                    cell.className += ' bg-slate-50/30 text-slate-300';
+                    dateHeader.innerHTML = `<span class="text-sm">${prevMonthDays - firstDay + i + 1}</span>`;
+                } else if (dayCount > daysInMonth) {
+                    // Next Month
+                    cell.className += ' bg-slate-50/50 text-slate-300';
+                    dateHeader.innerHTML = `<span class="text-sm">${nextMonthDay}</span>`;
+                    
+                    // Construct Date for Next Month (Fix: Local Time Format)
+                    cellDateStr = formatDateLocal(year, month + 1, nextMonthDay);
+                    nextMonthDay++;
+                } else {
+                    // Current Month
+                    const isToday = dayCount === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
+                    const dateNum = isToday 
+                        ? `<span class="w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center text-sm font-bold shadow-md shadow-brand-500/30">${dayCount}</span>`
+                        : `<span class="text-sm font-medium text-slate-600">${dayCount}</span>`;
+                    
+                    dateHeader.innerHTML = dateNum;
+                    
+                    // Add click to create
+                    const currentD = dayCount;
+                    cell.onclick = (e) => {
+                        // Only trigger if clicking cell background or specific non-interactive areas
+                        if(e.target === cell || e.target === contentWrapper || e.target.closest('.pointer-events-none')) {
+                            openModal(new Date(year, month, currentD));
+                        }
+                    };
+
+                    // Construct Date for this cell (Fix: Local Time Format)
+                    cellDateStr = formatDateLocal(year, month, dayCount);
+
+                    // Find events
+                    const dayEvents = events.filter(e => {
+                        return e.date.getDate() === dayCount && 
+                               e.date.getMonth() === month && 
+                               e.date.getFullYear() === year;
+                    });
+
+                    // Render Events inside contentWrapper
+                    const eventContainer = document.createElement('div');
+                    eventContainer.className = 'flex flex-col gap-1';
+                    
+                    dayEvents.forEach(evt => {
+                        const el = document.createElement('div');
+                        el.className = `event-card relative px-2 py-1 rounded text-xs font-medium truncate type-${evt.type}`;
+                        el.textContent = `${evt.date.getHours()}:${evt.date.getMinutes().toString().padStart(2,'0')} ${evt.title}`;
+                        el.title = evt.title; // Tooltip for full text
+                        el.draggable = true;
+                        el.ondragstart = (e) => dragStart(e, evt.id);
+                        el.onclick = (e) => { e.stopPropagation(); editEvent(evt.id); };
+                        eventContainer.appendChild(el);
+                    });
+                    
+                    contentWrapper.appendChild(eventContainer);
+                    dayCount++;
+                }
+
+                // Add Drag & Drop Listeners to Cell
+                if (cellDateStr) {
+                    cell.setAttribute('data-date', cellDateStr);
+                    cell.ondragover = (e) => dragOver(e, cell);
+                    cell.ondragleave = (e) => dragLeave(e, cell);
+                    cell.ondrop = (e) => drop(e, cell);
+                }
+
+                // Assemble Cell
+                cell.appendChild(dateHeader);
+                cell.appendChild(contentWrapper);
+                grid.appendChild(cell);
+            }
+
+            container.appendChild(grid);
+        }
+
+        // --- Week View ---
+        function renderWeekView(container) {
+            const startOfWeek = new Date(currentDate);
+            startOfWeek.setDate(currentDate.getDate() - currentDate.getDay()); // Sunday start
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'time-slot-grid fade-in h-full bg-white';
+
+            // Time Column
+            const timeCol = document.createElement('div');
+            timeCol.className = 'border-r border-slate-200 mt-10';
+            for (let i = 8; i <= 18; i++) {
+                const timeSlot = document.createElement('div');
+                timeSlot.className = 'h-20 text-xs text-slate-400 text-right pr-2 pt-2 border-b border-slate-100';
+                timeSlot.textContent = `${i}:00`;
+                timeCol.appendChild(timeSlot);
+            }
+            wrapper.appendChild(timeCol);
+
+            // Day Columns
+            for (let i = 0; i < 7; i++) {
+                const currentDay = new Date(startOfWeek);
+                currentDay.setDate(startOfWeek.getDate() + i);
+                
+                const col = document.createElement('div');
+                col.className = 'border-r border-slate-100 min-w-[120px] relative';
+
+                // Header
+                const header = document.createElement('div');
+                const isToday = currentDay.toDateString() === new Date().toDateString();
+                header.className = `text-center p-2 border-b border-slate-200 sticky top-0 bg-white z-10 ${isToday ? 'bg-brand-50' : ''}`;
+                header.innerHTML = `
+                    <div class="text-xs text-slate-400 mb-1">${thDayNamesShort[i]}</div>
+                    <div class="text-lg font-bold ${isToday ? 'text-brand-600' : 'text-slate-700'}">${currentDay.getDate()}</div>
+                `;
+                col.appendChild(header);
+
+                // Grid Lines
+                for (let h = 8; h <= 18; h++) {
+                    const slot = document.createElement('div');
+                    slot.className = 'h-20 border-b border-slate-50';
+                    // Allow click to add
+                    slot.onclick = () => openModal(new Date(currentDay.getFullYear(), currentDay.getMonth(), currentDay.getDate(), h, 0));
+                    col.appendChild(slot);
+                }
+
+                // Place Events (Absolute Positioning)
+                const dayEvents = events.filter(e => e.date.toDateString() === currentDay.toDateString());
+                dayEvents.forEach(evt => {
+                    if (evt.date.getHours() >= 8 && evt.date.getHours() <= 18) {
+                        const eventEl = document.createElement('div');
+                        eventEl.className = `absolute left-1 right-1 rounded p-2 text-xs font-medium shadow-sm cursor-pointer hover:brightness-95 type-${evt.type} overflow-hidden`;
+                        
+                        // Calculate position
+                        const startHour = evt.date.getHours();
+                        const top = (startHour - 8) * 80 + 45; // 80px height per hour + header offset
+                        eventEl.style.top = `${top}px`;
+                        eventEl.style.height = '70px'; // fixed height for demo
+                        eventEl.innerHTML = `<b>${evt.title}</b><br>${evt.desc}`;
+                        
+                        col.appendChild(eventEl);
+                    }
+                });
+
+                wrapper.appendChild(col);
+            }
+
+            container.appendChild(wrapper);
+        }
+
+        // --- Day View ---
+        function renderDayView(container) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'max-w-3xl mx-auto p-6 fade-in overflow-y-auto h-full'; // Added overflow-y-auto here
+
+            const dayEvents = events.filter(e => e.date.toDateString() === currentDate.toDateString());
+            dayEvents.sort((a, b) => a.date - b.date);
+
+            if (dayEvents.length === 0) {
+                wrapper.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-96 text-slate-400">
+                        <i class="fa-regular fa-calendar-xmark text-6xl mb-4 text-slate-200"></i>
+                        <p>ไม่มีนัดหมายในวันนี้</p>
+                        <button onclick="openModal(currentDate)" class="mt-4 text-brand-600 font-medium hover:underline">สร้างนัดหมาย</button>
+                    </div>
+                `;
+            } else {
+                dayEvents.forEach(evt => {
+                    const card = document.createElement('div');
+                    card.className = `flex gap-4 p-4 mb-4 rounded-xl bg-white shadow-soft border-l-4 border-l-${getTypeColor(evt.type)}`;
+                    card.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-w-[80px] text-slate-600">
+                            <span class="text-lg font-bold">${evt.date.getHours()}:${evt.date.getMinutes().toString().padStart(2, '0')}</span>
+                            <span class="text-xs text-slate-400">ถึง 1 ชม.</span>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-lg text-slate-800">${evt.title}</h4>
+                            <p class="text-slate-500 text-sm mt-1"><i class="fa-solid fa-align-left mr-2"></i>${evt.desc}</p>
+                            <span class="inline-block mt-2 text-xs px-2 py-1 rounded bg-slate-100 text-slate-500 capitalize">${evt.type}</span>
+                        </div>
+                        <button class="text-slate-300 hover:text-brand-500 transition-colors self-start"><i class="fa-solid fa-pen"></i></button>
+                    `;
+                    // Manual color fix for inline styles due to dynamic classes
+                    if(evt.type === 'meeting') card.style.borderLeftColor = '#8b5cf6';
+                    if(evt.type === 'teaching') card.style.borderLeftColor = '#f59e0b';
+                    if(evt.type === 'personal') card.style.borderLeftColor = '#10b981';
+                    if(evt.type === 'urgent') card.style.borderLeftColor = '#ef4444';
+
+                    wrapper.appendChild(card);
+                });
+            }
+            container.appendChild(wrapper);
+        }
+
+        // --- Sidebar Components ---
+        function renderSidebar() {
+            renderMiniCalendar();
+            renderUpcoming();
+        }
+
+        function renderMiniCalendar() {
+            const grid = document.getElementById('mini-calendar-grid');
+            grid.innerHTML = '';
+            
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Headers
+            thDayNamesShort.forEach(d => {
+                const el = document.createElement('div');
+                el.textContent = d;
+                grid.appendChild(el);
+            });
+
+            // Empty slots
+            for(let i=0; i<firstDay; i++) {
+                grid.appendChild(document.createElement('div'));
+            }
+
+            // Days
+            for(let i=1; i<=daysInMonth; i++) {
+                const el = document.createElement('div');
+                el.textContent = i;
+                el.className = 'w-6 h-6 flex items-center justify-center rounded-full mx-auto cursor-pointer hover:bg-slate-100 text-slate-600';
+                
+                // Highlight today
+                const isToday = i === new Date().getDate() && month === new Date().getMonth();
+                if(isToday) el.className = 'w-6 h-6 flex items-center justify-center rounded-full mx-auto bg-brand-500 text-white shadow-md';
+                
+                // Highlight active
+                if(i === currentDate.getDate()) el.className += ' ring-2 ring-brand-200';
+
+                el.onclick = () => {
+                    currentDate = new Date(year, month, i);
+                    renderCalendar();
+                };
+                grid.appendChild(el);
+            }
+        }
+
+        function renderUpcoming() {
+            const list = document.getElementById('upcoming-list');
+            list.innerHTML = '';
+            
+            // Get future events
+            const future = events.filter(e => e.date >= new Date()).sort((a,b) => a.date - b.date).slice(0, 5);
+            
+            future.forEach(evt => {
+                const item = document.createElement('div');
+                item.className = 'flex gap-3 items-center p-3 rounded-xl bg-white shadow-sm border border-slate-100 hover:shadow-md transition-shadow cursor-pointer';
+                const day = evt.date.getDate();
+                const m = thMonthNames[evt.date.getMonth()].substring(0, 3);
+                
+                let colorClass = 'bg-slate-200';
+                if(evt.type === 'meeting') colorClass = 'bg-violet-100 text-violet-600';
+                if(evt.type === 'teaching') colorClass = 'bg-amber-100 text-amber-600';
+                if(evt.type === 'personal') colorClass = 'bg-emerald-100 text-emerald-600';
+                if(evt.type === 'urgent') colorClass = 'bg-red-100 text-red-600';
+
+                item.innerHTML = `
+                    <div class="flex flex-col items-center justify-center w-10 h-10 rounded-lg ${colorClass} font-bold text-xs shrink-0">
+                        <span>${day}</span>
+                        <span class="text-[10px] opacity-80">${m}</span>
+                    </div>
+                    <div class="min-w-0">
+                        <h4 class="text-sm font-semibold text-slate-700 truncate">${evt.title}</h4>
+                        <p class="text-xs text-slate-400 truncate">${evt.desc}</p>
+                    </div>
+                `;
+                item.onclick = () => {
+                    currentDate = evt.date;
+                    renderCalendar();
+                };
+                list.appendChild(item);
+            });
+        }
+
+        // --- Interaction Logic ---
+        function switchView(view) {
+            currentView = view;
+            renderCalendar();
+        }
+
+        function changeMonth(delta) {
+            if (currentView === 'day') {
+                currentDate.setDate(currentDate.getDate() + delta);
+            } else {
+                currentDate.setMonth(currentDate.getMonth() + delta);
+            }
+            renderCalendar();
+        }
+
+        function resetToToday() {
+            currentDate = new Date();
+            renderCalendar();
+        }
+
+        function animateView() {
+            // Re-trigger animations if needed
+            const grid = document.querySelector('.calendar-grid-month') || document.querySelector('.time-slot-grid');
+            if(grid) {
+                grid.classList.remove('fade-in');
+                void grid.offsetWidth; // trigger reflow
+                grid.classList.add('fade-in');
+            }
+        }
+
+        function getTypeColor(type) {
+             // helper for day view
+             return 'slate-400';
+        }
+
+        // --- Modal & Form ---
+        function openModal(dateObj = null) {
+            const modal = document.getElementById('eventModal');
+            const content = document.getElementById('modalContent');
+            
+            // Set Date/Time Inputs
+            const d = dateObj || new Date();
+            
+            // Fix: Use Local date string format for input
+            document.getElementById('evtDate').value = formatDateLocal(d.getFullYear(), d.getMonth(), d.getDate());
+            
+            const h = d.getHours().toString().padStart(2, '0');
+            const m = d.getMinutes().toString().padStart(2, '0');
+            document.getElementById('evtTime').value = `${h}:${m}`;
+            
+            // Reset fields
+            document.getElementById('evtTitle').value = '';
+            document.getElementById('evtDesc').value = '';
+            
+            // Show
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('eventModal');
+            const content = document.getElementById('modalContent');
+            
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function selectType(type) {
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-offset-1', 'ring-brand-400', 'bg-slate-50');
+            });
+            const active = document.querySelector(`.type-btn[data-type="${type}"]`);
+            active.classList.add('ring-2', 'ring-offset-1', 'ring-brand-400');
+            document.getElementById('evtType').value = type;
+        }
+
+        function saveEvent() {
+            const title = document.getElementById('evtTitle').value;
+            const dateStr = document.getElementById('evtDate').value;
+            const timeStr = document.getElementById('evtTime').value;
+            const type = document.getElementById('evtType').value;
+            const desc = document.getElementById('evtDesc').value;
+
+            if(!title || !dateStr) return alert('กรุณากรอกหัวข้อและวันที่');
+
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const [hr, mn] = timeStr.split(':').map(Number);
+            
+            const newEvent = {
+                id: Date.now(),
+                title,
+                date: new Date(y, m-1, d, hr, mn),
+                type,
+                desc
+            };
+
+            events.push(newEvent);
+            closeModal();
+            renderCalendar();
+            renderSidebar();
+        }
+
+        // --- Drag & Drop (OPTIMIZED - NO BLINKING) ---
+        function dragStart(e, id) {
+            draggedEventId = id;
+            draggedElement = e.target; // Capture the DOM element
+            e.dataTransfer.effectAllowed = "move";
+            
+            // Use setTimeout to ensure the browser captures the drag image fully opaque 
+            // before we lower opacity on the element staying in the DOM
+            setTimeout(() => {
+                if(e.target) e.target.style.opacity = '0.5';
+            }, 0);
+        }
+
+        function dragOver(e, cell) {
+            e.preventDefault(); 
+            e.dataTransfer.dropEffect = "move";
+            cell.classList.add('drag-over');
+        }
+
+        function dragLeave(e, cell) {
+            // Only remove if we are really leaving the cell, not just entering a child
+            if (!cell.contains(e.relatedTarget)) {
+                cell.classList.remove('drag-over');
+            }
+        }
+
+        function drop(e, cell) {
+            e.preventDefault();
+            cell.classList.remove('drag-over');
+            
+            const targetDateStr = cell.getAttribute('data-date');
+            if (!targetDateStr || !draggedEventId) return;
+
+            const evtIndex = events.findIndex(evt => evt.id === draggedEventId);
+            if (evtIndex > -1) {
+                const oldDate = events[evtIndex].date;
+                const [targetY, targetM, targetD] = targetDateStr.split('-').map(Number);
+                
+                // Construct new date preserving original time
+                const newDate = new Date(
+                    targetY,
+                    targetM - 1,
+                    targetD,
+                    oldDate.getHours(),
+                    oldDate.getMinutes()
+                );
+
+                events[evtIndex].date = newDate;
+                
+                // --- NO-BLINK DOM MANIPULATION ---
+                if (currentView === 'month' && draggedElement) {
+                    // Restore opacity
+                    draggedElement.style.opacity = '1';
+                    
+                    // Find the container inside the drop target cell
+                    const targetContainer = cell.querySelector('.day-content-scroll > div');
+                    
+                    if (targetContainer) {
+                        // Directly move the DOM element (no full re-render)
+                        targetContainer.appendChild(draggedElement);
+                    } else {
+                        // Fallback safely if structure is missing
+                        renderCalendar();
+                    }
+                } else {
+                    // For other views, standard re-render is safer
+                    renderCalendar();
+                }
+                
+                // Sidebar still updates to reflect changes (optional, usually fast enough)
+                renderSidebar();
+                
+                draggedEventId = null;
+                draggedElement = null;
+            }
+        }
+    </script>
+</body>
+</html>
