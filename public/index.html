@@ -19,12 +19,27 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1153070485202875"
      crossorigin="anonymous"></script>
 
+    <!-- Meta Tags & SEO -->
     <meta name="description" content="เว็บไซต์ครูโบ๊ท (KruBoat.com) แหล่งรวมสื่อการเรียนรู้ และคลังความรู้สำหรับนักพัฒนา แบ่งปันโปรแกรมและ Source Code ฟรีสำหรับครูและนักเรียน">
     <meta name="keywords" content="ครูโบ๊ท, เว็บครูโบ๊ท, ครูโบ๊ทดอทคอม, kruboat, webkruboat, kruboat.com, สื่อการสอน, คลังโค้ด, แจกโค้ดฟรี, แจกระบบ, แจกโปรแกรม">
     <meta name="author" content="ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์">
+
+    <!-- Open Graph / Social Media Sharing -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.kruboat.com/">
+    <meta property="og:title" content="ครูโบ๊ท (KruBoat.com) | แหล่งรวมสื่อและโค้ดเพื่อการศึกษา">
+    <meta property="og:description" content="เว็บไซต์แบ่งปันสื่อการเรียนรู้ Application และ Source Code ฟรีสำหรับครู นักพัฒนา และนักเรียน">
+    <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/kruboat-web.firebasestorage.app/o/kruboat.com-profile.JPG?alt=media">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ครูโบ๊ท (KruBoat.com)">
+    <meta name="twitter:description" content="เว็บไซต์แบ่งปันสื่อการเรียนรู้ Application และ Source Code ฟรี">
+    <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/kruboat-web.firebasestorage.app/o/kruboat.com-profile.JPG?alt=media">
     
-    <link rel="icon" href="https://lh3.googleusercontent.com/d/1VUZ7MASQaCBSjW1IdE4Ip4O81Jxzqyk6">
-    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1VUZ7MASQaCBSjW1IdE4Ip4O81Jxzqyk6">
+    <!-- Favicon -->
+    <link rel="icon" href="https://firebasestorage.googleapis.com/v0/b/kruboat-web.firebasestorage.app/o/kruboat.com-profile.JPG?alt=media">
+    <link rel="apple-touch-icon" href="https://firebasestorage.googleapis.com/v0/b/kruboat-web.firebasestorage.app/o/kruboat.com-profile.JPG?alt=media">
 
     <script type="application/ld+json">
     {
@@ -32,13 +47,17 @@
       "@type": "Person",
       "name": "ครูโบ๊ท (KruBoat)",
       "url": "https://www.kruboat.com",
-      "image": "https://lh3.googleusercontent.com/d/1VUZ7MASQaCBSjW1IdE4Ip4O81Jxzqyk6",
+      "image": "https://firebasestorage.googleapis.com/v0/b/kruboat-web.firebasestorage.app/o/kruboat.com-profile.JPG?alt=media",
       "jobTitle": "Teacher & Developer"
     }
     </script>
 
     <meta name="referrer" content="no-referrer">
+    
+    <!-- Tailwind CSS -->
+    <!-- หมายเหตุ: สำหรับ Production แนะนำให้ Build เป็นไฟล์ style.css โดยใช้คำสั่ง: npx tailwindcss -i ./src/input.css -o ./public/style.css --minify -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style> body { font-family: 'Sarabun', sans-serif; } </style>
@@ -47,7 +66,10 @@
 
     <nav class="bg-white shadow-md sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="/" class="text-xl font-bold text-blue-600"><i class="fa-solid fa-graduation-cap"></i> KruBoat</a>
+            <a href="/" class="text-xl font-bold text-blue-600 flex items-center gap-2">
+                <img src="https://firebasestorage.googleapis.com/v0/b/kruboat-web.firebasestorage.app/o/kruboat.com-profile.JPG?alt=media" class="w-8 h-8 rounded-full border border-blue-100" alt="Logo">
+                KruBoat
+            </a>
 
             <div class="hidden md:flex space-x-6 text-sm font-medium">
                 <a href="index.html" class="text-blue-600 font-semibold">หน้าแรก</a>
@@ -71,19 +93,19 @@
 
     <header class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-12 text-center">
         <div class="container mx-auto px-4">
-            <h1 class="text-4xl md:text-4xl font-bold mb-4">ยินดีต้อนรับสู่ KruBoat.com</h1>
-            <p class="text-lg md:text-l opacity-90 mb-8">แหล่งรวมสื่อการจัดการเรียนการสอน Application, Source Code และคลังความรู้สำหรับครู นักพัฒนา และนักเรียน</p>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 drop-shadow-sm">ยินดีต้อนรับสู่ KruBoat.com</h1>
+            <p class="text-lg md:text-xl opacity-90 mb-8 font-light">แหล่งรวมสื่อการจัดการเรียนการสอน Application, Source Code และคลังความรู้สำหรับครู นักพัฒนา และนักเรียน</p>
             
             <div class="flex flex-col sm:flex-row justify-center gap-4 items-center">
-                <a href="student/" class="bg-white text-blue-600 px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition shadow-lg min-w-[180px]">
+                <a href="student/" class="bg-white text-blue-600 px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition shadow-lg min-w-[180px] transform hover:-translate-y-1">
                     <i class="fa-solid fa-user-check mr-2"></i>นักเรียนคลิกที่นี่
                 </a>
                 
-                <a href="app/" class="bg-teal-500 text-white border-2 border-teal-500 px-6 py-3 rounded-full font-bold hover:bg-teal-600 transition shadow-lg min-w-[180px]">
+                <a href="app/" class="bg-teal-500 text-white border-2 border-teal-500 px-6 py-3 rounded-full font-bold hover:bg-teal-600 transition shadow-lg min-w-[180px] transform hover:-translate-y-1">
                     <i class="fa-solid fa-rocket mr-2"></i>ดูแอปทั้งหมด
                 </a>
 
-                <a href="library.html" class="relative group bg-slate-900 text-green-400 border-2 border-green-500 px-6 py-3 rounded-full font-bold hover:bg-green-600 hover:text-white transition shadow-lg flex items-center justify-center gap-2 min-w-[180px]">
+                <a href="library.html" class="relative group bg-slate-900 text-green-400 border-2 border-green-500 px-6 py-3 rounded-full font-bold hover:bg-green-600 hover:text-white transition shadow-lg flex items-center justify-center gap-2 min-w-[180px] transform hover:-translate-y-1">
                     <i class="fa-solid fa-code"></i> คลังแจกโค้ด
                     <span class="absolute -top-3 -right-2 bg-yellow-400 text-slate-900 text-[10px] px-2 py-0.5 rounded shadow-sm font-mono transform rotate-12 group-hover:rotate-0 transition border border-slate-900">&lt;get code/&gt;</span>
                 </a>
@@ -95,10 +117,18 @@
     <section class="bg-white py-14">
         <div class="container mx-auto px-4">
             <div class="flex items-center mb-8">
-                <div class="w-2 h-8 bg-purple-600 mr-3 rounded"></div>
+                <div class="w-1.5 h-8 bg-purple-600 mr-3 rounded-full"></div>
                 <h2 class="text-3xl font-bold text-gray-800">คลังโค้ดล่าสุด</h2>
             </div>
-            <div id="home-portfolio-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+            
+            <div id="home-portfolio-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Skeleton Loading for Portfolio -->
+                <div class="animate-pulse bg-gray-100 rounded-xl h-64 w-full"></div>
+                <div class="animate-pulse bg-gray-100 rounded-xl h-64 w-full"></div>
+                <div class="animate-pulse bg-gray-100 rounded-xl h-64 w-full"></div>
+                <div class="animate-pulse bg-gray-100 rounded-xl h-64 w-full"></div>
+            </div>
+            
             <div class="text-center mt-8">
                 <a href="library.html" class="inline-block text-purple-600 font-semibold hover:text-purple-800 transition border border-purple-200 hover:border-purple-600 px-6 py-2 rounded-full">
                     ดูคลังโค้ดทั้งหมด <i class="fa-solid fa-arrow-right ml-2"></i>
@@ -107,47 +137,112 @@
         </div>
     </section>
 
-    <!-- 2. แอพครูโบ๊ทล่าสุด -->
+    <!-- ✅ 2. แอพครูโบ๊ทล่าสุด -->
     <section class="bg-gray-50 py-14 border-t border-b border-gray-200">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between mb-8">
                 <div class="flex items-center">
-                    <div class="w-2 h-8 bg-teal-500 mr-3 rounded"></div>
+                    <div class="w-1.5 h-8 bg-teal-500 mr-3 rounded-full"></div>
                     <h2 class="text-3xl font-bold text-gray-800">แอปและเกมใหม่</h2>
                 </div>
             </div>
             
+            <!-- Grid 3 คอลัมน์สำหรับ 3 หมวดหมู่ -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Tools -->
+                
+                <!-- Tools Container -->
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
                     <h3 class="font-bold text-lg text-gray-700 mb-4 flex items-center pb-3 border-b border-gray-100">
                         <div class="w-8 h-8 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center mr-3"><i class="fa-solid fa-toolbox"></i></div>
                         เครื่องมือ
                     </h3>
                     <div id="home-tools-list" class="space-y-4 min-h-[100px]">
-                        <div class="text-center text-gray-400 text-sm py-4"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>
+                        <!-- Skeleton Loading: Tools -->
+                        <div class="animate-pulse flex items-center space-x-3 mb-3">
+                           <div class="rounded-lg bg-gray-200 h-10 w-10"></div>
+                           <div class="flex-1 space-y-2">
+                             <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                             <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                           </div>
+                        </div>
+                        <div class="animate-pulse flex items-center space-x-3 mb-3">
+                           <div class="rounded-lg bg-gray-200 h-10 w-10"></div>
+                           <div class="flex-1 space-y-2">
+                             <div class="h-4 bg-gray-200 rounded w-2/3"></div>
+                             <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                           </div>
+                        </div>
+                        <div class="animate-pulse flex items-center space-x-3 mb-3">
+                           <div class="rounded-lg bg-gray-200 h-10 w-10"></div>
+                           <div class="flex-1 space-y-2">
+                             <div class="h-4 bg-gray-200 rounded w-4/5"></div>
+                             <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                           </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Games -->
+                <!-- Games Container -->
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
                     <h3 class="font-bold text-lg text-gray-700 mb-4 flex items-center pb-3 border-b border-gray-100">
                         <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center mr-3"><i class="fa-solid fa-gamepad"></i></div>
                         เกมการศึกษา
                     </h3>
                     <div id="home-games-list" class="space-y-4 min-h-[100px]">
-                        <div class="text-center text-gray-400 text-sm py-4"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>
+                        <!-- Skeleton Loading: Games -->
+                        <div class="animate-pulse flex items-center space-x-3 mb-3">
+                           <div class="rounded-lg bg-gray-200 h-10 w-10"></div>
+                           <div class="flex-1 space-y-2">
+                             <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                             <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                           </div>
+                        </div>
+                        <div class="animate-pulse flex items-center space-x-3 mb-3">
+                           <div class="rounded-lg bg-gray-200 h-10 w-10"></div>
+                           <div class="flex-1 space-y-2">
+                             <div class="h-4 bg-gray-200 rounded w-2/3"></div>
+                             <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                           </div>
+                        </div>
+                        <div class="animate-pulse flex items-center space-x-3 mb-3">
+                           <div class="rounded-lg bg-gray-200 h-10 w-10"></div>
+                           <div class="flex-1 space-y-2">
+                             <div class="h-4 bg-gray-200 rounded w-4/5"></div>
+                             <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                           </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Media -->
+                <!-- Media Container -->
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
                     <h3 class="font-bold text-lg text-gray-700 mb-4 flex items-center pb-3 border-b border-gray-100">
                         <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center mr-3"><i class="fa-solid fa-photo-film"></i></div>
                         สื่อการสอน
                     </h3>
                     <div id="home-media-list" class="space-y-4 min-h-[100px]">
-                        <div class="text-center text-gray-400 text-sm py-4"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>
+                        <!-- Skeleton Loading: Media -->
+                        <div class="animate-pulse flex items-center space-x-3 mb-3">
+                           <div class="rounded-lg bg-gray-200 h-10 w-10"></div>
+                           <div class="flex-1 space-y-2">
+                             <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                             <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                           </div>
+                        </div>
+                        <div class="animate-pulse flex items-center space-x-3 mb-3">
+                           <div class="rounded-lg bg-gray-200 h-10 w-10"></div>
+                           <div class="flex-1 space-y-2">
+                             <div class="h-4 bg-gray-200 rounded w-2/3"></div>
+                             <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                           </div>
+                        </div>
+                        <div class="animate-pulse flex items-center space-x-3 mb-3">
+                           <div class="rounded-lg bg-gray-200 h-10 w-10"></div>
+                           <div class="flex-1 space-y-2">
+                             <div class="h-4 bg-gray-200 rounded w-4/5"></div>
+                             <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                           </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -163,7 +258,13 @@
     <section class="bg-white py-14">
         <div class="container mx-auto px-4">
             <h2 class="text-xl font-bold mb-6 text-gray-600 flex items-center"><i class="fa-solid fa-bullhorn mr-2"></i> ข่าวประชาสัมพันธ์</h2>
-            <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+            <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Skeleton Loading for News -->
+                <div class="animate-pulse bg-gray-100 rounded-lg h-32 w-full"></div>
+                <div class="animate-pulse bg-gray-100 rounded-lg h-32 w-full"></div>
+                <div class="animate-pulse bg-gray-100 rounded-lg h-32 w-full"></div>
+                <div class="animate-pulse bg-gray-100 rounded-lg h-32 w-full"></div>
+            </div>
         </div>
     </section>
 
@@ -173,7 +274,7 @@
             <a href="about.html" class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 max-w-3xl mx-auto text-center group cursor-pointer transition duration-500 hover:scale-105 hover:shadow-2xl rounded-2xl p-6 bg-white shadow-sm border border-gray-100 block">
                 <div class="relative flex-shrink-0">
                     <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full blur opacity-20 group-hover:opacity-50 transition duration-500"></div>
-                    <img src="https://firebasestorage.googleapis.com/v0/b/kruboat-web.firebasestorage.app/o/kruboat.com-profile.JPG?alt=media&token=859324c7-8a3d-401b-acfa-f46f256b3122" class="relative w-40 h-40 md:w-48 md:h-48 rounded-full object-cover border-4 border-white shadow-md transition duration-300" alt="ครูโบ๊ท ชลสิทธิ์" title="คลิกเพื่อดูประวัติ">
+                    <img src="https://firebasestorage.googleapis.com/v0/b/kruboat-web.firebasestorage.app/o/kruboat.com-profile.JPG?alt=media" class="relative w-40 h-40 md:w-48 md:h-48 rounded-full object-cover border-4 border-white shadow-md transition duration-300" alt="ครูโบ๊ท ชลสิทธิ์" title="คลิกเพื่อดูประวัติ">
                     <div class="absolute bottom-0 right-2 bg-white text-blue-600 rounded-full w-8 h-8 flex items-center justify-center shadow-md border border-gray-100 group-hover:bg-blue-600 group-hover:text-white transition">
                         <i class="fa-solid fa-magnifying-glass text-xs"></i>
                     </div>
@@ -188,11 +289,8 @@
     </section>
 
     <footer class="bg-gray-800 text-white py-6 text-center mt-auto">
-        <div class="container mx-auto px-4">
-            <p class="mb-1 font-semibold">KruBoat.com</p>
-            <p class="text-gray-400 text-xs">&copy; 2025 พัฒนาโดย ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์ | ติดต่อ chonlasitgood@gmail.com</p>
-            <a href="privacy.html" class="text-gray-500 hover:text-gray-300 text-xs underline decoration-dotted transition">นโยบายความเป็นส่วนตัว</a>
-        </div>
+        <div class="container mx-auto px-4"><p class="mb-1 font-semibold">KruBoat.com</p>
+            <p class="text-gray-400 text-xs">&copy; 2025 พัฒนาโดย ครูโบ๊ท ชลสิทธิ์ วิเชียรพันธ์ | ติดต่อ chonlasitgood@gmail.com</p></div>
     </footer>
 
     <!-- NEWS MODAL -->
