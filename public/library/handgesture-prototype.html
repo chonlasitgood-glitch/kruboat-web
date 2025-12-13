@@ -141,7 +141,7 @@
             </div>
         </div>
         
-        <!-- 3. Sidebar Toggle -->
+        <!-- 3. Sidebar Toggle (Hamburger Button) - Z-index is higher than menu to stay clickable -->
         <div class="ui-overlay top-4 right-4 pointer-events-auto z-40">
             <button id="toggleMenu" class="p-3 bg-cyan-900/80 hover:bg-cyan-700 text-white rounded-lg border border-cyan-500/50 transition shadow-[0_0_15px_rgba(6,182,212,0.3)]">
                 <i data-lucide="menu"></i>
@@ -150,9 +150,9 @@
 
         <!-- 4. Level Menu Sidebar -->
         <div id="level-menu" class="open">
-            <div class="p-4 sticky top-0 bg-black/95 backdrop-blur-md border-b border-gray-800 z-10 flex justify-between items-center">
+            <div class="p-4 sticky top-0 bg-black/95 backdrop-blur-md border-b border-gray-800 z-10 flex justify-between items-center h-[74px]">
                 <h2 class="text-lg font-bold text-cyan-400 tech-font">LEVELS</h2>
-                <button id="closeMenu" class="text-gray-400 hover:text-white"><i data-lucide="x"></i></button>
+                <!-- Removed closeMenu button, hamburger will handle toggle -->
             </div>
             
             <!-- Create New Level Button -->
@@ -252,10 +252,10 @@
         const ctx2D = canvas2D.getContext('2d');
         const canvas3D = document.getElementById('three_canvas');
         const statusEl = document.getElementById('status');
+        const handIndicator = document.getElementById('hand-indicator');
         const btnCam = document.getElementById('toggleCam');
         const menu = document.getElementById('level-menu');
         const btnToggleMenu = document.getElementById('toggleMenu');
-        const btnCloseMenu = document.getElementById('closeMenu');
         const levelList = document.getElementById('level-list');
         const customLevelList = document.getElementById('custom-level-list');
         const questionText = document.getElementById('question-text');
@@ -336,7 +336,7 @@
             card.onclick = () => {
                 if(currentMode === MODE.BUILD) exitBuilderMode();
                 loadLevel(index);
-                // Auto close menu on mobile
+                // Auto close menu on mobile (optional, but good for UX)
                 if(window.innerWidth < 768) menu.classList.remove('open');
             };
 
@@ -395,8 +395,10 @@
             });
         }
 
-        btnToggleMenu.onclick = () => menu.classList.add('open');
-        btnCloseMenu.onclick = () => menu.classList.remove('open');
+        // Toggle Menu Logic - Use the same button to open/close
+        btnToggleMenu.onclick = () => {
+            menu.classList.toggle('open');
+        };
 
         // --- Three.js Setup ---
         function initThreeJS() {
