@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Spatial Math + Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Three.js & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <style>
+        body {
+            background-color: #000;
+            color: white;
+            font-family: 'Sarabun', sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        #webcam, #output_canvas, #three_canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        /* Mirror webcam & 2D canvas only in AR mode */
+        .mirror-mode {
+            transform: scaleX(-1);
+        }
+        #three_canvas {
+            transform: none !important; 
+            pointer-events: none; /* Default pass-through */
+        }
+        /* Enable interactions in builder mode */
+        #three_canvas.interactive {
+            pointer-events: auto;
+            cursor: crosshair;
+        }
+        .ui-overlay {
+            position: absolute;
+            z-index: 20;
+        }
+        .tech-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        /* Sidebar Styling */
+        #level-menu {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 300px;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(0, 255, 255, 0.2);
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 30;
+            pointer-events: auto;
+        }
+        #level-menu.open {
+            transform: translateX(0);
+        }
+        
+        .level-card {
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .level-card:hover {
+            background: rgba(6, 182, 212, 0.2);
+            border-color: rgba(6, 182, 212, 0.5);
+        }
+        .level-card.active {
+            background: rgba(6, 182, 212, 0.3);
+            border-color: #06b6d4;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
+        }
+
+        /* Builder Controls */
+        #builder-ui {
+            display: none;
+        }
+        #builder-ui.active {
+            display: flex;
+        }
+
+        /* Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none; 
+            background: transparent; 
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #06b6d4;
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 5px rgba(6, 182, 212, 0.8);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #4b5563;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <!-- 1. Webcam & Canvases -->
+        <video id="webcam" class="mirror-mode" autoplay playsinline></video>
+        <canvas id="output_canvas" class="mirror-mode"></canvas>
+        <canvas id="three_canvas"></canvas>
+
+        <!-- 2. UI Header (Play Mode) -->
+        <div id="play-ui" class="ui-overlay top-4 left-4 bg-black/60 p-5 rounded-xl border border-cyan-500/50 backdrop-blur-md shadow-lg shadow-cyan-500/20 pointer-events-none transition-opacity duration-300">
+            <h1 class="text-2xl font-bold text-cyan-300 flex items-center gap-2 tech-font">
+                <i data-lucide="cuboid"></i> SPATIAL MATH
+            </h1>
+            <p class="text-base text-white mt-2 font-bold" id="question-text">โจทย์: ...</p>
+            <p class="text-sm text-gray-300 mt-1">💡 ชูนิ้วชี้ และหมุนข้อมือเพื่อดูด้านหลัง</p>
+            <div id="status" class="mt-3 text-xs flex items-center gap-2 text-yellow-400">
+                <div class="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                Loading AI...
+            </div>
+        </div>
+        
+        <!-- 3. Sidebar Toggle -->
+        <div class="ui-overlay top-4 right-4 pointer-events-auto z-40">
+            <button id="toggleMenu" class="p-3 bg-cyan-900/80 hover:bg-cyan-700 text-white rounded-lg border border-cyan-500/50 transition shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+                <i data-lucide="menu"></i>
+            </button>
+        </div>
+
+        <!-- 4. Level Menu Sidebar -->
+        <div id="level-menu" class="open">
+            <div class="p-4 sticky top-0 bg-black/95 backdrop-blur-md border-b border-gray-800 z-10 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-cyan-400 tech-font">LEVELS</h2>
+                <button id="closeMenu" class="text-gray-400 hover:text-white"><i data-lucide="x"></i></button>
+            </div>
+            
+            <!-- Create New Level Button -->
+            <div class="p-3 border-b border-gray-800">
+                <button onclick="startBuilderMode()" class="w-full py-3 bg-green-600 hover:bg-green-500 text-white rounded-lg font-bold flex justify-center items-center gap-2 transition">
+                    <i data-lucide="plus-square"></i> สร้างโจทย์ใหม่
+                </button>
+            </div>
+
+            <div class="p-3">
+                <h3 class="text-xs text-gray-500 font-bold mb-2 uppercase">แบบฝึกหัดมาตรฐาน</h3>
+                <div id="level-list" class="space-y-2"></div>
+                
+                <h3 class="text-xs text-gray-500 font-bold mt-4 mb-2 uppercase">แบบฝึกหัดของฉัน</h3>
+                <div id="custom-level-list" class="space-y-2">
+                    <p class="text-xs text-gray-600 italic text-center py-2">ยังไม่มีด่านที่สร้างเอง</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Bottom Controls (Play Mode) -->
+        <!-- Main Start Button -->
+        <div id="play-controls" class="ui-overlay bottom-8 left-1/2 transform -translate-x-1/2 pointer-events-auto transition-opacity duration-300">
+            <button id="toggleCam" disabled class="px-8 py-3 bg-gray-600 cursor-not-allowed opacity-50 rounded-full hover:scale-105 transition shadow-[0_0_20px_rgba(79,70,229,0.5)] flex items-center gap-2 text-lg font-bold text-white">
+                <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> กำลังโหลด AI...
+            </button>
+        </div>
+
+        <!-- Rotation Controls (Slider Version) -->
+        <div id="rotation-controls" class="ui-overlay bottom-8 left-4 pointer-events-auto transition-opacity duration-300 flex flex-col gap-2 items-center bg-black/60 p-3 rounded-xl border border-gray-700 backdrop-blur-md w-64 shadow-lg">
+            <div class="flex justify-between w-full text-[10px] text-gray-400 font-bold mb-1">
+                <span>ปรับมุมแกน Y</span>
+                <span id="rotation-val" class="text-cyan-400">0°</span>
+            </div>
+            <div class="flex items-center gap-3 w-full">
+                <input type="range" id="rotation-slider" min="-180" max="180" value="0" class="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                <button onclick="resetRotation()" class="p-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-md transition border border-gray-500 shadow-sm" title="รีเซ็ตเป็น 0">
+                    <i data-lucide="rotate-ccw" width="14" height="14"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 6. Builder UI Overlay (Hidden by default) -->
+        <div id="builder-ui" class="ui-overlay inset-0 flex-col pointer-events-none bg-black/20">
+            <!-- Top Bar -->
+            <div class="w-full bg-black/80 backdrop-blur p-4 flex justify-between items-center pointer-events-auto border-b border-gray-700">
+                <div class="text-white">
+                    <h2 class="font-bold text-xl text-green-400 flex gap-2 items-center"><i data-lucide="hammer"></i> โหมดสร้างโจทย์</h2>
+                    <p class="text-xs text-gray-400">คลิกซ้าย: วางบล็อก | Alt+คลิก: ลบ | คลิกซ้ายค้าง: หมุนมุมกล้อง</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="exitBuilderMode()" class="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600 text-white text-sm">ยกเลิก</button>
+                    <button onclick="saveCustomLevel()" class="px-6 py-2 rounded bg-green-600 hover:bg-green-500 text-white font-bold shadow-[0_0_10px_rgba(34,197,94,0.4)]">บันทึกโจทย์</button>
+                </div>
+            </div>
+
+            <!-- Bottom Tools -->
+            <div class="mt-auto w-full p-4 flex justify-center pointer-events-auto pb-8">
+                <div class="bg-black/80 backdrop-blur px-6 py-3 rounded-full border border-gray-700 flex gap-4">
+                    <div class="flex items-center gap-2 text-white">
+                        <span class="text-sm text-gray-400">ชื่อโจทย์:</span>
+                        <input type="text" id="level-name-input" class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-white focus:outline-none focus:border-green-500" placeholder="เช่น โจทย์ข้อที่ 1..." value="My Custom Level">
+                    </div>
+                    <div class="w-px bg-gray-600 mx-2"></div>
+                    <button onclick="clearBuilder()" class="text-red-400 hover:text-red-300 text-sm flex items-center gap-1"><i data-lucide="trash-2" size="16"></i> ล้างกระดาน</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { FilesetResolver, HandLandmarker } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
+
+        lucide.createIcons();
+
+        // --- State Management ---
+        const MODE = { PLAY: 'PLAY', BUILD: 'BUILD' };
+        let currentMode = MODE.PLAY;
+        let levels = []; // Will be populated with default + custom
+        let currentLevelIndex = 0;
+        let customLevels = JSON.parse(localStorage.getItem('ar_spatial_math_levels') || '[]');
+        
+        // Rotation State
+        let manualRotationOffset = 0; // Starts at 0
+
+        // Default Levels Data
+        const defaultLevels = [
+            { id: 1, name: "1x1 Starter", difficulty: "Very Easy", color: "text-green-400", blocks: [{x:0, y:0, z:0}] },
+            { id: 2, name: "2x1 Horizontal", difficulty: "Easy", color: "text-green-400", blocks: [{x:0, y:0, z:0}, {x:1, y:0, z:0}] },
+            { id: 3, name: "2x2 Square", difficulty: "Normal", color: "text-yellow-400", blocks: [{x:0, y:0, z:0}, {x:1, y:0, z:0}, {x:0, y:1, z:0}, {x:1, y:1, z:0}] }
+        ];
+
+        // --- DOM Elements ---
+        const video = document.getElementById('webcam');
+        const canvas2D = document.getElementById('output_canvas');
+        const ctx2D = canvas2D.getContext('2d');
+        const canvas3D = document.getElementById('three_canvas');
+        const statusEl = document.getElementById('status');
+        const btnCam = document.getElementById('toggleCam');
+        const menu = document.getElementById('level-menu');
+        const btnToggleMenu = document.getElementById('toggleMenu');
+        const btnCloseMenu = document.getElementById('closeMenu');
+        const levelList = document.getElementById('level-list');
+        const customLevelList = document.getElementById('custom-level-list');
+        const questionText = document.getElementById('question-text');
+        
+        // Mode UI
+        const playUI = document.getElementById('play-ui');
+        const playControls = document.getElementById('play-controls');
+        const rotationControls = document.getElementById('rotation-controls');
+        const builderUI = document.getElementById('builder-ui');
+        const levelNameInput = document.getElementById('level-name-input');
+        
+        // Slider Elements
+        const rotationSlider = document.getElementById('rotation-slider');
+        const rotationVal = document.getElementById('rotation-val');
+
+        // --- Three.js Globals ---
+        let handLandmarker;
+        let webcamRunning = false;
+        let cubeMesh, scene, camera, renderer;
+        let orbitControls, raycaster, mouse, rollOverMesh;
+        let builderGroup, gridHelper, plane;
+        let builderBlocks = [];
+
+        // --- Init Function ---
+        function init() {
+            refreshLevelData();
+            initMenu();
+            initThreeJS();
+            setupAI();
+            initBuilderTools();
+            
+            // Start in Play Mode
+            loadLevel(0);
+        }
+
+        function refreshLevelData() {
+            levels = [...defaultLevels, ...customLevels];
+        }
+
+        // --- Rotation Logic (Slider) ---
+        rotationSlider.addEventListener('input', (e) => {
+            const deg = parseInt(e.target.value);
+            manualRotationOffset = deg * (Math.PI / 180);
+            rotationVal.innerText = `${deg}°`;
+        });
+
+        window.resetRotation = () => {
+            manualRotationOffset = 0;
+            rotationSlider.value = 0;
+            rotationVal.innerText = "0°";
+        };
+
+        // --- UI Logic: Menu ---
+        function initMenu() {
+            // Render Standard Levels
+            levelList.innerHTML = '';
+            defaultLevels.forEach((lvl, index) => {
+                const card = createLevelCard(lvl, index);
+                levelList.appendChild(card);
+            });
+
+            // Render Custom Levels
+            customLevelList.innerHTML = '';
+            if (customLevels.length > 0) {
+                customLevels.forEach((lvl, index) => {
+                    const realIndex = defaultLevels.length + index;
+                    const card = createLevelCard(lvl, realIndex, true);
+                    customLevelList.appendChild(card);
+                });
+            } else {
+                customLevelList.innerHTML = '<p class="text-xs text-gray-600 italic text-center py-2">ยังไม่มีด่านที่สร้างเอง</p>';
+            }
+        }
+
+        function createLevelCard(lvl, index, isCustom = false) {
+            const card = document.createElement('div');
+            card.className = `level-card bg-gray-900 p-3 rounded-lg cursor-pointer flex items-center gap-3 ${index === currentLevelIndex ? 'active' : ''}`;
+            card.onclick = () => {
+                if(currentMode === MODE.BUILD) exitBuilderMode();
+                loadLevel(index);
+                // Auto close menu on mobile
+                if(window.innerWidth < 768) menu.classList.remove('open');
+            };
+
+            const cvs = document.createElement('canvas');
+            cvs.width = 50;
+            cvs.height = 50;
+            cvs.className = "rounded bg-gray-800 border border-gray-700 flex-shrink-0";
+            drawThumbnail(cvs, lvl.blocks);
+
+            const info = document.createElement('div');
+            info.className = "flex-grow min-w-0";
+            info.innerHTML = `
+                <div class="text-sm font-bold text-white truncate">${lvl.name}</div>
+                <div class="text-xs ${lvl.color}">${lvl.difficulty || 'Custom'} (${lvl.blocks.length} Blocks)</div>
+            `;
+            
+            // Delete button for custom levels
+            if (isCustom) {
+                const delBtn = document.createElement('button');
+                delBtn.className = "p-2 text-red-500 hover:text-red-400 z-10";
+                delBtn.innerHTML = '<i data-lucide="trash"></i>';
+                delBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteCustomLevel(index - defaultLevels.length);
+                };
+                card.appendChild(cvs);
+                card.appendChild(info);
+                card.appendChild(delBtn);
+            } else {
+                card.appendChild(cvs);
+                card.appendChild(info);
+            }
+
+            return card;
+        }
+
+        function drawThumbnail(canvas, blocks) {
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+            const scale = 10;
+            const cx = w/2;
+            const cy = h/2 + 10;
+            ctx.clearRect(0,0,w,h);
+            ctx.fillStyle = "#06b6d4";
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 1;
+            const sorted = [...blocks].sort((a,b) => (a.z - b.z) || (a.y - b.y) || (a.x - b.x));
+            sorted.forEach(b => {
+                const isoX = (b.x - b.z) * scale * 0.8;
+                const isoY = (b.x + b.z) * scale * 0.4 - (b.y * scale * 1.2);
+                const px = cx + isoX;
+                const py = cy + isoY;
+                ctx.fillRect(px - scale/2, py - scale/2, scale, scale);
+                ctx.strokeRect(px - scale/2, py - scale/2, scale, scale);
+            });
+        }
+
+        btnToggleMenu.onclick = () => menu.classList.add('open');
+        btnCloseMenu.onclick = () => menu.classList.remove('open');
+
+        // --- Three.js Setup ---
+        function initThreeJS() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            renderer = new THREE.WebGLRenderer({ canvas: canvas3D, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+
+            // Group for AR
+            cubeMesh = new THREE.Group();
+            scene.add(cubeMesh);
+
+            // Group for Builder
+            builderGroup = new THREE.Group();
+            builderGroup.visible = false;
+            scene.add(builderGroup);
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+            dirLight.position.set(5, 10, 7);
+            scene.add(dirLight);
+            const backLight = new THREE.DirectionalLight(0x0088ff, 0.8);
+            backLight.position.set(-5, -5, -10);
+            scene.add(backLight);
+        }
+
+        function createBlock(x, y, z, isBuilder = false) {
+            const geometry = new THREE.BoxGeometry(0.95, 0.95, 0.95);
+            // Builder blocks might look slightly different (e.g. less transparent)
+            const material = new THREE.MeshPhongMaterial({
+                color: isBuilder ? 0x22c55e : 0xff8800, // Green for builder, Orange for play
+                emissive: isBuilder ? 0x004400 : 0xaa4400,
+                emissiveIntensity: 0.2,
+                transparent: true, opacity: isBuilder ? 1.0 : 0.9, shininess: 80,
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            const outlineMat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide });
+            const outline = new THREE.Mesh(geometry, outlineMat);
+            outline.scale.set(1.05, 1.05, 1.05);
+            mesh.add(outline);
+            const wireGeo = new THREE.EdgesGeometry(geometry);
+            const wireMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
+            const wire = new THREE.LineSegments(wireGeo, wireMat);
+            mesh.add(wire);
+            mesh.position.set(x, y, z);
+            return mesh;
+        }
+
+        window.loadLevel = function(index) {
+            currentLevelIndex = index;
+            const lvl = levels[index];
+            if(!lvl) return;
+
+            // Clear AR Mesh
+            while(cubeMesh.children.length > 0) cubeMesh.remove(cubeMesh.children[0]);
+
+            // Calculate center
+            let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity, minZ=Infinity, maxZ=-Infinity;
+            lvl.blocks.forEach(b => {
+                minX = Math.min(minX, b.x); maxX = Math.max(maxX, b.x);
+                minY = Math.min(minY, b.y); maxY = Math.max(maxY, b.y);
+                minZ = Math.min(minZ, b.z); maxZ = Math.max(maxZ, b.z);
+            });
+            const cx = (minX + maxX) / 2;
+            const cy = (minY + maxY) / 2;
+            const cz = (minZ + maxZ) / 2;
+
+            lvl.blocks.forEach(pos => {
+                cubeMesh.add(createBlock(pos.x - cx, pos.y - cy, pos.z - cz));
+            });
+
+            // Update UI
+            document.querySelectorAll('.level-card').forEach((el, i) => {
+                if(i === index) el.classList.add('active');
+                else el.classList.remove('active');
+            });
+            questionText.innerText = `โจทย์ ${lvl.name}: มีกล่องทั้งหมดกี่ใบ?`;
+        }
+
+        // --- Builder Logic ---
+        function initBuilderTools() {
+            // Orbit Controls
+            orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+            orbitControls.enableDamping = true;
+            orbitControls.enabled = false; // Disable initially
+
+            // Raycaster
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+
+            // Grid & Plane
+            gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+            gridHelper.position.y = -0.5;
+            builderGroup.add(gridHelper);
+
+            const planeGeometry = new THREE.PlaneGeometry(20, 20);
+            planeGeometry.rotateX(-Math.PI / 2);
+            plane = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({ visible: false }));
+            plane.position.y = -0.5;
+            builderGroup.add(plane);
+
+            // Roll-over helper (Ghost block)
+            const rollOverGeo = new THREE.BoxGeometry(1, 1, 1);
+            const rollOverMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, opacity: 0.5, transparent: true, wireframe: true });
+            rollOverMesh = new THREE.Mesh(rollOverGeo, rollOverMaterial);
+            builderGroup.add(rollOverMesh);
+
+            // Event Listeners for Builder
+            canvas3D.addEventListener('pointermove', onPointerMove);
+            canvas3D.addEventListener('pointerdown', onPointerDown);
+        }
+
+        window.startBuilderMode = function() {
+            currentMode = MODE.BUILD;
+            
+            // UI Switch
+            menu.classList.remove('open');
+            playUI.classList.add('opacity-0', 'pointer-events-none');
+            playControls.classList.add('opacity-0', 'pointer-events-none');
+            rotationControls.classList.add('opacity-0', 'pointer-events-none');
+            builderUI.classList.add('active');
+            canvas3D.classList.add('interactive');
+            
+            // Stop AR Tracking visual
+            if(webcamRunning) stopCam(); // Pause cam
+            video.style.opacity = 0; // Hide webcam feed
+            canvas2D.style.opacity = 0;
+            cubeMesh.visible = false;
+
+            // Setup Builder Scene
+            scene.background = new THREE.Color(0x111111); // Dark background
+            builderGroup.visible = true;
+            camera.position.set(5, 5, 8);
+            camera.lookAt(0, 0, 0);
+            orbitControls.enabled = true;
+            
+            // Clear existing builder blocks
+            clearBuilder();
+        }
+
+        window.exitBuilderMode = function() {
+            currentMode = MODE.PLAY;
+
+            // UI Switch
+            playUI.classList.remove('opacity-0', 'pointer-events-none');
+            playControls.classList.remove('opacity-0', 'pointer-events-none');
+            rotationControls.classList.remove('opacity-0', 'pointer-events-none');
+            builderUI.classList.remove('active');
+            canvas3D.classList.remove('interactive');
+
+            // Restore AR Scene
+            scene.background = null; // Transparent
+            builderGroup.visible = false;
+            video.style.opacity = 1;
+            canvas2D.style.opacity = 1;
+            orbitControls.enabled = false;
+            
+            // Reset Camera to AR default
+            camera.position.set(0, 0, 5);
+            camera.quaternion.set(0, 0, 0, 1);
+            
+            // Reload current level to make sure mesh is back
+            loadLevel(currentLevelIndex);
+        }
+
+        window.clearBuilder = function() {
+            builderBlocks.forEach(b => builderGroup.remove(b));
+            builderBlocks = [];
+        }
+
+        window.saveCustomLevel = function() {
+            if (builderBlocks.length === 0) {
+                alert("กรุณาวางบล็อกอย่างน้อย 1 ก้อน");
+                return;
+            }
+
+            const name = levelNameInput.value.trim() || "Custom Level";
+            
+            // Extract coordinates
+            const blocksData = builderBlocks.map(mesh => ({
+                x: Math.round(mesh.position.x),
+                y: Math.round(mesh.position.y),
+                z: Math.round(mesh.position.z)
+            }));
+
+            const newLevel = {
+                id: Date.now(), // unique ID
+                name: name,
+                difficulty: "Custom",
+                color: "text-blue-400",
+                blocks: blocksData
+            };
+
+            customLevels.push(newLevel);
+            localStorage.setItem('ar_spatial_math_levels', JSON.stringify(customLevels));
+            
+            refreshLevelData();
+            initMenu();
+            
+            // Exit and load new level
+            exitBuilderMode();
+            loadLevel(levels.length - 1); // Load the last added level
+            menu.classList.add('open');
+        }
+
+        window.deleteCustomLevel = function(customIndex) {
+            if(confirm("ต้องการลบด่านนี้ใช่หรือไม่?")) {
+                customLevels.splice(customIndex, 1);
+                localStorage.setItem('ar_spatial_math_levels', JSON.stringify(customLevels));
+                refreshLevelData();
+                initMenu();
+                // If we deleted the current level, go back to 0
+                if(currentLevelIndex >= defaultLevels.length + customIndex) {
+                    loadLevel(0);
+                }
+            }
+        }
+
+        function onPointerMove(event) {
+            if (currentMode !== MODE.BUILD) return;
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects([...builderBlocks, plane]);
+
+            if (intersects.length > 0) {
+                const intersect = intersects[0];
+                rollOverMesh.position.copy(intersect.point).add(intersect.face.normal).floor().addScalar(0.5);
+            }
+        }
+
+        function onPointerDown(event) {
+            if (currentMode !== MODE.BUILD) return;
+            if (event.button !== 0) return; // Only Left Click
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects([...builderBlocks, plane]);
+
+            if (intersects.length > 0) {
+                const intersect = intersects[0];
+                
+                // Alt Key to Remove
+                if (event.altKey) {
+                    if (intersect.object !== plane) {
+                        builderGroup.remove(intersect.object);
+                        builderBlocks.splice(builderBlocks.indexOf(intersect.object), 1);
+                    }
+                } 
+                // Normal Click to Add
+                else {
+                    const voxel = createBlock(0,0,0, true);
+                    voxel.position.copy(intersect.point).add(intersect.face.normal).floor().addScalar(0.5);
+                    builderGroup.add(voxel);
+                    builderBlocks.push(voxel);
+                }
+            }
+        }
+
+        // --- Animation Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (currentMode === MODE.BUILD) {
+                orbitControls.update();
+                renderer.render(scene, camera);
+            } else {
+                // AR Mode Logic handled by predictLoop
+            }
+        }
+        animate(); // Start render loop for builder
+
+        // --- AI Logic (Same as before) ---
+        async function setupAI() {
+            try {
+                const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
+                handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                    baseOptions: {
+                        modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
+                        delegate: "GPU"
+                    },
+                    runningMode: "VIDEO",
+                    numHands: 1
+                });
+                statusEl.innerHTML = `<span class="text-green-400">● AI พร้อมใช้งาน</span>`;
+                statusEl.className = "mt-3 text-xs flex items-center gap-2 text-green-400 font-bold";
+                
+                // Enable button and update text
+                btnCam.disabled = false;
+                btnCam.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-600');
+                btnCam.classList.add('bg-gradient-to-r', 'from-blue-600', 'to-indigo-600');
+                btnCam.innerHTML = `<i data-lucide="play-circle"></i> เริ่มบทเรียน`;
+                lucide.createIcons();
+
+            } catch (err) {
+                console.error(err);
+                statusEl.textContent = "Error: ไม่สามารถโหลด AI ได้";
+            }
+        }
+
+        let lastVideoTime = -1;
+        const lerpFactor = 0.2; 
+        let targetPos = new THREE.Vector3();
+        let targetScale = new THREE.Vector3(1, 1, 1);
+        let targetQuaternion = new THREE.Quaternion();
+
+        async function predictLoop() {
+            if (currentMode === MODE.BUILD) {
+                requestAnimationFrame(predictLoop); // Keep loop alive but do nothing
+                return;
+            }
+            if (!webcamRunning) return;
+
+            // Resize Logic
+            if (canvas3D.width !== window.innerWidth || canvas3D.height !== window.innerHeight) {
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                canvas2D.width = window.innerWidth;
+                canvas2D.height = window.innerHeight;
+            }
+
+            if (lastVideoTime !== video.currentTime) {
+                lastVideoTime = video.currentTime;
+                try {
+                    const startTimeMs = performance.now();
+                    const results = handLandmarker.detectForVideo(video, startTimeMs);
+
+                    ctx2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
+
+                    if (results.landmarks && results.landmarks.length > 0) {
+                        const landmarks = results.landmarks[0];
+                        let isRightHand = true; 
+                        if (results.handedness?.[0]?.[0]) {
+                            const catName = results.handedness[0][0].categoryName;
+                            isRightHand = (catName === "Right");
+                            // handIndicator.innerText = `Hand: ${catName}`;
+                        }
+
+                        const indexTip = landmarks[8];
+                        const indexMCP = landmarks[5];
+                        const vFingerY = new THREE.Vector3((1-indexTip.x)-(1-indexMCP.x), -(indexTip.y-indexMCP.y), -(indexTip.z-indexMCP.z)).normalize();
+
+                        const screenX = (1 - indexTip.x) * 2 - 1; 
+                        const screenY = -(indexTip.y * 2 - 1);
+                        
+                        const wrist = landmarks[0];
+                        const middleMCP = landmarks[9];
+                        const palmSize = Math.hypot(middleMCP.x - wrist.x, middleMCP.y - wrist.y);
+                        const zDepth = (palmSize * 15) - 4; 
+
+                        const vector = new THREE.Vector3(screenX, screenY, 0.5);
+                        vector.unproject(camera);
+                        const dir = vector.sub(camera.position).normalize();
+                        const distance = Math.abs((camera.position.z - zDepth) / dir.z);
+                        const basePos = camera.position.clone().add(dir.multiplyScalar(distance));
+                        
+                        const offsetAmount = 1.2; 
+                        const offsetVector = vFingerY.clone().multiplyScalar(offsetAmount);
+                        targetPos.copy(basePos).add(offsetVector);
+                        targetScale.set(0.7, 0.7, 0.7); 
+
+                        const pinkyMCP = landmarks[17];
+                        const vPalmX = new THREE.Vector3((1-pinkyMCP.x)-(1-indexMCP.x), -(pinkyMCP.y-indexMCP.y), -(pinkyMCP.z-indexMCP.z)).normalize();
+                        let vZ = new THREE.Vector3().crossVectors(vPalmX, vFingerY).normalize();
+
+                        if (isRightHand) vZ.negate();
+
+                        const vX = new THREE.Vector3().crossVectors(vFingerY, vZ).normalize();
+                        const rotationMatrix = new THREE.Matrix4();
+                        rotationMatrix.makeBasis(vX, vFingerY, vZ);
+                        targetQuaternion.setFromRotationMatrix(rotationMatrix);
+                        
+                        // Use Manual Rotation Offset instead of hardcoded 70 deg
+                        const yRotation = new THREE.Quaternion();
+                        yRotation.setFromAxisAngle(new THREE.Vector3(0, 1, 0), manualRotationOffset);
+                        targetQuaternion.multiply(yRotation);
+
+                        cubeMesh.visible = true;
+                    } else {
+                        targetScale.set(0, 0, 0);
+                        // handIndicator.innerText = "Wait for hand...";
+                    }
+
+                    cubeMesh.position.lerp(targetPos, lerpFactor);
+                    cubeMesh.scale.lerp(targetScale, lerpFactor);
+                    cubeMesh.quaternion.slerp(targetQuaternion, lerpFactor); 
+                    renderer.render(scene, camera);
+
+                } catch (error) { console.error(error); }
+            }
+            requestAnimationFrame(predictLoop);
+        }
+
+        function stopCam() {
+            webcamRunning = false;
+            const stream = video.srcObject;
+            if(stream) stream.getTracks().forEach(track => track.stop());
+            video.srcObject = null;
+            btnCam.innerHTML = `<i data-lucide="play-circle"></i> เริ่มบทเรียน`;
+            btnCam.classList.replace('from-red-600', 'from-blue-600');
+            btnCam.classList.replace('to-pink-600', 'to-indigo-600');
+            lucide.createIcons();
+        }
+
+        btnCam.addEventListener('click', () => {
+            if (!handLandmarker) return;
+            if (webcamRunning) {
+                stopCam();
+                cubeMesh.visible = false;
+                renderer.render(scene, camera);
+            } else {
+                webcamRunning = true;
+                btnCam.innerHTML = `<i data-lucide="pause-circle"></i> หยุดชั่วคราว`;
+                btnCam.classList.replace('from-blue-600', 'from-red-600');
+                btnCam.classList.replace('to-indigo-600', 'to-pink-600');
+                lucide.createIcons();
+                navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } }).then(stream => {
+                    video.srcObject = stream;
+                    video.addEventListener("loadeddata", predictLoop);
+                });
+            }
+        });
+
+        // Run Init
+        init();
+
+    </script>
+</body>
+</html>
