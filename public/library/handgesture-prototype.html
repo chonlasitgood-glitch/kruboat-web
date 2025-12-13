@@ -99,10 +99,12 @@
         /* Range Slider Styling */
         input[type=range] {
             -webkit-appearance: none; 
+            appearance: none; /* เพิ่มบรรทัดนี้เพื่อแก้ warning */
             background: transparent; 
         }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
+            appearance: none; /* เพิ่มบรรทัดนี้เพื่อความสมบูรณ์ */
             height: 16px;
             width: 16px;
             border-radius: 50%;
