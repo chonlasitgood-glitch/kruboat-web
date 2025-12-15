@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spatial Math: Level Builder (Teacher)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Prompt:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <!-- Shared Script -->
+    <script src="./spatialscript.js"></script>
+
+    <style>
+        body { background-color: #111; color: white; font-family: 'Prompt', sans-serif; overflow: hidden; }
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .tech-font { font-family: 'Orbitron', sans-serif; }
+        .tool-btn.active { background-color: #2563eb; border-color: #60a5fa; color: white; box-shadow: 0 0 15px rgba(37, 99, 235, 0.5); }
+        
+        /* Sidebar Animation */
+        #level-sidebar { transform: translateX(100%); transition: transform 0.3s ease-in-out; }
+        #level-sidebar.open { transform: translateX(0); }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+
+        /* Modal Animation */
+        #custom-modal { transition: opacity 0.2s ease-in-out; }
+        #modal-content { transition: transform 0.2s ease-in-out; }
+    </style>
+</head>
+<body>
+
+    <!-- 3D Canvas -->
+    <div id="canvas-container">
+        <canvas id="three_canvas"></canvas>
+    </div>
+
+    <!-- UI Overlay: Header -->
+    <div class="absolute top-0 left-0 w-full p-4 flex justify-between items-center bg-black/80 backdrop-blur border-b border-gray-700 z-10">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-purple-600 rounded-lg shadow-lg shadow-purple-900/50"><i data-lucide="hammer"></i></div>
+            <div class="hidden md:block">
+                <h1 class="text-xl font-bold text-purple-400 tech-font">LEVEL BUILDER</h1>
+                <p class="text-xs text-gray-400">Teacher Mode</p>
+            </div>
+        </div>
+        <div class="flex gap-2 md:gap-3">
+             <a href="app.html" class="px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 text-sm transition text-gray-200 flex items-center gap-2">
+                <i data-lucide="arrow-left" size="16"></i> <span class="hidden lg:inline">Back</span>
+             </a>
+
+             <!-- New Button -->
+             <button onclick="checkResetEditor()" class="px-3 py-2 rounded bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-lg shadow-indigo-900/40 flex items-center gap-2 transition" title="New Level">
+                <i data-lucide="file-plus"></i> <span class="hidden md:inline">New</span>
+             </button>
+
+            <button onclick="toggleSidebar()" class="px-3 py-2 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-lg shadow-blue-900/40 flex items-center gap-2 transition">
+                <i data-lucide="list"></i> <span class="hidden md:inline">Levels</span> <span id="level-count-badge" class="bg-white text-blue-600 text-[10px] px-1.5 rounded-full">0</span>
+            </button>
+            <button onclick="saveLevel()" id="btn-save" class="px-4 py-2 rounded bg-green-600 hover:bg-green-500 text-white font-bold shadow-lg shadow-green-900/40 flex items-center gap-2 transition hover:scale-105">
+                <i data-lucide="save"></i> <span class="hidden md:inline">Save</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- UI Overlay: Tools (Left) -->
+    <div class="absolute top-24 left-4 flex flex-col gap-2 z-10">
+        <button onclick="setTool('ROTATE')" id="btn-tool-rotate" class="tool-btn active w-16 h-16 rounded-xl bg-gray-800 border border-gray-600 flex flex-col items-center justify-center transition hover:bg-gray-700">
+            <i data-lucide="move-3d" size="24"></i>
+            <span class="text-[10px] mt-1 font-bold">ROTATE</span>
+        </button>
+        <button onclick="setTool('ADD')" id="btn-tool-add" class="tool-btn w-16 h-16 rounded-xl bg-gray-800 border border-gray-600 flex flex-col items-center justify-center transition hover:bg-gray-700">
+            <i data-lucide="plus-square" size="24"></i>
+            <span class="text-[10px] mt-1 font-bold">ADD</span>
+        </button>
+        <button onclick="setTool('DELETE')" id="btn-tool-delete" class="tool-btn w-16 h-16 rounded-xl bg-gray-800 border border-gray-600 flex flex-col items-center justify-center transition hover:bg-gray-700">
+            <i data-lucide="trash-2" size="24"></i>
+            <span class="text-[10px] mt-1 font-bold">DELETE</span>
+        </button>
+    </div>
+
+    <!-- UI Overlay: Properties (Bottom) -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black/90 backdrop-blur px-6 py-4 rounded-xl border border-gray-700 flex flex-col md:flex-row gap-4 items-center z-10 w-[95%] md:w-[90%] max-w-2xl shadow-2xl">
+        <div class="flex flex-col gap-1 flex-grow w-full">
+            <div class="flex justify-between">
+                <label class="text-xs text-purple-400 uppercase font-bold">Level Name</label>
+                <span id="edit-mode-indicator" class="text-[10px] text-yellow-400 hidden animate-pulse">● Editing Existing Level</span>
+            </div>
+            <input type="text" id="level-name" class="bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-purple-500 transition" placeholder="e.g. Triangle Pyramid">
+        </div>
+        <div class="flex flex-col gap-1 w-full md:w-40">
+             <label class="text-xs text-purple-400 uppercase font-bold">Difficulty</label>
+             <select id="level-diff" class="bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none cursor-pointer">
+                 <option value="Easy">Easy</option>
+                 <option value="Medium">Medium</option>
+                 <option value="Hard">Hard</option>
+             </select>
+        </div>
+    </div>
+
+    <!-- Sidebar: Level Manager -->
+    <div id="level-sidebar" class="absolute top-0 right-0 bottom-0 w-80 bg-gray-900 border-l border-gray-700 z-20 flex flex-col shadow-2xl">
+        <div class="p-4 border-b border-gray-800 bg-black/20 flex justify-between items-center">
+            <h2 class="font-bold text-white flex items-center gap-2"><i data-lucide="database"></i> Level List</h2>
+            <button onclick="toggleSidebar()" class="text-gray-400 hover:text-white"><i data-lucide="x"></i></button>
+        </div>
+        <div class="flex-grow overflow-y-auto p-2 space-y-2" id="level-list-container">
+            <!-- Level Items will be injected here -->
+            <p class="text-center text-gray-500 text-sm mt-10">Loading data...</p>
+        </div>
+        <div class="p-4 border-t border-gray-800 bg-black/20">
+            <button onclick="fetchLevels()" class="w-full py-2 bg-gray-800 hover:bg-gray-700 rounded text-sm text-gray-300 flex justify-center gap-2">
+                <i data-lucide="refresh-cw" size="16"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- CUSTOM MODAL -->
+    <div id="custom-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden opacity-0">
+        <div class="bg-gray-900 border border-gray-700 rounded-xl shadow-2xl max-w-sm w-full mx-4 transform scale-95" id="modal-content">
+            <div class="p-6">
+                <h3 id="modal-title" class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                    Alert
+                </h3>
+                <p id="modal-message" class="text-gray-300 text-sm leading-relaxed">
+                    Details...
+                </p>
+            </div>
+            <div class="p-4 bg-gray-900/50 border-t border-gray-800 flex justify-end gap-3 rounded-b-xl">
+                <button id="modal-cancel" class="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium transition border border-gray-600 hidden">Cancel</button>
+                <button id="modal-confirm" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold shadow-lg shadow-blue-900/20 transition">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, getDocs, query, orderBy, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // --- Firebase Init ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyAlfZHbCFxGK3p3nDoAPy3m9KqZzmX2s9I",
+            authDomain: "kruboat-web.firebaseapp.com",
+            projectId: "kruboat-web",
+            storageBucket: "kruboat-web.firebasestorage.app",
+            messagingSenderId: "61868765546",
+            appId: "1:61868765546:web:683b18ddf68c89dd317513"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app';
+
+        let currentLevelId = null; 
+        let cachedLevels = [];
+
+        // --- MODAL SYSTEM ---
+        window.showModal = function(title, message, type = 'alert', callback = null) {
+            const modal = document.getElementById('custom-modal');
+            const content = document.getElementById('modal-content');
+            const titleEl = document.getElementById('modal-title');
+            const msgEl = document.getElementById('modal-message');
+            const btnCancel = document.getElementById('modal-cancel');
+            const btnConfirm = document.getElementById('modal-confirm');
+
+            // Reset
+            btnCancel.classList.add('hidden');
+            btnConfirm.className = "px-4 py-2 rounded-lg text-white text-sm font-bold shadow-lg transition"; 
+            
+            // Content
+            titleEl.innerHTML = title;
+            msgEl.innerHTML = message.replace(/\n/g, '<br>');
+
+            // Setup Buttons
+            const closeModal = () => {
+                modal.classList.add('opacity-0');
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 200);
+            };
+
+            // Remove old listeners (cloning is a quick way to wipe listeners)
+            const newConfirm = btnConfirm.cloneNode(true);
+            const newCancel = btnCancel.cloneNode(true);
+            btnConfirm.parentNode.replaceChild(newConfirm, btnConfirm);
+            btnCancel.parentNode.replaceChild(newCancel, btnCancel);
+
+            // Re-select
+            const finalConfirm = document.getElementById('modal-confirm');
+            const finalCancel = document.getElementById('modal-cancel');
+
+            if (type === 'confirm') {
+                finalCancel.classList.remove('hidden');
+                finalCancel.innerHTML = 'Cancel';
+                finalCancel.onclick = closeModal;
+                
+                // Style based on destructive intent (heuristic)
+                if(title.includes('Delete') || title.includes('Remove')) {
+                     finalConfirm.classList.add('bg-red-600', 'hover:bg-red-500', 'shadow-red-900/20');
+                     finalConfirm.innerHTML = 'Confirm';
+                } else {
+                     finalConfirm.classList.add('bg-blue-600', 'hover:bg-blue-500', 'shadow-blue-900/20');
+                     finalConfirm.innerHTML = 'OK';
+                }
+
+                finalConfirm.onclick = () => {
+                    if (callback) callback();
+                    closeModal();
+                };
+            } else {
+                // Alert
+                finalConfirm.classList.add('bg-blue-600', 'hover:bg-blue-500', 'shadow-blue-900/20');
+                finalConfirm.innerHTML = 'OK';
+                finalConfirm.onclick = () => {
+                    if (callback) callback();
+                    closeModal();
+                };
+            }
+
+            // Show
+            modal.classList.remove('hidden');
+            // Timeout to allow display:block to apply before opacity transition
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+        };
+
+        // Auto login
+        signInAnonymously(auth).then(() => {
+            console.log("Teacher logged in");
+            fetchLevels(); 
+        }).catch(err => {
+            console.error("Auth failed:", err);
+            window.showModal("Error", "Login failed: " + err.message, "alert");
+        });
+
+        // --- Firestore Functions ---
+
+        window.fetchLevels = async function() {
+            const container = document.getElementById('level-list-container');
+            container.innerHTML = '<div class="flex justify-center mt-10"><span class="animate-spin text-blue-500">⏳</span></div>';
+            
+            try {
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'spatial_math_levels');
+                const snapshot = await getDocs(colRef);
+                
+                cachedLevels = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                cachedLevels.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                
+                document.getElementById('level-count-badge').innerText = cachedLevels.length;
+                renderLevelList();
+            } catch (e) {
+                console.error(e);
+                container.innerHTML = `<div class="text-red-400 text-center text-sm p-4">Failed to load data<br>${e.message}</div>`;
+            }
+        };
+
+        function renderLevelList() {
+            const container = document.getElementById('level-list-container');
+            container.innerHTML = '';
+
+            if (cachedLevels.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center text-sm mt-10">No levels created yet.</div>';
+                return;
+            }
+
+            cachedLevels.forEach(lvl => {
+                const div = document.createElement('div');
+                div.className = `p-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition group relative ${currentLevelId === lvl.id ? 'bg-blue-900/30 border-blue-500' : 'bg-gray-800/50'}`;
+                
+                const diffColor = lvl.difficulty === 'Easy' ? 'text-green-400' : (lvl.difficulty === 'Medium' ? 'text-yellow-400' : 'text-red-400');
+
+                div.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="cursor-pointer flex-grow" onclick="loadLevelForEdit('${lvl.id}')">
+                            <h3 class="font-bold text-sm text-gray-200 group-hover:text-white">${lvl.name}</h3>
+                            <span class="text-[10px] ${diffColor} border border-gray-700 px-1 rounded">${lvl.difficulty}</span>
+                            <span class="text-[10px] text-gray-500 ml-1">${new Date((lvl.createdAt?.seconds || 0) * 1000).toLocaleDateString()}</span>
+                        </div>
+                        <button onclick="requestDeleteLevel('${lvl.id}', '${lvl.name}')" class="text-gray-500 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition">
+                            <i data-lucide="trash-2" size="14"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            lucide.createIcons();
+        }
+
+        window.loadLevelForEdit = function(id) {
+            const lvl = cachedLevels.find(l => l.id === id);
+            if (!lvl) return;
+
+            currentLevelId = lvl.id;
+            document.getElementById('edit-mode-indicator').classList.remove('hidden');
+            document.getElementById('btn-save').innerHTML = `<i data-lucide="save"></i> <span class="hidden md:inline">Update</span>`;
+            document.getElementById('btn-save').classList.remove('bg-green-600', 'hover:bg-green-500');
+            document.getElementById('btn-save').classList.add('bg-blue-600', 'hover:bg-blue-500');
+
+            document.getElementById('level-name').value = lvl.name;
+            document.getElementById('level-diff').value = lvl.difficulty;
+
+            // Clear without confirm since we are loading
+            forceClearScene(); 
+            
+            if (lvl.blocks) {
+                lvl.blocks.forEach(pos => {
+                    const voxel = window.SpatialScript.createBlockMesh(0,0,0, true);
+                    
+                    let x = pos.x, y = pos.y, z = pos.z;
+                    if (Number.isInteger(pos.x)) x = pos.x - 0.5;
+                    if (Number.isInteger(pos.y)) y = pos.y - 0.5;
+                    if (Number.isInteger(pos.z)) z = pos.z - 0.5;
+
+                    voxel.position.set(x, y, z);
+                    builderGroup.add(voxel);
+                    blocks.push(voxel);
+                });
+            }
+
+            renderLevelList(); 
+            if(window.innerWidth < 768) toggleSidebar();
+            lucide.createIcons();
+        };
+
+        window.requestDeleteLevel = function(id, name) {
+            window.showModal(
+                "Confirm Delete", 
+                `Are you sure you want to delete level "${name}"?<br><span class="text-red-400 text-xs">This action cannot be undone.</span>`, 
+                "confirm", 
+                async () => {
+                    try {
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'spatial_math_levels', id));
+                        if (currentLevelId === id) performReset();
+                        await fetchLevels();
+                    } catch (e) {
+                        console.error(e);
+                        window.showModal("Error", "Delete failed: " + e.message, "alert");
+                    }
+                }
+            );
+        };
+
+        // --- Builder Logic ---
+        lucide.createIcons();
+
+        let scene, camera, renderer;
+        let builderGroup, gridHelper, plane, rollOverMesh;
+        let raycaster, mouse;
+        let orbitControls;
+        let currentTool = 'ROTATE';
+        let blocks = []; 
+
+        function init() {
+            const threeObj = window.SpatialScript.initThreeJS('three_canvas');
+            scene = threeObj.scene;
+            camera = threeObj.camera;
+            renderer = threeObj.renderer;
+
+            camera.position.set(5, 5, 8);
+            camera.lookAt(0, 0, 0);
+            scene.background = new THREE.Color(0x111111);
+
+            builderGroup = new THREE.Group();
+            scene.add(builderGroup);
+
+            gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+            gridHelper.position.y = -0.5;
+            builderGroup.add(gridHelper);
+
+            const planeGeometry = new THREE.PlaneGeometry(20, 20);
+            planeGeometry.rotateX(-Math.PI / 2);
+            plane = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({ visible: false }));
+            plane.position.y = -0.5;
+            builderGroup.add(plane);
+
+            const rollOverGeo = new THREE.BoxGeometry(1, 1, 1);
+            const rollOverMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, opacity: 0.5, transparent: true, wireframe: true });
+            rollOverMesh = new THREE.Mesh(rollOverGeo, rollOverMaterial);
+            rollOverMesh.visible = false;
+            builderGroup.add(rollOverMesh);
+
+            orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+            orbitControls.enableDamping = true;
+
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+            
+            const canvas = document.getElementById('three_canvas');
+            canvas.addEventListener('pointermove', onPointerMove);
+            canvas.addEventListener('pointerdown', onPointerDown);
+
+            animate();
+        }
+
+        function onPointerMove(event) {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+
+            if (currentTool === 'ADD') {
+                const intersects = raycaster.intersectObjects([...blocks, plane]);
+                if (intersects.length > 0) {
+                    const intersect = intersects[0];
+                    rollOverMesh.visible = true;
+                    rollOverMesh.position.copy(intersect.point).add(intersect.face.normal).floor().addScalar(0.5);
+                } else {
+                    rollOverMesh.visible = false;
+                }
+            }
+        }
+
+        function onPointerDown(event) {
+            if (event.button !== 0 || currentTool === 'ROTATE') return;
+
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+
+            const intersects = raycaster.intersectObjects([...blocks, plane]);
+            if (intersects.length > 0) {
+                const intersect = intersects[0];
+                
+                if (currentTool === 'ADD') {
+                    const voxel = window.SpatialScript.createBlockMesh(0,0,0, true);
+                    voxel.position.copy(intersect.point).add(intersect.face.normal).floor().addScalar(0.5);
+                    builderGroup.add(voxel);
+                    blocks.push(voxel);
+                } else if (currentTool === 'DELETE') {
+                    if (intersect.object !== plane) {
+                        builderGroup.remove(intersect.object);
+                        blocks.splice(blocks.indexOf(intersect.object), 1);
+                    }
+                }
+            }
+        }
+
+        window.setTool = function(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-tool-rotate').classList.remove('active');
+            document.getElementById('btn-tool-add').classList.remove('active');
+            document.getElementById('btn-tool-delete').classList.remove('active');
+            
+            if(tool === 'ROTATE') document.getElementById('btn-tool-rotate').classList.add('active');
+            if(tool === 'ADD') document.getElementById('btn-tool-add').classList.add('active');
+            if(tool === 'DELETE') document.getElementById('btn-tool-delete').classList.add('active');
+
+            if (tool === 'ROTATE') {
+                orbitControls.enabled = true;
+                rollOverMesh.visible = false;
+                document.getElementById('three_canvas').style.cursor = 'grab';
+            } else {
+                orbitControls.enabled = false;
+                rollOverMesh.visible = (tool === 'ADD');
+                document.getElementById('three_canvas').style.cursor = 'crosshair';
+            }
+        };
+
+        // --- Helper for clearing without confirmation logic ---
+        function forceClearScene() {
+            blocks.forEach(b => builderGroup.remove(b));
+            blocks = [];
+        }
+
+        // --- Helper for Reset Logic ---
+        function performReset() {
+            forceClearScene();
+            currentLevelId = null;
+            document.getElementById('level-name').value = "";
+            document.getElementById('level-diff').value = "Easy";
+            
+            // Reset UI
+            document.getElementById('edit-mode-indicator').classList.add('hidden');
+            document.getElementById('btn-save').innerHTML = `<i data-lucide="save"></i> <span class="hidden md:inline">Save</span>`;
+            document.getElementById('btn-save').classList.add('bg-green-600', 'hover:bg-green-500');
+            document.getElementById('btn-save').classList.remove('bg-blue-600', 'hover:bg-blue-500');
+            
+            renderLevelList(); 
+            lucide.createIcons();
+        }
+
+        window.checkResetEditor = function() {
+            if(blocks.length > 0) {
+                window.showModal(
+                    "Create New Level", 
+                    "Do you want to clear the scene to create a new level?<br>Unsaved blocks will be lost.", 
+                    "confirm", 
+                    () => performReset()
+                );
+            } else {
+                performReset();
+            }
+        };
+
+        window.saveLevel = async function() {
+            if (blocks.length === 0) {
+                window.showModal("Alert", "Please place at least 1 block.", "alert");
+                return;
+            }
+            if (!auth.currentUser) {
+                window.showModal("Alert", "Connecting to database... please wait.", "alert");
+                return;
+            }
+
+            const btn = document.getElementById('btn-save');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="animate-spin mr-2">⏳</span> Saving...';
+            btn.disabled = true;
+
+            const name = document.getElementById('level-name').value.trim() || "New Level (Untitled)";
+            const diff = document.getElementById('level-diff').value;
+            
+            const blocksData = blocks.map(b => ({
+                x: b.position.x,
+                y: b.position.y,
+                z: b.position.z
+            }));
+
+            try {
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'spatial_math_levels');
+
+                if (currentLevelId) {
+                    // Update
+                    await updateDoc(doc(colRef, currentLevelId), {
+                        name: name,
+                        difficulty: diff,
+                        blocks: blocksData
+                    });
+                    window.showModal("Success", "Level updated successfully!", "alert");
+                } else {
+                    // Create
+                    await addDoc(colRef, {
+                        name: name,
+                        difficulty: diff,
+                        blocks: blocksData,
+                        createdAt: serverTimestamp(),
+                        authorId: auth.currentUser.uid
+                    });
+                    window.showModal("Success", "New level saved successfully!", "alert", () => performReset());
+                }
+                
+                await fetchLevels();
+
+            } catch (e) {
+                console.error(e);
+                if (e.code === 'permission-denied') {
+                    window.showModal("Save Failed", "Permission Denied (Check Firestore Rules).", "alert");
+                } else {
+                    window.showModal("Error", "An error occurred: " + e.message, "alert");
+                }
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                lucide.createIcons();
+            }
+        };
+
+        window.toggleSidebar = function() {
+            document.getElementById('level-sidebar').classList.toggle('open');
+        };
+
+        function animate() {
+            requestAnimationFrame(animate);
+            orbitControls.update();
+            renderer.render(scene, camera);
+        }
+
+        init();
+    </script>
+</body>
+</html>

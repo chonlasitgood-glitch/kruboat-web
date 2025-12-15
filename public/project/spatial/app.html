@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spatial Math: Student App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        body { background-color: #000; color: white; font-family: 'Sarabun', sans-serif; overflow: hidden; user-select: none; }
+        #webcam, #output_canvas, #three_canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+        .mirror-mode { transform: scaleX(-1); }
+        .tech-font { font-family: 'Orbitron', sans-serif; }
+        
+        /* UI Overlays */
+        .ui-overlay { position: absolute; z-index: 20; }
+        
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none; appearance: none; background: transparent; 
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+            background: #06b6d4; cursor: pointer; margin-top: -6px;
+            box-shadow: 0 0 5px rgba(6, 182, 212, 0.8);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; cursor: pointer; background: #4b5563; border-radius: 2px;
+        }
+
+        /* Level Menu Animation */
+        #level-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        #level-menu.open {
+            transform: translateX(0);
+        }
+        .level-card.active { 
+            border-color: #06b6d4; 
+            box-shadow: 0 0 10px rgba(6,182,212,0.4); 
+            background: rgba(6,182,212,0.1); 
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Media Layers -->
+    <video id="webcam" class="mirror-mode" autoplay playsinline></video>
+    <canvas id="output_canvas" class="mirror-mode"></canvas>
+    <canvas id="three_canvas"></canvas>
+
+    <!-- 2. Loading Screen -->
+    <div id="loader" class="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center">
+        <div class="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p class="text-cyan-400 tech-font animate-pulse">CONNECTING TO CLASSROOM...</p>
+    </div>
+
+    <!-- 3. Play Mode UI (Top Left) -->
+    <div id="play-ui" class="ui-overlay top-4 left-4 right-16 md:right-auto bg-black/60 p-4 rounded-xl border border-cyan-500/50 backdrop-blur-md shadow-lg shadow-cyan-500/20 md:min-w-[280px]">
+        <h1 class="text-xl font-bold text-cyan-300 flex items-center gap-2 tech-font">
+            <i data-lucide="cuboid" class="w-6 h-6"></i> SPATIAL MATH
+        </h1>
+        <p class="text-white font-bold mt-1 truncate" id="current-level-name">Select a Level...</p>
+        <p class="text-xs text-gray-300 mt-1 mb-3 flex items-center gap-1">
+            <i data-lucide="hand" size="12"></i> Raise index finger to control
+        </p>
+        
+        <!-- Counting Controls -->
+        <div class="bg-gray-800/80 p-2 rounded-lg border border-gray-600 flex items-center justify-between gap-2">
+            <button id="countPrevBtn" class="p-2 bg-gray-700 hover:bg-gray-600 rounded-full text-white transition shadow-md">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+            </button>
+            <span class="text-gray-400 text-xs font-bold uppercase tracking-wider">COUNT</span>
+            <button id="countNextBtn" class="p-2 bg-green-600 hover:bg-green-500 rounded-full text-white transition shadow-md shadow-green-900/50">
+                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+            </button>
+            <div class="w-px h-6 bg-gray-600 mx-1"></div>
+            <button id="resetStateBtn" class="p-2 bg-red-900/80 hover:bg-red-700 rounded-full text-red-200 transition shadow-md" title="Reset">
+                <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Status Indicator -->
+        <div id="status" class="mt-3 text-[10px] flex items-center gap-2 text-yellow-400 font-mono">
+            <div class="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+            <span id="status-text">Loading AI Model...</span>
+        </div>
+    </div>
+
+    <!-- 4. Sidebar Toggle (Top Right) -->
+    <div class="ui-overlay top-4 right-4 z-40">
+        <button onclick="toggleMenu()" class="p-3 bg-cyan-900/80 hover:bg-cyan-700 text-white rounded-lg border border-cyan-500/50 transition shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+            <i data-lucide="menu"></i>
+        </button>
+    </div>
+
+    <!-- 5. Level Menu (Right Sidebar) -->
+    <div id="level-menu" class="absolute right-0 top-0 bottom-0 w-80 bg-black/95 backdrop-blur border-l border-gray-800 z-30 flex flex-col shadow-2xl">
+        <div class="p-4 border-b border-gray-800 flex justify-between items-center h-[74px]">
+            <h2 class="text-lg font-bold text-cyan-400 tech-font">CLASSROOM LEVELS</h2>
+        </div>
+        
+        <div class="p-2 overflow-y-auto flex-grow space-y-2" id="level-list">
+            <p class="text-center text-gray-500 text-sm mt-10">Waiting for data...</p>
+        </div>
+
+        <div class="p-4 border-t border-gray-800 bg-gray-900/50">
+            <button onclick="refreshLevels()" class="w-full py-2 bg-gray-800 hover:bg-gray-700 rounded text-sm text-cyan-400 font-bold flex justify-center gap-2 transition">
+                <i data-lucide="refresh-cw" size="16"></i> Refresh List
+            </button>
+        </div>
+    </div>
+
+    <!-- 6. Camera Control (Bottom Center) -->
+    <div class="ui-overlay bottom-6 left-1/2 transform -translate-x-1/2 w-full flex justify-center px-4">
+        <button id="toggleCam" disabled class="w-full max-w-xs px-6 py-3 bg-gray-600 cursor-not-allowed opacity-50 rounded-full hover:scale-105 transition shadow-[0_0_20px_rgba(79,70,229,0.5)] flex items-center justify-center gap-2 text-lg font-bold text-white">
+            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> 
+            <span id="btn-text">Loading AI...</span>
+        </button>
+    </div>
+
+    <!-- 7. Rotation Controls (Bottom Left) -->
+    <div class="ui-overlay bottom-24 left-1/2 transform -translate-x-1/2 md:translate-x-0 md:left-4 md:bottom-8 bg-black/60 p-3 rounded-xl border border-gray-700 backdrop-blur-md w-64 shadow-lg flex flex-col gap-2">
+        <div class="flex justify-between w-full text-[10px] text-gray-400 font-bold mb-1">
+            <span>Adjust Y-Axis</span>
+            <span id="rotation-val" class="text-cyan-400">0°</span>
+        </div>
+        <div class="flex items-center gap-3 w-full">
+            <input type="range" id="rotation-slider" min="-180" max="180" value="0" class="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+            <button onclick="resetRotation()" class="p-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-md transition border border-gray-500 shadow-sm" title="Reset to 0">
+                <i data-lucide="rotate-ccw" width="14" height="14"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Shared Script for Thumbnails/Utils -->
+    <script src="./spatialscript.js"></script>
+
+    <!-- App Logic -->
+    <script type="module">
+        import { FilesetResolver, HandLandmarker } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // --- Configuration ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyAlfZHbCFxGK3p3nDoAPy3m9KqZzmX2s9I",
+            authDomain: "kruboat-web.firebaseapp.com",
+            projectId: "kruboat-web",
+            storageBucket: "kruboat-web.firebasestorage.app",
+            messagingSenderId: "61868765546",
+            appId: "1:61868765546:web:683b18ddf68c89dd317513"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app';
+
+        // --- State Variables ---
+        let levels = [];
+        let currentLevel = null;
+        let handLandmarker = null;
+        let webcamRunning = false;
+        let lastVideoTime = -1;
+        
+        // Three.js State
+        let scene, camera, renderer, cubeGroup;
+        
+        // Smoothing & Logic State
+        const targetPos = new THREE.Vector3();
+        const targetScale = new THREE.Vector3(0, 0, 0); 
+        const targetQuaternion = new THREE.Quaternion();
+        const lerpFactor = 0.08; // Smoothness factor
+        let manualRotationOffset = 0;
+        
+        // Counting State
+        let sortedBlocksCache = [];
+        let currentCountStep = 0;
+
+        // DOM Elements
+        const video = document.getElementById('webcam');
+        const canvas2D = document.getElementById('output_canvas');
+        const ctx2D = canvas2D.getContext('2d');
+        const statusText = document.getElementById('status-text');
+        const statusEl = document.getElementById('status');
+        const btnCam = document.getElementById('toggleCam');
+
+        // --- Initialization ---
+        async function initApp() {
+            lucide.createIcons();
+            
+            // 1. Setup Three.js (Self-contained to ensure compatibility with logic)
+            initThreeJS();
+
+            // 2. Auth & Data
+            try {
+                await signInAnonymously(auth);
+                await refreshLevels();
+                document.getElementById('loader').style.display = 'none';
+            } catch (e) {
+                console.error("Auth/Data Error", e);
+                document.getElementById('loader').innerHTML = `
+                    <div class="text-center">
+                        <p class="text-red-500 font-bold">Connection Failed</p>
+                        <p class="text-gray-400 text-xs mt-2">Check console for details.</p>
+                    </div>`;
+            }
+
+            // 3. Setup AI
+            setupAI();
+            
+            // 4. Start Loop
+            animate();
+        }
+
+        function initThreeJS() {
+            const canvas = document.getElementById('three_canvas');
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 0, 5);
+
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+            dirLight.position.set(5, 10, 7);
+            scene.add(dirLight);
+            const backLight = new THREE.DirectionalLight(0x0088ff, 0.8);
+            backLight.position.set(-5, -5, -10);
+            scene.add(backLight);
+
+            // Group for Blocks
+            cubeGroup = new THREE.Group();
+            cubeGroup.visible = false; // Start hidden
+            scene.add(cubeGroup);
+
+            // Resize Handler
+            window.addEventListener('resize', () => {
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+                renderer.setSize(width, height);
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                canvas2D.width = width;
+                canvas2D.height = height;
+            });
+        }
+
+        // --- AI Logic (Advanced from Prototype) ---
+        async function setupAI() {
+            try {
+                const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm");
+                
+                try {
+                    handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                        baseOptions: {
+                            modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
+                            delegate: "GPU"
+                        },
+                        runningMode: "VIDEO",
+                        numHands: 1
+                    });
+                } catch(e) {
+                    console.warn("GPU init failed, using CPU", e);
+                    handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                        baseOptions: {
+                            modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
+                            delegate: "CPU"
+                        },
+                        runningMode: "VIDEO",
+                        numHands: 1
+                    });
+                }
+                
+                // UI Update: AI Ready
+                statusText.innerHTML = `<span class="text-green-400">● AI Ready</span>`;
+                statusEl.classList.remove("text-yellow-400");
+                
+                btnCam.disabled = false;
+                btnCam.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-600');
+                btnCam.classList.add('bg-gradient-to-r', 'from-blue-600', 'to-indigo-600');
+                btnCam.innerHTML = `<i data-lucide="play-circle"></i> <span id="btn-text">Start Camera</span>`;
+                lucide.createIcons();
+                
+            } catch (err) {
+                console.error(err);
+                statusText.textContent = "AI Load Failed";
+                statusText.className = "text-red-500 font-bold";
+            }
+        }
+
+        function runAI() {
+            if (!handLandmarker || !webcamRunning || video.paused) return;
+
+            if (lastVideoTime !== video.currentTime) {
+                lastVideoTime = video.currentTime;
+                try {
+                    const results = handLandmarker.detectForVideo(video, performance.now());
+                    ctx2D.clearRect(0, 0, canvas2D.width, canvas2D.height);
+
+                    if (results.landmarks && results.landmarks.length > 0) {
+                        const landmarks = results.landmarks[0];
+                        let isRightHand = true;
+                        if (results.handedness?.[0]?.[0]) {
+                            isRightHand = (results.handedness[0][0].categoryName === "Right");
+                        }
+
+                        // 1. Calculate Position (Unproject)
+                        const indexTip = landmarks[8];
+                        const indexMCP = landmarks[5];
+                        const screenX = (1 - indexTip.x) * 2 - 1; 
+                        const screenY = -(indexTip.y * 2 - 1);
+                        
+                        const wrist = landmarks[0];
+                        const middleMCP = landmarks[9];
+                        const palmSize = Math.hypot(middleMCP.x - wrist.x, middleMCP.y - wrist.y);
+                        // Depth estimation logic
+                        const zDepth = (palmSize * 15) - 4; 
+
+                        const vector = new THREE.Vector3(screenX, screenY, 0.5);
+                        vector.unproject(camera);
+                        const dir = vector.sub(camera.position).normalize();
+                        const distance = Math.abs((camera.position.z - zDepth) / dir.z);
+                        const basePos = camera.position.clone().add(dir.multiplyScalar(distance));
+                        
+                        // Offset to float above finger
+                        const vFingerY = new THREE.Vector3((1-indexTip.x)-(1-indexMCP.x), -(indexTip.y-indexMCP.y), -(indexTip.z-indexMCP.z)).normalize();
+                        const offsetAmount = 1.2; 
+                        const offsetVector = vFingerY.clone().multiplyScalar(offsetAmount);
+                        
+                        targetPos.copy(basePos).add(offsetVector);
+                        targetScale.set(0.7, 0.7, 0.7);
+
+                        // 2. Calculate Rotation
+                        const pinkyMCP = landmarks[17];
+                        const vPalmX = new THREE.Vector3((1-pinkyMCP.x)-(1-indexMCP.x), -(pinkyMCP.y-indexMCP.y), -(pinkyMCP.z-indexMCP.z)).normalize();
+                        let vZ = new THREE.Vector3().crossVectors(vPalmX, vFingerY).normalize();
+                        if (isRightHand) vZ.negate();
+
+                        const vX = new THREE.Vector3().crossVectors(vFingerY, vZ).normalize();
+                        const rotationMatrix = new THREE.Matrix4();
+                        rotationMatrix.makeBasis(vX, vFingerY, vZ);
+                        targetQuaternion.setFromRotationMatrix(rotationMatrix);
+                        
+                        // Add Manual Y-Rotation
+                        const yRotation = new THREE.Quaternion();
+                        yRotation.setFromAxisAngle(new THREE.Vector3(0, 1, 0), manualRotationOffset);
+                        targetQuaternion.multiply(yRotation);
+
+                        cubeGroup.visible = true; 
+                    } else {
+                        targetScale.set(0, 0, 0); // Shrink if lost
+                    }
+                } catch (e) {
+                    console.error("Tracking Error:", e);
+                }
+            }
+        }
+
+        // --- Render Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            if (webcamRunning) {
+                runAI();
+                // Smooth Movement (Lerp)
+                cubeGroup.position.lerp(targetPos, lerpFactor);
+                cubeGroup.scale.lerp(targetScale, lerpFactor);
+                cubeGroup.quaternion.slerp(targetQuaternion, lerpFactor);
+            }
+            renderer.render(scene, camera);
+        }
+
+        // --- Firestore Logic ---
+        window.refreshLevels = async function() {
+            const list = document.getElementById('level-list');
+            list.innerHTML = '<div class="text-center text-gray-500"><div class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mx-auto"></div></div>';
+            
+            try {
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'spatial_math_levels');
+                const snapshot = await getDocs(colRef);
+                levels = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // SORTING CHANGED HERE: Oldest -> Newest (New at bottom)
+                // Default sort (a - b) puts smaller (older) dates first
+                levels.sort((a,b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+
+                renderLevelList();
+            } catch (e) {
+                console.error("Firestore Error:", e);
+                list.innerHTML = `<p class="text-red-500 text-xs text-center">Failed to load levels.</p>`;
+            }
+        };
+
+        function renderLevelList() {
+            const list = document.getElementById('level-list');
+            list.innerHTML = '';
+            
+            if (levels.length === 0) {
+                list.innerHTML = '<p class="text-gray-500 text-xs text-center mt-4">No levels found. Ask your teacher to create one!</p>';
+                return;
+            }
+
+            levels.forEach(lvl => {
+                const div = document.createElement('div');
+                div.className = "level-card bg-gray-900 border border-gray-700 p-3 rounded-lg flex items-center gap-3 cursor-pointer hover:bg-gray-800 transition";
+                div.onclick = () => loadLevel(lvl, div);
+                
+                div.innerHTML = `
+                    <div class="flex-grow min-w-0">
+                        <div class="text-sm font-bold text-white truncate">${lvl.name}</div>
+                        <div class="text-xs text-${getDiffColor(lvl.difficulty)}">${lvl.difficulty}</div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+            lucide.createIcons();
+        }
+
+        function getDiffColor(diff) {
+            if(diff === 'Easy') return 'green-400';
+            if(diff === 'Medium') return 'yellow-400';
+            if(diff === 'Hard') return 'red-400';
+            return 'gray-400';
+        }
+
+        function loadLevel(lvl, cardElement) {
+            currentLevel = lvl;
+            document.getElementById('current-level-name').innerText = lvl.name;
+            document.getElementById('current-level-name').classList.remove('text-yellow-400');
+            
+            // UI Highlight
+            document.querySelectorAll('.level-card').forEach(c => c.classList.remove('active'));
+            if(cardElement) cardElement.classList.add('active');
+
+            // Rebuild 3D
+            while(cubeGroup.children.length > 0) cubeGroup.remove(cubeGroup.children[0]);
+            
+            if (lvl.blocks) {
+                // Calculate Center
+                let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity, minZ=Infinity, maxZ=-Infinity;
+                lvl.blocks.forEach(b => {
+                    minX = Math.min(minX, b.x); maxX = Math.max(maxX, b.x);
+                    minY = Math.min(minY, b.y); maxY = Math.max(maxY, b.y);
+                    minZ = Math.min(minZ, b.z); maxZ = Math.max(maxZ, b.z);
+                });
+                const cx = (minX + maxX) / 2;
+                const cy = (minY + maxY) / 2;
+                const cz = (minZ + maxZ) / 2;
+
+                lvl.blocks.forEach(pos => {
+                    // Create Block using Shared Script or Local Fallback
+                    let mesh;
+                    if(window.SpatialScript) {
+                        mesh = window.SpatialScript.createBlockMesh(pos.x - cx, pos.y - cy, pos.z - cz, false);
+                    } else {
+                         // Fallback simple block
+                         const geo = new THREE.BoxGeometry(0.95,0.95,0.95);
+                         const mat = new THREE.MeshPhongMaterial({color:0xff8800});
+                         mesh = new THREE.Mesh(geo, mat);
+                         mesh.position.set(pos.x - cx, pos.y - cy, pos.z - cz);
+                         mesh.userData.isBlock = true;
+                    }
+                    cubeGroup.add(mesh);
+                });
+            }
+            
+            resetCountingState();
+            
+            if(window.innerWidth < 768) document.getElementById('level-menu').classList.remove('open');
+        }
+
+        // --- UI Interactions ---
+        
+        // 1. Sidebar
+        window.toggleMenu = function() {
+            document.getElementById('level-menu').classList.toggle('open');
+        };
+
+        // 2. Camera Button
+        btnCam.addEventListener('click', () => {
+            if (!handLandmarker) return;
+            if (webcamRunning) {
+                // Stop
+                webcamRunning = false;
+                if(video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+                video.srcObject = null;
+                
+                btnCam.innerHTML = `<i data-lucide="play-circle"></i> <span id="btn-text">Start Camera</span>`;
+                btnCam.classList.replace('from-red-600', 'from-blue-600');
+                btnCam.classList.replace('to-pink-600', 'to-indigo-600');
+                cubeGroup.visible = false; 
+            } else {
+                // Start
+                webcamRunning = true;
+                navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } }).then(stream => {
+                    video.srcObject = stream;
+                });
+                
+                btnCam.innerHTML = `<i data-lucide="pause-circle"></i> <span id="btn-text">Pause</span>`;
+                btnCam.classList.replace('from-blue-600', 'from-red-600');
+                btnCam.classList.replace('to-indigo-600', 'to-pink-600');
+            }
+            lucide.createIcons();
+        });
+
+        // 3. Rotation Slider
+        document.getElementById('rotation-slider').addEventListener('input', (e) => {
+            const deg = parseInt(e.target.value);
+            manualRotationOffset = deg * (Math.PI / 180);
+            document.getElementById('rotation-val').innerText = `${deg}°`;
+        });
+
+        window.resetRotation = () => {
+            manualRotationOffset = 0;
+            document.getElementById('rotation-slider').value = 0;
+            document.getElementById('rotation-val').innerText = "0°";
+        };
+
+        // 4. Counting Logic
+        function resetCountingState() {
+            currentCountStep = 0;
+            // Get blocks and sort them
+            sortedBlocksCache = cubeGroup.children.filter(c => c.userData.isBlock);
+            sortedBlocksCache.sort((a, b) => {
+                if (Math.abs(a.position.y - b.position.y) > 0.1) return a.position.y - b.position.y;
+                if (Math.abs(a.position.z - b.position.z) > 0.1) return a.position.z - b.position.z;
+                return a.position.x - b.position.x;
+            });
+
+            // Reset Colors
+            sortedBlocksCache.forEach(b => setBlockColor(b, false));
+            
+            // Reset Text
+            if(currentLevel) {
+                document.getElementById('current-level-name').innerText = currentLevel.name;
+                document.getElementById('current-level-name').classList.remove('text-yellow-400');
+            }
+        }
+
+        function setBlockColor(mesh, isHighlight) {
+            // Check if material is array or single
+            const mat = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
+            if(window.SpatialScript) {
+                 mat.color.setHex(isHighlight ? window.SpatialScript.COLORS.highlight : window.SpatialScript.COLORS.block);
+                 mat.emissive.setHex(isHighlight ? window.SpatialScript.COLORS.highlightEmissive : window.SpatialScript.COLORS.blockEmissive);
+            } else {
+                 mat.color.setHex(isHighlight ? 0x3b82f6 : 0xff8800);
+            }
+        }
+
+        document.getElementById('countNextBtn').onclick = () => {
+            if (currentCountStep < sortedBlocksCache.length) {
+                const block = sortedBlocksCache[currentCountStep];
+                setBlockColor(block, true);
+                
+                // Pop Animation
+                const originalScale = block.scale.clone();
+                block.scale.multiplyScalar(1.2);
+                setTimeout(() => block.scale.copy(originalScale), 150);
+                
+                currentCountStep++;
+                
+                if(currentCountStep === sortedBlocksCache.length) {
+                    const txt = document.getElementById('current-level-name');
+                    txt.innerText = `Great! All ${sortedBlocksCache.length} blocks counted!`;
+                    txt.classList.add('text-yellow-400');
+                }
+            }
+        };
+
+        document.getElementById('countPrevBtn').onclick = () => {
+            if (currentCountStep > 0) {
+                currentCountStep--;
+                setBlockColor(sortedBlocksCache[currentCountStep], false);
+                
+                const txt = document.getElementById('current-level-name');
+                if(currentLevel) txt.innerText = currentLevel.name;
+                txt.classList.remove('text-yellow-400');
+            }
+        };
+
+        document.getElementById('resetStateBtn').onclick = resetCountingState;
+
+        // Start
+        initApp();
+    </script>
+</body>
+</html>
