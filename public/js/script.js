@@ -18,7 +18,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // Global Variables
-let allProjectsData = [];
+let alllibraryData = [];
 
 // Expose Functions
 window.openNewsModal = openNewsModal;
@@ -144,11 +144,11 @@ async function loadHomePortfolio() {
     container.innerHTML = renderSkeleton(4);
     
     try {
-        let q = query(collection(db, "projects"), orderBy("createdAt", "desc"), limit(4));
+        let q = query(collection(db, "library"), orderBy("createdAt", "desc"), limit(4));
         let snap = await getDocs(q);
         
         if (snap.empty) {
-             const qBackup = query(collection(db, "projects"), limit(4));
+             const qBackup = query(collection(db, "library"), limit(4));
              snap = await getDocs(qBackup);
         }
         
@@ -219,24 +219,24 @@ async function loadLibrary() {
     container.innerHTML = renderSkeleton(6);
     
     try {
-        const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
+        const q = query(collection(db, "library"), orderBy("createdAt", "desc"));
         let snap = await getDocs(q);
 
         if (snap.empty) {
-             const qBackup = collection(db, "projects");
+             const qBackup = collection(db, "library");
              snap = await getDocs(qBackup);
         }
         
         if (snap.empty) {
             container.innerHTML = '<div class="col-span-full text-center text-gray-400 py-10">ยังไม่มีผลงานในคลัง</div>';
         } else {
-            allProjectsData = [];
+            alllibraryData = [];
             snap.forEach(d => {
                 const p = d.data(); p.id = d.id;
-                allProjectsData.push(p);
+                alllibraryData.push(p);
             });
-            renderLibrary(allProjectsData);
-            generateTagButtons(allProjectsData);
+            renderLibrary(alllibraryData);
+            generateTagButtons(alllibraryData);
         }
     } catch (error) { console.error(error); }
 }
@@ -254,30 +254,30 @@ function filterLibrary(type, value) {
     let filteredData = [];
     let statusText = "รายการทั้งหมด";
 
-    if (type === 'all') filteredData = allProjectsData;
-    else if (type === 'cat') { filteredData = allProjectsData.filter(p => p.category === value); statusText = `หมวดหมู่: ${value}`; } 
-    else if (type === 'tag') { filteredData = allProjectsData.filter(p => p.tags && p.tags.includes(value)); statusText = `แท็ก: ${value}`; }
+    if (type === 'all') filteredData = alllibraryData;
+    else if (type === 'cat') { filteredData = alllibraryData.filter(p => p.category === value); statusText = `หมวดหมู่: ${value}`; } 
+    else if (type === 'tag') { filteredData = alllibraryData.filter(p => p.tags && p.tags.includes(value)); statusText = `แท็ก: ${value}`; }
 
     renderLibrary(filteredData);
     const statusEl = document.getElementById('filter-status');
     if(statusEl) statusEl.innerText = statusText;
 }
 
-function renderLibrary(projects) {
+function renderLibrary(library) {
     const container = document.getElementById('library-grid');
     const countLabel = document.getElementById('item-count');
-    if(countLabel) countLabel.innerText = `${projects.length} items`;
+    if(countLabel) countLabel.innerText = `${library.length} items`;
 
-    if (projects.length === 0) { container.innerHTML = '<div class="col-span-full text-center text-gray-400 py-10">ไม่พบรายการที่ค้นหา</div>'; return; }
+    if (library.length === 0) { container.innerHTML = '<div class="col-span-full text-center text-gray-400 py-10">ไม่พบรายการที่ค้นหา</div>'; return; }
     container.innerHTML = "";
-    projects.forEach(p => container.innerHTML += createCardHTML(p));
+    library.forEach(p => container.innerHTML += createCardHTML(p));
 }
 
-function generateTagButtons(projects) {
+function generateTagButtons(library) {
     const container = document.getElementById('tag-filters-container');
     if(!container) return;
     const allTags = new Set();
-    projects.forEach(p => { if(p.tags) p.tags.split(',').map(t => t.trim()).forEach(t => allTags.add(t)); });
+    library.forEach(p => { if(p.tags) p.tags.split(',').map(t => t.trim()).forEach(t => allTags.add(t)); });
 
     container.innerHTML = '<span class="text-slate-500 font-code mr-2 self-center">Tags:</span>';
     allTags.forEach(tag => {
@@ -295,11 +295,11 @@ async function loadProjectDetail() {
     const id = params.get('id');
     if(!id) return;
     try {
-        const snap = await getDoc(doc(db, "projects", id));
+        const snap = await getDoc(doc(db, "library", id));
         if(snap.exists()) {
             const p = snap.data(); p.id = snap.id;
             renderDetailHTML(p);
-            await updateDoc(doc(db, "projects", id), { views: increment(1) });
+            await updateDoc(doc(db, "library", id), { views: increment(1) });
         } else { alert("ไม่พบข้อมูล"); window.location.href = 'library.html'; }
     } catch (e) { console.error(e); }
 }
@@ -444,7 +444,7 @@ async function loadNews() {
     } catch (error) { console.error("Error loading news:", error); }
 }
 
-async function incrementStat(id, type) { try { const ref = doc(db, "projects", id); await updateDoc(ref, { [type]: increment(1) }); } catch (e) { console.error(e); } }
+async function incrementStat(id, type) { try { const ref = doc(db, "library", id); await updateDoc(ref, { [type]: increment(1) }); } catch (e) { console.error(e); } }
 function openNewsModal(data) { const n = JSON.parse(decodeURIComponent(data)); document.getElementById('m-title').innerText = n.title; document.getElementById('m-content').innerHTML = n.content.replace(/\n/g, "<br>"); document.getElementById('news-modal').classList.remove('hidden'); }
 function closeNewsModal() { document.getElementById('news-modal').classList.add('hidden'); }
 

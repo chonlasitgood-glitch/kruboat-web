@@ -22,7 +22,7 @@ const ADMIN_PIN = "0903498148";
 window.checkLogin = checkLogin;
 window.performLogin = performLogin;
 window.logout = logout;
-// Projects
+// library
 window.openAddProjectModal = openAddProjectModal;
 window.closeAddProjectModal = closeAddProjectModal;
 window.saveProject = saveProject;
@@ -144,7 +144,7 @@ function logout() {
 function showDashboard() {
     if(!isAuthenticated()) return; // กันการโหลดข้อมูลถ้ายังไม่ล็อกอิน
 
-    onSnapshot(collection(db, "projects"), (snap) => {
+    onSnapshot(collection(db, "library"), (snap) => {
         const el = document.getElementById('stat-projects');
         if(el) el.innerText = snap.size.toLocaleString();
         let dl=0, vw=0;
@@ -164,7 +164,7 @@ function showDashboard() {
     });
 }
 
-// --- Projects ---
+// --- library ---
 function openAddProjectModal() { if(authGuard()) document.getElementById('project-modal').classList.remove('hidden'); }
 function closeAddProjectModal() { 
     document.getElementById('project-modal').classList.add('hidden'); 
@@ -207,11 +207,11 @@ async function saveProject() {
 
     try {
         if (id) {
-            await updateDoc(doc(db, "projects", id), payload);
+            await updateDoc(doc(db, "library", id), payload);
             alert("แก้ไขสำเร็จ!");
         } else {
             payload.views = 0; payload.downloads = 0; payload.createdAt = serverTimestamp();
-            await addDoc(collection(db, "projects"), payload);
+            await addDoc(collection(db, "library"), payload);
             alert("เพิ่มสำเร็จ!");
         }
         closeAddProjectModal();
@@ -226,7 +226,7 @@ async function openManageModal() {
     const tbody = document.getElementById('manage-list-body');
     tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading...</td></tr>';
     
-    const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
+    const q = query(collection(db, "library"), orderBy("createdAt", "desc"));
     const snap = await getDocs(q);
     
     if(snap.empty) {
@@ -256,7 +256,7 @@ async function editProject(id) {
     closeManageModal();
     
     try {
-        const snap = await getDoc(doc(db, "projects", id));
+        const snap = await getDoc(doc(db, "library", id));
         if(!snap.exists()) return alert("ไม่พบข้อมูล");
         
         const p = snap.data();
@@ -286,7 +286,7 @@ async function editProject(id) {
 async function deleteProject(id, title) {
     if(!authGuard()) return; // 🔒 Guard
     if(confirm(`ลบโปรเจกต์ "${title}"?`)) {
-        await deleteDoc(doc(db, "projects", id));
+        await deleteDoc(doc(db, "library", id));
         openManageModal(); 
     }
 }
