@@ -22,22 +22,25 @@ const ADMIN_PIN = "0903498148";
 window.checkLogin = checkLogin;
 window.performLogin = performLogin;
 window.logout = logout;
-// library
-window.openAddProjectModal = openAddProjectModal;
-window.closeAddProjectModal = closeAddProjectModal;
+
+// Library (Old Projects)
+window.openLibraryModal = openLibraryModal;
+window.closeLibraryModal = closeLibraryModal;
+window.saveLibrary = saveLibrary;
+window.openManageLibraryModal = openManageLibraryModal;
+window.closeManageLibraryModal = closeManageLibraryModal;
+window.deleteLibrary = deleteLibrary;
+window.editLibrary = editLibrary;
+
+// Projects (New Web Projects)
+window.openProjectModal = openProjectModal;
+window.closeProjectModal = closeProjectModal;
 window.saveProject = saveProject;
-window.openManageModal = openManageModal;
-window.closeManageModal = closeManageModal;
+window.openManageProjectsModal = openManageProjectsModal;
+window.closeManageProjectsModal = closeManageProjectsModal;
 window.deleteProject = deleteProject;
 window.editProject = editProject;
-// News
-window.openAddNewsModal = openAddNewsModal;
-window.closeAddNewsModal = closeAddNewsModal;
-window.saveNews = saveNews;
-window.openManageNewsModal = openManageNewsModal;
-window.closeManageNewsModal = closeManageNewsModal;
-window.deleteNews = deleteNews;
-window.editNews = editNews;
+
 // Apps
 window.openAddAppModal = openAddAppModal;
 window.closeAddAppModal = closeAddAppModal;
@@ -46,6 +49,16 @@ window.openManageAppsModal = openManageAppsModal;
 window.closeManageAppsModal = closeManageAppsModal;
 window.deleteApp = deleteApp;
 window.editApp = editApp;
+
+// News
+window.openAddNewsModal = openAddNewsModal;
+window.closeAddNewsModal = closeAddNewsModal;
+window.saveNews = saveNews;
+window.openManageNewsModal = openManageNewsModal;
+window.closeManageNewsModal = closeManageNewsModal;
+window.deleteNews = deleteNews;
+window.editNews = editNews;
+
 // System
 window.checkSystemStatus = checkSystemStatus;
 window.saveNote = saveNote;
@@ -64,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, (user) => {
         if (user) {
             console.log("Firebase Connected");
-            checkLogin(); // ตรวจสอบรหัส Admin
+            checkLogin(); 
         }
     });
 });
@@ -83,7 +96,7 @@ function convertDriveImage(url) {
 
 function formatDate(dateString) {
     if(!dateString) return "-";
-    if(typeof dateString === 'string' && dateString.includes('/')) return dateString;
+    if(typeof dateString === 'string' && dateString.includes('-')) return dateString; // YYYY-MM-DD
     let date;
     if(dateString.toDate) date = dateString.toDate();
     else date = new Date(dateString);
@@ -93,8 +106,6 @@ function formatDate(dateString) {
 
 // --- Security Helper ---
 function isAuthenticated() {
-    // ตรวจสอบว่ามี session password หรือไม่
-    // ถ้าไม่มี -> คืนค่า false เพื่อบล็อกการทำงาน
     return sessionStorage.getItem('admin_password') === ADMIN_PIN;
 }
 
@@ -111,16 +122,14 @@ function authGuard() {
 function checkLogin() {
     const savedPassword = sessionStorage.getItem('admin_password');
     if (savedPassword === ADMIN_PIN) {
-        // ✅ Login Success: ซ่อน Modal, โชว์ Content
         document.getElementById('login-modal').classList.add('hidden');
-        document.getElementById('protected-content').classList.remove('hidden'); // <-- โชว์เนื้อหาตรงนี้
+        document.getElementById('protected-content').classList.remove('hidden'); 
         showDashboard();
         loadNote();
         listenToMessages();
     } else {
-        // ❌ Not Logged In: โชว์ Modal, ซ่อน Content
         document.getElementById('login-modal').classList.remove('hidden');
-        document.getElementById('protected-content').classList.add('hidden'); // <-- ซ่อนเนื้อหาให้มิด
+        document.getElementById('protected-content').classList.add('hidden');
     }
 }
 
@@ -142,62 +151,66 @@ function logout() {
 
 // --- Dashboard ---
 function showDashboard() {
-    if(!isAuthenticated()) return; // กันการโหลดข้อมูลถ้ายังไม่ล็อกอิน
+    if(!isAuthenticated()) return;
 
+    // Library Count (formerly Projects)
     onSnapshot(collection(db, "library"), (snap) => {
+        const el = document.getElementById('stat-library');
+        if(el) el.innerText = snap.size.toLocaleString();
+    });
+
+    // Projects Count (New Web Projects)
+    onSnapshot(collection(db, "projects"), (snap) => {
         const el = document.getElementById('stat-projects');
         if(el) el.innerText = snap.size.toLocaleString();
-        let dl=0, vw=0;
-        snap.forEach(d=>{ 
-            const data = d.data();
-            dl += (data.downloads||0); 
-            vw += (data.views||0); 
-        });
-        const elDl = document.getElementById('stat-downloads');
-        if(elDl) elDl.innerText = dl.toLocaleString();
-        const elVw = document.getElementById('stat-views');
-        if(elVw) elVw.innerText = vw.toLocaleString();
     });
+
+    // Apps Count
+    onSnapshot(collection(db, "apps"), (snap) => {
+        const el = document.getElementById('stat-apps');
+        if(el) el.innerText = snap.size.toLocaleString();
+    });
+
+    // News Count
     onSnapshot(collection(db, "news"), (snap) => {
         const el = document.getElementById('stat-news');
         if(el) el.innerText = snap.size.toLocaleString();
     });
 }
 
-// --- library ---
-function openAddProjectModal() { if(authGuard()) document.getElementById('project-modal').classList.remove('hidden'); }
-function closeAddProjectModal() { 
-    document.getElementById('project-modal').classList.add('hidden'); 
-    document.getElementById('p-id').value = "";
-    document.querySelectorAll('#project-modal input, #project-modal textarea').forEach(i=>i.value='');
-    document.getElementById('save-project-btn').innerText = 'บันทึกข้อมูล';
-    document.getElementById('p-modal-title').innerHTML = '<i class="fa-solid fa-plus-circle mr-2"></i>เพิ่มโปรเจกต์ใหม่';
+// ================= LIBRARY (Old Projects) =================
+function openLibraryModal() { if(authGuard()) document.getElementById('library-modal').classList.remove('hidden'); }
+function closeLibraryModal() { 
+    document.getElementById('library-modal').classList.add('hidden'); 
+    document.getElementById('lib-id').value = "";
+    document.querySelectorAll('#library-modal input, #library-modal textarea').forEach(i=>i.value='');
+    document.getElementById('save-lib-btn').innerText = 'บันทึกข้อมูล';
+    document.getElementById('lib-modal-title').innerHTML = '<i class="fa-solid fa-code mr-2"></i>เพิ่ม Source Code (Library)';
 }
-function closeManageModal() { document.getElementById('manage-modal').classList.add('hidden'); }
+function closeManageLibraryModal() { document.getElementById('manage-library-modal').classList.add('hidden'); }
 
-async function saveProject() {
-    if(!authGuard()) return; // 🔒 Guard
+async function saveLibrary() {
+    if(!authGuard()) return;
 
-    const id = document.getElementById('p-id').value;
-    const title = document.getElementById('p-title').value;
-    const category = document.getElementById('p-category').value;
-    const tags = document.getElementById('p-tags').value;
-    const desc = document.getElementById('p-desc').value;
-    const detail = document.getElementById('p-detail').value;
-    const linkPreview = document.getElementById('p-link-preview').value;
-    const linkCode = document.getElementById('p-link-code').value;
+    const id = document.getElementById('lib-id').value;
+    const title = document.getElementById('lib-title').value;
+    const category = document.getElementById('lib-category').value;
+    const tags = document.getElementById('lib-tags').value;
+    const desc = document.getElementById('lib-desc').value;
+    const detail = document.getElementById('lib-detail').value;
+    const linkPreview = document.getElementById('lib-link-preview').value;
+    const linkCode = document.getElementById('lib-link-code').value;
     
     const images = [];
-    for(let i=1; i<=5; i++) {
-        const el = document.getElementById('p-image-'+i);
+    for(let i=1; i<=2; i++) {
+        const el = document.getElementById('lib-image-'+i);
         if(el && el.value.trim()) images.push(el.value.trim());
     }
 
-    if(!title || !tags || images.length === 0 || !desc) return alert("กรอกข้อมูลให้ครบ");
+    if(!title || !tags || !desc) return alert("กรอกข้อมูลให้ครบ (ชื่อ, Tag, คำอธิบาย)");
 
-    const btn = document.getElementById('save-project-btn');
-    btn.innerText = "กำลังบันทึก...";
-    btn.disabled = true;
+    const btn = document.getElementById('save-lib-btn');
+    btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
 
     const payload = {
         title, category, tags, images, description: desc, detail: detail || desc,
@@ -208,41 +221,151 @@ async function saveProject() {
     try {
         if (id) {
             await updateDoc(doc(db, "library", id), payload);
-            alert("แก้ไขสำเร็จ!");
+            alert("แก้ไข Library สำเร็จ!");
         } else {
             payload.views = 0; payload.downloads = 0; payload.createdAt = serverTimestamp();
             await addDoc(collection(db, "library"), payload);
-            alert("เพิ่มสำเร็จ!");
+            alert("เพิ่ม Library สำเร็จ!");
         }
-        closeAddProjectModal();
-        if(!document.getElementById('manage-modal').classList.contains('hidden')) openManageModal();
+        closeLibraryModal();
+        if(!document.getElementById('manage-library-modal').classList.contains('hidden')) openManageLibraryModal();
     } catch(e) { alert(e.message); } 
     finally { btn.innerText = "บันทึกข้อมูล"; btn.disabled = false; }
 }
 
-async function openManageModal() {
-    if(!authGuard()) return; // 🔒 Guard
-    document.getElementById('manage-modal').classList.remove('hidden');
-    const tbody = document.getElementById('manage-list-body');
+async function openManageLibraryModal() {
+    if(!authGuard()) return;
+    document.getElementById('manage-library-modal').classList.remove('hidden');
+    const tbody = document.getElementById('manage-library-body');
     tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading...</td></tr>';
     
     const q = query(collection(db, "library"), orderBy("createdAt", "desc"));
     const snap = await getDocs(q);
     
-    if(snap.empty) {
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">ไม่มีข้อมูล</td></tr>';
-        return;
-    }
+    if(snap.empty) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">ไม่มีข้อมูล</td></tr>'; return; }
     
     tbody.innerHTML = "";
     snap.forEach(docSnap => {
         const p = docSnap.data();
-        const img = (p.images && p.images.length > 0) ? p.images[0] : p.image;
+        const img = (p.images && p.images.length > 0) ? p.images[0] : (p.image || "");
         tbody.innerHTML += `
             <tr class="bg-white border-b hover:bg-gray-50">
-                <td class="px-6 py-4 flex items-center gap-3"><img src="${convertDriveImage(img)}" class="w-10 h-10 rounded object-cover"><span class="truncate max-w-xs">${p.title}</span></td>
+                <td class="px-6 py-4 flex items-center gap-3"><img src="${convertDriveImage(img)}" class="w-10 h-10 rounded object-cover"><span class="truncate max-w-xs font-medium">${p.title}</span></td>
                 <td class="px-6 py-4">${p.category}</td>
                 <td class="px-6 py-4 text-center">${p.views||0} / ${p.downloads||0}</td>
+                <td class="px-6 py-4 text-right">
+                    <button onclick="editLibrary('${docSnap.id}')" class="text-blue-600 mr-2"><i class="fa-solid fa-pen"></i></button>
+                    <button onclick="deleteLibrary('${docSnap.id}', '${p.title}')" class="text-red-600"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>`;
+    });
+}
+
+async function editLibrary(id) {
+    if(!authGuard()) return;
+    closeManageLibraryModal();
+    
+    try {
+        const snap = await getDoc(doc(db, "library", id));
+        if(!snap.exists()) return alert("ไม่พบข้อมูล");
+        
+        const p = snap.data();
+        document.getElementById('lib-id').value = id;
+        document.getElementById('lib-title').value = p.title;
+        document.getElementById('lib-category').value = p.category;
+        document.getElementById('lib-tags').value = p.tags;
+        document.getElementById('lib-desc').value = p.description;
+        document.getElementById('lib-detail').value = p.detail || "";
+        document.getElementById('lib-link-preview').value = p.link_preview || "";
+        document.getElementById('lib-link-code').value = p.link_code || "";
+        
+        const imgs = p.images || (p.image ? [p.image] : []);
+        for(let i=1; i<=2; i++) { 
+            const el = document.getElementById('lib-image-'+i);
+            if(el) el.value = imgs[i-1] || ""; 
+        }
+        
+        document.getElementById('lib-modal-title').innerHTML = 'แก้ไข Library';
+        document.getElementById('save-lib-btn').innerText = 'อัปเดต';
+        openLibraryModal();
+        
+    } catch(e) { console.error(e); alert("Error: " + e.message); }
+}
+
+async function deleteLibrary(id, title) {
+    if(authGuard() && confirm(`ลบ Library "${title}"?`)) {
+        await deleteDoc(doc(db, "library", id));
+        openManageLibraryModal(); 
+    }
+}
+
+// ================= PROJECTS (New Web Projects) =================
+function openProjectModal() { if(authGuard()) document.getElementById('project-modal').classList.remove('hidden'); }
+function closeProjectModal() { 
+    document.getElementById('project-modal').classList.add('hidden'); 
+    document.getElementById('proj-id').value = "";
+    document.querySelectorAll('#project-modal input, #project-modal textarea, #project-modal select').forEach(i=>i.value='');
+    document.getElementById('save-proj-btn').innerText = 'บันทึก';
+    document.getElementById('proj-modal-title').innerHTML = '<i class="fa-solid fa-diagram-project mr-2"></i>เพิ่มโปรเจกต์ใหม่';
+}
+function closeManageProjectsModal() { document.getElementById('manage-projects-modal').classList.add('hidden'); }
+
+async function saveProject() {
+    if(!authGuard()) return;
+
+    const id = document.getElementById('proj-id').value;
+    const title = document.getElementById('proj-title').value;
+    const description = document.getElementById('proj-desc').value;
+    const category = document.getElementById('proj-tag').value; // Using as category/tag
+    const tagColor = document.getElementById('proj-color').value || 'bg-gray-500';
+    const link = document.getElementById('proj-link').value;
+    const displayDate = document.getElementById('proj-date').value;
+
+    if(!title || !description || !category || !link) return alert("กรอกข้อมูลให้ครบ (Title, Desc, Tag, Link)");
+
+    const btn = document.getElementById('save-proj-btn');
+    btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
+
+    const payload = { title, description, category, tagColor, link, displayDate };
+
+    try {
+        if (id) {
+            await updateDoc(doc(db, "projects", id), payload);
+            alert("แก้ไขโปรเจกต์สำเร็จ!");
+        } else {
+            payload.createdAt = serverTimestamp();
+            await addDoc(collection(db, "projects"), payload);
+            alert("เพิ่มโปรเจกต์สำเร็จ!");
+        }
+        closeProjectModal();
+        if(!document.getElementById('manage-projects-modal').classList.contains('hidden')) openManageProjectsModal();
+    } catch(e) { alert(e.message); } 
+    finally { btn.innerText = "บันทึก"; btn.disabled = false; }
+}
+
+async function openManageProjectsModal() {
+    if(!authGuard()) return;
+    document.getElementById('manage-projects-modal').classList.remove('hidden');
+    const tbody = document.getElementById('manage-projects-body');
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading...</td></tr>';
+    
+    // Sort by displayDate if available, else createdAt
+    const q = query(collection(db, "projects"), orderBy("createdAt", "desc")); 
+    const snap = await getDocs(q);
+    
+    if(snap.empty) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">ไม่มีข้อมูล</td></tr>'; return; }
+    
+    tbody.innerHTML = "";
+    snap.forEach(docSnap => {
+        const p = docSnap.data();
+        // Generate Color Dot
+        const colorDot = `<span class="w-3 h-3 rounded-full inline-block mr-2 ${p.tagColor}"></span>`;
+        
+        tbody.innerHTML += `
+            <tr class="bg-white border-b hover:bg-gray-50">
+                <td class="px-6 py-4 text-xs text-gray-500">${p.displayDate || "-"}</td>
+                <td class="px-6 py-4 font-bold text-gray-700">${p.title}</td>
+                <td class="px-6 py-4 flex items-center">${colorDot} ${p.category}</td>
                 <td class="px-6 py-4 text-right">
                     <button onclick="editProject('${docSnap.id}')" class="text-blue-600 mr-2"><i class="fa-solid fa-pen"></i></button>
                     <button onclick="deleteProject('${docSnap.id}', '${p.title}')" class="text-red-600"><i class="fa-solid fa-trash"></i></button>
@@ -252,46 +375,35 @@ async function openManageModal() {
 }
 
 async function editProject(id) {
-    if(!authGuard()) return; // 🔒 Guard
-    closeManageModal();
-    
+    if(!authGuard()) return;
+    closeManageProjectsModal();
     try {
-        const snap = await getDoc(doc(db, "library", id));
+        const snap = await getDoc(doc(db, "projects", id));
         if(!snap.exists()) return alert("ไม่พบข้อมูล");
-        
         const p = snap.data();
-        document.getElementById('p-id').value = id;
-        document.getElementById('p-title').value = p.title;
-        document.getElementById('p-category').value = p.category;
-        document.getElementById('p-tags').value = p.tags;
-        document.getElementById('p-desc').value = p.description;
-        document.getElementById('p-detail').value = p.detail || "";
-        document.getElementById('p-link-preview').value = p.link_preview || "";
-        document.getElementById('p-link-code').value = p.link_code || "";
         
-        const imgs = p.images || (p.image ? [p.image] : []);
-        for(let i=1; i<=5; i++) { 
-            const el = document.getElementById('p-image-'+i);
-            if(el) el.value = imgs[i-1] || ""; 
-        }
-        
-        document.getElementById('p-modal-title').innerHTML = 'แก้ไขโปรเจกต์';
-        document.getElementById('save-project-btn').innerText = 'อัปเดต';
-        
-        openAddProjectModal();
-        
-    } catch(e) { console.error(e); alert("เกิดข้อผิดพลาด: " + e.message); }
+        document.getElementById('proj-id').value = id;
+        document.getElementById('proj-title').value = p.title;
+        document.getElementById('proj-desc').value = p.description;
+        document.getElementById('proj-tag').value = p.category;
+        document.getElementById('proj-color').value = p.tagColor || 'bg-gray-500';
+        document.getElementById('proj-link').value = p.link;
+        document.getElementById('proj-date').value = p.displayDate || "";
+
+        document.getElementById('proj-modal-title').innerHTML = 'แก้ไขโปรเจกต์';
+        document.getElementById('save-proj-btn').innerText = 'อัปเดต';
+        openProjectModal();
+    } catch(e) { console.error(e); alert("Error: " + e.message); }
 }
 
 async function deleteProject(id, title) {
-    if(!authGuard()) return; // 🔒 Guard
-    if(confirm(`ลบโปรเจกต์ "${title}"?`)) {
-        await deleteDoc(doc(db, "library", id));
-        openManageModal(); 
+    if(authGuard() && confirm(`ลบโปรเจกต์ "${title}"?`)) {
+        await deleteDoc(doc(db, "projects", id));
+        openManageProjectsModal(); 
     }
 }
 
-// --- News ---
+// ================= NEWS =================
 function openAddNewsModal() { if(authGuard()) document.getElementById('add-news-modal').classList.remove('hidden'); }
 function closeAddNewsModal() { 
     document.getElementById('add-news-modal').classList.add('hidden'); 
@@ -303,7 +415,7 @@ function closeAddNewsModal() {
 function closeManageNewsModal() { document.getElementById('manage-news-modal').classList.add('hidden'); }
 
 async function saveNews() {
-    if(!authGuard()) return; // 🔒 Guard
+    if(!authGuard()) return;
     const id = document.getElementById('n-id').value;
     const title = document.getElementById('n-title').value;
     const tag = document.getElementById('n-tag').value;
@@ -323,7 +435,7 @@ async function saveNews() {
 }
 
 async function openManageNewsModal() {
-    if(!authGuard()) return; // 🔒 Guard
+    if(!authGuard()) return;
     document.getElementById('manage-news-modal').classList.remove('hidden');
     const tbody = document.getElementById('manage-news-body');
     tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading...</td></tr>';
@@ -334,10 +446,9 @@ async function openManageNewsModal() {
         tbody.innerHTML = "";
         snap.forEach(docSnap => {
             const n = docSnap.data();
-            let dateStr = formatDate(n.createdAt);
             tbody.innerHTML += `
                 <tr class="bg-white border-b">
-                    <td class="px-6 py-4">${dateStr}</td>
+                    <td class="px-6 py-4">${formatDate(n.createdAt)}</td>
                     <td class="px-6 py-4">${n.title}</td>
                     <td class="px-6 py-4"><span class="px-2 py-1 rounded bg-gray-100 text-xs">${n.tag}</span></td>
                     <td class="px-6 py-4 text-right flex justify-end gap-2">
@@ -350,7 +461,7 @@ async function openManageNewsModal() {
 }
 
 async function editNews(id) {
-    if(!authGuard()) return; // 🔒 Guard
+    if(!authGuard()) return;
     closeManageNewsModal();
     try {
         const docSnap = await getDoc(doc(db, "news", id));
@@ -368,7 +479,7 @@ async function editNews(id) {
 
 async function deleteNews(id) { if(authGuard() && confirm("ลบข่าวนี้?")) { await deleteDoc(doc(db, "news", id)); openManageNewsModal(); } }
 
-// --- Apps ---
+// ================= APPS =================
 function openAddAppModal() { if(authGuard()) document.getElementById('app-modal').classList.remove('hidden'); }
 function closeAddAppModal() { 
     document.getElementById('app-modal').classList.add('hidden');
@@ -380,12 +491,11 @@ function closeAddAppModal() {
 function closeManageAppsModal() { document.getElementById('manage-apps-modal').classList.add('hidden'); }
 
 async function saveApp() {
-    if(!authGuard()) return; // 🔒 Guard
+    if(!authGuard()) return;
     const id = document.getElementById('a-id').value;
     const name = document.getElementById('a-name').value;
     const category = document.getElementById('a-category').value;
     const desc = document.getElementById('a-desc').value;
-    const tag = document.getElementById('a-tag').value;
     const image = document.getElementById('a-image').value;
     const link = document.getElementById('a-link').value;
 
@@ -393,7 +503,7 @@ async function saveApp() {
     const btn = document.getElementById('save-app-btn');
     btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
 
-    const payload = { name, category, description: desc, tag, image, link };
+    const payload = { name, category, description: desc, image, link };
 
     try {
         if(id) { await updateDoc(doc(db, "apps", id), payload); alert("แก้ไขแอพสำเร็จ!"); } 
@@ -404,7 +514,7 @@ async function saveApp() {
 }
 
 async function openManageAppsModal() {
-    if(!authGuard()) return; // 🔒 Guard
+    if(!authGuard()) return;
     document.getElementById('manage-apps-modal').classList.remove('hidden');
     const tbody = document.getElementById('manage-apps-body');
     tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4">Loading...</td></tr>';
@@ -429,7 +539,7 @@ async function openManageAppsModal() {
 }
 
 async function editApp(id) {
-    if(!authGuard()) return; // 🔒 Guard
+    if(!authGuard()) return;
     closeManageAppsModal();
     try {
         const docSnap = await getDoc(doc(db, "apps", id));
@@ -439,7 +549,6 @@ async function editApp(id) {
         document.getElementById('a-name').value = a.name;
         document.getElementById('a-category').value = a.category;
         document.getElementById('a-desc').value = a.description;
-        document.getElementById('a-tag').value = a.tag || '';
         document.getElementById('a-image').value = a.image;
         document.getElementById('a-link').value = a.link;
         document.getElementById('a-modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2"></i>แก้ไขแอพ';
@@ -450,15 +559,20 @@ async function editApp(id) {
 
 async function deleteApp(id, name) { if(authGuard() && confirm(`ลบแอพ "${name}"?`)) { await deleteDoc(doc(db, "apps", id)); openManageAppsModal(); } }
 
-// --- Inbox ---
+// ================= INBOX =================
 function listenToMessages() {
     if(!isAuthenticated()) return;
     const q = query(collection(db, "messages"), orderBy("timestamp", "desc"));
     onSnapshot(q, (snapshot) => {
         let unread = 0;
         snapshot.forEach(d => { if(!d.data().read) unread++; });
-        const badges = [document.getElementById('sidebar-inbox-badge'), document.getElementById('quick-inbox-badge')];
-        badges.forEach(b => { if(b) { b.classList.toggle('hidden', unread===0); b.innerText = unread > 9 ? '9+' : unread; } });
+        const badges = [document.getElementById('sidebar-inbox-badge'), document.getElementById('quick-inbox-badge'), document.getElementById('inbox-count')];
+        badges.forEach(b => { 
+            if(b) { 
+                b.classList.toggle('hidden', unread===0); 
+                b.innerText = unread > 9 ? '9+' : unread; 
+            } 
+        });
     });
 }
 function openInboxModal() { if(authGuard()) { document.getElementById('inbox-modal').classList.remove('hidden'); loadMessages(); } }
@@ -484,7 +598,7 @@ function loadMessages() {
 }
 async function deleteMessage(id) { if(authGuard() && confirm("ลบข้อความ?")) await deleteDoc(doc(db, "messages", id)); }
 
-// --- System ---
+// ================= SYSTEM =================
 async function loadNote() {
     if(!isAuthenticated()) return;
     const el = document.getElementById('admin-note-input');
@@ -495,7 +609,7 @@ async function loadNote() {
     } catch (error) { el.value = "โหลดไม่สำเร็จ"; } finally { el.disabled = false; }
 }
 async function saveNote() {
-    if(!authGuard()) return; // 🔒 Guard
+    if(!authGuard()) return;
     const val = document.getElementById('admin-note-input').value;
     const btn = document.getElementById('save-note-btn');
     btn.innerText = "...";

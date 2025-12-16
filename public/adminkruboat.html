@@ -21,12 +21,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
-    <style> body { font-family: 'Sarabun', sans-serif; } </style>
+    <style> 
+        body { font-family: 'Sarabun', sans-serif; } 
+        /* Custom Scrollbar for inner content */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
 </head>
 <body class="bg-gray-100 text-gray-800 h-screen overflow-hidden">
 
     <!-- LOGIN MODAL (ด่านหน้า) -->
-    <!-- Logic: ถ้าไม่ Login จะไม่เห็นเนื้อหาข้างหลังเลย -->
     <div id="login-modal" class="fixed inset-0 z-50 bg-gray-900 flex items-center justify-center">
         <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md text-center">
             <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl text-blue-600"><i class="fa-solid fa-user-lock"></i></div>
@@ -41,67 +47,64 @@
     </div>
 
     <!-- ✅ PROTECTED CONTENT WRAPPER -->
-    <!-- เนื้อหาทั้งหมดถูกห่อไว้ในนี้ และซ่อนไว้ด้วย class="hidden" -->
     <div id="protected-content" class="hidden flex h-full w-full">
 
-        <!-- 1. ADD/EDIT PROJECT MODAL -->
-        <div id="project-modal" class="fixed inset-0 z-40 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden backdrop-blur-sm">
+        <!-- ================= MODALS ZONE ================= -->
+
+        <!-- 1. [LIBRARY] ADD/EDIT LIBRARY MODAL (เดิมคือ Project) -->
+        <div id="library-modal" class="fixed inset-0 z-40 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden backdrop-blur-sm">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
                 <div class="bg-purple-600 px-6 py-4 flex justify-between items-center text-white rounded-t-xl sticky top-0 z-10">
-                    <h3 class="font-bold text-lg" id="p-modal-title"><i class="fa-solid fa-plus-circle mr-2"></i>เพิ่มคลังโค้ดใหม่</h3>
-                    <button onclick="closeAddProjectModal()" class="hover:bg-purple-700 rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
+                    <h3 class="font-bold text-lg" id="lib-modal-title"><i class="fa-solid fa-code mr-2"></i>เพิ่ม Source Code (Library)</h3>
+                    <button onclick="closeLibraryModal()" class="hover:bg-purple-700 rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div class="p-6 space-y-4">
-                    <input type="hidden" id="p-id">
+                    <input type="hidden" id="lib-id">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><label class="block text-sm font-bold text-gray-700 mb-1">ชื่อคลังโค้ด <span class="text-red-500">*</span></label><input type="text" id="p-title" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none"></div>
-                        <div><label class="block text-sm font-bold text-gray-700 mb-1">หมวดหมู่ <span class="text-red-500">*</span></label><select id="p-category" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none bg-white"><option>Web Application</option><option>Game</option><option>Utility</option><option>Data</option><option>Template</option></select></div>
+                        <div><label class="block text-sm font-bold text-gray-700 mb-1">ชื่อโค้ด/ไลบรารี่ <span class="text-red-500">*</span></label><input type="text" id="lib-title" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none"></div>
+                        <div><label class="block text-sm font-bold text-gray-700 mb-1">หมวดหมู่ <span class="text-red-500">*</span></label><select id="lib-category" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none bg-white"><option>Web Application</option><option>Game</option><option>Utility</option><option>Data</option><option>Template</option></select></div>
                     </div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-1">Tags (คั่นด้วยจุลภาค) <span class="text-red-500">*</span></label><input type="text" id="p-tags" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none"></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">Tags (คั่นด้วยจุลภาค) <span class="text-red-500">*</span></label><input type="text" id="lib-tags" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none"></div>
                     
                     <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                        <label class="block text-sm font-bold text-gray-700 mb-2">ลิงก์รูปภาพ (Google Drive / URL) <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">รูปภาพ (Google Drive / URL)</label>
                         <div class="space-y-2">
-                            <input type="text" id="p-image-1" class="w-full border rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none" placeholder="รูปหลัก (Thumbnail)">
-                            <input type="text" id="p-image-2" class="w-full border rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none" placeholder="รูปเพิ่มเติม 2">
-                            <input type="text" id="p-image-3" class="w-full border rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none" placeholder="รูปเพิ่มเติม 3">
-                            <input type="text" id="p-image-4" class="w-full border rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none" placeholder="รูปเพิ่มเติม 4">
-                            <input type="text" id="p-image-5" class="w-full border rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none" placeholder="รูปเพิ่มเติม 5">
+                            <input type="text" id="lib-image-1" class="w-full border rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none" placeholder="รูปหลัก (Thumbnail) *">
+                            <input type="text" id="lib-image-2" class="w-full border rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-purple-500 outline-none" placeholder="รูปเพิ่มเติม 2">
                         </div>
-                        <p class="text-xs text-gray-400 mt-1">ใส่ลิงก์ Google Drive ได้เลย ระบบจะแปลงให้เอง</p>
                     </div>
 
-                    <div><label class="block text-sm font-bold text-gray-700 mb-1">คำอธิบายย่อ <span class="text-red-500">*</span></label><textarea id="p-desc" rows="2" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none"></textarea></div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-1">รายละเอียดเต็ม</label><textarea id="p-detail" rows="4" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none"></textarea></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">คำอธิบายย่อ <span class="text-red-500">*</span></label><textarea id="lib-desc" rows="2" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none"></textarea></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">รายละเอียดเต็ม (HTML Supported)</label><textarea id="lib-detail" rows="4" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none"></textarea></div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><label class="block text-sm font-bold text-gray-700 mb-1">ลิงก์ตัวอย่าง</label><input type="text" id="p-link-preview" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none"></div>
-                        <div><label class="block text-sm font-bold text-gray-700 mb-1">ลิงก์รับโค้ด</label><input type="text" id="p-link-code" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none"></div>
+                        <div><label class="block text-sm font-bold text-gray-700 mb-1">ลิงก์ตัวอย่าง</label><input type="text" id="lib-link-preview" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none"></div>
+                        <div><label class="block text-sm font-bold text-gray-700 mb-1">ลิงก์รับโค้ด</label><input type="text" id="lib-link-code" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none"></div>
                     </div>
                     <div class="pt-4 border-t flex justify-end gap-3">
-                        <button onclick="closeAddProjectModal()" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">ยกเลิก</button>
-                        <button id="save-project-btn" onclick="saveProject()" class="px-6 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700 font-bold shadow">บันทึกข้อมูล</button>
+                        <button onclick="closeLibraryModal()" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">ยกเลิก</button>
+                        <button id="save-lib-btn" onclick="saveLibrary()" class="px-6 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700 font-bold shadow">บันทึกข้อมูล</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- MANAGE PROJECTS MODAL -->
-        <div id="manage-modal" class="fixed inset-0 z-40 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden backdrop-blur-sm">
+        <!-- [LIBRARY] MANAGE MODAL -->
+        <div id="manage-library-modal" class="fixed inset-0 z-40 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden backdrop-blur-sm">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden m-4 flex flex-col">
                 <div class="bg-slate-800 px-6 py-4 flex justify-between items-center text-white rounded-t-xl">
-                    <h3 class="font-bold text-lg"><i class="fa-solid fa-list-check mr-2"></i>จัดการคลังโค้ด</h3>
-                    <button onclick="closeManageModal()" class="hover:bg-slate-700 rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
+                    <h3 class="font-bold text-lg"><i class="fa-solid fa-list-check mr-2"></i>จัดการคลังโค้ด (Library)</h3>
+                    <button onclick="closeManageLibraryModal()" class="hover:bg-slate-700 rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
-                    <span class="text-sm text-gray-500 font-bold">รายการที่มีอยู่ทั้งหมด</span>
-                    <button onclick="closeManageModal(); openAddProjectModal()" class="text-xs bg-purple-600 text-white px-3 py-1.5 rounded hover:bg-purple-700 transition"><i class="fa-solid fa-plus mr-1"></i> เพิ่มรายการใหม่</button>
+                    <span class="text-sm text-gray-500 font-bold">รายการโค้ดที่มีอยู่ทั้งหมด</span>
+                    <button onclick="closeManageLibraryModal(); openLibraryModal()" class="text-xs bg-purple-600 text-white px-3 py-1.5 rounded hover:bg-purple-700 transition"><i class="fa-solid fa-plus mr-1"></i> เพิ่มรายการใหม่</button>
                 </div>
                 <div class="overflow-y-auto flex-grow p-0">
                     <table class="w-full text-sm text-left text-gray-500">
                         <thead class="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0">
-                            <tr><th class="px-6 py-3">ชื่อโปรเจกต์</th><th class="px-6 py-3">หมวดหมู่</th><th class="px-6 py-3 text-center">สถิติ</th><th class="px-6 py-3 text-right">จัดการ</th></tr>
+                            <tr><th class="px-6 py-3">ชื่อ</th><th class="px-6 py-3">หมวดหมู่</th><th class="px-6 py-3 text-center">วิว/โหลด</th><th class="px-6 py-3 text-right">จัดการ</th></tr>
                         </thead>
-                        <tbody id="manage-list-body" class="divide-y divide-gray-100">
+                        <tbody id="manage-library-body" class="divide-y divide-gray-100">
                             <tr><td colspan="4" class="text-center py-8">กำลังโหลดข้อมูล...</td></tr>
                         </tbody>
                     </table>
@@ -109,7 +112,91 @@
             </div>
         </div>
 
-        <!-- 2. ADD/EDIT NEWS MODAL -->
+        <!-- 2. [NEW PROJECTS] ADD/EDIT PROJECT MODAL (ของใหม่) -->
+        <div id="project-modal" class="fixed inset-0 z-40 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden backdrop-blur-sm">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg m-4">
+                <div class="bg-indigo-600 px-6 py-4 flex justify-between items-center text-white rounded-t-xl sticky top-0 z-10">
+                    <h3 class="font-bold text-lg" id="proj-modal-title"><i class="fa-solid fa-diagram-project mr-2"></i>เพิ่มโปรเจกต์ใหม่</h3>
+                    <button onclick="closeProjectModal()" class="hover:bg-indigo-700 rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <input type="hidden" id="proj-id">
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">ชื่อโปรเจกต์ (Title) <span class="text-red-500">*</span></label>
+                        <input type="text" id="proj-title" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">รายละเอียด (Description) <span class="text-red-500">*</span></label>
+                        <textarea id="proj-desc" rows="3" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">แท็ก (Category) <span class="text-red-500">*</span></label>
+                            <input type="text" id="proj-tag" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="เช่น Web Dev">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">สีแท็ก (Tag Color)</label>
+                            <select id="proj-color" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                                <option value="bg-gray-500">สีเทา (Gray)</option>
+                                <option value="bg-red-500">สีแดง (Red)</option>
+                                <option value="bg-orange-500">สีส้ม (Orange)</option>
+                                <option value="bg-yellow-500">สีเหลือง (Yellow)</option>
+                                <option value="bg-green-500">สีเขียว (Green)</option>
+                                <option value="bg-teal-500">สีฟ้าเขียว (Teal)</option>
+                                <option value="bg-blue-500">สีน้ำเงิน (Blue)</option>
+                                <option value="bg-indigo-500">สีคราม (Indigo)</option>
+                                <option value="bg-purple-500">สีม่วง (Purple)</option>
+                                <option value="bg-pink-500">สีชมพู (Pink)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">ลิงก์โปรเจกต์ (Link) <span class="text-red-500">*</span></label>
+                        <input type="text" id="proj-link" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="https://...">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">วันที่แสดงผล (Display Date)</label>
+                        <input type="date" id="proj-date" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+
+                    <div class="pt-4 border-t flex justify-end gap-3">
+                        <button onclick="closeProjectModal()" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">ยกเลิก</button>
+                        <button id="save-proj-btn" onclick="saveProject()" class="px-6 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 font-bold shadow">บันทึก</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- [NEW PROJECTS] MANAGE MODAL -->
+        <div id="manage-projects-modal" class="fixed inset-0 z-40 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden backdrop-blur-sm">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden m-4 flex flex-col">
+                <div class="bg-slate-800 px-6 py-4 flex justify-between items-center text-white rounded-t-xl">
+                    <h3 class="font-bold text-lg"><i class="fa-solid fa-diagram-project mr-2"></i>จัดการโปรเจกต์ (Projects)</h3>
+                    <button onclick="closeManageProjectsModal()" class="hover:bg-slate-700 rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
+                    <span class="text-sm text-gray-500 font-bold">รายการโปรเจกต์ทั้งหมด</span>
+                    <button onclick="closeManageProjectsModal(); openProjectModal()" class="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded hover:bg-indigo-700 transition"><i class="fa-solid fa-plus mr-1"></i> เพิ่มโปรเจกต์ใหม่</button>
+                </div>
+                <div class="overflow-y-auto flex-grow p-0">
+                    <table class="w-full text-sm text-left text-gray-500">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0">
+                            <tr><th class="px-6 py-3">วันที่</th><th class="px-6 py-3">ชื่อโปรเจกต์</th><th class="px-6 py-3">Tag</th><th class="px-6 py-3 text-right">จัดการ</th></tr>
+                        </thead>
+                        <tbody id="manage-projects-body" class="divide-y divide-gray-100">
+                            <tr><td colspan="4" class="text-center py-8">กำลังโหลดข้อมูล...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. ADD/EDIT NEWS MODAL -->
         <div id="add-news-modal" class="fixed inset-0 z-40 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden backdrop-blur-sm">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg m-4">
                 <div class="bg-red-500 px-6 py-4 flex justify-between items-center text-white rounded-t-xl">
@@ -118,26 +205,9 @@
                 </div>
                 <div class="p-6 space-y-4">
                     <input type="hidden" id="n-id">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">หัวข้อข่าว <span class="text-red-500">*</span></label>
-                        <input type="text" id="n-title" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 outline-none" placeholder="เช่น แจ้งปิดปรับปรุงระบบ...">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">ประเภท (Tag) <span class="text-red-500">*</span></label>
-                        <select id="n-tag" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 outline-none bg-white">
-                            <option>ประกาศทั่วไป</option>
-                            <option>อัปเดตระบบ</option>
-                            <option>เนื้อหาใหม่</option>
-                            <option>กิจกรรม</option>
-                            <option>ปิดปรับปรุง</option>
-                            <option>ด่วนที่สุด</option>
-                            <option>แก้ไขบั๊ก</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">เนื้อหาข่าว <span class="text-red-500">*</span></label>
-                        <textarea id="n-content" rows="4" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 outline-none" placeholder="ใส่รายละเอียดข่าวที่นี่..."></textarea>
-                    </div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">หัวข้อข่าว <span class="text-red-500">*</span></label><input type="text" id="n-title" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 outline-none"></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">ประเภท (Tag)</label><select id="n-tag" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 outline-none bg-white"><option>ประกาศทั่วไป</option><option>อัปเดตระบบ</option><option>เนื้อหาใหม่</option><option>กิจกรรม</option><option>ด่วนที่สุด</option></select></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">เนื้อหาข่าว <span class="text-red-500">*</span></label><textarea id="n-content" rows="4" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 outline-none"></textarea></div>
                     <div class="pt-4 border-t flex justify-end gap-3">
                         <button onclick="closeAddNewsModal()" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">ยกเลิก</button>
                         <button id="save-news-btn" onclick="saveNews()" class="px-6 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 font-bold shadow">ประกาศข่าว</button>
@@ -153,26 +223,17 @@
                     <h3 class="font-bold text-lg"><i class="fa-solid fa-list-ul mr-2"></i>จัดการข่าวทั้งหมด</h3>
                     <button onclick="closeManageNewsModal()" class="hover:bg-slate-700 rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                
                 <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
                     <span class="text-sm text-gray-500 font-bold">รายการข่าวทั้งหมด</span>
                     <button onclick="closeManageNewsModal(); openAddNewsModal()" class="text-xs bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition"><i class="fa-solid fa-plus mr-1"></i> เพิ่มข่าวใหม่</button>
                 </div>
-
                 <div class="overflow-y-auto flex-grow p-0">
-                    <table class="w-full text-sm text-left text-gray-500">
-                        <thead class="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0">
-                            <tr><th class="px-6 py-3">วันที่</th><th class="px-6 py-3">หัวข้อข่าว</th><th class="px-6 py-3">Tag</th><th class="px-6 py-3 text-right">จัดการ</th></tr>
-                        </thead>
-                        <tbody id="manage-news-body" class="divide-y divide-gray-100">
-                            <tr><td colspan="4" class="text-center py-8">กำลังโหลดข้อมูล...</td></tr>
-                        </tbody>
-                    </table>
+                    <table class="w-full text-sm text-left text-gray-500"><tbody id="manage-news-body" class="divide-y divide-gray-100"></tbody></table>
                 </div>
             </div>
         </div>
 
-        <!-- 3. ADD/EDIT APP MODAL -->
+        <!-- 4. ADD/EDIT APP MODAL -->
         <div id="app-modal" class="fixed inset-0 z-40 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden backdrop-blur-sm">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg m-4">
                 <div class="bg-teal-600 px-6 py-4 flex justify-between items-center text-white rounded-t-xl sticky top-0 z-10">
@@ -181,34 +242,11 @@
                 </div>
                 <div class="p-6 space-y-4">
                     <input type="hidden" id="a-id">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">ชื่อแอพ <span class="text-red-500">*</span></label>
-                        <input type="text" id="a-name" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">หมวดหมู่ <span class="text-red-500">*</span></label>
-                        <select id="a-category" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 outline-none bg-white">
-                            <option value="game">เกมการศึกษา (Games)</option>
-                            <option value="media">สื่อการเรียน/การสอน (Media)</option>
-                            <option value="tool">เครื่องมือ (Tools)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">รายละเอียด <span class="text-red-500">*</span></label>
-                        <textarea id="a-desc" rows="2" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 outline-none"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">แท็ก <span class="text-gray-400 font-normal text-xs ml-1">(เช่น ชื่อวิชา, ชื่อเนื้อหา)</span></label>
-                        <input type="text" id="a-tag" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">ลิงก์รูปภาพ (1 รูป) <span class="text-red-500">*</span></label>
-                        <input type="text" id="a-image" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 outline-none" placeholder="Google Drive / URL">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">ลิงก์แอพ (URL) <span class="text-red-500">*</span></label>
-                        <input type="text" id="a-link" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 outline-none" placeholder="เช่น scoreboard/ หรือ https://...">
-                    </div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">ชื่อแอพ <span class="text-red-500">*</span></label><input type="text" id="a-name" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 outline-none"></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">หมวดหมู่</label><select id="a-category" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 outline-none bg-white"><option value="game">เกมการศึกษา (Games)</option><option value="media">สื่อการเรียน/การสอน (Media)</option><option value="tool">เครื่องมือ (Tools)</option></select></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">รายละเอียด</label><textarea id="a-desc" rows="2" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 outline-none"></textarea></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">ลิงก์รูปภาพ</label><input type="text" id="a-image" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 outline-none" placeholder="Google Drive / URL"></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-1">ลิงก์แอพ (URL)</label><input type="text" id="a-link" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 outline-none"></div>
                     <div class="pt-4 border-t flex justify-end gap-3">
                         <button onclick="closeAddAppModal()" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">ยกเลิก</button>
                         <button id="save-app-btn" onclick="saveApp()" class="px-6 py-2 text-white bg-teal-600 rounded-lg hover:bg-teal-700 font-bold shadow">บันทึก</button>
@@ -224,26 +262,17 @@
                     <h3 class="font-bold text-lg"><i class="fa-solid fa-list-check mr-2"></i>จัดการแอพครูโบ๊ท</h3>
                     <button onclick="closeManageAppsModal()" class="hover:bg-slate-700 rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                
                 <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
                     <span class="text-sm text-gray-500 font-bold">รายการแอพทั้งหมด</span>
                     <button onclick="closeManageAppsModal(); openAddAppModal()" class="text-xs bg-teal-600 text-white px-3 py-1.5 rounded hover:bg-teal-700 transition"><i class="fa-solid fa-plus mr-1"></i> เพิ่มแอพใหม่</button>
                 </div>
-
                 <div class="overflow-y-auto flex-grow p-0">
-                    <table class="w-full text-sm text-left text-gray-500">
-                        <thead class="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0">
-                            <tr><th class="px-6 py-3">ชื่อแอพ</th><th class="px-6 py-3">หมวดหมู่</th><th class="px-6 py-3 text-right">จัดการ</th></tr>
-                        </thead>
-                        <tbody id="manage-apps-body" class="divide-y divide-gray-100">
-                            <tr><td colspan="3" class="text-center py-8">กำลังโหลดข้อมูล...</td></tr>
-                        </tbody>
-                    </table>
+                    <table class="w-full text-sm text-left text-gray-500"><tbody id="manage-apps-body" class="divide-y divide-gray-100"></tbody></table>
                 </div>
             </div>
         </div>
 
-        <!-- 4. INBOX MODAL -->
+        <!-- 5. INBOX MODAL -->
         <div id="inbox-modal" class="fixed inset-0 z-40 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden backdrop-blur-sm">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden m-4 flex flex-col">
                 <div class="bg-slate-800 px-6 py-4 flex justify-between items-center text-white rounded-t-xl">
@@ -253,21 +282,17 @@
                     </div>
                     <button onclick="closeInboxModal()" class="hover:bg-slate-700 rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                
                 <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
                     <span class="text-sm text-gray-500">ข้อความจากหน้า "ติดต่อเรา"</span>
                     <button onclick="loadMessages()" class="text-xs text-blue-600 hover:underline"><i class="fa-solid fa-rotate-right mr-1"></i> รีเฟรช</button>
                 </div>
-
                 <div class="overflow-y-auto flex-grow p-0">
-                    <div id="inbox-list" class="divide-y divide-gray-100">
-                        <div class="text-center py-10 text-gray-400">กำลังโหลด...</div>
-                    </div>
+                    <div id="inbox-list" class="divide-y divide-gray-100"><div class="text-center py-10 text-gray-400">กำลังโหลด...</div></div>
                 </div>
             </div>
         </div>
 
-        <!-- Sidebar -->
+        <!-- ================= SIDEBAR ================= -->
         <aside class="w-64 bg-slate-800 text-white flex flex-col hidden md:flex flex-shrink-0 transition-all duration-300">
             <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-900 shadow-lg">
                 <h1 class="text-xl font-bold tracking-wider"><i class="fa-solid fa-code text-blue-400 mr-2"></i>KruBoat Admin</h1>
@@ -282,16 +307,20 @@
                     <span id="sidebar-inbox-badge" class="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full hidden">New</span>
                 </button>
 
-                <p class="px-4 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Content Management</p>
-                <button onclick="openManageModal()" class="w-full flex items-center px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg transition group text-left">
-                    <i class="fa-solid fa-laptop-code w-6 text-center mr-3 group-hover:text-purple-400 transition"></i><span>จัดการคลังโค้ด</span>
+                <p class="px-4 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Management</p>
+                <button onclick="openManageLibraryModal()" class="w-full flex items-center px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg transition group text-left">
+                    <i class="fa-solid fa-laptop-code w-6 text-center mr-3 group-hover:text-purple-400 transition"></i><span>จัดการคลังโค้ด (Lib)</span>
                 </button>
+                <button onclick="openManageAppsModal()" class="w-full flex items-center px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg transition group text-left">
+                    <i class="fa-solid fa-rocket w-6 text-center mr-3 group-hover:text-teal-400 transition"></i><span>จัดการแอปครูโบ๊ท</span>
+                </button>
+                <!-- NEW MENU -->
+                <button onclick="openManageProjectsModal()" class="w-full flex items-center px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg transition group text-left">
+                    <i class="fa-solid fa-diagram-project w-6 text-center mr-3 group-hover:text-indigo-400 transition"></i><span>จัดการโปรเจกต์</span>
+                </button>
+
                 <button onclick="openManageNewsModal()" class="w-full flex items-center px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg transition group text-left">
                     <i class="fa-solid fa-newspaper w-6 text-center mr-3 group-hover:text-red-400 transition"></i><span>ข่าวประชาสัมพันธ์</span>
-                </button>
-                
-                <button onclick="openManageAppsModal()" class="w-full flex items-center px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg transition group text-left">
-                    <i class="fa-solid fa-rocket w-6 text-center mr-3 group-hover:text-teal-400 transition"></i><span>จัดการแอพครูโบ๊ท</span>
                 </button>
 
                 <p class="px-4 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">System</p>
@@ -306,6 +335,7 @@
             </div>
         </aside>
 
+        <!-- ================= MAIN CONTENT ================= -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <header class="bg-white shadow-sm h-16 flex items-center justify-between px-4 md:hidden z-10">
                 <span class="font-bold text-lg text-slate-800">Admin Panel</span>
@@ -314,35 +344,51 @@
             <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
                 <div class="flex justify-between items-center mb-8"><div><h2 class="text-2xl font-bold text-gray-800">Developer Dashboard</h2><p class="text-gray-500 text-sm mt-1">จัดการข้อมูลเว็บไซต์และคลังโค้ด</p></div></div>
                 
+                <!-- STATS -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500 flex items-center justify-between"><div><p class="text-gray-500 text-xs font-bold uppercase tracking-wide">คลังโค้ดที่แจก</p><h3 id="stat-projects" class="text-3xl font-bold text-gray-800 mt-1">-</h3></div><div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-code-branch"></i></div></div>
-                    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500 flex items-center justify-between"><div><p class="text-gray-500 text-xs font-bold uppercase tracking-wide">ยอดดาวน์โหลดรวม</p><h3 id="stat-downloads" class="text-3xl font-bold text-gray-800 mt-1">-</h3></div><div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-download"></i></div></div>
-                    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500 flex items-center justify-between"><div><p class="text-gray-500 text-xs font-bold uppercase tracking-wide">ยอดเข้าชมรวม</p><h3 id="stat-views" class="text-3xl font-bold text-gray-800 mt-1">-</h3></div><div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-eye"></i></div></div>
-                    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500 flex items-center justify-between"><div><p class="text-gray-500 text-xs font-bold uppercase tracking-wide">ข่าวทั้งหมด</p><h3 id="stat-news" class="text-3xl font-bold text-gray-800 mt-1">-</h3></div><div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-newspaper"></i></div></div>
+                    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500 flex items-center justify-between"><div><p class="text-gray-500 text-xs font-bold uppercase tracking-wide">Library (Code)</p><h3 id="stat-library" class="text-3xl font-bold text-gray-800 mt-1">-</h3></div><div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-code"></i></div></div>
+                    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-indigo-500 flex items-center justify-between"><div><p class="text-gray-500 text-xs font-bold uppercase tracking-wide">Web Projects</p><h3 id="stat-projects" class="text-3xl font-bold text-gray-800 mt-1">-</h3></div><div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-diagram-project"></i></div></div>
+                    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-teal-500 flex items-center justify-between"><div><p class="text-gray-500 text-xs font-bold uppercase tracking-wide">Apps</p><h3 id="stat-apps" class="text-3xl font-bold text-gray-800 mt-1">-</h3></div><div class="w-12 h-12 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-rocket"></i></div></div>
+                    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500 flex items-center justify-between"><div><p class="text-gray-500 text-xs font-bold uppercase tracking-wide">News</p><h3 id="stat-news" class="text-3xl font-bold text-gray-800 mt-1">-</h3></div><div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-newspaper"></i></div></div>
                 </div>
 
+                <!-- ACTIONS -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6 h-fit">
-                        <h3 class="font-bold text-lg text-gray-800 mb-4 border-b pb-2">Actions</h3>
+                        <h3 class="font-bold text-lg text-gray-800 mb-4 border-b pb-2">Quick Actions</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div onclick="openAddProjectModal()" class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-purple-300 cursor-pointer transition flex items-center group">
-                                <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition"><i class="fa-solid fa-plus"></i></div>
-                                <div><h4 class="font-bold text-gray-700">เพิ่ม Code ใหม่</h4><p class="text-xs text-gray-500">อัปโหลดซอร์สโค้ดลง Library</p></div>
-                            </div>
-                            <div onclick="openManageModal()" class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-red-300 cursor-pointer transition flex items-center group">
-                                <div class="w-10 h-10 bg-red-100 text-red-600 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition"><i class="fa-solid fa-trash-can"></i></div>
-                                <div><h4 class="font-bold text-gray-700">ลบ/แก้ไขข้อมูล</h4><p class="text-xs text-gray-500">จัดการรายการที่มีอยู่</p></div>
-                            </div>
-                            <div onclick="openAddNewsModal()" class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-orange-300 cursor-pointer transition flex items-center group">
-                                <div class="w-10 h-10 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition"><i class="fa-solid fa-bullhorn"></i></div>
-                                <div><h4 class="font-bold text-gray-700">ประกาศข่าวใหม่</h4><p class="text-xs text-gray-500">แจ้งข่าวสารหน้าแรก</p></div>
-                            </div>
                             
-                            <div onclick="openManageAppsModal()" class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-teal-300 cursor-pointer transition flex items-center group">
-                                <div class="w-10 h-10 bg-teal-100 text-teal-600 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition"><i class="fa-solid fa-rocket"></i></div>
-                                <div><h4 class="font-bold text-gray-700">จัดการแอพ</h4><p class="text-xs text-gray-500">เพิ่ม/ลบ แอพในหน้า KruBoat Apps</p></div>
+                            <!-- Library (Code) -->
+                            <div onclick="openLibraryModal()" class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-purple-300 cursor-pointer transition flex items-center group">
+                                <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition"><i class="fa-solid fa-plus"></i></div>
+                                <div><h4 class="font-bold text-gray-700">เพิ่ม Code (Lib)</h4><p class="text-xs text-gray-500">Source Code ลง Library</p></div>
+                            </div>
+                            <div onclick="openManageLibraryModal()" class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-purple-300 cursor-pointer transition flex items-center group">
+                                <div class="w-10 h-10 bg-white border border-purple-200 text-purple-600 rounded-lg flex items-center justify-center mr-4 group-hover:bg-purple-50 transition"><i class="fa-solid fa-list"></i></div>
+                                <div><h4 class="font-bold text-gray-700">แก้ไข/ลบ Code</h4><p class="text-xs text-gray-500">จัดการ Library ทั้งหมด</p></div>
                             </div>
 
+                            <!-- Apps -->
+                            <div onclick="openAddAppModal()" class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-teal-300 cursor-pointer transition flex items-center group">
+                                <div class="w-10 h-10 bg-teal-100 text-teal-600 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition"><i class="fa-solid fa-plus"></i></div>
+                                <div><h4 class="font-bold text-gray-700">เพิ่ม App ใหม่</h4><p class="text-xs text-gray-500">แอพหน้า KruBoat Apps</p></div>
+                            </div>
+                            <div onclick="openManageAppsModal()" class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-teal-300 cursor-pointer transition flex items-center group">
+                                <div class="w-10 h-10 bg-white border border-teal-200 text-teal-600 rounded-lg flex items-center justify-center mr-4 group-hover:bg-teal-50 transition"><i class="fa-solid fa-list"></i></div>
+                                <div><h4 class="font-bold text-gray-700">แก้ไข/ลบ App</h4><p class="text-xs text-gray-500">จัดการ App ทั้งหมด</p></div>
+                            </div>
+
+                            <!-- Projects (New) -->
+                            <div onclick="openProjectModal()" class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-indigo-300 cursor-pointer transition flex items-center group">
+                                <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition"><i class="fa-solid fa-plus"></i></div>
+                                <div><h4 class="font-bold text-gray-700">เพิ่ม Project ใหม่</h4><p class="text-xs text-gray-500">ผลงาน Web Project</p></div>
+                            </div>
+                            <div onclick="openManageProjectsModal()" class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-indigo-300 cursor-pointer transition flex items-center group">
+                                <div class="w-10 h-10 bg-white border border-indigo-200 text-indigo-600 rounded-lg flex items-center justify-center mr-4 group-hover:bg-indigo-50 transition"><i class="fa-solid fa-list"></i></div>
+                                <div><h4 class="font-bold text-gray-700">แก้ไข/ลบ Project</h4><p class="text-xs text-gray-500">จัดการ Project ทั้งหมด</p></div>
+                            </div>
+
+                            <!-- Other -->
                             <div onclick="openInboxModal()" class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-blue-300 cursor-pointer transition flex items-center group relative">
                                 <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition"><i class="fa-solid fa-envelope"></i></div>
                                 <div><h4 class="font-bold text-gray-700">กล่องข้อความ</h4><p class="text-xs text-gray-500">อ่านข้อความจากทางบ้าน</p></div>

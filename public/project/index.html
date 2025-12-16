@@ -117,7 +117,7 @@
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <a href="#" onclick="switchTab('overview')" class="text-xl font-bold text-white flex items-center gap-2 hover:opacity-80 transition">
                 <!-- GitHub Icon Removed -->
-                <span class="font-code font-bold">KruBoat.com<span class="text-[#58a6ff]">/Portfolio</span></span>
+                <span class="font-code font-bold">KruBoat.com<span class="text-[#58a6ff]">/Project</span></span>
             </a>
             
             <!-- Mobile Menu Toggle -->
@@ -136,7 +136,6 @@
                     <div class="w-full max-w-[280px] aspect-square rounded-full border-2 border-[#30363d] shadow-xl mx-auto md:mx-0 overflow-hidden relative z-10 bg-[#0d1117]">
                          <img src="https://firebasestorage.googleapis.com/v0/b/kruboat-web.firebasestorage.app/o/kruboat.com-profile.JPG?alt=media&token=859324c7-8a3d-401b-acfa-f46f256b3122" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
                     </div>
-                    <!-- Status Badge REMOVED -->
                 </div>
 
                 <!-- Bio Text -->
@@ -147,7 +146,7 @@
 
                 <div class="text-[#c9d1d9] text-base leading-relaxed">
                     <p>🚀 <b>Teacher & Full Stack Dev</b></p>
-                    <p class="mt-2 text-[#8b949e]">"เปลี่ยนห้องเรียนให้เป็นโลกแห่งนวัตกรรม สร้างสรรค์สื่อการสอนด้วยเทคโนโลยี เพื่อการเรียนรู้ที่ไร้ขีดจำกัด"</p>
+                    <p class="mt-2 text-[#8b949e]">"เปลี่ยนสมมติฐานให้เป็นผลลัพธ์ : พื้นที่บันทึกการเดินทาง รวบรวมโปรเจกต์ งานวิจัย โครงงาน และนวัตกรรมสื่อการสอนของผม เพื่ออนาคตของการศึกษาที่ไม่มีขีดจำกัด"</p>
                 </div>
 
                 <button onclick="switchTab('contact')" class="w-full bg-[#21262d] border border-[#30363d] text-white py-1.5 rounded-md font-semibold text-sm hover:bg-[#30363d] hover:border-[#8b949e] transition shadow-sm">
@@ -156,8 +155,8 @@
 
                 <!-- Profile Meta -->
                 <div class="text-sm text-[#8b949e] space-y-2 pt-2">
-                    <div class="flex items-center gap-2"><i class="fa-solid fa-users w-4 text-center"></i> <span>Teacher at Roi Et</span></div>
-                    <div class="flex items-center gap-2"><i class="fa-solid fa-location-dot w-4 text-center"></i> <span>Roi Et, Thailand</span></div>
+                    <div class="flex items-center gap-2"><i class="fa-solid fa-brands fa-facebook-f w-4 text-center"></i> <a href="https://www.facebook.com/chonlasitgood" target="_blank" class="hover:text-[#58a6ff]">Facebook</a></div>
+                    <div class="flex items-center gap-2"><i class="fa-solid fa-brands fa-instagram w-4 text-center"></i> <a href="https://www.instagram.com/ruabai.photo/" target="_blank" class="hover:text-[#58a6ff]">Instagram</a></div>
                     <div class="flex items-center gap-2"><i class="fa-solid fa-envelope w-4 text-center"></i> <a href="mailto:chonlasitgood@gmail.com" class="hover:text-[#58a6ff]">chonlasitgood@gmail.com</a></div>
                     <div class="flex items-center gap-2"><i class="fa-solid fa-globe w-4 text-center"></i> <a href="https://www.kruboat.com" target="_blank" class="hover:text-[#58a6ff]">www.kruboat.com</a></div>
                 </div>
@@ -181,6 +180,8 @@
                     <div class="flex gap-6 border-b border-[#30363d] mb-6 overflow-x-auto text-sm hide-scrollbar">
                         <div onclick="switchTab('overview')" id="nav-overview" class="tab-item tab-active py-3 px-1 flex items-center gap-2 whitespace-nowrap">
                             <i class="fa-solid fa-book-bookmark"></i> Overview
+                            <!-- NEW: Overview Count Badge -->
+                            <span id="overview-badge" class="bg-[#30363d] px-2 rounded-full text-xs py-0.5 text-white hidden">0</span>
                         </div>
                         <div onclick="switchTab('experience')" id="nav-experience" class="tab-item py-3 px-1 flex items-center gap-2 whitespace-nowrap text-[#8b949e]">
                             <i class="fa-solid fa-graduation-cap"></i> Experience <span class="bg-[#30363d] px-2 rounded-full text-xs py-0.5 text-white">6</span>
@@ -194,43 +195,16 @@
                 <!-- ================= TAB 1: OVERVIEW (Merged Projects) ================= -->
                 <div id="tab-overview" class="tab-content block fade-in">
                     
-                    <!-- 1. Pinned Projects -->
+                    <!-- 1. Pinned Projects (Recently Updated) -->
                     <div class="mb-8">
                         <div class="flex justify-between items-end mb-3">
-                            <h2 class="text-base text-[#c9d1d9] font-semibold">Pinned</h2>
+                            <h2 class="text-base text-[#c9d1d9] font-semibold">Pinned (Latest 2 Projects)</h2>
                         </div>
                         
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            <!-- Pin 1 -->
-                            <div class="repo-card bg-[#0d1117] border border-[#30363d] rounded-md p-4 flex flex-col justify-between h-32 hover:bg-[#161b22] transition cursor-pointer">
-                                <div>
-                                    <div class="flex items-center justify-between mb-2">
-                                        <a href="#" class="text-[#58a6ff] font-bold hover:underline flex items-center gap-2 font-mono">
-                                            <i class="fa-solid fa-book-bookmark text-[#8b949e]"></i> RoomMate-CheckIn
-                                        </a>
-                                        <span class="text-[10px] border border-[#30363d] text-[#8b949e] px-2 py-0.5 rounded-full">Public</span>
-                                    </div>
-                                    <p class="text-xs text-[#8b949e] line-clamp-2">Web App บริหารจัดการห้องเรียน เช็คชื่อ ตรวจเวร บันทึกความดี</p>
-                                </div>
-                                <div class="flex items-center gap-4 text-xs text-[#8b949e]">
-                                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-yellow-400"></span> JavaScript</span>
-                                </div>
-                            </div>
-                            <!-- Pin 2 -->
-                            <div class="repo-card bg-[#0d1117] border border-[#30363d] rounded-md p-4 flex flex-col justify-between h-32 hover:bg-[#161b22] transition cursor-pointer">
-                                <div>
-                                    <div class="flex items-center justify-between mb-2">
-                                        <a href="#" class="text-[#58a6ff] font-bold hover:underline flex items-center gap-2 font-mono">
-                                            <i class="fa-solid fa-book-bookmark text-[#8b949e]"></i> Scoreboard-Online
-                                        </a>
-                                        <span class="text-[10px] border border-[#30363d] text-[#8b949e] px-2 py-0.5 rounded-full">Public</span>
-                                    </div>
-                                    <p class="text-xs text-[#8b949e] line-clamp-2">ระบบป้ายคะแนนออนไลน์ ควบคุมผ่านมือถือ Real-time</p>
-                                </div>
-                                <div class="flex items-center gap-4 text-xs text-[#8b949e]">
-                                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-orange-500"></span> HTML</span>
-                                </div>
-                            </div>
+                        <!-- Pinned Grid -->
+                        <div id="pinned-projects-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <!-- JS Will inject content here -->
+                            <div class="col-span-full text-[#8b949e] text-sm animate-pulse">Loading latest projects...</div>
                         </div>
                     </div>
 
@@ -321,7 +295,7 @@
     <!-- Logic Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, orderBy, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, orderBy, addDoc, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
         // Configuration
@@ -468,41 +442,88 @@
 
         async function loadProjects() {
             const listContainer = document.getElementById('project-list');
-            if(listContainer.children.length > 1) return; 
+            const pinnedContainer = document.getElementById('pinned-projects-grid');
+
+            if(listContainer.children.length > 1) return; // Prevent reload if already loaded
+
             try {
+                // Fetch All projects first
                 const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
                 const querySnapshot = await getDocs(q);
+                
+                // Update Content Count Label (All Projects (N))
                 const countBadge = document.getElementById('project-count-label');
                 if(countBadge) countBadge.innerText = `(${querySnapshot.size})`;
+
+                // Update Overview Tab Badge
+                const tabBadge = document.getElementById('overview-badge');
+                if(tabBadge) {
+                    tabBadge.innerText = querySnapshot.size;
+                    tabBadge.classList.remove('hidden');
+                }
                 
-                if (querySnapshot.empty) { listContainer.innerHTML = '<div class="text-center text-[#8b949e] py-12">No public projects found.</div>'; return; }
-                let html = '';
+                if (querySnapshot.empty) { 
+                    listContainer.innerHTML = '<div class="text-center text-[#8b949e] py-12">No public projects found in "projects" collection.</div>'; 
+                    pinnedContainer.innerHTML = '<div class="col-span-full text-center text-[#8b949e] py-8">No pinned projects available.</div>';
+                    return; 
+                }
+
+                let allHtml = '';
+                let pinnedHtml = '';
+                let count = 0;
+
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
+                    const tagColor = data.tagColor || 'bg-gray-500';
+                    const category = data.category || 'General';
                     let lastUpdate = data.createdAt?.toDate ? data.createdAt.toDate().toLocaleDateString('en-GB') : 'Recently';
-                    let langColor = 'bg-gray-500'; let lang = 'HTML';
-                    const cat = (data.category || '').toLowerCase();
-                    if(cat.includes('web')) { lang = 'JavaScript'; langColor = 'bg-yellow-400'; }
-                    else if(cat.includes('iot')) { lang = 'C++'; langColor = 'bg-red-500'; }
-                    else if(cat.includes('python')) { lang = 'Python'; langColor = 'bg-blue-500'; }
                     
-                    html += `
+                    // --- 1. PINNED (Take first 2 latest) ---
+                    if(count < 2) {
+                        pinnedHtml += `
+                        <div onclick="window.open('${data.link || '#'}', '_blank')" class="repo-card bg-[#0d1117] border border-[#30363d] rounded-md p-4 flex flex-col justify-between h-32 hover:bg-[#161b22] transition cursor-pointer">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[#58a6ff] font-bold hover:underline flex items-center gap-2 font-mono">
+                                        <i class="fa-solid fa-book-bookmark text-[#8b949e]"></i> ${data.title}
+                                    </span>
+                                    <span class="text-[10px] border border-[#30363d] text-[#8b949e] px-2 py-0.5 rounded-full">Public</span>
+                                </div>
+                                <p class="text-xs text-[#8b949e] line-clamp-2">${data.description || ''}</p>
+                            </div>
+                            <div class="flex items-center gap-4 text-xs text-[#8b949e]">
+                                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full ${tagColor}"></span> ${category}</span>
+                            </div>
+                        </div>`;
+                    }
+
+                    // --- 2. ALL LIST ---
+                    allHtml += `
                     <div class="project-item border-b border-[#30363d] py-6 flex justify-between items-start group hover:bg-[#161b22]/40 px-2 transition -mx-2 rounded-md" data-title="${data.title}">
                         <div class="w-full">
                             <div class="flex items-center gap-2 mb-1">
-                                <a href="library_detail.html?id=${doc.id}" class="text-lg font-bold text-[#58a6ff] hover:underline font-code">${data.title}</a>
+                                <a href="${data.link || '#'}" target="_blank" class="text-lg font-bold text-[#58a6ff] hover:underline font-code">${data.title}</a>
                                 <span class="text-[10px] border border-[#30363d] text-[#8b949e] px-2 py-0.5 rounded-full uppercase">Public</span>
                             </div>
                             <p class="text-[#8b949e] text-sm mb-4 max-w-2xl">${data.description || 'No description provided.'}</p>
                             <div class="flex flex-wrap items-center gap-4 text-xs text-[#8b949e]">
-                                <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full ${langColor}"></span> ${lang}</div>
+                                <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full ${tagColor}"></span> ${category}</div>
                                 <div>Updated ${lastUpdate}</div>
                             </div>
                         </div>
                     </div>`;
+
+                    count++;
                 });
-                listContainer.innerHTML = html;
-            } catch (error) { console.error("FB Error:", error); listContainer.innerHTML = '<div class="text-center text-red-400 py-4">Failed to load.</div>'; }
+
+                listContainer.innerHTML = allHtml;
+                pinnedContainer.innerHTML = pinnedHtml;
+
+            } catch (error) { 
+                console.error("FB Error:", error); 
+                listContainer.innerHTML = '<div class="text-center text-red-400 py-4">Failed to load.</div>'; 
+                pinnedContainer.innerHTML = '<div class="col-span-full text-center text-red-400">Failed to load pinned projects.</div>';
+            }
         }
 
         window.sendMessage = async () => {
