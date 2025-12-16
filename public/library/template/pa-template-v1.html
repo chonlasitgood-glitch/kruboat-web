@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบประเมินผลการปฏิบัติงาน - [ชื่อ-นามสกุล]</title>
+    
+    <!-- ================================================================================== 
+         1. FONTS & ICONS 
+         - Google Fonts: ใช้ Prompt (สำหรับข้อความทั่วไป) และ Sarabun (สำหรับส่วนที่เป็นทางการ)
+         - Font Awesome: สำหรับไอคอนต่างๆ
+    ================================================================================== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- ================================================================================== 
+         2. CSS FRAMEWORK (Tailwind CSS)
+    ================================================================================== -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- ตั้งค่าธีมสีและฟอนต์ที่นี่ (Tailwind Config) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e3a8a',   /* สีหลัก (น้ำเงินเข้ม) */
+                        secondary: '#d97706', /* สีรอง (ทอง/ส้ม) */
+                        accent: '#f3f4f6',    /* สีพื้นหลังอ่อนๆ */
+                        dark: '#1f2937',      /* สีข้อความเข้ม */
+                    },
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                        serif: ['Sarabun', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- ================================================================================== 
+         3. CUSTOM CSS
+         - สไตล์เพิ่มเติมที่ Tailwind ทำไม่ได้ หรือทำแล้วโค้ดยาวเกินไป
+    ================================================================================== -->
+    <style>
+        /* การเลื่อนหน้าจอแบบนุ่มนวล */
+        html { scroll-behavior: smooth; }
+        
+        /* ปรับแต่ง Scrollbar ให้สวยงาม */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #1e3a8a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #1e40af; }
+
+        /* Animation: เลื่อนขึ้นและค่อยๆ ปรากฏ (Fade In Up) */
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Effect: การ์ดลอยขึ้นเมื่อเอาเมาส์ชี้ (Hover Zoom) */
+        .hover-card-zoom {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hover-card-zoom:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* เส้นขีดตกแต่งใต้หัวข้อ (Header Decoration) */
+        .header-decoration {
+            position: relative;
+            display: inline-block;
+        }
+        .header-decoration::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: #d97706; /* สีทอง */
+            border-radius: 2px;
+        }
+        .header-decoration::before {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 4px;
+            background: #e5e7eb; /* สีเทาจางๆ รองพื้น */
+            border-radius: 2px;
+            z-index: -1;
+        }
+
+        /* เงาฟุ้งหลังรูปโปรไฟล์ */
+        .profile-glow {
+            box-shadow: 0 0 30px rgba(30, 58, 138, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased">
+
+    <!-- ================================================================================== 
+         NAVBAR: เมนูนำทางด้านบน
+    ================================================================================== -->
+    <nav class="fixed w-full z-50 bg-white/95 backdrop-blur-md shadow-md transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- โลโก้ / ชื่อเว็บไซต์ -->
+                <div class="flex-shrink-0 flex items-center gap-2 group cursor-pointer">
+                    <div class="w-10 h-10 bg-primary text-white rounded-lg flex items-center justify-center text-xl shadow-lg group-hover:rotate-12 transition-transform">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-lg text-primary tracking-tight leading-none">E-Portfolio</span>
+                        <span class="text-xs text-gray-500 font-medium">Professional Assessment</span>
+                    </div>
+                </div>
+                
+                <!-- เมนูสำหรับจอ Desktop -->
+                <div class="hidden md:flex space-x-1">
+                    <a href="#home" class="text-gray-600 hover:text-primary hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-semibold transition-all">หน้าแรก</a>
+                    <a href="#about" class="text-gray-600 hover:text-primary hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-semibold transition-all">ข้อมูลส่วนตัว</a>
+                    <a href="#evaluation" class="text-gray-600 hover:text-primary hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-semibold transition-all">การประเมิน</a>
+                    <a href="#timeline" class="text-gray-600 hover:text-primary hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-semibold transition-all">เส้นทางวิชาชีพ</a>
+                    <a href="#achievements" class="text-gray-600 hover:text-primary hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-semibold transition-all">ผลงาน</a>
+                </div>
+
+                <!-- ปุ่มเมนูสำหรับมือถือ -->
+                <div class="md:hidden flex items-center">
+                    <button onclick="toggleMobileMenu()" class="text-gray-600 hover:text-primary focus:outline-none p-2">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- เมนูย่อยสำหรับมือถือ (จะแสดงเมื่อกดปุ่ม) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 shadow-lg">
+            <div class="px-4 pt-2 pb-4 space-y-2">
+                <a href="#home" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-blue-50 border-l-4 border-transparent hover:border-primary">หน้าแรก</a>
+                <a href="#about" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-blue-50 border-l-4 border-transparent hover:border-primary">ข้อมูลส่วนตัว</a>
+                <a href="#evaluation" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-blue-50 border-l-4 border-transparent hover:border-primary">การประเมิน</a>
+                <a href="#achievements" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-blue-50 border-l-4 border-transparent hover:border-primary">ผลงานดีเด่น</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ================================================================================== 
+         HERO SECTION: ส่วนหัวข้อหลัก หน้าแรก
+    ================================================================================== -->
+    <section id="home" class="relative pt-24 pb-12 lg:pt-36 lg:pb-32 bg-gradient-to-br from-white via-blue-50 to-gray-100 overflow-hidden">
+        <!-- Abstract Background Shapes -->
+        <div class="absolute top-20 right-0 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+        <div class="absolute bottom-20 left-10 w-72 h-72 bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style="animation-delay: 2s;"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- ข้อความต้อนรับ -->
+                <div class="lg:col-span-7 text-center lg:text-left fade-in-up" style="animation-delay: 0.1s;">
+                    <div class="inline-flex items-center px-4 py-2 rounded-full bg-white border border-blue-100 text-primary text-sm font-bold shadow-sm mb-6">
+                        <span class="flex h-2 w-2 relative mr-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                        </span>
+                        ยินดีต้อนรับคณะกรรมการการประเมิน
+                    </div>
+                    <h1 class="text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight mb-4 tracking-tight">
+                        แฟ้มสะสมผลงาน <br>
+                        <!-- Gradient Text Using Tailwind Utility Classes -->
+                        <span class="bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">อิเล็กทรอนิกส์</span>
+                    </h1>
+                    <p class="text-xl text-gray-600 mb-2 font-serif font-medium">
+                        เพื่อประกอบการพิจารณา <span class="text-secondary font-bold border-b-2 border-secondary border-dashed">[ระบุประเภทการประเมิน เช่น เลื่อนวิทยฐานะ ค.ศ.3]</span>
+                    </p>
+                    <p class="text-lg text-gray-500 mb-8 flex items-center justify-center lg:justify-start gap-2">
+                        <i class="far fa-calendar-alt"></i> ปีงบประมาณ 2567 <span class="mx-2">|</span> <i class="fas fa-school"></i> โรงเรียน................................
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <a href="#evaluation" class="px-8 py-4 bg-primary text-white rounded-xl shadow-lg shadow-blue-900/20 hover:bg-blue-800 transition transform hover:-translate-y-1 font-bold text-center flex items-center justify-center gap-2">
+                            <i class="fas fa-chart-line"></i> ดูผลการปฏิบัติงาน
+                        </a>
+                        <a href="#about" class="px-8 py-4 bg-white text-primary border-2 border-primary/10 rounded-xl shadow-lg hover:bg-blue-50 transition font-bold text-center flex items-center justify-center gap-2">
+                            <i class="far fa-user"></i> รู้จักกับฉัน
+                        </a>
+                    </div>
+                </div>
+
+                <!-- รูปโปรไฟล์ -->
+                <div class="lg:col-span-5 flex justify-center fade-in-up" style="animation-delay: 0.3s;">
+                    <div class="relative w-80 h-80 lg:w-[450px] lg:h-[450px]">
+                        <div class="absolute inset-0 bg-primary rotate-6 rounded-[2rem] opacity-5 scale-105"></div>
+                        <div class="absolute inset-0 bg-secondary -rotate-6 rounded-[2rem] opacity-5 scale-105"></div>
+                        <div class="relative w-full h-full rounded-[2rem] overflow-hidden profile-glow border-8 border-white bg-white">
+                            <!-- [!] แก้ไขรูปภาพตรงนี้: ใส่ path รูปของคุณ -->
+                            <img src="https://placehold.co/600x800/1e3a8a/FFFFFF?text=Teacher+Photo" alt="Profile" class="w-full h-full object-cover">
+                        </div>
+                        
+                        <!-- ป้ายสถานะลอย -->
+                        <div class="absolute -bottom-8 -right-4 bg-white p-4 rounded-xl shadow-xl flex items-center gap-4 animate-bounce border border-gray-100" style="animation-duration: 3s;">
+                            <div class="bg-gradient-to-br from-yellow-400 to-orange-500 p-3 rounded-full text-white shadow-lg">
+                                <i class="fas fa-award text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 font-semibold uppercase">Status</p>
+                                <p class="text-base font-bold text-gray-800">[ตำแหน่งปัจจุบัน]</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================================== 
+         ABOUT SECTION: ข้อมูลส่วนตัว
+    ================================================================================== -->
+    <section id="about" class="py-20 bg-white relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <!-- Badge on Top -->
+                <div class="mb-2">
+                    <span class="text-primary font-bold tracking-widest text-sm uppercase bg-blue-50 px-3 py-1 rounded-full border border-blue-100">Personal Information</span>
+                </div>
+                <h2 class="text-4xl font-bold mt-2 header-decoration">ข้อมูลผู้รับการประเมิน</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <!-- การ์ดข้อมูลส่วนตัว -->
+                <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-xl relative overflow-hidden group hover:border-primary/30 transition-all duration-300">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-8 flex items-center relative z-10">
+                        <span class="w-10 h-10 bg-primary text-white rounded-lg flex items-center justify-center mr-3 text-lg"><i class="fas fa-user"></i></span>
+                        ประวัติส่วนตัว
+                    </h3>
+                    <ul class="space-y-5 text-gray-600 relative z-10">
+                        <!-- [!] แก้ไขข้อมูลส่วนตัวในส่วนนี้ -->
+                        <li class="flex items-center border-b border-gray-100 pb-3 hover:pl-2 transition-all">
+                            <span class="w-32 font-bold text-gray-800 min-w-[120px]">ชื่อ-นามสกุล:</span>
+                            <span class="text-primary font-medium">[นาย/นาง/นางสาว ชื่อ-สกุล]</span>
+                        </li>
+                        <li class="flex items-center border-b border-gray-100 pb-3 hover:pl-2 transition-all">
+                            <span class="w-32 font-bold text-gray-800 min-w-[120px]">ตำแหน่ง:</span>
+                            <span>[ครู ค.ศ.1 / ชำนาญการ]</span>
+                        </li>
+                        <li class="flex items-center border-b border-gray-100 pb-3 hover:pl-2 transition-all">
+                            <span class="w-32 font-bold text-gray-800 min-w-[120px]">อายุราชการ:</span>
+                            <span>[XX ปี YY เดือน]</span>
+                        </li>
+                        <li class="flex items-center border-b border-gray-100 pb-3 hover:pl-2 transition-all">
+                            <span class="w-32 font-bold text-gray-800 min-w-[120px]">กลุ่มสาระฯ:</span>
+                            <span>[ระบุกลุ่มสาระการเรียนรู้]</span>
+                        </li>
+                        <li class="flex items-start hover:pl-2 transition-all">
+                            <span class="w-32 font-bold text-gray-800 min-w-[120px] mt-1">การศึกษา:</span>
+                            <div class="flex flex-col gap-1">
+                                <span class="bg-blue-50 px-2 py-1 rounded text-sm text-blue-800 font-medium inline-block w-fit">ปริญญาโท [สาขา]</span>
+                                <span class="text-sm text-gray-500">[สถาบัน]</span>
+                                <span class="bg-gray-50 px-2 py-1 rounded text-sm text-gray-700 font-medium inline-block w-fit mt-1">ปริญญาตรี [สาขา]</span>
+                                <span class="text-sm text-gray-500">[สถาบัน]</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- ทักษะและปรัชญา -->
+                <div class="flex flex-col h-full">
+                     <h3 class="text-2xl font-bold text-gray-900 mb-8 flex items-center">
+                        <span class="w-10 h-10 bg-secondary text-white rounded-lg flex items-center justify-center mr-3 text-lg"><i class="fas fa-tools"></i></span>
+                         ทักษะและความเชี่ยวชาญ
+                    </h3>
+                    
+                    <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-lg flex-grow space-y-8">
+                        <!-- Skill 1 -->
+                        <div class="group">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-base font-bold text-gray-700 group-hover:text-primary transition-colors">การจัดการเรียนรู้ (Instructional Management)</span>
+                                <span class="text-sm font-bold text-primary bg-blue-50 px-2 rounded">95%</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                                <div class="bg-gradient-to-r from-blue-500 to-primary h-3 rounded-full transition-all duration-1000 ease-out" style="width: 95%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Skill 2 -->
+                        <div class="group">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-base font-bold text-gray-700 group-hover:text-secondary transition-colors">เทคโนโลยีเพื่อการศึกษา (Digital Literacy)</span>
+                                <span class="text-sm font-bold text-secondary bg-yellow-50 px-2 rounded">90%</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                                <div class="bg-gradient-to-r from-yellow-400 to-secondary h-3 rounded-full transition-all duration-1000 ease-out" style="width: 90%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Skill 3 -->
+                        <div class="group">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-base font-bold text-gray-700 group-hover:text-green-600 transition-colors">การวิจัยในชั้นเรียน (Classroom Research)</span>
+                                <span class="text-sm font-bold text-green-600 bg-green-50 px-2 rounded">85%</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                                <div class="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full transition-all duration-1000 ease-out" style="width: 85%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Quote Box -->
+                        <div class="bg-gradient-to-r from-primary to-blue-900 p-6 rounded-xl mt-8 text-white shadow-lg transform hover:-translate-y-1 transition-transform relative overflow-hidden">
+                            <i class="fas fa-quote-right absolute top-4 right-4 text-white/10 text-6xl"></i>
+                            <h4 class="font-bold text-lg mb-2 border-b border-white/20 pb-2 inline-block">ปรัชญาการทำงาน</h4>
+                            <p class="text-blue-100 italic font-medium leading-relaxed relative z-10">"มุ่งมั่นพัฒนาผู้เรียน ให้เป็นมนุษย์ที่สมบูรณ์ ทั้งร่างกาย จิตใจ สติปัญญา ความรู้ และคุณธรรม เพื่อเป็นกำลังสำคัญของชาติในอนาคต"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================================== 
+         TIMELINE: เส้นทางวิชาชีพ
+    ================================================================================== -->
+    <section id="timeline" class="py-20 bg-gray-50 border-t border-gray-200">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <!-- Badge on Top -->
+                <div class="mb-2">
+                    <span class="text-secondary font-bold tracking-widest text-sm uppercase bg-yellow-50 px-3 py-1 rounded-full border border-yellow-100">Experience</span>
+                </div>
+                <h2 class="text-4xl font-bold mt-2 header-decoration">เส้นทางวิชาชีพ</h2>
+            </div>
+            
+            <div class="relative border-l-4 border-gray-200 ml-4 md:ml-6 space-y-12 pb-4">
+                <!-- ช่วงที่ 1 -->
+                <div class="relative pl-8 md:pl-12 group">
+                    <div class="absolute -left-3 md:-left-[14px] top-0 w-7 h-7 bg-primary rounded-full border-4 border-white shadow-lg group-hover:scale-125 transition-transform duration-300"></div>
+                    <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-primary hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-2">
+                            <h3 class="text-xl font-bold text-gray-900">ครู ค.ศ.2 (ชำนาญการ)</h3>
+                            <span class="text-sm font-bold text-primary bg-blue-50 px-3 py-1 rounded-full mt-2 md:mt-0 w-fit">2566 - ปัจจุบัน</span>
+                        </div>
+                        <p class="text-gray-700 font-medium mb-1"><i class="fas fa-school text-gray-400 mr-2"></i> โรงเรียน....................................</p>
+                        <p class="text-gray-500 text-sm">รับผิดชอบหัวหน้ากลุ่มสาระฯ และโครงการพัฒนาทักษะวิชาการนักเรียน</p>
+                    </div>
+                </div>
+                <!-- ช่วงที่ 2 -->
+                <div class="relative pl-8 md:pl-12 group">
+                    <div class="absolute -left-3 md:-left-[14px] top-0 w-7 h-7 bg-secondary rounded-full border-4 border-white shadow-lg group-hover:scale-125 transition-transform duration-300"></div>
+                     <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-secondary hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-2">
+                            <h3 class="text-xl font-bold text-gray-900">ครู ค.ศ.1</h3>
+                            <span class="text-sm font-bold text-secondary bg-yellow-50 px-3 py-1 rounded-full mt-2 md:mt-0 w-fit">2562 - 2565</span>
+                        </div>
+                        <p class="text-gray-700 font-medium mb-1"><i class="fas fa-school text-gray-400 mr-2"></i> โรงเรียน....................................</p>
+                        <p class="text-gray-500 text-sm">พัฒนานวัตกรรมการสอน Active Learning และสื่อการสอนออนไลน์ช่วงโควิด-19</p>
+                    </div>
+                </div>
+                <!-- ช่วงที่ 3 -->
+                <div class="relative pl-8 md:pl-12 group">
+                    <div class="absolute -left-3 md:-left-[14px] top-0 w-7 h-7 bg-gray-400 rounded-full border-4 border-white shadow-lg group-hover:scale-125 transition-transform duration-300"></div>
+                     <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-gray-400 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-2">
+                            <h3 class="text-xl font-bold text-gray-900">ครูผู้ช่วย</h3>
+                            <span class="text-sm font-bold text-gray-500 bg-gray-100 px-3 py-1 rounded-full mt-2 md:mt-0 w-fit">2560 - 2562</span>
+                        </div>
+                        <p class="text-gray-700 font-medium mb-1"><i class="fas fa-school text-gray-400 mr-2"></i> โรงเรียน....................................</p>
+                        <p class="text-gray-500 text-sm">บรรจุเข้ารับราชการ เริ่มต้นการสอนและการดูแลนักเรียนประจำชั้น</p>
+                    </div>
+                </div>
+                <!-- ช่วงที่ 4 -->
+                <div class="relative pl-8 md:pl-12 group">
+                    <div class="absolute -left-3 md:-left-[14px] top-0 w-7 h-7 bg-gray-300 rounded-full border-4 border-white shadow-lg group-hover:scale-125 transition-transform duration-300"></div>
+                     <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-gray-300 hover:shadow-lg transition-all duration-300 opacity-80 hover:opacity-100">
+                        <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-2">
+                            <h3 class="text-lg font-bold text-gray-800">นักศึกษาฝึกประสบการณ์วิชาชีพ</h3>
+                            <span class="text-sm font-bold text-gray-500 bg-gray-100 px-3 py-1 rounded-full mt-2 md:mt-0 w-fit">2559</span>
+                        </div>
+                        <p class="text-gray-700 font-medium mb-1"><i class="fas fa-university text-gray-400 mr-2"></i> มหาวิทยาลัย.........................</p>
+                        <p class="text-gray-500 text-sm">ฝึกประสบการณ์วิชาชีพครูเต็มรูปแบบ ณ โรงเรียนสาธิตฯ</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================================== 
+         EVALUATION SECTION: ส่วนการประเมิน (PA/ข้อตกลง)
+    ================================================================================== -->
+    <section id="evaluation" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                 <!-- Badge on Top -->
+                <div class="mb-2">
+                    <span class="text-primary font-bold tracking-widest text-sm uppercase bg-blue-50 px-3 py-1 rounded-full border border-blue-100">Performance Agreement (PA)</span>
+                </div>
+                <h2 class="text-4xl font-bold mt-2 header-decoration">ส่วนที่ 1: ข้อตกลงในการพัฒนางาน</h2>
+                <p class="text-gray-500 mt-6 max-w-2xl mx-auto text-lg">รายละเอียดตัวชี้วัดและร่องรอยหลักฐานการปฏิบัติงานตามมาตรฐานตำแหน่ง</p>
+            </div>
+
+            <!-- การ์ด 3 ด้าน -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+                
+                <!-- ด้านที่ 1: การจัดการเรียนรู้ -->
+                <div class="hover-card-zoom bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 flex flex-col h-full">
+                    <div class="bg-primary p-1 h-2"></div>
+                    <div class="p-8 flex-grow">
+                        <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-primary text-2xl mb-6 shadow-inner">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-4">ด้านที่ 1 <br>การจัดการเรียนรู้</h3>
+                        <div class="h-1 w-12 bg-gray-200 mb-6 rounded-full"></div>
+                        <ul class="space-y-4 text-sm text-gray-600 mb-6">
+                            <li class="flex items-start"><i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i> 1.1 สร้างและพัฒนาหลักสูตร</li>
+                            <li class="flex items-start"><i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i> 1.2 ออกแบบการจัดการเรียนรู้</li>
+                            <li class="flex items-start"><i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i> 1.3 จัดกิจกรรมการเรียนรู้</li>
+                            <li class="flex items-start"><i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i> 1.4 สร้างสื่อ นวัตกรรม เทคโนโลยี</li>
+                            <li class="flex items-start"><i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i> 1.5 วัดและประเมินผล</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-50 px-8 py-6 border-t border-gray-100">
+                         <div class="grid grid-cols-2 gap-3">
+                            <!-- [!] ใส่ลิงก์ Folder หลักฐาน -->
+                            <a href="#" class="flex items-center justify-center py-2 px-4 bg-white border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-primary transition shadow-sm">
+                                <i class="fas fa-folder-open mr-2 text-yellow-500"></i> หลักฐาน
+                            </a>
+                            <!-- [!] ใส่ลิงก์ PDF รายงาน -->
+                            <a href="#" class="flex items-center justify-center py-2 px-4 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">
+                                <i class="fas fa-file-pdf mr-2"></i> รายงาน
+                            </a>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- ด้านที่ 2: การส่งเสริมสนับสนุน -->
+                <div class="hover-card-zoom bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 flex flex-col h-full">
+                    <div class="bg-secondary p-1 h-2"></div>
+                    <div class="p-8 flex-grow">
+                        <div class="w-16 h-16 bg-yellow-50 rounded-2xl flex items-center justify-center text-secondary text-2xl mb-6 shadow-inner">
+                            <i class="fas fa-users-cog"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-4">ด้านที่ 2 <br>การส่งเสริมและสนับสนุน</h3>
+                        <div class="h-1 w-12 bg-gray-200 mb-6 rounded-full"></div>
+                        <ul class="space-y-4 text-sm text-gray-600 mb-6">
+                            <li class="flex items-start"><i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i> 2.1 ข้อมูลสารสนเทศของผู้เรียน</li>
+                            <li class="flex items-start"><i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i> 2.2 ระบบดูแลช่วยเหลือผู้เรียน</li>
+                            <li class="flex items-start"><i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i> 2.3 ปฏิบัติงานวิชาการและอื่นๆ</li>
+                            <li class="flex items-start"><i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i> 2.4 ประสานความร่วมมือ</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-50 px-8 py-6 border-t border-gray-100">
+                        <div class="grid grid-cols-2 gap-3">
+                            <a href="#" class="flex items-center justify-center py-2 px-4 bg-white border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-secondary transition shadow-sm">
+                                <i class="fas fa-folder-open mr-2 text-yellow-500"></i> หลักฐาน
+                            </a>
+                            <a href="#" class="flex items-center justify-center py-2 px-4 bg-secondary text-white rounded-lg text-sm font-semibold hover:bg-yellow-600 transition shadow-lg shadow-yellow-500/30">
+                                <i class="fas fa-file-pdf mr-2"></i> รายงาน
+                            </a>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- ด้านที่ 3: การพัฒนาตนเอง -->
+                <div class="hover-card-zoom bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 flex flex-col h-full">
+                    <div class="bg-green-500 p-1 h-2"></div>
+                    <div class="p-8 flex-grow">
+                        <div class="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 text-2xl mb-6 shadow-inner">
+                            <i class="fas fa-seedling"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-4">ด้านที่ 3 <br>การพัฒนาตนเองและวิชาชีพ</h3>
+                        <div class="h-1 w-12 bg-gray-200 mb-6 rounded-full"></div>
+                        <ul class="space-y-4 text-sm text-gray-600 mb-6">
+                            <li class="flex items-start"><i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i> 3.1 พัฒนาตนเองอย่างเป็นระบบ</li>
+                            <li class="flex items-start"><i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i> 3.2 มีส่วนร่วม PLC</li>
+                            <li class="flex items-start"><i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i> 3.3 นำความรู้มาใช้พัฒนาการสอน</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-50 px-8 py-6 border-t border-gray-100">
+                        <div class="grid grid-cols-2 gap-3">
+                            <a href="#" class="flex items-center justify-center py-2 px-4 bg-white border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-green-600 transition shadow-sm">
+                                <i class="fas fa-folder-open mr-2 text-yellow-500"></i> หลักฐาน
+                            </a>
+                            <a href="#" class="flex items-center justify-center py-2 px-4 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition shadow-lg shadow-green-500/30">
+                                <i class="fas fa-file-pdf mr-2"></i> รายงาน
+                            </a>
+                         </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Best Practice -->
+            <div class="mb-12 bg-gradient-to-r from-blue-50 to-white border border-blue-100 rounded-2xl p-8 flex flex-col md:flex-row items-center gap-8 shadow-sm">
+                <div class="flex-shrink-0 w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-md text-3xl text-primary">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <div class="flex-grow">
+                    <h4 class="text-2xl font-bold text-gray-900 mb-2">วิธีปฏิบัติที่เป็นเลิศ (Best Practice)</h4>
+                    <p class="text-gray-600 mb-4">"รูปแบบการจัดการเรียนรู้แบบห้องเรียนกลับด้าน (Flipped Classroom) ร่วมกับ Gamification เพื่อส่งเสริมความกระตือรือร้นของผู้เรียน"</p>
+                    <a href="#" class="text-primary font-semibold hover:underline">อ่านรายละเอียดเพิ่มเติม <i class="fas fa-arrow-right ml-1"></i></a>
+                </div>
+            </div>
+
+             <!-- Challenge Issue (ประเด็นท้าทาย) -->
+             <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200 hover-card-zoom">
+                <div class="bg-gray-900 text-white px-8 py-5 flex justify-between items-center bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-rocket text-yellow-400 text-xl"></i>
+                        <h4 class="font-bold text-xl">ส่วนที่ 2: ประเด็นท้าทาย (Challenge)</h4>
+                    </div>
+                    <span class="bg-yellow-500 text-gray-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Highlight</span>
+                </div>
+                <div class="p-8 grid md:grid-cols-3 gap-8 items-center bg-gradient-to-b from-white to-gray-50">
+                    <div class="md:col-span-2">
+                        <h5 class="text-2xl font-bold text-primary mb-3">เรื่อง: [ชื่อเรื่องประเด็นท้าทายของคุณ]</h5>
+                        <p class="text-gray-600 mb-6 leading-relaxed">การแก้ปัญหา/พัฒนาผู้เรียนในรายวิชา... โดยใช้นวัตกรรม... เพื่อยกระดับผลสัมฤทธิ์ทางการเรียน... (อธิบายย่อๆ เกี่ยวกับผลลัพธ์ที่คาดหวัง)</p>
+                        <div class="flex flex-wrap gap-3">
+                            <span class="text-xs font-bold bg-white border border-gray-200 px-4 py-2 rounded-full text-gray-600 shadow-sm flex items-center gap-2"><div class="w-2 h-2 bg-red-500 rounded-full"></div> สภาพปัญหา</span>
+                            <span class="text-xs font-bold bg-white border border-gray-200 px-4 py-2 rounded-full text-gray-600 shadow-sm flex items-center gap-2"><div class="w-2 h-2 bg-yellow-500 rounded-full"></div> วิธีการ</span>
+                            <span class="text-xs font-bold bg-white border border-gray-200 px-4 py-2 rounded-full text-gray-600 shadow-sm flex items-center gap-2"><div class="w-2 h-2 bg-green-500 rounded-full"></div> ผลลัพธ์</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <!-- ปุ่มลิงก์คลิป VDO -->
+                        <a href="#" class="flex items-center justify-between px-6 py-4 bg-red-600 text-white rounded-xl hover:bg-red-700 transition shadow-lg shadow-red-500/30 group">
+                            <span class="font-bold"><i class="fas fa-video mr-2"></i> คลิปการสอน</span>
+                            <i class="fas fa-play-circle group-hover:scale-110 transition-transform"></i>
+                        </a>
+                        <!-- ปุ่มลิงก์แผนการสอน -->
+                        <a href="#" class="flex items-center justify-between px-6 py-4 bg-white border-2 border-gray-200 text-gray-800 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition shadow-sm group">
+                            <span class="font-bold"><i class="fas fa-file-alt mr-2"></i> แผนการสอน</span>
+                            <i class="fas fa-download group-hover:translate-y-1 transition-transform text-gray-400"></i>
+                        </a>
+                    </div>
+                </div>
+             </div>
+        </div>
+    </section>
+
+    <!-- ================================================================================== 
+         ACHIEVEMENTS SECTION: ผลงานเชิงประจักษ์ & รางวัล
+    ================================================================================== -->
+    <section id="achievements" class="py-20 bg-primary text-white relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <!-- Badge on Top -->
+                <div class="mb-2">
+                    <span class="text-blue-100 font-bold tracking-widest text-sm uppercase bg-white/10 px-3 py-1 rounded-full border border-white/10">Achievements</span>
+                </div>
+                <h2 class="text-4xl font-bold text-white mt-2 relative inline-block">
+                    ผลงานเชิงประจักษ์
+                    <span class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-secondary rounded"></span>
+                </h2>
+                <p class="text-blue-100 mt-4 max-w-2xl mx-auto text-base">รางวัลและความสำเร็จที่เป็นเครื่องยืนยันถึงความมุ่งมั่นในการพัฒนาคุณภาพการศึกษา</p>
+            </div>
+
+            <!-- สถิติ (Stats Grid) -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center mb-12">
+                <div class="p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg hover:bg-white/20 transition-all duration-300 transform hover:-translate-y-2 group">
+                    <div class="text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-sm group-hover:scale-105 transition-transform">20+</div>
+                    <div class="text-blue-100 text-sm font-medium opacity-90">สื่อการสอนที่ผลิต</div>
+                </div>
+                <div class="p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg hover:bg-white/20 transition-all duration-300 transform hover:-translate-y-2 group">
+                    <div class="text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-sm group-hover:scale-105 transition-transform">200</div>
+                    <div class="text-blue-100 text-sm font-medium opacity-90">ชั่วโมงอบรม</div>
+                </div>
+                <div class="p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg hover:bg-white/20 transition-all duration-300 transform hover:-translate-y-2 group">
+                    <div class="text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-sm group-hover:scale-105 transition-transform">100%</div>
+                    <div class="text-blue-100 text-sm font-medium opacity-90">การเข้าเรียน</div>
+                </div>
+                <div class="p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg hover:bg-white/20 transition-all duration-300 transform hover:-translate-y-2 group">
+                    <div class="text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-sm group-hover:scale-105 transition-transform">5</div>
+                    <div class="text-blue-100 text-sm font-medium opacity-90">งานวิจัยในชั้นเรียน</div>
+                </div>
+            </div>
+
+            <!-- การ์ดรางวัล -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- รางวัลที่ 1 -->
+                <div class="bg-white rounded-xl p-6 shadow-lg text-gray-800 flex flex-col gap-3 transform hover:scale-105 transition-transform duration-300 border-b-4 border-yellow-500">
+                    <div class="w-12 h-12 bg-yellow-100 p-3 rounded-xl text-yellow-600 text-2xl flex items-center justify-center mb-1"><i class="fas fa-trophy"></i></div>
+                    <div>
+                        <h4 class="font-bold text-lg mb-1 text-gray-900">รางวัลครูดีเด่น</h4>
+                        <p class="text-sm text-gray-500 leading-snug">ได้รับรางวัลครูดีเด่นระดับเขตพื้นที่การศึกษา ประจำปี 2566 สาขาการจัดการเรียนรู้</p>
+                    </div>
+                </div>
+                <!-- รางวัลที่ 2 -->
+                <div class="bg-white rounded-xl p-6 shadow-lg text-gray-800 flex flex-col gap-3 transform hover:scale-105 transition-transform duration-300 border-b-4 border-blue-600">
+                    <div class="w-12 h-12 bg-blue-100 p-3 rounded-xl text-blue-600 text-2xl flex items-center justify-center mb-1"><i class="fas fa-medal"></i></div>
+                    <div>
+                        <h4 class="font-bold text-lg mb-1 text-gray-900">ครูผู้ฝึกสอนยอดเยี่ยม</h4>
+                        <p class="text-sm text-gray-500 leading-snug">รางวัลเหรียญทอง กิจกรรม... งานศิลปหัตถกรรมนักเรียน ระดับภาค</p>
+                    </div>
+                </div>
+                <!-- รางวัลที่ 3 -->
+                <div class="bg-white rounded-xl p-6 shadow-lg text-gray-800 flex flex-col gap-3 transform hover:scale-105 transition-transform duration-300 border-b-4 border-green-500">
+                    <div class="w-12 h-12 bg-green-100 p-3 rounded-xl text-green-600 text-2xl flex items-center justify-center mb-1"><i class="fas fa-certificate"></i></div>
+                    <div>
+                        <h4 class="font-bold text-lg mb-1 text-gray-900">นวัตกรรมยอดเยี่ยม</h4>
+                        <p class="text-sm text-gray-500 leading-snug">ชนะเลิศการประกวดนวัตกรรมการสอน โครงการโรงเรียนคุณภาพ SMT</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- รายการอบรมล่าสุด -->
+            <div class="mt-12 bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                <h4 class="text-lg font-bold mb-4 flex items-center gap-2 text-white">
+                    <i class="fas fa-file-certificate text-yellow-400"></i> การอบรมและพัฒนาตนเองล่าสุด
+                </h4>
+                <div class="grid md:grid-cols-2 gap-3 text-blue-100 text-sm">
+                    <div class="flex items-center gap-3 p-2 bg-white/5 rounded hover:bg-white/10 transition">
+                        <i class="fas fa-check-circle text-green-400 text-xs"></i>
+                        <span>อบรมเชิงปฏิบัติการหลักสูตรต้านทุจริตศึกษา (12 ชม.)</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-2 bg-white/5 rounded hover:bg-white/10 transition">
+                        <i class="fas fa-check-circle text-green-400 text-xs"></i>
+                        <span>การใช้งาน AI เพื่อการจัดการเรียนการสอน (6 ชม.)</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-2 bg-white/5 rounded hover:bg-white/10 transition">
+                        <i class="fas fa-check-circle text-green-400 text-xs"></i>
+                        <span>การสร้างสื่อดิจิทัลด้วย Canva for Education (20 ชม.)</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-2 bg-white/5 rounded hover:bg-white/10 transition">
+                        <i class="fas fa-check-circle text-green-400 text-xs"></i>
+                        <span>การพัฒนาสมรรถนะครูสู่มืออาชีพ (PA Support)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================================== 
+         GALLERY SECTION: ประมวลภาพกิจกรรม
+    ================================================================================== -->
+    <section id="gallery" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <!-- Badge on Top -->
+                <div class="mb-2">
+                    <span class="text-primary font-bold tracking-widest text-sm uppercase bg-blue-50 px-3 py-1 rounded-full border border-blue-100">Gallery</span>
+                </div>
+                <h2 class="text-4xl font-bold mt-2 header-decoration">ภาพกิจกรรม & ผลงาน</h2>
+                <p class="text-gray-500 mt-6 max-w-xl mx-auto">ประมวลภาพความสำเร็จ การจัดการเรียนการสอน และการมีส่วนร่วมกับชุมชน</p>
+            </div>
+
+            <!-- Grid: 3 คอลัมน์ x 2 แถว -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- รูปที่ 1 -->
+                <div class="group relative aspect-video overflow-hidden rounded-2xl shadow-lg cursor-pointer hover:shadow-2xl transition-all duration-500">
+                    <img src="https://placehold.co/600x400/e2e8f0/1e3a8a?text=Active+Learning" alt="Activity" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                        <span class="text-xs font-bold bg-secondary text-white px-3 py-1 rounded-full mb-2 w-fit">การสอน</span>
+                        <p class="text-white font-bold text-lg leading-tight">การจัดการเรียนรู้เชิงรุก (Active Learning)</p>
+                    </div>
+                </div>
+                
+                <!-- รูปที่ 2 -->
+                <div class="group relative aspect-video overflow-hidden rounded-2xl shadow-lg cursor-pointer hover:shadow-2xl transition-all duration-500">
+                    <img src="https://placehold.co/600x400/f1f5f9/d97706?text=PLC+Activity" alt="Activity" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                         <span class="text-xs font-bold bg-green-500 text-white px-3 py-1 rounded-full mb-2 w-fit">วิชาการ</span>
+                        <p class="text-white font-bold text-lg leading-tight">ชุมชนแห่งการเรียนรู้ทางวิชาชีพ (PLC)</p>
+                    </div>
+                </div>
+
+                <!-- รูปที่ 3 -->
+                <div class="group relative aspect-video overflow-hidden rounded-2xl shadow-lg cursor-pointer hover:shadow-2xl transition-all duration-500">
+                    <img src="https://placehold.co/600x400/f0fdf4/15803d?text=Student+Awards" alt="Activity" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                        <span class="text-xs font-bold bg-yellow-500 text-white px-3 py-1 rounded-full mb-2 w-fit">ผลงานนักเรียน</span>
+                        <p class="text-white font-bold text-lg leading-tight">นักเรียนรับรางวัลระดับภาค</p>
+                    </div>
+                </div>
+
+                <!-- รูปที่ 4 -->
+                 <div class="group relative aspect-video overflow-hidden rounded-2xl shadow-lg cursor-pointer hover:shadow-2xl transition-all duration-500">
+                    <img src="https://placehold.co/600x400/fff7ed/ea580c?text=Open+House" alt="Activity" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                        <span class="text-xs font-bold bg-pink-500 text-white px-3 py-1 rounded-full mb-2 w-fit">กิจกรรม</span>
+                        <p class="text-white font-bold text-lg leading-tight">นิทรรศการวิชาการ Open House</p>
+                    </div>
+                </div>
+
+                <!-- รูปที่ 5 -->
+                 <div class="group relative aspect-video overflow-hidden rounded-2xl shadow-lg cursor-pointer hover:shadow-2xl transition-all duration-500">
+                    <img src="https://placehold.co/600x400/eef2ff/4338ca?text=Online+Media" alt="Activity" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                        <span class="text-xs font-bold bg-blue-500 text-white px-3 py-1 rounded-full mb-2 w-fit">สื่อเทคโนโลยี</span>
+                        <p class="text-white font-bold text-lg leading-tight">การผลิตสื่อการสอนมัลติมีเดีย</p>
+                    </div>
+                </div>
+
+                <!-- รูปที่ 6 -->
+                 <div class="group relative aspect-video overflow-hidden rounded-2xl shadow-lg cursor-pointer hover:shadow-2xl transition-all duration-500">
+                    <img src="https://placehold.co/600x400/f8fafc/64748b?text=Training" alt="Activity" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                        <span class="text-xs font-bold bg-purple-500 text-white px-3 py-1 rounded-full mb-2 w-fit">พัฒนาตนเอง</span>
+                        <p class="text-white font-bold text-lg leading-tight">เข้าร่วมอบรมเชิงปฏิบัติการ</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-center">
+                <a href="#" class="inline-block px-8 py-3 bg-gray-100 border border-gray-200 rounded-lg text-gray-700 font-bold hover:bg-gray-200 hover:shadow-md transition-all">
+                    ดูภาพทั้งหมด
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================================== 
+         FOOTER: ส่วนท้ายเว็บไซต์
+    ================================================================================== -->
+    <footer class="bg-gray-900 text-white py-16 border-t-8 border-secondary relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+             <i class="fas fa-quote-right text-9xl"></i>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <!-- ข้อมูลติดต่อ -->
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-6 flex items-center">
+                        <span class="w-8 h-8 bg-secondary rounded flex items-center justify-center mr-3 text-sm"><i class="fas fa-address-card"></i></span>
+                        ข้อมูลติดต่อ
+                    </h3>
+                    <ul class="space-y-4 text-gray-400">
+                        <li class="flex items-center group"><div class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center mr-4 group-hover:bg-primary transition-colors"><i class="fas fa-phone text-sm"></i></div> [0XX-XXXXXXX]</li>
+                        <li class="flex items-center group"><div class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center mr-4 group-hover:bg-primary transition-colors"><i class="fas fa-envelope text-sm"></i></div> [email@example.com]</li>
+                        <li class="flex items-center group"><div class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center mr-4 group-hover:bg-primary transition-colors"><i class="fab fa-line text-lg"></i></div> [Line ID]</li>
+                    </ul>
+                </div>
+
+                <!-- ลิงก์ที่เกี่ยวข้อง -->
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-6">ลิงก์ที่เกี่ยวข้อง</h3>
+                    <ul class="space-y-3 text-gray-400">
+                        <li><a href="#" class="hover:text-secondary transition flex items-center"><i class="fas fa-chevron-right mr-2 text-xs"></i> เว็บไซต์โรงเรียน...</a></li>
+                        <li><a href="#" class="hover:text-secondary transition flex items-center"><i class="fas fa-chevron-right mr-2 text-xs"></i> ระบบ OBEC Content Center</a></li>
+                        <li><a href="#" class="hover:text-secondary transition flex items-center"><i class="fas fa-chevron-right mr-2 text-xs"></i> สำนักงานคณะกรรมการการศึกษาขั้นพื้นฐาน</a></li>
+                        <li><a href="#" class="hover:text-secondary transition flex items-center"><i class="fas fa-chevron-right mr-2 text-xs"></i> คุรุสภา</a></li>
+                    </ul>
+                </div>
+
+                <!-- คำคม -->
+                <div>
+                    <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700 shadow-xl">
+                        <p class="text-gray-300 italic text-lg leading-relaxed font-serif">"การศึกษาคืออาวุธที่ทรงพลังที่สุด ที่คุณสามารถนำมาใช้เปลี่ยนโลกได้"</p>
+                        <div class="flex items-center mt-6">
+                            <div class="h-1 w-12 bg-secondary mr-4"></div>
+                            <p class="text-white font-bold uppercase tracking-wider text-sm">- เนลสัน แมนเดลา</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ส่วนลิขสิทธิ์ (ปรับระยะห่างให้เล็กลงตามคำขอ) -->
+            <div class="border-t border-gray-800 mt-8 pt-6 text-center">
+                <p class="text-gray-500 text-sm leading-tight">
+                    &copy; 2025 [ชื่อ-นามสกุล]. All Rights Reserved. <br>
+                    <span class="opacity-50 mt-1 inline-block">E-Portfolio By KruBoat.com</span>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ================================================================================== 
+         JAVASCRIPT: การทำงานของเว็บไซต์
+    ================================================================================== -->
+    <script>
+        // ฟังก์ชันเปิด/ปิดเมนูมือถือ
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // ปรับ Navbar เมื่อเลื่อนหน้าจอ
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                navbar.classList.add('shadow-md', 'py-0');
+            } else {
+                navbar.classList.remove('shadow-md', 'py-0');
+            }
+        });
+
+        // Animation: ทำให้เนื้อหาค่อยๆ ปรากฏเมื่อเลื่อนมาถึง
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                    entry.target.classList.remove('opacity-0', 'translate-y-4');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section > div').forEach((el) => {
+            el.classList.add('transition-all', 'duration-1000', 'opacity-0', 'translate-y-4');
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
