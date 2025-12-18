@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoomMate Auto Demo</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #ec4899;
+            --bg-color: #f3f4f6;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --fab-text-bg: #374151;
+        }
+
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding-bottom: 100px;
+            overflow-x: hidden;
+        }
+
+        /* Fake Cursor */
+        .fake-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border: 2px solid rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            opacity: 0;
+        }
+        .fake-cursor.active {
+            transform: translate(-50%, -50%) scale(0.8);
+            background-color: rgba(99, 102, 241, 0.8);
+            border-color: var(--primary-color);
+        }
+
+        /* Mobile Container */
+        .mobile-container {
+            max-width: 480px;
+            margin: 0 auto;
+            background-color: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            position: relative;
+            padding-bottom: 80px;
+        }
+
+        /* ----- Main Styles ----- */
+        .app-header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 20px; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; margin-bottom: 20px; }
+        .profile-wrapper { position: relative; display: inline-block; }
+        .profile-section img { width: 60px; height: 60px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.5); object-fit: cover; }
+        .edit-photo-btn { position: absolute; bottom: 0; right: -5px; background-color: white; color: var(--primary-color); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid var(--primary-color); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .xp-bar { height: 8px; background-color: rgba(255,255,255,0.3); border-radius: 10px; margin-top: 5px; overflow: hidden; }
+        .xp-progress { height: 100%; background-color: #fbbf24; width: 75%; transition: width 0.5s ease-in-out; }
+        .custom-card { border: none; border-radius: 15px; box-shadow: var(--card-shadow); margin-bottom: 15px; overflow: hidden; background: white; }
+        .card-header-custom { padding: 12px 15px; font-weight: 600; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+        .schedule-item { padding: 10px 15px; border-left: 4px solid #e5e7eb; margin-bottom: 8px; background-color: #f9fafb; border-radius: 0 8px 8px 0; transition: all 0.3s; }
+        .schedule-item.active { border-left: 4px solid var(--primary-color); background-color: #eef2ff; }
+        .time-badge { font-size: 0.75rem; color: #6b7280; display: block; }
+        .hw-item { border-left: 4px solid transparent; }
+        .hw-urgent { border-left-color: #ef4444; }
+        .hw-normal { border-left-color: #fbbf24; }
+        .hw-done { border-left-color: #10b981; opacity: 0.6; }
+        
+        /* Creator Card Styles */
+        .creator-card {
+            background: white;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+        .creator-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .creator-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color); margin-right: 15px; }
+        .creator-info h6 { margin: 0; font-weight: 700; color: #374151; font-size: 0.95rem; }
+        .creator-role { font-size: 0.75rem; color: var(--primary-color); background: #eef2ff; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-top: 4px; font-weight: 500; }
+
+        /* FAB Styles */
+        .fab-container { position: fixed; bottom: 25px; right: 25px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+        .fab-trigger { width: 50px; height: 50px; background-color: var(--primary-color); border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; border: none; transition: all 0.3s; position: relative; z-index: 1001; }
+        .fab-menu { display: flex; flex-direction: column-reverse; align-items: flex-end; gap: 12px; opacity: 0; pointer-events: none; transform: translateY(20px); transition: all 0.3s ease-in-out; margin-bottom: 5px; z-index: 1000; }
+        .fab-container.active .fab-menu { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        .fab-container.active .fab-trigger { transform: rotate(45deg); background-color: #ef4444; }
+        .fab-item { display: flex; align-items: center; justify-content: flex-end; gap: 10px; text-decoration: none; cursor: pointer; }
+        .fab-item-btn { width: 40px; height: 40px; background-color: white; border-radius: 50%; box-shadow: 0 3px 6px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; color: var(--primary-color); font-size: 16px; transition: background-color 0.2s; }
+        .fab-item-label { background-color: var(--fab-text-bg); color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.15); opacity: 0.9; }
+        .fab-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); }
+        .fab-container.active ~ .fab-overlay { opacity: 1; pointer-events: auto; }
+
+        .add-hw-btn { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; border: none; }
+        
+        /* Camera Preview Animation */
+        .camera-flash {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; opacity: 0; pointer-events: none; z-index: 10;
+        }
+        .flash-active { animation: flashAnim 0.3s ease-out; }
+        @keyframes flashAnim { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
+
+        /* Animation for New Item */
+        @keyframes slideDownFade {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in { animation: slideDownFade 0.5s ease-out forwards; }
+
+        /* Helper */
+        .scroll-target { scroll-margin-top: 100px; }
+    </style>
+</head>
+<body>
+
+<div class="fake-cursor" id="fakeCursor"></div>
+
+<div class="mobile-container" id="mainContainer">
+
+    <header class="app-header">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="fw-bold fs-5"><i class="fa-solid fa-shapes me-2"></i>RoomMate</div>
+            <div class="position-relative">
+                <i class="fa-regular fa-bell fs-5"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5rem;">2</span>
+            </div>
+        </div>
+        <div class="d-flex align-items-center profile-section">
+            <div class="profile-wrapper" id="profilePicBtn">
+                <img src="https://ui-avatars.com/api/?name=Nattapol+A&background=0D8ABC&color=fff" alt="Profile">
+                <div class="edit-photo-btn shadow-sm"><i class="fa-solid fa-camera"></i></div>
+            </div>
+            <div class="ms-3 flex-grow-1">
+                <div class="fw-bold">ด.ช.ณัฐพล อนุไพร (ม.1/1)</div>
+                <div class="d-flex justify-content-between align-items-end" style="font-size: 0.8rem;">
+                    <span>Lv. 5 Ranger</span>
+                    <span>450/600 XP</span>
+                </div>
+                <div class="xp-bar"><div class="xp-progress" id="xpProgressBar"></div></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container px-3">
+
+        <div class="custom-card scroll-target" id="scheduleCard">
+            <div class="card-header-custom">
+                <span><i class="fa-regular fa-calendar-days me-2 text-primary"></i>ตารางเรียนวันนี้</span>
+                <span class="badge bg-primary rounded-pill">อังคาร</span>
+            </div>
+            <div class="p-3">
+                <div class="schedule-item">
+                    <span class="time-badge">08:30 - 09:30</span>
+                    <div class="fw-medium text-muted">ภาษาไทย</div>
+                </div>
+                <div class="schedule-item active d-flex justify-content-between align-items-center" id="activeClass">
+                    <div>
+                        <span class="time-badge text-primary fw-bold">09:30 - 10:30 (ตอนนี้)</span>
+                        <div class="fw-bold text-dark">คณิตศาสตร์ พื้นฐาน</div>
+                        <small class="text-muted"><i class="fa-solid fa-location-dot me-1"></i>ห้อง 412</small>
+                    </div>
+                    <i class="fa-solid fa-book-open text-primary fs-4 opacity-50"></i>
+                </div>
+                <div class="schedule-item">
+                    <span class="time-badge">10:30 - 11:30</span>
+                    <div class="fw-medium">วิทยาศาสตร์</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="custom-card border-0 scroll-target" id="dutyCard" style="background: linear-gradient(to right, #fff1eb, #ace0f9);">
+            <div class="card-header-custom bg-transparent border-0">
+                <span><i class="fa-solid fa-broom me-2 text-success"></i>เวรประจำวัน</span>
+                <span class="badge bg-success">กลุ่ม B</span>
+            </div>
+            <div class="p-3 pt-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted d-block mb-1">สมาชิกเวรวันนี้:</small>
+                        <div class="d-flex">
+                            <img src="https://ui-avatars.com/api/?name=Suchada&background=random" class="rounded-circle border border-white" width="30" height="30" style="margin-right: -10px;">
+                            <img src="https://ui-avatars.com/api/?name=Supansa&background=random" class="rounded-circle border border-white" width="30" height="30" style="margin-right: -10px;">
+                            <img src="https://ui-avatars.com/api/?name=Nattapol&background=0D8ABC&color=fff" class="rounded-circle border border-white" width="30" height="30" style="z-index:1;">
+                            <div class="rounded-circle bg-white border d-flex align-items-center justify-content-center ms-2" style="width: 30px; height: 30px; font-size: 10px;">+2</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" id="checkInBtn" data-bs-toggle="modal" data-bs-target="#checkInModal">
+                        <i class="fa-solid fa-camera me-1"></i> ส่งงาน
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-2 mt-4 scroll-target" id="homeworkSection">
+            <h6 class="fw-bold m-0"><i class="fa-solid fa-pen-to-square me-2 text-warning"></i>การบ้านวันนี้</h6>
+            <button class="btn btn-dark add-hw-btn shadow-sm" id="addHwBtn" data-bs-toggle="modal" data-bs-target="#addHomeworkModal">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </div>
+
+        <div class="custom-card hw-item hw-urgent p-3 mb-2">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <span class="badge bg-danger mb-1" style="font-size: 0.6rem;">ส่งพรุ่งนี้!</span>
+                    <div class="fw-bold">แบบฝึกหัด 1.2 (ข้อคู่)</div>
+                    <div class="text-muted small">วิชาคณิตศาสตร์</div>
+                </div>
+                <div class="text-end">
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill" style="font-size: 0.7rem;">รายละเอียด</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="newHwContainer"></div>
+
+        <div class="custom-card hw-item hw-normal p-3 mb-2">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <span class="badge bg-warning text-dark mb-1" style="font-size: 0.6rem;">ส่ง 25 ส.ค.</span>
+                    <div class="fw-bold">วาดภาพระบายสีหัวข้อ "วันแม่"</div>
+                    <div class="text-muted small">วิชาศิลปะ</div>
+                </div>
+                <div class="text-end">
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill" style="font-size: 0.7rem;">รายละเอียด</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="custom-card hw-item hw-done p-3 mb-2 bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="badge bg-success mb-1" style="font-size: 0.6rem;">ส่งแล้ว ✅</span>
+                    <div class="fw-bold text-decoration-line-through text-muted">ท่องศัพท์ Unit 3</div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="height: 150px;"></div>
+    </div>
+</div>
+
+<!-- FAB Menu -->
+<div class="fab-container" id="fabMenu">
+    <div class="fab-menu">
+        <!-- เปลี่ยนปุ่มนี้เป็น "ผู้จัดทำ" -->
+        <div class="fab-item" id="projectStructureBtn" data-bs-toggle="modal" data-bs-target="#projectStructureModal">
+            <span class="fab-item-label">ผู้จัดทำ</span>
+            <div class="fab-item-btn text-white bg-warning"><i class="fa-solid fa-user-group text-white"></i></div>
+        </div>
+        <a href="#" class="fab-item"><span class="fab-item-label">โปรไฟล์</span><div class="fab-item-btn"><i class="fa-solid fa-user"></i></div></a>
+        <a href="#" class="fab-item"><span class="fab-item-label">จัดอันดับ</span><div class="fab-item-btn"><i class="fa-solid fa-trophy"></i></div></a>
+        <a href="#" class="fab-item"><span class="fab-item-label">ปฏิทินงาน</span><div class="fab-item-btn"><i class="fa-regular fa-calendar-check"></i></div></a>
+        <a href="#" class="fab-item" id="homeBtn"><span class="fab-item-label">หน้าหลัก</span><div class="fab-item-btn"><i class="fa-solid fa-house"></i></div></a>
+    </div>
+    <button class="fab-trigger" id="fabTriggerBtn"><i class="fa-solid fa-plus"></i></button>
+</div>
+<div class="fab-overlay" id="fabOverlay"></div>
+
+<!-- Modal: Add Homework -->
+<div class="modal fade" id="addHomeworkModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-header border-0 pb-0"><h6 class="modal-title fw-bold">เพิ่มการบ้านใหม่</h6><button type="button" class="btn-close"></button></div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3"><label class="form-label small text-muted">วิชา</label><select id="hwSubjectSelect" class="form-select form-select-sm bg-light border-0"><option value="math">คณิตศาสตร์ พื้นฐาน</option><option value="science" selected>วิทยาศาสตร์</option><option value="thai">ภาษาไทย</option></select></div>
+                    <div class="mb-3"><label class="form-label small text-muted">รายละเอียด</label><textarea id="hwDetailInput" class="form-control form-control-sm bg-light border-0" rows="2"></textarea></div>
+                    <div class="mb-3"><label class="form-label small text-muted">กำหนดส่ง</label><input id="hwDateInput" type="date" class="form-control form-control-sm bg-light border-0" value=""></div>
+                    <button type="button" class="btn btn-primary w-100 rounded-pill btn-sm" id="saveHwBtn">บันทึก</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Check In -->
+<div class="modal fade" id="checkInModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content rounded-4 border-0 position-relative overflow-hidden">
+            <div class="camera-flash" id="camFlash"></div>
+            
+            <div class="modal-body text-center p-4">
+                <h6 class="fw-bold mb-3">ส่งรูปเวรประจำวัน</h6>
+                <div id="cameraPreviewBox" class="bg-dark rounded-3 mb-3 d-flex justify-content-center align-items-center text-white position-relative overflow-hidden" style="height: 200px; width: 100%;">
+                    <div class="placeholder-content">
+                        <i class="fa-solid fa-camera mb-2" style="font-size: 2rem;"></i>
+                        <p class="small m-0">กำลังเปิดกล้อง...</p>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-success w-100 rounded-pill btn-sm" id="submitCheckInBtn">ยืนยันการส่ง</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Creators (Updated) -->
+<div class="modal fade" id="projectStructureModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-header bg-white border-0 pb-0">
+                <h5 class="modal-title fw-bold text-primary"><i class="fa-solid fa-users me-2"></i>คณะผู้จัดทำ</h5>
+                <button type="button" class="btn-close" id="closeStructureBtn"></button>
+            </div>
+            <div class="modal-body bg-white pt-2">
+                <div class="text-center mb-3">
+                    <small class="text-muted d-block">โครงงานคอมพิวเตอร์</small>
+                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1">RoomMate Team</span>
+                </div>
+
+                <!-- Creator 1 -->
+                <div class="creator-card">
+                    <img src="https://ui-avatars.com/api/?name=Nattapol+A&background=0D8ABC&color=fff" class="creator-img">
+                    <div class="creator-info">
+                        <h6>ด.ช.ณัฐพล อนุไพร</h6>
+                        <span class="creator-role">หัวหน้าทีม / Leader</span>
+                    </div>
+                </div>
+
+                <!-- Creator 2 -->
+                <div class="creator-card">
+                    <img src="https://ui-avatars.com/api/?name=Suchada&background=ec4899&color=fff" class="creator-img" style="border-color: #ec4899;">
+                    <div class="creator-info">
+                        <h6>ด.ญ.สุชาดา บุญกุ้ม</h6>
+                        <span class="creator-role" style="color: #ec4899; background: #fdf2f8;">สมาชิก / Member</span>
+                    </div>
+                </div>
+
+                <!-- Creator 3 -->
+                <div class="creator-card">
+                    <img src="https://ui-avatars.com/api/?name=Supansa&background=10b981&color=fff" class="creator-img" style="border-color: #10b981;">
+                    <div class="creator-info">
+                        <h6>ด.ญ.สุพรรณษา บุญกุ้ม</h6>
+                        <span class="creator-role" style="color: #10b981; background: #ecfdf5;">สมาชิก / Member</span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer border-0 pt-0"><button type="button" class="btn btn-secondary w-100 rounded-pill btn-sm" id="closeStructureBottomBtn">ปิดหน้าต่าง</button></div>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 1100;">
+    <div id="liveToast" class="toast align-items-center text-white bg-success border-0 rounded-pill" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex"><div class="toast-body px-4 py-2"><i class="fa-solid fa-circle-check me-2"></i> <span id="toastMessage">บันทึกสำเร็จ!</span></div></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // --- DEMO CONTROLLER SCRIPT (REVISED) ---
+
+    // Init Modals & Toast
+    const addHwModal = new bootstrap.Modal(document.getElementById('addHomeworkModal'));
+    const checkInModal = new bootstrap.Modal(document.getElementById('checkInModal'));
+    const structureModal = new bootstrap.Modal(document.getElementById('projectStructureModal'));
+    const toast = new bootstrap.Toast(document.getElementById('liveToast'), { delay: 1500 });
+
+    // Elements
+    const cursor = document.getElementById('fakeCursor');
+    const xpBar = document.getElementById('xpProgressBar');
+    const fabMenu = document.getElementById('fabMenu');
+    
+    // Helpers
+    const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    async function moveCursorTo(elementId, offsetX = 0, offsetY = 0) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        const rect = element.getBoundingClientRect();
+        const x = rect.left + rect.width / 2 + offsetX;
+        const y = rect.top + rect.height / 2 + offsetY;
+        
+        cursor.style.opacity = '1';
+        cursor.style.left = `${x}px`;
+        cursor.style.top = `${y}px`;
+        await wait(600);
+    }
+
+    async function clickElement(elementId) {
+        await moveCursorTo(elementId);
+        cursor.classList.add('active');
+        await wait(150);
+        cursor.classList.remove('active');
+        document.getElementById(elementId).click();
+        await wait(400); 
+    }
+
+    async function scrollToElement(elementId) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        await wait(800);
+    }
+
+    async function typeText(elementId, text) {
+        await moveCursorTo(elementId);
+        await clickElement(elementId); // Focus input
+        
+        const el = document.getElementById(elementId);
+        el.value = "";
+        // Simulate typing effect
+        for (let i = 0; i < text.length; i++) {
+            el.value += text[i];
+            await wait(40); 
+        }
+        await wait(300);
+    }
+
+    function showToast(message) {
+        document.getElementById('toastMessage').innerText = message;
+        toast.show();
+    }
+
+    // --- Main Demo Sequence ---
+    async function runDemoSequence() {
+        console.log('Demo started...');
+        cursor.style.opacity = '0';
+        window.scrollTo(0, 0);
+
+        // --- 1. Check Schedule & XP ---
+        await wait(1000);
+        await moveCursorTo('activeClass');
+        await wait(800); 
+        // XP Animation
+        const currentWidth = parseFloat(getComputedStyle(xpBar).width);
+        xpBar.style.width = (currentWidth + 30) + 'px';
+        
+        // --- 2. Submit Duty (Classroom Preview) ---
+        await scrollToElement('dutyCard');
+        await clickElement('checkInBtn'); // Opens Modal
+        await wait(600); // Wait for modal animation
+        
+        // Simulating Taking Photo
+        const previewBox = document.getElementById('cameraPreviewBox');
+        const flash = document.getElementById('camFlash');
+        
+        // Flash Effect
+        flash.classList.add('flash-active');
+        setTimeout(() => flash.classList.remove('flash-active'), 300);
+        
+        // Change to "Classroom" Photo
+        previewBox.innerHTML = `<img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" style="width:100%; height:100%; object-fit:cover;">`;
+        
+        await wait(1200);
+
+        await clickElement('submitCheckInBtn');
+        checkInModal.hide();
+        showToast('ส่งรูปเวรเรียบร้อย (+20 XP)');
+        xpBar.style.width = (parseFloat(getComputedStyle(xpBar).width) + 20) + 'px';
+        
+        setTimeout(() => {
+            previewBox.innerHTML = `<div class="placeholder-content"><i class="fa-solid fa-camera mb-2" style="font-size: 2rem;"></i><p class="small m-0">กำลังเปิดกล้อง...</p></div>`;
+        }, 1000);
+
+        // --- 3. Add Homework ---
+        await scrollToElement('homeworkSection');
+        await clickElement('addHwBtn');
+        await wait(600);
+
+        await typeText('hwDetailInput', 'สรุปเนื้อหาบทที่ 4 เรื่องเซลล์พืช');
+        document.getElementById('hwDateInput').value = '2025-08-28';
+        await wait(500);
+
+        await clickElement('saveHwBtn');
+        addHwModal.hide();
+        showToast('เพิ่มการบ้านใหม่แล้ว');
+        
+        const newHwHTML = `
+        <div class="custom-card hw-item hw-normal p-3 mb-2 animate-in">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <span class="badge bg-warning text-dark mb-1" style="font-size: 0.6rem;">ส่ง 28 ส.ค.</span>
+                    <div class="fw-bold">สรุปเนื้อหาบทที่ 4</div>
+                    <div class="text-muted small">วิชาวิทยาศาสตร์</div>
+                </div>
+                <div class="text-end">
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill" style="font-size: 0.7rem;">รายละเอียด</button>
+                </div>
+            </div>
+        </div>`;
+        document.getElementById('newHwContainer').innerHTML = newHwHTML;
+        await wait(1500);
+
+        // --- 4. FAB Menu & Creators (UPDATED) ---
+        await clickElement('fabTriggerBtn');
+        await wait(500);
+        await clickElement('projectStructureBtn'); // Now "ผู้จัดทำ"
+        await wait(1000);
+        
+        // Scroll slightly to show all members if needed
+        const structureBody = document.querySelector('#projectStructureModal .modal-body');
+        if (structureBody.scrollHeight > structureBody.clientHeight) {
+             structureBody.scrollBy({ top: 100, behavior: 'smooth' });
+             await wait(1000);
+        }
+        
+        await wait(1500);
+        await clickElement('closeStructureBottomBtn');
+        structureModal.hide();
+        
+        if (document.getElementById('fabMenu').classList.contains('active')) {
+             await clickElement('fabOverlay');
+        }
+
+        // --- Loop Reset ---
+        await wait(1000);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        cursor.style.opacity = '0';
+        document.getElementById('newHwContainer').innerHTML = ''; 
+        await wait(2000);
+        runDemoSequence();
+    }
+
+    // Manual triggers
+    document.getElementById('fabTriggerBtn').addEventListener('click', () => {
+        fabMenu.classList.toggle('active');
+        const icon = document.getElementById('fabTriggerBtn').querySelector('i');
+        icon.classList.toggle('fa-plus'); icon.classList.toggle('fa-xmark');
+    });
+    document.getElementById('fabOverlay').addEventListener('click', () => {
+        fabMenu.classList.remove('active');
+        const icon = document.getElementById('fabTriggerBtn').querySelector('i');
+        icon.classList.add('fa-plus'); icon.classList.remove('fa-xmark');
+    });
+    document.getElementById('closeStructureBtn').addEventListener('click', () => structureModal.hide());
+    document.getElementById('closeStructureBottomBtn').addEventListener('click', () => structureModal.hide());
+
+    window.addEventListener('load', runDemoSequence);
+
+</script>
+
+</body>
+</html>

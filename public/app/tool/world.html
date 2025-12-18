@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galactic Overseer v2.1 | Enhanced Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Rajdhani', sans-serif; color: #00f2ff; }
+        .orbitron { font-family: 'Orbitron', sans-serif; }
+        
+        #loading-screen {
+            position: fixed; inset: 0; background: radial-gradient(circle at center, #001a33 0%, #000 100%);
+            z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 1s ease-out;
+        }
+
+        .glass-panel {
+            background: rgba(0, 20, 40, 0.6); backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 242, 255, 0.3); box-shadow: 0 0 20px rgba(0, 242, 255, 0.1);
+        }
+
+        /* ปรับปรุง Cursor */
+        #hand-cursor {
+            width: 34px; height: 34px; border: 2px solid #00f2ff; border-radius: 50%;
+            position: fixed; pointer-events: none; z-index: 99; transform: translate(-50%, -50%);
+            display: none; box-shadow: 0 0 15px #00f2ff;
+            transition: width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                        height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                        background 0.3s ease;
+        }
+
+        /* สถานะเมื่อชี้ที่จุดประเทศ (Lock On) */
+        #hand-cursor.locked {
+            width: 45px; height: 45px; 
+            background: rgba(0, 242, 255, 0.4); 
+            border-width: 4px;
+            box-shadow: 0 0 25px #00f2ff, inset 0 0 10px #00f2ff;
+        }
+
+        /* สถานะเมื่อกำมือ (Active) */
+        #hand-cursor.active {
+            width: 55px; height: 55px;
+            background: rgba(0, 242, 255, 0.7);
+            border-color: #fff;
+            box-shadow: 0 0 40px #00f2ff;
+        }
+
+        .country-popup {
+            position: fixed; top: 50%; right: 50px; transform: translateY(-50%);
+            width: 320px; display: none; z-index: 20;
+            animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-50%) translateX(50px); } to { opacity: 1; transform: translateY(-50%) translateX(0); } }
+
+        .scanline {
+            width: 100%; height: 2px; background: rgba(0, 242, 255, 0.5);
+            position: absolute; top: 0; left: 0; pointer-events: none;
+            animation: scan 3s linear infinite;
+        }
+        @keyframes scan { from { top: 0%; } to { top: 100%; } }
+
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-screen">
+        <div class="orbitron text-3xl mb-4 tracking-widest text-cyan-400">OPTIMIZING NEURAL LINK</div>
+        <div class="w-64 h-1 bg-cyan-900 overflow-hidden"><div class="h-full bg-cyan-400 animate-[loading_2s_infinite]"></div></div>
+        <div class="mt-4 text-cyan-700 animate-pulse text-sm">REDUCING JITTER & CALIBRATING OPTICS...</div>
+    </div>
+    <style> @keyframes loading { from { transform: translateX(-100%); } to { transform: translateX(100%); } } </style>
+
+    <div id="hand-cursor"></div>
+
+    <div id="country-info" class="country-popup glass-panel p-6 rounded-2xl border-l-4 border-l-cyan-400">
+        <div class="scanline"></div>
+        <div class="orbitron text-xs text-cyan-500 mb-1 tracking-widest">INTELLIGENCE REPORT</div>
+        <h2 id="country-name" class="orbitron text-3xl font-bold text-white mb-4">--</h2>
+        <div class="space-y-4 text-sm">
+            <div class="flex justify-between border-b border-cyan-900 pb-1">
+                <span class="text-cyan-600">POPULATION</span>
+                <span id="pop-val" class="text-cyan-200">--</span>
+            </div>
+            <div class="flex justify-between border-b border-cyan-900 pb-1">
+                <span class="text-cyan-600">COORDINATES</span>
+                <span id="coord-val" class="text-cyan-200">--</span>
+            </div>
+            <div class="flex justify-between border-b border-cyan-900 pb-1">
+                <span class="text-cyan-600">SECTOR STATUS</span>
+                <span class="text-green-400 font-bold">OPTIMAL</span>
+            </div>
+            <p id="country-desc" class="text-cyan-400 italic text-xs leading-relaxed">--</p>
+        </div>
+    </div>
+
+    <div class="fixed inset-0 pointer-events-none flex flex-col justify-between p-6 z-10">
+        <div class="flex justify-between items-start">
+            <div class="glass-panel p-4 rounded-br-3xl">
+                <h1 class="orbitron text-xl font-bold tracking-tighter text-cyan-400">GALACTIC OVERSEER</h1>
+                <div class="text-[10px] text-cyan-700 uppercase">Neural Intelligence Interface v2.1</div>
+            </div>
+            <div class="glass-panel p-3 text-right">
+                <div id="time-display" class="orbitron text-lg">00:00:00</div>
+                <div class="text-[10px] text-cyan-600">SYSTEM LOG TIME</div>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center h-full">
+            <div class="flex flex-col gap-4 w-64">
+                <div class="glass-panel p-4 rounded-xl">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div id="status-light" class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                        <span class="text-[10px] uppercase font-bold tracking-widest text-cyan-500">Uplink Feed</span>
+                    </div>
+                    <video id="webcam-feed" class="w-full h-32 bg-black rounded border border-cyan-900 object-cover opacity-60 scale-x-[-1]" autoplay playsinline></video>
+                    <div id="gesture-label" class="mt-2 text-center orbitron text-[10px] text-cyan-500">CALIBRATING HAND...</div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-4 w-64 text-right">
+                <div class="glass-panel p-4 rounded-xl">
+                    <div class="text-[10px] text-cyan-600 mb-1 uppercase tracking-widest">Global Zoom Level</div>
+                    <div id="alt-val" class="orbitron text-2xl">-- km</div>
+                </div>
+                <div class="glass-panel p-4 rounded-xl">
+                    <div class="text-[10px] text-cyan-600 mb-1 uppercase tracking-widest">Active Beacons</div>
+                    <div id="beacon-count" class="orbitron text-2xl">08</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-center">
+            <div class="glass-panel px-8 py-3 rounded-full flex gap-10 text-[10px] tracking-widest font-bold">
+                <div class="flex items-center gap-2"><span class="bg-cyan-500 text-black px-1 rounded">PINCH</span> MOVE WORLD</div>
+                <div class="flex items-center gap-2"><span class="bg-cyan-500 text-black px-1 rounded">2 FINGERS</span> TIME SHIFT</div>
+                <div class="flex items-center gap-2"><span class="bg-cyan-500 text-black px-1 rounded">FIST ON BEACON</span> TARGET ZOOM</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const COUNTRIES = [
+            { name: "Thailand", lat: 13.7563, lng: 100.5018, pop: "71.6M", desc: "ศูนย์กลางยุทธศาสตร์ในเอเชียตะวันออกเฉียงใต้ พร้อมเครือข่าย Neural Hub หนาแน่น" },
+            { name: "Japan", lat: 35.6762, lng: 139.6503, pop: "125.7M", desc: "เขตอุตสาหกรรมเทคโนโลยีขั้นสูง พร้อมระบบรักษาความปลอดภัยระดับสูงสุด" },
+            { name: "USA", lat: 40.7128, lng: -74.0060, pop: "331.9M", desc: "ศูนย์กลางเศรษฐกิจโลก Sector-7 จุดรวมกระแสข้อมูลหลัก" },
+            { name: "UK", lat: 51.5074, lng: -0.1278, pop: "67.3M", desc: "Neural Node สำคัญในยุโรปตะวันตก มีเสถียรภาพระบบสูง" },
+            { name: "Brazil", lat: -23.5505, lng: -46.6333, pop: "214.3M", desc: "Node หลักในอเมริกาใต้ ครอบคลุมพื้นที่ป่าอเมซอน" },
+            { name: "Australia", lat: -33.8688, lng: 151.2093, pop: "25.7M", desc: "สถานีสังเกตการณ์ภาคใต้ มีระบบป้องกันชั้นบรรยากาศแยกส่วน" },
+            { name: "Egypt", lat: 30.0444, lng: 31.2357, pop: "109.3M", desc: "Gateway เชื่อมต่อระหว่างทวีป จุดตัดสัญญาณทางประวัติศาสตร์" },
+            { name: "Iceland", lat: 64.1265, lng: -21.8277, pop: "0.4M", desc: "ศูนย์สำรองข้อมูลเขตหนาว ปลอดภัยจากการรบกวนของความร้อน" }
+        ];
+
+        let scene, camera, renderer, earth, clouds, sun, raycaster, mouse;
+        let beacons = [];
+        let targetRotationX = 0, targetRotationY = 0;
+        let targetZoom = 50, currentZoom = 50;
+        let solarAngle = 0;
+        let hoveredBeacon = null;
+        let isFistActive = false;
+
+        // Jitter reduction variables
+        let lastTargetZoom = 50;
+        let zoomStabilityCounter = 0;
+
+        function initThree() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
+            camera.position.z = 100;
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.body.appendChild(renderer.domElement);
+
+            const loader = new THREE.TextureLoader();
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+
+            // Earth
+            const earthGeom = new THREE.SphereGeometry(10, 64, 64);
+            const earthMat = new THREE.MeshPhongMaterial({
+                map: loader.load('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg'),
+                specularMap: loader.load('https://unpkg.com/three-globe/example/img/earth-water.png'),
+                specular: new THREE.Color('grey'),
+                shininess: 5
+            });
+            earth = new THREE.Mesh(earthGeom, earthMat);
+            scene.add(earth);
+
+            // Beacons
+            COUNTRIES.forEach(country => {
+                const pos = latLngToVector3(country.lat, country.lng, 10.05);
+                const beaconGroup = new THREE.Group();
+                
+                const ring = new THREE.Mesh(
+                    new THREE.RingGeometry(0.15, 0.22, 32),
+                    new THREE.MeshBasicMaterial({ color: 0x00f2ff, side: THREE.DoubleSide, transparent: true, opacity: 0.6 })
+                );
+                ring.position.copy(pos);
+                ring.lookAt(new THREE.Vector3(0,0,0));
+                
+                const core = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.08, 16, 16),
+                    new THREE.MeshBasicMaterial({ color: 0xffffff })
+                );
+                core.position.copy(pos);
+                
+                beaconGroup.add(ring);
+                beaconGroup.add(core);
+                beaconGroup.userData = country;
+                
+                beacons.push(beaconGroup);
+                earth.add(beaconGroup);
+            });
+
+            // Clouds
+            clouds = new THREE.Mesh(
+                new THREE.SphereGeometry(10.2, 64, 64),
+                new THREE.MeshStandardMaterial({
+                    map: loader.load('https://unpkg.com/three-globe/example/img/earth-clouds.png'),
+                    transparent: true, opacity: 0.4
+                })
+            );
+            scene.add(clouds);
+
+            // Stars
+            const starGeom = new THREE.SphereGeometry(200, 32, 32);
+            const starMat = new THREE.MeshBasicMaterial({ side: THREE.BackSide, map: loader.load('https://threejs.org/examples/textures/planets/galaxy.png'), transparent: true, opacity: 0.2 });
+            scene.add(new THREE.Mesh(starGeom, starMat));
+
+            scene.add(new THREE.AmbientLight(0x222222));
+            sun = new THREE.DirectionalLight(0xffffff, 1.5);
+            sun.position.set(20, 10, 20);
+            scene.add(sun);
+
+            window.addEventListener('resize', onResize);
+            setTimeout(() => {
+                document.getElementById('loading-screen').style.opacity = '0';
+                setTimeout(() => document.getElementById('loading-screen').style.display = 'none', 1000);
+            }, 2000);
+        }
+
+        function latLngToVector3(lat, lng, radius) {
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lng + 180) * (Math.PI / 180);
+            return new THREE.Vector3(
+                -radius * Math.sin(phi) * Math.cos(theta),
+                radius * Math.cos(phi),
+                radius * Math.sin(phi) * Math.sin(theta)
+            );
+        }
+
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        const cursor = document.getElementById('hand-cursor');
+        const gestureLabel = document.getElementById('gesture-label');
+        const statusLight = document.getElementById('status-light');
+        let lastHandPos = { x: 0, y: 0 };
+
+        const hands = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
+        hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.75, minTrackingConfidence: 0.75 });
+        hands.onResults(onHandResults);
+
+        const cameraFeed = new Camera(document.getElementById('webcam-feed'), {
+            onFrame: async () => { await hands.send({ image: document.getElementById('webcam-feed') }); },
+            width: 640, height: 480
+        });
+        cameraFeed.start();
+
+        function onHandResults(results) {
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const lm = results.multiHandLandmarks[0];
+                statusLight.classList.replace('bg-red-500', 'bg-green-500');
+                cursor.style.display = 'block';
+
+                const x = (1 - lm[8].x) * window.innerWidth;
+                const y = lm[8].y * window.innerHeight;
+                
+                // Cursor Smoothing (Interpolation)
+                const currentX = parseFloat(cursor.style.left) || x;
+                const currentY = parseFloat(cursor.style.top) || y;
+                cursor.style.left = `${currentX + (x - currentX) * 0.4}px`;
+                cursor.style.top = `${currentY + (y - currentY) * 0.4}px`;
+
+                mouse.x = ((1 - lm[8].x) * 2) - 1;
+                mouse.y = -(lm[8].y * 2) + 1;
+
+                const gesture = detectGesture(lm);
+                handleGesture(gesture, x, y);
+                lastHandPos = { x, y };
+            } else {
+                statusLight.classList.replace('bg-green-500', 'bg-red-500');
+                cursor.style.display = 'none';
+                gestureLabel.innerText = "WAITING FOR HAND...";
+                isFistActive = false;
+                setSafeTargetZoom(50);
+            }
+        }
+
+        // เพิ่มตัวกรองความสั่นไหวของ Zoom
+        function setSafeTargetZoom(val) {
+            if (val !== lastTargetZoom) {
+                zoomStabilityCounter++;
+                if (zoomStabilityCounter > 3) { // ต้องมีการสั่ง Zoom ค่าเดิมซ้ำ 3 เฟรมถึงจะเปลี่ยนจริง
+                    lastTargetZoom = val;
+                    zoomStabilityCounter = 0;
+                }
+            } else {
+                zoomStabilityCounter = 0;
+            }
+            targetZoom = lastTargetZoom;
+        }
+
+        function detectGesture(lm) {
+            const dist = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y, p1.z - p2.z);
+            const wrist = lm[0];
+            const isFist = [8, 12, 16, 20].every(i => dist(lm[i], wrist) < 0.28);
+            if (isFist) return "FIST";
+            const indexExtended = dist(lm[8], wrist) > 0.4;
+            const middleExtended = dist(lm[12], wrist) > 0.4;
+            const ringFolded = dist(lm[16], wrist) < 0.35;
+            const pinkyFolded = dist(lm[20], wrist) < 0.35;
+            if (indexExtended && middleExtended && ringFolded && pinkyFolded) return "VICTORY";
+            if (dist(lm[4], lm[8]) < 0.05) return "PINCH";
+            return "NONE";
+        }
+
+        function handleGesture(gesture, x, y) {
+            gestureLabel.innerText = `ACTIVE: ${gesture}`;
+            const infoBox = document.getElementById('country-info');
+
+            if (gesture === "FIST") {
+                isFistActive = true;
+                cursor.classList.add('active');
+                if (hoveredBeacon) {
+                    setSafeTargetZoom(13.8); // Warp Zoom
+                    showInfo(hoveredBeacon.userData);
+                } else {
+                    setSafeTargetZoom(30);
+                }
+            } else {
+                isFistActive = false;
+                cursor.classList.remove('active');
+                setSafeTargetZoom(50);
+                infoBox.style.display = 'none';
+            }
+
+            if (gesture === "PINCH") {
+                targetRotationY += (x - lastHandPos.x) * 0.01;
+                targetRotationX += (y - lastHandPos.y) * 0.01;
+            }
+
+            if (gesture === "VICTORY") {
+                solarAngle = (x / window.innerWidth) * Math.PI * 2;
+            }
+        }
+
+        function showInfo(data) {
+            document.getElementById('country-info').style.display = 'block';
+            document.getElementById('country-name').innerText = data.name.toUpperCase();
+            document.getElementById('pop-val').innerText = data.pop;
+            document.getElementById('coord-val').innerText = `${data.lat.toFixed(1)}N, ${data.lng.toFixed(1)}E`;
+            document.getElementById('country-desc').innerText = data.desc;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // ปรับ Lerp Factor ให้ต่ำลง (0.05) เพื่อความนิ่ง
+            currentZoom += (targetZoom - currentZoom) * 0.05;
+            camera.position.z = currentZoom;
+
+            earth.rotation.y += (targetRotationY - earth.rotation.y) * 0.1;
+            earth.rotation.x += (targetRotationX - earth.rotation.x) * 0.1;
+
+            if (!isFistActive) earth.rotation.y += 0.0008;
+            clouds.rotation.y = earth.rotation.y * 1.05;
+
+            sun.position.x = Math.cos(solarAngle) * 30;
+            sun.position.z = Math.sin(solarAngle) * 30;
+
+            // Raycasting & Cursor state
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(earth.children, true);
+            
+            let foundBeacon = null;
+            if (intersects.length > 0) {
+                const group = intersects[0].object.parent;
+                if (group && group.userData.name) {
+                    foundBeacon = group;
+                }
+            }
+
+            // จัดการสถานะ Cursor
+            if (foundBeacon) {
+                hoveredBeacon = foundBeacon;
+                cursor.classList.add('locked'); // เปลี่ยนเป็นวงกลมทึบ
+                foundBeacon.children[0].material.opacity = 1.0;
+                foundBeacon.children[0].scale.set(1.4, 1.4, 1.4);
+            } else {
+                hoveredBeacon = null;
+                cursor.classList.remove('locked');
+                beacons.forEach(b => {
+                    b.children[0].material.opacity = 0.5;
+                    b.children[0].scale.set(1, 1, 1);
+                });
+            }
+
+            document.getElementById('time-display').innerText = new Date().toTimeString().split(' ')[0];
+            document.getElementById('alt-val').innerText = `${Math.round(currentZoom * 850).toLocaleString()} km`;
+
+            renderer.render(scene, camera);
+        }
+
+        window.onload = () => {
+            initThree();
+            animate();
+        };
+    </script>
+</body>
+</html>
