@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>บทเรียน: Computational Thinking & Algorithms</title>
-    <!-- Google Fonts: Kanit for headings, Sarabun for body text -->
+    <title>บทเรียน: Computational Thinking & Algorithms (ฉบับสมบูรณ์)</title>
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -16,8 +16,8 @@
     <style>
         body {
             font-family: 'Sarabun', sans-serif;
-            background-color: #f3f4f6;
-            color: #1f2937;
+            background-color: #f8fafc;
+            color: #334155;
         }
         h1, h2, h3, h4, .font-heading {
             font-family: 'Kanit', sans-serif;
@@ -26,14 +26,28 @@
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
-            background-image: linear-gradient(to right, #2563eb, #06b6d4);
+            background-image: linear-gradient(to right, #2563eb, #0891b2);
+        }
+        .section-header {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+        .section-header::after {
+            content: '';
+            display: block;
+            width: 60%;
+            height: 4px;
+            background: #3b82f6;
+            margin: 0.5rem auto 0;
+            border-radius: 2px;
         }
         .card-hover {
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .card-hover:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         /* Custom scrollbar */
         ::-webkit-scrollbar {
@@ -54,21 +68,24 @@
 <body>
 
     <!-- Navigation -->
-    <nav class="bg-white/90 backdrop-blur-md shadow-sm fixed w-full z-50 top-0">
+    <nav class="bg-white/90 backdrop-blur-md shadow-sm fixed w-full z-50 top-0 border-b border-gray-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex-shrink-0 flex items-center gap-2">
-                    <i data-lucide="cpu" class="h-8 w-8 text-blue-600"></i>
-                    <span class="font-heading font-bold text-xl text-gray-800">CompThinking</span>
+                    <div class="bg-blue-600 p-1.5 rounded-lg">
+                        <i data-lucide="cpu" class="h-6 w-6 text-white"></i>
+                    </div>
+                    <span class="font-heading font-bold text-xl text-gray-800">CompThinking<span class="text-blue-600">.EDU</span></span>
                 </div>
-                <div class="hidden md:flex space-x-8">
-                    <a href="#comp-thinking" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md font-medium transition">แนวคิดเชิงคำนวณ</a>
-                    <a href="#algorithm" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md font-medium transition">อัลกอริทึม</a>
-                    <a href="#flowchart" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md font-medium transition">ผังงาน</a>
-                    <a href="#quiz" class="text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-full font-medium transition shadow-md">แบบทดสอบ</a>
+                <div class="hidden lg:flex space-x-6">
+                    <a href="#comp-thinking" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md font-medium transition text-sm">1. แนวคิดเชิงคำนวณ</a>
+                    <a href="#algorithm" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md font-medium transition text-sm">2. อัลกอริทึม</a>
+                    <a href="#structures" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md font-medium transition text-sm">3. โครงสร้างควบคุม</a>
+                    <a href="#flowchart" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md font-medium transition text-sm">4. สัญลักษณ์</a>
+                    <a href="#quiz" class="text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-full font-medium transition shadow-md shadow-blue-200 text-sm">แบบทดสอบ</a>
                 </div>
                 <!-- Mobile menu button -->
-                <div class="md:hidden flex items-center">
+                <div class="lg:hidden flex items-center">
                     <button id="mobile-menu-btn" class="text-gray-600 hover:text-blue-600 focus:outline-none">
                         <i data-lucide="menu" class="h-6 w-6"></i>
                     </button>
@@ -76,96 +93,153 @@
             </div>
         </div>
         <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="#comp-thinking" class="block text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md font-medium">แนวคิดเชิงคำนวณ</a>
                 <a href="#algorithm" class="block text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md font-medium">อัลกอริทึม</a>
-                <a href="#flowchart" class="block text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md font-medium">ผังงาน</a>
+                <a href="#structures" class="block text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md font-medium">โครงสร้างควบคุม</a>
+                <a href="#flowchart" class="block text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md font-medium">สัญลักษณ์ผังงาน</a>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <header class="pt-24 pb-12 bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <span class="inline-block py-1 px-3 rounded-full bg-blue-100 text-blue-700 text-sm font-semibold mb-4">สื่อการสอนวิทยาการคำนวณ (ปรับปรุงเนื้อหา)</span>
-            <h1 class="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+    <header class="pt-32 pb-20 bg-gradient-to-b from-blue-50 via-white to-white relative overflow-hidden">
+        <!-- Background Decoration -->
+        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-50"></div>
+        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-cyan-100 rounded-full blur-3xl opacity-50"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <span class="inline-flex items-center gap-2 py-1 px-4 rounded-full bg-white border border-blue-100 text-blue-700 text-sm font-semibold mb-6 shadow-sm">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                ฉบับสมบูรณ์ (Comprehensive Edition)
+            </span>
+            <h1 class="text-5xl md:text-7xl font-bold text-gray-900 mb-6 tracking-tight">
                 Computational <span class="gradient-text">Thinking</span>
             </h1>
-            <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-8 font-light">
-                เรียนรู้กระบวนการคิดวิเคราะห์อย่างเป็นระบบ 4 ขั้นตอน เพื่อการแก้ปัญหาที่ซับซ้อนได้อย่างมีประสิทธิภาพและยั่งยืน
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-10 font-light leading-relaxed">
+                เปลี่ยนวิธีคิดให้เป็นระบบด้วย 4 องค์ประกอบสำคัญ พร้อมเจาะลึกโครงสร้างอัลกอริทึม พื้นฐานสำคัญสู่การเป็นโปรแกรมเมอร์มืออาชีพ
             </p>
-            <div class="flex justify-center gap-4">
-                <a href="#comp-thinking" class="bg-blue-600 text-white px-8 py-3 rounded-full font-medium hover:bg-blue-700 transition shadow-lg flex items-center gap-2">
-                    เริ่มบทเรียน <i data-lucide="arrow-down" class="h-4 w-4"></i>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="#comp-thinking" class="bg-blue-600 text-white px-8 py-3.5 rounded-full font-medium hover:bg-blue-700 transition shadow-lg shadow-blue-200 flex items-center justify-center gap-2">
+                    เริ่มบทเรียน <i data-lucide="arrow-right" class="h-4 w-4"></i>
+                </a>
+                <a href="#quiz" class="bg-white text-gray-700 border border-gray-200 px-8 py-3.5 rounded-full font-medium hover:bg-gray-50 transition flex items-center justify-center gap-2">
+                    <i data-lucide="help-circle" class="h-4 w-4"></i> ทำแบบทดสอบเลย
                 </a>
             </div>
         </div>
     </header>
 
     <!-- Section 1: Computational Thinking -->
-    <section id="comp-thinking" class="py-16 bg-white">
+    <section id="comp-thinking" class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">แนวคิดเชิงคำนวณ (Computational Thinking)</h2>
-                <div class="w-20 h-1 bg-blue-500 mx-auto rounded-full"></div>
-                <p class="mt-4 text-gray-600">4 องค์ประกอบสำคัญในการคิดแก้ปัญหาแบบนักวิทยาศาสตร์คอมพิวเตอร์</p>
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 section-header">1. แนวคิดเชิงคำนวณ (Computational Thinking)</h2>
+                <p class="mt-4 text-gray-600 max-w-2xl mx-auto text-lg">กระบวนการแก้ปัญหาแบบนักคอมพิวเตอร์ ไม่ใช่แค่การเขียนโค้ด แต่คือ "วิธีคิด" ที่นำไปใช้ได้กับทุกเรื่อง</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <!-- Decomposition -->
-                <div class="card-hover bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full">
-                    <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mb-4">
-                        <i data-lucide="puzzle" class="h-6 w-6 text-red-600"></i>
+                <div class="card-hover bg-white p-6 rounded-2xl border border-gray-100 shadow-lg flex flex-col h-full relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-bl-full -mr-4 -mt-4 transition group-hover:bg-red-100"></div>
+                    <div class="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center mb-6 relative z-10">
+                        <i data-lucide="puzzle" class="h-7 w-7 text-red-600"></i>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">Decomposition</h3>
-                    <p class="text-sm font-bold text-red-500 mb-3">การย่อยปัญหา</p>
-                    <p class="text-gray-600 text-sm mb-4">การแตกปัญหาใหญ่ที่ซับซ้อนให้เป็นปัญหาย่อยๆ เพื่อให้จัดการได้ง่ายขึ้น</p>
-                    <div class="mt-auto bg-red-50 p-3 rounded-lg">
-                        <p class="text-xs font-bold text-red-700 mb-1">ตัวอย่าง:</p>
-                        <p class="text-xs text-red-600">การจัดงานกีฬาสี แบ่งงานเป็น ฝ่ายสถานที่, ฝ่ายการแสดง, ฝ่ายกีฬา และฝ่ายสวัสดิการ</p>
+                    <p class="text-sm font-bold text-red-500 mb-3 uppercase tracking-wide">การแตกปัญหาใหญ่เป็นปัญหาย่อย</p>
+                    <p class="text-gray-600 text-sm mb-4 flex-grow">การแยกส่วนประกอบของปัญหาที่ซับซ้อนออกเป็นส่วนเล็กๆ เพื่อให้จัดการได้ง่ายขึ้น</p>
+                    
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <p class="text-xs font-bold text-gray-500 mb-2 uppercase">ตัวอย่าง:</p>
+                        <div class="space-y-2">
+                            <div class="flex gap-2 items-start text-xs text-gray-700">
+                                <i data-lucide="check-circle-2" class="w-3 h-3 text-red-500 mt-0.5"></i>
+                                <span><b>ชีวิตจริง:</b> การสร้างบ้าน แบ่งเป็น งานฐานราก, งานโครงสร้าง, งานระบบไฟ, งานตกแต่ง</span>
+                            </div>
+                            <div class="flex gap-2 items-start text-xs text-gray-700">
+                                <i data-lucide="code" class="w-3 h-3 text-red-500 mt-0.5"></i>
+                                <span><b>Programming:</b> แบ่งโปรแกรมใหญ่เป็นฟังก์ชัน (Functions) ย่อยๆ</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Pattern Recognition -->
-                <div class="card-hover bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full">
-                    <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mb-4">
-                        <i data-lucide="scan-search" class="h-6 w-6 text-yellow-600"></i>
+                <div class="card-hover bg-white p-6 rounded-2xl border border-gray-100 shadow-lg flex flex-col h-full relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-yellow-50 rounded-bl-full -mr-4 -mt-4 transition group-hover:bg-yellow-100"></div>
+                    <div class="w-14 h-14 bg-yellow-100 rounded-2xl flex items-center justify-center mb-6 relative z-10">
+                        <i data-lucide="scan-search" class="h-7 w-7 text-yellow-600"></i>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">Pattern Recognition</h3>
-                    <p class="text-sm font-bold text-yellow-600 mb-3">การจดจำรูปแบบ</p>
-                    <p class="text-gray-600 text-sm mb-4">การหารูปแบบหรือความคล้ายคลึงของปัญหา เพื่อนำวิธีการเดิมมาประยุกต์ใช้</p>
-                    <div class="mt-auto bg-yellow-50 p-3 rounded-lg">
-                        <p class="text-xs font-bold text-yellow-700 mb-1">ตัวอย่าง:</p>
-                        <p class="text-xs text-yellow-700">รถยนต์ทุกคันมีล้อ พวงมาลัย และเบรกเหมือนกัน แม้จะต่างยี่ห้อ ขับได้ด้วยวิธีการเดียวกัน</p>
+                    <p class="text-sm font-bold text-yellow-600 mb-3 uppercase tracking-wide">การจดจำรูปแบบ</p>
+                    <p class="text-gray-600 text-sm mb-4 flex-grow">การหารูปแบบหรือความคล้ายคลึงกันของปัญหา เพื่อนำวิธีการเดิมมาใช้ซ้ำ (Reusability)</p>
+                    
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <p class="text-xs font-bold text-gray-500 mb-2 uppercase">ตัวอย่าง:</p>
+                        <div class="space-y-2">
+                            <div class="flex gap-2 items-start text-xs text-gray-700">
+                                <i data-lucide="check-circle-2" class="w-3 h-3 text-yellow-600 mt-0.5"></i>
+                                <span><b>ชีวิตจริง:</b> การขับรถ รถต่างยี่ห้อมีพวงมาลัยและเบรกเหมือนกัน เรียนรู้ครั้งเดียวขับได้หมด</span>
+                            </div>
+                            <div class="flex gap-2 items-start text-xs text-gray-700">
+                                <i data-lucide="code" class="w-3 h-3 text-yellow-600 mt-0.5"></i>
+                                <span><b>Programming:</b> การใช้ Loop วนซ้ำกับข้อมูลที่มีโครงสร้างเหมือนกัน</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Abstraction -->
-                <div class="card-hover bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full">
-                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
-                        <i data-lucide="focus" class="h-6 w-6 text-green-600"></i>
+                <div class="card-hover bg-white p-6 rounded-2xl border border-gray-100 shadow-lg flex flex-col h-full relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-green-50 rounded-bl-full -mr-4 -mt-4 transition group-hover:bg-green-100"></div>
+                    <div class="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center mb-6 relative z-10">
+                        <i data-lucide="focus" class="h-7 w-7 text-green-600"></i>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">Abstraction</h3>
-                    <p class="text-sm font-bold text-green-600 mb-3">ความคิดด้านนามธรรม</p>
-                    <p class="text-gray-600 text-sm mb-4">การมุ่งเน้นเฉพาะข้อมูลสำคัญ และตัดรายละเอียดที่ไม่จำเป็นทิ้งไป (Focus on key details)</p>
-                    <div class="mt-auto bg-green-50 p-3 rounded-lg">
-                        <p class="text-xs font-bold text-green-700 mb-1">ตัวอย่าง:</p>
-                        <p class="text-xs text-green-700">แผนที่รถไฟฟ้า แสดงเฉพาะเส้นทางและสถานี ไม่แสดงต้นไม้ ตึก หรือร้านค้าข้างทาง</p>
+                    <p class="text-sm font-bold text-green-600 mb-3 uppercase tracking-wide">ความคิดเชิงนามธรรม</p>
+                    <p class="text-gray-600 text-sm mb-4 flex-grow">การมุ่งเน้นเฉพาะสาระสำคัญ (Main Idea) และตัดรายละเอียดปลีกย่อยที่ไม่จำเป็นทิ้งไป</p>
+                    
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <p class="text-xs font-bold text-gray-500 mb-2 uppercase">ตัวอย่าง:</p>
+                        <div class="space-y-2">
+                            <div class="flex gap-2 items-start text-xs text-gray-700">
+                                <i data-lucide="check-circle-2" class="w-3 h-3 text-green-600 mt-0.5"></i>
+                                <span><b>ชีวิตจริง:</b> แผนที่รถไฟฟ้า บอกแค่สถานีและเส้นทาง ไม่บอกต้นไม้หรือร้านค้าข้างทาง</span>
+                            </div>
+                            <div class="flex gap-2 items-start text-xs text-gray-700">
+                                <i data-lucide="code" class="w-3 h-3 text-green-600 mt-0.5"></i>
+                                <span><b>Programming:</b> การสร้าง UI ปุ่มกด ผู้ใช้เห็นแค่ปุ่ม ไม่ต้องรู้โค้ดข้างใน</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Algorithm Design -->
-                <div class="card-hover bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full">
-                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
-                        <i data-lucide="list-ordered" class="h-6 w-6 text-blue-600"></i>
+                <div class="card-hover bg-white p-6 rounded-2xl border border-gray-100 shadow-lg flex flex-col h-full relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition group-hover:bg-blue-100"></div>
+                    <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 relative z-10">
+                        <i data-lucide="list-ordered" class="h-7 w-7 text-blue-600"></i>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">Algorithm Design</h3>
-                    <p class="text-sm font-bold text-blue-600 mb-3">การออกแบบอัลกอริทึม</p>
-                    <p class="text-gray-600 text-sm mb-4">การวางลำดับขั้นตอนการแก้ปัญหาอย่างเป็นระบบ ตั้งแต่ต้นจนจบเพื่อให้คนหรือคอมพิวเตอร์ทำตามได้</p>
-                    <div class="mt-auto bg-blue-50 p-3 rounded-lg">
-                        <p class="text-xs font-bold text-blue-700 mb-1">ตัวอย่าง:</p>
-                        <p class="text-xs text-blue-700">สูตรทำอาหาร ที่บอกวัตถุดิบและขั้นตอนการปรุงทีละข้อ จนได้อาหารสำเร็จ</p>
+                    <p class="text-sm font-bold text-blue-600 mb-3 uppercase tracking-wide">การออกแบบอัลกอริทึม</p>
+                    <p class="text-gray-600 text-sm mb-4 flex-grow">การลำดับขั้นตอนการแก้ปัญหาอย่างเป็นระบบ ตั้งแต่ต้นจนจบ (Step-by-step)</p>
+                    
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <p class="text-xs font-bold text-gray-500 mb-2 uppercase">ตัวอย่าง:</p>
+                        <div class="space-y-2">
+                            <div class="flex gap-2 items-start text-xs text-gray-700">
+                                <i data-lucide="check-circle-2" class="w-3 h-3 text-blue-600 mt-0.5"></i>
+                                <span><b>ชีวิตจริง:</b> คู่มือประกอบตู้ IKEA หรือสูตรอาหาร</span>
+                            </div>
+                            <div class="flex gap-2 items-start text-xs text-gray-700">
+                                <i data-lucide="code" class="w-3 h-3 text-blue-600 mt-0.5"></i>
+                                <span><b>Programming:</b> ขั้นตอนการเรียงลำดับข้อมูล (Sorting) จากน้อยไปมาก</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -173,190 +247,208 @@
     </section>
 
     <!-- Section 2: Algorithm Types -->
-    <section id="algorithm" class="py-16 bg-gray-50">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row gap-12 items-start">
-                <div class="md:w-1/3">
-                    <span class="text-blue-600 font-bold tracking-wider text-sm uppercase">Step-by-Step</span>
-                    <h2 class="text-3xl font-bold text-gray-900 mt-2 mb-6">Algorithm (อัลกอริทึม)</h2>
-                    <p class="text-gray-600 mb-6">
-                        อัลกอริทึม คือ กระบวนการแก้ปัญหาที่มีลำดับขั้นตอนชัดเจน ไม่กำกวม โดยมี 3 รูปแบบหลักในการนำเสนอ:
-                    </p>
-                    <div class="flex flex-col space-y-2">
-                        <button onclick="switchTab('narrative')" id="btn-narrative" class="algo-tab-btn active text-left px-4 py-3 rounded-lg font-medium transition flex items-center gap-3 bg-white shadow-md text-blue-600 border-l-4 border-blue-600">
-                            <i data-lucide="message-square" class="h-5 w-5"></i> 
+    <section id="algorithm" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 section-header">2. อัลกอริทึม (Algorithm)</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
+                <div class="lg:col-span-1">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <i data-lucide="award" class="text-yellow-500"></i> คุณสมบัติที่ดี
+                        </h3>
+                        <ul class="space-y-3 text-sm text-gray-600">
+                            <li class="flex gap-3">
+                                <span class="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs font-bold">1</span>
+                                <span><b>ชัดเจน (Unambiguous):</b> ขั้นตอนต้องไม่กำกวม ตีความได้ทางเดียว</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs font-bold">2</span>
+                                <span><b>มีจุดจบ (Finite):</b> ทำงานแล้วต้องจบ ไม่วนลูปไม่รู้จบ</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs font-bold">3</span>
+                                <span><b>มีผลลัพธ์ (Output):</b> ต้องได้ผลลัพธ์ตามที่ต้องการอย่างน้อย 1 อย่าง</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="space-y-3">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">เลือกรูปแบบการแสดงผล:</p>
+                        <button onclick="switchTab('narrative')" id="btn-narrative" class="algo-tab-btn active w-full text-left px-5 py-4 rounded-xl font-medium transition flex items-center gap-4 bg-white shadow-md border border-blue-100 text-blue-600">
+                            <div class="bg-blue-50 p-2 rounded-lg"><i data-lucide="message-square" class="h-5 w-5"></i></div>
                             <div>
                                 <div class="font-bold">ภาษาธรรมชาติ</div>
-                                <div class="text-xs opacity-75 font-normal">Narrative Description</div>
+                                <div class="text-xs text-gray-500 font-normal">Narrative Description</div>
                             </div>
                         </button>
-                        <button onclick="switchTab('pseudo')" id="btn-pseudo" class="algo-tab-btn text-left px-4 py-3 rounded-lg font-medium text-gray-600 hover:bg-white hover:shadow-sm transition flex items-center gap-3 border-l-4 border-transparent">
-                            <i data-lucide="code-2" class="h-5 w-5"></i> 
+                        <button onclick="switchTab('pseudo')" id="btn-pseudo" class="algo-tab-btn w-full text-left px-5 py-4 rounded-xl font-medium text-gray-600 hover:bg-white hover:shadow-sm transition flex items-center gap-4 border border-transparent">
+                            <div class="bg-gray-100 p-2 rounded-lg"><i data-lucide="code-2" class="h-5 w-5"></i></div>
                             <div>
                                 <div class="font-bold">รหัสลำลอง</div>
-                                <div class="text-xs opacity-75 font-normal">Pseudo Code</div>
+                                <div class="text-xs text-gray-500 font-normal">Pseudo Code</div>
                             </div>
                         </button>
-                        <button onclick="switchTab('flowchart-desc')" id="btn-flowchart-desc" class="algo-tab-btn text-left px-4 py-3 rounded-lg font-medium text-gray-600 hover:bg-white hover:shadow-sm transition flex items-center gap-3 border-l-4 border-transparent">
-                            <i data-lucide="workflow" class="h-5 w-5"></i> 
+                        <button onclick="switchTab('flowchart-desc')" id="btn-flowchart-desc" class="algo-tab-btn w-full text-left px-5 py-4 rounded-xl font-medium text-gray-600 hover:bg-white hover:shadow-sm transition flex items-center gap-4 border border-transparent">
+                            <div class="bg-gray-100 p-2 rounded-lg"><i data-lucide="workflow" class="h-5 w-5"></i></div>
                             <div>
                                 <div class="font-bold">ผังงาน</div>
-                                <div class="text-xs opacity-75 font-normal">Flowchart</div>
+                                <div class="text-xs text-gray-500 font-normal">Flowchart</div>
                             </div>
                         </button>
                     </div>
                 </div>
 
-                <div class="md:w-2/3 w-full">
-                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden min-h-[400px]">
-                        <div class="bg-gray-800 px-6 py-4 flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                            <span class="ml-4 text-gray-400 text-sm font-mono" id="tab-title">Example: ต้มบะหมี่กึ่งสำเร็จรูป</span>
+                <div class="lg:col-span-2 w-full">
+                    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden min-h-[500px]">
+                        <div class="bg-slate-800 px-6 py-4 flex items-center gap-2 border-b border-slate-700">
+                            <div class="flex gap-2">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            </div>
+                            <span class="ml-4 text-slate-400 text-sm font-mono" id="tab-title">Project: ต้มบะหมี่กึ่งสำเร็จรูป.algo</span>
                         </div>
                         
                         <!-- Content: Narrative -->
                         <div id="content-narrative" class="p-8 algo-content">
-                            <div class="flex items-start gap-4 mb-6">
-                                <div class="bg-blue-100 p-3 rounded-lg"><i data-lucide="message-square" class="text-blue-600"></i></div>
-                                <div>
-                                    <h3 class="text-xl font-bold text-gray-800">ภาษาธรรมชาติ (Narrative)</h3>
-                                    <p class="text-sm text-gray-500">เหมาะสำหรับสื่อสารทั่วไป แต่อาจมีความกำกวม</p>
+                            <div class="mb-6 pb-6 border-b border-gray-100">
+                                <h3 class="text-2xl font-bold text-gray-800 mb-2">ภาษาธรรมชาติ (Narrative)</h3>
+                                <p class="text-gray-600">การบรรยายขั้นตอนด้วยภาษาพูดหรือเขียน เหมาะสำหรับสื่อสารกับคนทั่วไป</p>
+                                <div class="mt-3 flex gap-4 text-sm">
+                                    <span class="text-green-600 flex items-center gap-1"><i data-lucide="thumbs-up" class="w-4 h-4"></i> เข้าใจง่าย</span>
+                                    <span class="text-red-500 flex items-center gap-1"><i data-lucide="thumbs-down" class="w-4 h-4"></i> อาจตีความผิดได้</span>
                                 </div>
                             </div>
                             
-                            <p class="text-gray-700 mb-4 font-medium">คำอธิบาย:</p>
-                            <p class="text-gray-600 mb-6 text-sm">เป็นการใช้ภาษาพูดหรือเขียนในการบรรยายขั้นตอนอย่างละเอียด ข้อดีคือง่ายต่อการเข้าใจสำหรับคนทั่วไป แต่ข้อเสียคือคอมพิวเตอร์ไม่สามารถเข้าใจได้โดยตรง และภาษาอาจดิ้นได้</p>
-
-                            <div class="bg-blue-50 p-6 rounded-xl border border-blue-100">
-                                <h4 class="font-bold text-blue-800 mb-3">ขั้นตอนการต้มบะหมี่:</h4>
-                                <ol class="list-decimal list-inside space-y-2 text-gray-700 text-sm md:text-base">
-                                    <li>เริ่มต้นการทำงาน</li>
-                                    <li>เตรียมอุปกรณ์และนำน้ำสะอาดใส่หม้อ ต้มน้ำให้เดือด</li>
-                                    <li>แกะซองบะหมี่ นำก้อนบะหมี่ใส่ลงในชาม</li>
-                                    <li>เมื่อน้ำเดือดแล้ว เทน้ำร้อนใส่ชามที่มีบะหมี่ให้ท่วมเส้น</li>
-                                    <li>นำจานมาปิดฝาชามไว้ รอประมาณ 3 นาที</li>
-                                    <li>เปิดฝาและใช้ส้อมตรวจสอบเส้น
-                                        <ul class="list-disc list-inside ml-6 text-gray-500 mt-1">
-                                            <li><span class="text-red-500 font-bold">เงื่อนไข:</span> ถ้าเส้นยังแข็งอยู่ ให้ปิดฝารอต่ออีก 1 นาที</li>
-                                            <li>ถ้าเส้นนิ่มสุกพอดี ให้ทำขั้นตอนต่อไป</li>
+                            <div class="bg-blue-50/50 p-6 rounded-xl border border-blue-100">
+                                <h4 class="font-bold text-blue-800 mb-4 flex items-center gap-2"><i data-lucide="chef-hat" class="w-5 h-5"></i> ขั้นตอนการทำ:</h4>
+                                <ol class="list-decimal list-inside space-y-3 text-gray-700 md:text-lg">
+                                    <li class="pl-2">เริ่มต้นการทำงาน</li>
+                                    <li class="pl-2">ต้มน้ำในหม้อให้เดือด</li>
+                                    <li class="pl-2">นำก้อนบะหมี่ใส่ชาม แล้วเทน้ำร้อนใส่ให้ท่วม</li>
+                                    <li class="pl-2">ปิดฝาชามทิ้งไว้ 3 นาที</li>
+                                    <li class="pl-2">เปิดฝาตรวจสอบเส้น
+                                        <ul class="list-disc list-inside ml-8 text-gray-500 text-base mt-2 bg-white p-3 rounded-lg border border-gray-200">
+                                            <li><span class="text-red-500 font-bold">เงื่อนไข:</span> ถ้าเส้นยังแข็ง (ไม่สุก) ให้ปิดฝารอต่ออีก 1 นาที แล้วตรวจสอบใหม่</li>
+                                            <li><span class="text-green-600 font-bold">เงื่อนไข:</span> ถ้าเส้นนิ่มแล้ว (สุก) ให้ทำข้อต่อไป</li>
                                         </ul>
                                     </li>
-                                    <li>ฉีกซองเครื่องปรุง ใส่ลงในชามและคนให้เข้ากัน</li>
-                                    <li>รับประทานบะหมี่</li>
-                                    <li>จบการทำงาน</li>
+                                    <li class="pl-2">ใส่เครื่องปรุงและคนให้เข้ากัน</li>
+                                    <li class="pl-2">รับประทาน</li>
+                                    <li class="pl-2">จบการทำงาน</li>
                                 </ol>
                             </div>
                         </div>
 
                         <!-- Content: Pseudo Code -->
-                        <div id="content-pseudo" class="hidden p-8 algo-content">
-                             <div class="flex items-start gap-4 mb-6">
-                                <div class="bg-green-100 p-3 rounded-lg"><i data-lucide="code-2" class="text-green-600"></i></div>
-                                <div>
-                                    <h3 class="text-xl font-bold text-gray-800">รหัสลำลอง (Pseudo Code)</h3>
-                                    <p class="text-sm text-gray-500">โครงสร้างคล้ายโค้ด แต่ไม่ใช่ภาษาคอมพิวเตอร์จริง</p>
-                                </div>
+                        <div id="content-pseudo" class="hidden p-8 algo-content bg-slate-50 h-full">
+                            <div class="mb-6 pb-6 border-b border-gray-200">
+                                <h3 class="text-2xl font-bold text-gray-800 mb-2">รหัสลำลอง (Pseudo Code)</h3>
+                                <p class="text-gray-600">การเขียนจำลองโครงสร้างภาษาโปรแกรม ตัดเรื่องไวยากรณ์ (Syntax) ที่ซับซ้อนออก เพื่อเน้น Logic</p>
                             </div>
 
-                            <p class="text-gray-600 mb-6 text-sm">ช่วยให้นักเขียนโปรแกรมวางแผนโครงสร้างตรรกะ (Logic) ได้ชัดเจนก่อนเริ่มเขียนโค้ดจริง ตัดความกังวลเรื่อง Syntax ภาษาทิ้งไป</p>
+                            <div class="bg-slate-900 p-6 rounded-xl overflow-x-auto shadow-inner relative">
+                                <div class="absolute top-4 right-4 text-xs text-slate-500">pseudo_code_v1.0</div>
+                                <pre class="text-gray-300 font-mono text-base leading-relaxed">
+<span class="text-purple-400">BEGIN</span> Cooking_Noodles
 
-                            <div class="bg-gray-900 p-6 rounded-xl overflow-x-auto border-l-4 border-green-500 shadow-inner">
-                                <pre class="text-gray-300 font-mono text-sm leading-relaxed">
-<span class="text-pink-400">BEGIN</span> Cooking_Noodles
+    <span class="text-slate-500">// 1. ขั้นตอนเตรียมการ (Sequence)</span>
     Boil water
-    Put noodles into bowl
-    Pour hot water into bowl
+    Place noodles in bowl
+    Pour hot water
     Wait 3 minutes
     
-    <span class="text-gray-500">// วนลูปตรวจสอบความสุกของเส้น</span>
+    <span class="text-slate-500">// 2. การวนซ้ำเพื่อตรวจสอบ (Loop)</span>
     <span class="text-yellow-400">WHILE</span> (noodles is <span class="text-red-400">NOT</span> soft) <span class="text-yellow-400">DO</span>
         Wait 1 minute
         Check noodles status
     <span class="text-yellow-400">ENDWHILE</span>
     
+    <span class="text-slate-500">// 3. ปรุงรสและจบงาน</span>
     Add seasoning
     Stir well
     Eat
-<span class="text-pink-400">END</span> Cooking_Noodles
+
+<span class="text-purple-400">END</span> Cooking_Noodles
                                 </pre>
                             </div>
-                            <div class="mt-4 flex gap-4 text-xs text-gray-500">
-                                <div class="flex items-center gap-1"><div class="w-3 h-3 bg-pink-400 rounded-full"></div> คำสั่งเริ่ม/จบ</div>
-                                <div class="flex items-center gap-1"><div class="w-3 h-3 bg-yellow-400 rounded-full"></div> คำสั่งควบคุม (Loop/Condition)</div>
+                            <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
+                                <div class="bg-white p-3 rounded border border-gray-200">
+                                    <span class="font-bold text-purple-600">Keywords:</span> คำสั่งหลักมักใช้ตัวพิมพ์ใหญ่ (BEGIN, WHILE, IF)
+                                </div>
+                                <div class="bg-white p-3 rounded border border-gray-200">
+                                    <span class="font-bold text-gray-600">Indentation:</span> การย่อหน้าสำคัญมาก เพื่อบอกขอบเขตของคำสั่ง
+                                </div>
                             </div>
                         </div>
 
                         <!-- Content: Flowchart Desc -->
                         <div id="content-flowchart-desc" class="hidden p-8 algo-content">
-                            <div class="flex items-start gap-4 mb-4">
-                                <div class="bg-purple-100 p-3 rounded-lg"><i data-lucide="workflow" class="text-purple-600"></i></div>
-                                <div>
-                                    <h3 class="text-xl font-bold text-gray-800">ผังงาน (Flowchart)</h3>
-                                    <p class="text-sm text-gray-500">แสดงความสัมพันธ์ของขั้นตอนด้วยรูปภาพ</p>
-                                </div>
+                            <div class="mb-6">
+                                <h3 class="text-2xl font-bold text-gray-800 mb-2">ผังงาน (Flowchart)</h3>
+                                <p class="text-gray-600">การใช้สัญลักษณ์ภาพมาตรฐาน เพื่อแสดงลำดับการทำงาน เห็นภาพรวมและการไหลของข้อมูลได้ชัดเจนที่สุด</p>
                             </div>
 
-                            <div class="flex flex-col md:flex-row gap-8 items-start">
-                                <div class="flex-1 text-sm text-gray-600 space-y-3">
-                                    <p>ใช้สัญลักษณ์มาตรฐานสากล ทำให้คนต่างภาษาเข้าใจตรงกันได้ง่าย เหมาะสำหรับการตรวจสอบความผิดพลาดของกระบวนการ (Process Flow)</p>
-                                    <ul class="list-disc list-inside bg-purple-50 p-3 rounded-lg text-purple-900">
-                                        <li><span class="font-bold">สี่เหลี่ยมมน:</span> เริ่มต้น/สิ้นสุด</li>
-                                        <li><span class="font-bold">สี่เหลี่ยมผืนผ้า:</span> การกระทำ</li>
-                                        <li><span class="font-bold">สี่เหลี่ยมข้าวหลามตัด:</span> การตัดสินใจ</li>
-                                    </ul>
-                                </div>
+                            <div class="flex justify-center bg-white p-4">
+                                <!-- Enhanced SVG Flowchart -->
+                                <svg width="280" height="480" viewBox="0 0 280 480" fill="none" xmlns="http://www.w3.org/2000/svg" class="filter drop-shadow-sm">
+                                    <!-- Start -->
+                                    <rect x="90" y="10" width="100" height="40" rx="20" fill="#E0F2FE" stroke="#0284C7" stroke-width="2"/>
+                                    <text x="140" y="35" text-anchor="middle" font-size="12" fill="#0284C7" font-weight="bold">Start</text>
+                                    <line x1="140" y1="50" x2="140" y2="70" stroke="#64748B" stroke-width="2" marker-end="url(#arrowhead)"/>
+                                    
+                                    <!-- Process 1 -->
+                                    <rect x="70" y="70" width="140" height="40" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
+                                    <text x="140" y="95" text-anchor="middle" font-size="12" fill="#16A34A">ต้มน้ำ / ใส่บะหมี่</text>
+                                    <line x1="140" y1="110" x2="140" y2="130" stroke="#64748B" stroke-width="2" marker-end="url(#arrowhead)"/>
 
-                                <div class="flex-shrink-0 mx-auto bg-white p-2 border rounded-lg shadow-sm">
-                                    <!-- Simple SVG Flowchart Visualization -->
-                                    <svg width="200" height="380" viewBox="0 0 200 380" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <!-- Start -->
-                                        <rect x="50" y="10" width="100" height="40" rx="20" fill="#E0F2FE" stroke="#0284C7" stroke-width="2"/>
-                                        <text x="100" y="35" text-anchor="middle" font-size="12" fill="#0284C7" font-weight="bold">Start</text>
-                                        <line x1="100" y1="50" x2="100" y2="70" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowhead)"/>
-                                        
-                                        <!-- Process -->
-                                        <rect x="40" y="70" width="120" height="40" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
-                                        <text x="100" y="95" text-anchor="middle" font-size="12" fill="#16A34A">ต้มน้ำ / ใส่บะหมี่</text>
-                                        <line x1="100" y1="110" x2="100" y2="130" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowhead)"/>
+                                    <!-- Decision Loop Header -->
+                                    <path d="M140 130 L200 160 L140 190 L80 160 Z" fill="#FEF3C7" stroke="#D97706" stroke-width="2"/>
+                                    <text x="140" y="165" text-anchor="middle" font-size="12" fill="#D97706" font-weight="bold">เส้นสุกหรือไม่?</text>
+                                    
+                                    <!-- No Path (Loop Back) -->
+                                    <line x1="200" y1="160" x2="240" y2="160" stroke="#64748B" stroke-width="2"/>
+                                    <line x1="240" y1="160" x2="240" y2="210" stroke="#64748B" stroke-width="2"/>
+                                    
+                                    <!-- Loop Process -->
+                                    <rect x="180" y="210" width="120" height="30" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
+                                    <text x="240" y="230" text-anchor="middle" font-size="11" fill="#16A34A">รอ 1 นาที</text>
+                                    
+                                    <!-- Loop Return Line -->
+                                    <line x1="240" y1="240" x2="240" y2="260" stroke="#64748B" stroke-width="2"/>
+                                    <line x1="240" y1="260" x2="270" y2="260" stroke="#64748B" stroke-width="2"/>
+                                    <line x1="270" y1="260" x2="270" y2="110" stroke="#64748B" stroke-width="2"/>
+                                    <line x1="270" y1="110" x2="140" y2="110" stroke="#64748B" stroke-width="2"/>
+                                    
+                                    <text x="210" y="150" font-size="11" fill="#EF4444" font-weight="bold">No (ยังไม่สุก)</text>
+                                    
+                                    <!-- Yes Path -->
+                                    <line x1="140" y1="190" x2="140" y2="240" stroke="#64748B" stroke-width="2" marker-end="url(#arrowhead)"/>
+                                    <text x="145" y="215" font-size="11" fill="#16A34A" font-weight="bold">Yes</text>
 
-                                        <!-- Decision -->
-                                        <path d="M100 130 L160 160 L100 190 L40 160 Z" fill="#FEF3C7" stroke="#D97706" stroke-width="2"/>
-                                        <text x="100" y="165" text-anchor="middle" font-size="12" fill="#D97706" font-weight="bold">เส้นนิ่มหรือยัง?</text>
-                                        
-                                        <!-- Arrows from Decision -->
-                                        <!-- No Path -->
-                                        <line x1="160" y1="160" x2="180" y2="160" stroke="#94A3B8" stroke-width="2"/>
-                                        <line x1="180" y1="160" x2="180" y2="110" stroke="#94A3B8" stroke-width="2"/>
-                                        <line x1="180" y1="110" x2="160" y2="90" stroke="#94A3B8" stroke-width="2"/> 
-                                        <text x="170" y="150" font-size="10" fill="#EF4444" font-weight="bold">No (ยังไม่สุก)</text>
-                                        
-                                        <!-- Yes Path -->
-                                        <line x1="100" y1="190" x2="100" y2="230" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowhead)"/>
-                                        <text x="105" y="215" font-size="10" fill="#16A34A" font-weight="bold">Yes</text>
+                                    <!-- Process End -->
+                                    <rect x="70" y="240" width="140" height="40" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
+                                    <text x="140" y="265" text-anchor="middle" font-size="12" fill="#16A34A">ใส่เครื่องปรุง / คน</text>
+                                    <line x1="140" y1="280" x2="140" y2="300" stroke="#64748B" stroke-width="2" marker-end="url(#arrowhead)"/>
 
-                                        <!-- Process End -->
-                                        <rect x="40" y="230" width="120" height="40" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
-                                        <text x="100" y="255" text-anchor="middle" font-size="12" fill="#16A34A">ใส่เครื่องปรุง</text>
-                                        <line x1="100" y1="270" x2="100" y2="290" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowhead)"/>
+                                    <!-- Process Eat -->
+                                    <rect x="70" y="300" width="140" height="40" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
+                                    <text x="140" y="325" text-anchor="middle" font-size="12" fill="#16A34A">รับประทาน</text>
+                                    <line x1="140" y1="340" x2="140" y2="360" stroke="#64748B" stroke-width="2" marker-end="url(#arrowhead)"/>
 
-                                        <!-- Process Eat -->
-                                        <rect x="40" y="290" width="120" height="40" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
-                                        <text x="100" y="315" text-anchor="middle" font-size="12" fill="#16A34A">รับประทาน</text>
-                                        <line x1="100" y1="330" x2="100" y2="350" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowhead)"/>
+                                    <!-- End -->
+                                    <rect x="90" y="360" width="100" height="40" rx="20" fill="#E0F2FE" stroke="#0284C7" stroke-width="2"/>
+                                    <text x="140" y="385" text-anchor="middle" font-size="12" fill="#0284C7" font-weight="bold">Stop</text>
 
-                                        <!-- End -->
-                                        <rect x="50" y="350" width="100" height="30" rx="15" fill="#E0F2FE" stroke="#0284C7" stroke-width="2"/>
-                                        <text x="100" y="370" text-anchor="middle" font-size="12" fill="#0284C7" font-weight="bold">Stop</text>
-
-                                        <defs>
-                                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                                                <polygon points="0 0, 10 3.5, 0 7" fill="#94A3B8" />
-                                            </marker>
-                                        </defs>
-                                    </svg>
-                                </div>
+                                    <defs>
+                                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                            <polygon points="0 0, 10 3.5, 0 7" fill="#64748B" />
+                                        </marker>
+                                    </defs>
+                                </svg>
                             </div>
                         </div>
                     </div>
@@ -365,33 +457,101 @@
         </div>
     </section>
 
-    <!-- Section 3: Flowchart Symbols -->
-    <section id="flowchart" class="py-16 bg-white">
+    <!-- Section 3: Control Structures (NEW) -->
+    <section id="structures" class="py-20 bg-white border-t border-gray-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">สัญลักษณ์ผังงาน (Flowchart Symbols)</h2>
-                <div class="w-20 h-1 bg-blue-500 mx-auto rounded-full"></div>
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 section-header">3. โครงสร้างควบคุม (Control Structures)</h2>
+                <p class="mt-4 text-gray-600">3 รูปแบบพื้นฐานที่ประกอบกันเป็นโปรแกรมคอมพิวเตอร์ทุกชนิดในโลก</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Sequence -->
+                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100 text-center">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">1. การทำงานแบบลำดับ<br>(Sequence)</h3>
+                    <div class="bg-white p-4 rounded-xl border border-dashed border-gray-300 mb-4 h-48 flex items-center justify-center">
+                        <svg width="100" height="150" viewBox="0 0 100 150">
+                            <rect x="20" y="10" width="60" height="30" fill="#E0F2FE" stroke="#0284C7"/>
+                            <line x1="50" y1="40" x2="50" y2="60" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowhead-sm)"/>
+                            <rect x="20" y="60" width="60" height="30" fill="#F0FDF4" stroke="#16A34A"/>
+                            <line x1="50" y1="90" x2="50" y2="110" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowhead-sm)"/>
+                            <rect x="20" y="110" width="60" height="30" fill="#F0FDF4" stroke="#16A34A"/>
+                        </svg>
+                    </div>
+                    <p class="text-sm text-gray-600 text-left">ทำทีละคำสั่งจากบนลงล่าง เรียงต่อกันไปเรื่อยๆ ห้ามข้ามขั้นตอน</p>
+                </div>
+
+                <!-- Selection -->
+                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100 text-center">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">2. การเลือกทำ/เงื่อนไข<br>(Selection)</h3>
+                    <div class="bg-white p-4 rounded-xl border border-dashed border-gray-300 mb-4 h-48 flex items-center justify-center">
+                        <svg width="140" height="150" viewBox="0 0 140 150">
+                            <path d="M70 10 L100 30 L70 50 L40 30 Z" fill="#FEF3C7" stroke="#D97706"/>
+                            <line x1="40" y1="30" x2="20" y2="30" stroke="#94A3B8" stroke-width="2"/>
+                            <line x1="20" y1="30" x2="20" y2="70" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowhead-sm)"/>
+                            <rect x="5" y="70" width="30" height="20" fill="#F0FDF4" stroke="#16A34A"/>
+                            
+                            <line x1="100" y1="30" x2="120" y2="30" stroke="#94A3B8" stroke-width="2"/>
+                            <line x1="120" y1="30" x2="120" y2="70" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowhead-sm)"/>
+                            <rect x="105" y="70" width="30" height="20" fill="#FEE2E2" stroke="#DC2626"/>
+                        </svg>
+                    </div>
+                    <p class="text-sm text-gray-600 text-left">ตัดสินใจเลือกทำทางใดทางหนึ่งตามเงื่อนไข (True/False หรือ Yes/No)</p>
+                </div>
+
+                <!-- Repetition -->
+                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100 text-center">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">3. การทำงานวนซ้ำ<br>(Repetition/Loop)</h3>
+                    <div class="bg-white p-4 rounded-xl border border-dashed border-gray-300 mb-4 h-48 flex items-center justify-center">
+                        <svg width="120" height="150" viewBox="0 0 120 150">
+                            <path d="M60 20 L90 40 L60 60 L30 40 Z" fill="#FEF3C7" stroke="#D97706"/>
+                            <line x1="60" y1="60" x2="60" y2="80" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowhead-sm)"/>
+                            <rect x="30" y="80" width="60" height="30" fill="#F0FDF4" stroke="#16A34A"/>
+                            
+                            <!-- Loop line -->
+                            <line x1="90" y1="95" x2="105" y2="95" stroke="#94A3B8" stroke-width="2"/>
+                            <line x1="105" y1="95" x2="105" y2="40" stroke="#94A3B8" stroke-width="2"/>
+                            <line x1="105" y1="40" x2="90" y2="40" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowhead-sm)"/>
+                        </svg>
+                        <defs>
+                            <marker id="arrowhead-sm" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                                <polygon points="0 0, 8 3, 0 6" fill="#94A3B8" />
+                            </marker>
+                        </defs>
+                    </div>
+                    <p class="text-sm text-gray-600 text-left">ทำคำสั่งเดิมซ้ำๆ จนกว่าเงื่อนไขจะเปลี่ยน หรือครบจำนวนรอบที่กำหนด</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Flowchart Symbols -->
+    <section id="flowchart" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 section-header">4. สัญลักษณ์ผังงาน (Flowchart Symbols)</h2>
+                <p class="mt-4 text-gray-600">มาตรฐาน ANSI/ISO ที่ใช้กันทั่วโลก</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 
                 <!-- Terminal -->
-                <div class="flex flex-col items-center p-6 border rounded-xl hover:border-blue-400 transition bg-gray-50 h-full">
+                <div class="flex flex-col items-center p-6 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition h-full">
                     <div class="h-24 w-full flex items-center justify-center mb-4">
                         <svg width="140" height="50">
                             <rect x="2" y="2" width="136" height="46" rx="23" fill="#E0F2FE" stroke="#0284C7" stroke-width="3"/>
                             <text x="70" y="30" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#0369A1" font-weight="bold">Start / Stop</text>
                         </svg>
                     </div>
-                    <h3 class="font-bold text-lg mb-2 text-gray-800">Terminator (จุดเริ่มต้น/สิ้นสุด)</h3>
-                    <p class="text-center text-gray-600 text-sm mb-4">ต้องมีเสมอ! ใช้แสดงจุดเริ่มต้นของการทำงาน และจุดสิ้นสุดเมื่อจบงาน</p>
-                    <div class="mt-auto w-full bg-white p-2 rounded border border-gray-200 text-xs text-gray-500 text-center">
-                        <span class="font-semibold text-blue-600">Tip:</span> ควรมีจุด Start เพียงจุดเดียวใน 1 ผังงาน
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">Terminator (เริ่มต้น/สิ้นสุด)</h3>
+                    <p class="text-center text-gray-600 text-sm mb-4">จุดเริ่มต้นและจุดสิ้นสุดของการทำงาน</p>
+                    <div class="mt-auto w-full bg-blue-50 p-3 rounded-lg border border-blue-100 text-xs text-blue-800">
+                        <b>ข้อกำหนด:</b> มีจุด Start ได้แค่จุดเดียว แต่มี Stop ได้หลายจุด
                     </div>
                 </div>
 
                 <!-- Process -->
-                <div class="flex flex-col items-center p-6 border rounded-xl hover:border-blue-400 transition bg-gray-50 h-full">
+                <div class="flex flex-col items-center p-6 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition h-full">
                     <div class="h-24 w-full flex items-center justify-center mb-4">
                         <svg width="140" height="50">
                             <rect x="2" y="2" width="136" height="46" fill="#F0FDF4" stroke="#15803D" stroke-width="3"/>
@@ -399,29 +559,29 @@
                         </svg>
                     </div>
                     <h3 class="font-bold text-lg mb-2 text-gray-800">Process (การปฏิบัติงาน)</h3>
-                    <p class="text-center text-gray-600 text-sm mb-4">ใช้เมื่อมีการคำนวณ การกำหนดค่าตัวแปร หรือการประมวลผลข้อมูล</p>
-                    <div class="mt-auto w-full bg-white p-2 rounded border border-gray-200 text-xs text-gray-500 text-center">
-                        <span class="font-semibold text-blue-600">Tip:</span> เขียนข้อความสั้นๆ กระชับ เช่น "X = X + 1" หรือ "คำนวณภาษี"
+                    <p class="text-center text-gray-600 text-sm mb-4">การคำนวณ หรือกำหนดค่า</p>
+                    <div class="mt-auto w-full bg-green-50 p-3 rounded-lg border border-green-100 text-xs text-green-800">
+                        <b>ตัวอย่าง:</b> Area = Width * Height,  X = X + 1
                     </div>
                 </div>
 
                 <!-- Input/Output -->
-                <div class="flex flex-col items-center p-6 border rounded-xl hover:border-blue-400 transition bg-gray-50 h-full">
+                <div class="flex flex-col items-center p-6 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition h-full">
                     <div class="h-24 w-full flex items-center justify-center mb-4">
                         <svg width="150" height="50">
                             <polygon points="20,2 148,2 128,48 0,48" fill="#FFF7ED" stroke="#EA580C" stroke-width="3"/>
                             <text x="74" y="30" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#9A3412" font-weight="bold">Input / Output</text>
                         </svg>
                     </div>
-                    <h3 class="font-bold text-lg mb-2 text-gray-800">Input / Output (รับ/แสดงผล)</h3>
-                    <p class="text-center text-gray-600 text-sm mb-4">ใช้เมื่อรับค่าเข้ามา (เช่น พิมพ์คีย์บอร์ด) หรือแสดงผลลัพธ์ (เช่น โชว์บนจอ)</p>
-                    <div class="mt-auto w-full bg-white p-2 rounded border border-gray-200 text-xs text-gray-500 text-center">
-                        <span class="font-semibold text-blue-600">Tip:</span> ใช้รูปทรงนี้เมื่อไม่ได้ระบุอุปกรณ์เฉพาะเจาะจง
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">General I/O (รับ/แสดงผล)</h3>
+                    <p class="text-center text-gray-600 text-sm mb-4">รับหรือแสดงข้อมูลแบบไม่ระบุอุปกรณ์</p>
+                    <div class="mt-auto w-full bg-orange-50 p-3 rounded-lg border border-orange-100 text-xs text-orange-800">
+                        <b>ตัวอย่าง:</b> Read Score,  Print "Hello World"
                     </div>
                 </div>
 
                 <!-- Decision -->
-                <div class="flex flex-col items-center p-6 border rounded-xl hover:border-blue-400 transition bg-gray-50 h-full">
+                <div class="flex flex-col items-center p-6 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition h-full">
                     <div class="h-24 w-full flex items-center justify-center mb-4">
                         <svg width="140" height="80">
                             <polygon points="70,2 138,40 70,78 2,40" fill="#FEF3C7" stroke="#D97706" stroke-width="3"/>
@@ -429,14 +589,14 @@
                         </svg>
                     </div>
                     <h3 class="font-bold text-lg mb-2 text-gray-800">Decision (การตัดสินใจ)</h3>
-                    <p class="text-center text-gray-600 text-sm mb-4">จุดตรวจสอบเงื่อนไข จะมีลูกศรเข้า 1 เส้น และลูกศรออก 2 เส้นเสมอ (จริง/เท็จ)</p>
-                    <div class="mt-auto w-full bg-white p-2 rounded border border-gray-200 text-xs text-gray-500 text-center">
-                        <span class="font-semibold text-blue-600">Tip:</span> เขียนคำถามในรูปทรง เช่น "อายุ > 18?" หรือ "จริงหรือไม่"
+                    <p class="text-center text-gray-600 text-sm mb-4">ตรวจสอบเงื่อนไข ทางออก 2 ทาง (True/False)</p>
+                    <div class="mt-auto w-full bg-yellow-50 p-3 rounded-lg border border-yellow-100 text-xs text-yellow-800">
+                        <b>ตัวอย่าง:</b> Score >= 50?, Is Member?
                     </div>
                 </div>
 
                 <!-- Connection -->
-                <div class="flex flex-col items-center p-6 border rounded-xl hover:border-blue-400 transition bg-gray-50 h-full">
+                <div class="flex flex-col items-center p-6 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition h-full">
                     <div class="h-24 w-full flex items-center justify-center mb-4">
                         <svg width="50" height="50">
                             <circle cx="25" cy="25" r="23" fill="#F3E8FF" stroke="#9333EA" stroke-width="3"/>
@@ -444,14 +604,14 @@
                         </svg>
                     </div>
                     <h3 class="font-bold text-lg mb-2 text-gray-800">Connector (จุดเชื่อมต่อ)</h3>
-                    <p class="text-center text-gray-600 text-sm mb-4">ใช้เมื่อผังงานยาวเกินไปและต้องตัดไปขึ้นคอลัมน์ใหม่ในหน้าเดียวกัน</p>
-                    <div class="mt-auto w-full bg-white p-2 rounded border border-gray-200 text-xs text-gray-500 text-center">
-                        <span class="font-semibold text-blue-600">Tip:</span> ใช้อักษรภาษาอังกฤษ (A, B, C) ระบุคู่จุดเชื่อม
+                    <p class="text-center text-gray-600 text-sm mb-4">เชื่อมผังงานในหน้าเดียวกัน</p>
+                    <div class="mt-auto w-full bg-purple-50 p-3 rounded-lg border border-purple-100 text-xs text-purple-800">
+                        <b>วิธีใช้:</b> ใช้อักษร A, B, C เป็นคู่เพื่อระบุจุดเชื่อม
                     </div>
                 </div>
 
                 <!-- Flow Arrow -->
-                <div class="flex flex-col items-center p-6 border rounded-xl hover:border-blue-400 transition bg-gray-50 h-full">
+                <div class="flex flex-col items-center p-6 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition h-full">
                     <div class="h-24 w-full flex items-center justify-center mb-4">
                         <svg width="100" height="50">
                             <line x1="10" y1="25" x2="85" y2="25" stroke="#475569" stroke-width="3" marker-end="url(#arrowhead-lg)"/>
@@ -463,9 +623,9 @@
                         </svg>
                     </div>
                     <h3 class="font-bold text-lg mb-2 text-gray-800">Flow Line (ทิศทาง)</h3>
-                    <p class="text-center text-gray-600 text-sm mb-4">เส้นลูกศรแสดงลำดับขั้นตอนการทำงานจากบนลงล่าง หรือซ้ายไปขวา</p>
-                    <div class="mt-auto w-full bg-white p-2 rounded border border-gray-200 text-xs text-gray-500 text-center">
-                        <span class="font-semibold text-blue-600">Tip:</span> หัวลูกศรต้องชี้ไปยังขั้นตอนถัดไปให้ชัดเจน
+                    <p class="text-center text-gray-600 text-sm mb-4">แสดงลำดับขั้นตอนการทำงาน</p>
+                    <div class="mt-auto w-full bg-gray-100 p-3 rounded-lg border border-gray-200 text-xs text-gray-600">
+                        <b>ข้อควรระวัง:</b> หัวลูกศรต้องชี้ไปยังขั้นตอนถัดไปเสมอ ห้ามปล่อยลอย
                     </div>
                 </div>
 
@@ -474,56 +634,96 @@
     </section>
 
     <!-- Quiz Section -->
-    <section id="quiz" class="py-16 bg-blue-600 text-white">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-center mb-8">ทดสอบความเข้าใจ</h2>
+    <section id="quiz" class="py-20 bg-blue-600 text-white relative overflow-hidden">
+        <!-- Background Decor -->
+        <div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-2">ทดสอบความเข้าใจ</h2>
+            <p class="text-center text-blue-100 mb-10">ลองตอบคำถาม 5 ข้อ เพื่อวัดระดับความรู้ของคุณ</p>
             
-            <div id="quiz-container" class="bg-white text-gray-800 rounded-2xl p-8 shadow-xl">
+            <div id="quiz-container" class="bg-white text-gray-800 rounded-3xl p-8 md:p-10 shadow-2xl">
                 <!-- Question 1 -->
-                <div class="quiz-item mb-6 pb-6 border-b border-gray-100">
-                    <p class="font-bold text-lg mb-3">1. การวางแผนจัดงานโรงเรียน โดยแบ่งหน้าที่ให้แต่ละฝ่ายรับผิดชอบ ตรงกับแนวคิดใด?</p>
-                    <div class="space-y-2">
-                        <button onclick="checkAnswer(this, true)" class="w-full text-left p-3 rounded-lg border hover:bg-gray-50 transition quiz-option">ก. Decomposition (การย่อยปัญหา)</button>
-                        <button onclick="checkAnswer(this, false)" class="w-full text-left p-3 rounded-lg border hover:bg-gray-50 transition quiz-option">ข. Pattern Recognition (การจดจำรูปแบบ)</button>
-                        <button onclick="checkAnswer(this, false)" class="w-full text-left p-3 rounded-lg border hover:bg-gray-50 transition quiz-option">ค. Abstraction (ความคิดด้านนามธรรม)</button>
+                <div class="quiz-item mb-8 pb-8 border-b border-gray-100">
+                    <span class="inline-block bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded mb-2">ข้อที่ 1</span>
+                    <p class="font-bold text-lg mb-4">หากคุณต้องการเขียนโปรแกรม "ตัดเกรดนักเรียน" โดยพิจารณาแค่คะแนนสอบ ไม่สนใจชื่อหรือเลขที่นักเรียน นี่คือแนวคิดใด?</p>
+                    <div class="space-y-3">
+                        <button onclick="checkAnswer(this, false)" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition quiz-option flex items-center"><div class="w-6 h-6 border rounded-full mr-3 flex items-center justify-center text-xs text-gray-400">A</div> Decomposition</button>
+                        <button onclick="checkAnswer(this, false)" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition quiz-option flex items-center"><div class="w-6 h-6 border rounded-full mr-3 flex items-center justify-center text-xs text-gray-400">B</div> Pattern Recognition</button>
+                        <button onclick="checkAnswer(this, true)" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition quiz-option flex items-center"><div class="w-6 h-6 border rounded-full mr-3 flex items-center justify-center text-xs text-gray-400">C</div> Abstraction</button>
                     </div>
-                    <div class="feedback hidden mt-2 font-medium"></div>
+                    <div class="feedback hidden mt-3 font-medium bg-gray-50 p-4 rounded-lg"></div>
                 </div>
 
                 <!-- Question 2 -->
-                <div class="quiz-item mb-6 pb-6 border-b border-gray-100">
-                    <p class="font-bold text-lg mb-3">2. ถ้าต้องการตรวจสอบว่า "คะแนนสอบผ่านเกณฑ์หรือไม่" ควรใช้สัญลักษณ์ใดในผังงาน?</p>
-                    <div class="space-y-2">
-                        <button onclick="checkAnswer(this, false)" class="w-full text-left p-3 rounded-lg border hover:bg-gray-50 transition quiz-option">ก. สี่เหลี่ยมผืนผ้า (Process)</button>
-                        <button onclick="checkAnswer(this, true)" class="w-full text-left p-3 rounded-lg border hover:bg-gray-50 transition quiz-option">ข. สี่เหลี่ยมข้าวหลามตัด (Decision)</button>
-                        <button onclick="checkAnswer(this, false)" class="w-full text-left p-3 rounded-lg border hover:bg-gray-50 transition quiz-option">ค. วงกลม (Connector)</button>
+                <div class="quiz-item mb-8 pb-8 border-b border-gray-100">
+                    <span class="inline-block bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded mb-2">ข้อที่ 2</span>
+                    <p class="font-bold text-lg mb-4">สัญลักษณ์ "สี่เหลี่ยมข้าวหลามตัด" (Decision) ต้องมีเส้นลูกศรออกจากรูปกี่เส้นเสมอ?</p>
+                    <div class="space-y-3">
+                        <button onclick="checkAnswer(this, false)" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition quiz-option flex items-center"><div class="w-6 h-6 border rounded-full mr-3 flex items-center justify-center text-xs text-gray-400">A</div> 1 เส้น</button>
+                        <button onclick="checkAnswer(this, true)" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition quiz-option flex items-center"><div class="w-6 h-6 border rounded-full mr-3 flex items-center justify-center text-xs text-gray-400">B</div> 2 เส้น (จริง/เท็จ)</button>
+                        <button onclick="checkAnswer(this, false)" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition quiz-option flex items-center"><div class="w-6 h-6 border rounded-full mr-3 flex items-center justify-center text-xs text-gray-400">C</div> กี่เส้นก็ได้</button>
                     </div>
-                    <div class="feedback hidden mt-2 font-medium"></div>
+                    <div class="feedback hidden mt-3 font-medium bg-gray-50 p-4 rounded-lg"></div>
                 </div>
 
-                 <!-- Question 3 -->
-                 <div class="quiz-item">
-                    <p class="font-bold text-lg mb-3">3. ข้อใดคือข้อดีของ "รหัสลำลอง (Pseudo Code)"?</p>
-                    <div class="space-y-2">
-                        <button onclick="checkAnswer(this, false)" class="w-full text-left p-3 rounded-lg border hover:bg-gray-50 transition quiz-option">ก. คอมพิวเตอร์สามารถประมวลผลได้ทันที</button>
-                        <button onclick="checkAnswer(this, false)" class="w-full text-left p-3 rounded-lg border hover:bg-gray-50 transition quiz-option">ข. มีรูปภาพสวยงาม เข้าใจง่าย</button>
-                        <button onclick="checkAnswer(this, true)" class="w-full text-left p-3 rounded-lg border hover:bg-gray-50 transition quiz-option">ค. โฟกัสที่ตรรกะการทำงาน ไม่ยึดติดกับภาษาโปรแกรม</button>
+                <!-- Question 3 -->
+                <div class="quiz-item mb-8 pb-8 border-b border-gray-100">
+                    <span class="inline-block bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded mb-2">ข้อที่ 3</span>
+                    <p class="font-bold text-lg mb-4">การเขียน Pseudo Code (รหัสลำลอง) ข้อใด **ไม่จำเป็น** ต้องคำนึงถึง?</p>
+                    <div class="space-y-3">
+                        <button onclick="checkAnswer(this, true)" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition quiz-option flex items-center"><div class="w-6 h-6 border rounded-full mr-3 flex items-center justify-center text-xs text-gray-400">A</div> ความถูกต้องของไวยากรณ์ (Syntax) ภาษาโปรแกรม</button>
+                        <button onclick="checkAnswer(this, false)" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition quiz-option flex items-center"><div class="w-6 h-6 border rounded-full mr-3 flex items-center justify-center text-xs text-gray-400">B</div> ลำดับขั้นตอนการทำงาน</button>
+                        <button onclick="checkAnswer(this, false)" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition quiz-option flex items-center"><div class="w-6 h-6 border rounded-full mr-3 flex items-center justify-center text-xs text-gray-400">C</div> การย่อหน้า (Indentation)</button>
                     </div>
-                    <div class="feedback hidden mt-2 font-medium"></div>
+                    <div class="feedback hidden mt-3 font-medium bg-gray-50 p-4 rounded-lg"></div>
+                </div>
+
+                 <!-- Question 4 -->
+                 <div class="quiz-item mb-8 pb-8 border-b border-gray-100">
+                    <span class="inline-block bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded mb-2">ข้อที่ 4</span>
+                    <p class="font-bold text-lg mb-4">โครงสร้างการทำงานที่ "ทำคำสั่งเดิมซ้ำๆ จนกว่าเงื่อนไขจะเปลี่ยน" เรียกว่าอะไร?</p>
+                    <div class="space-y-3">
+                        <button onclick="checkAnswer(this, false)" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition quiz-option flex items-center"><div class="w-6 h-6 border rounded-full mr-3 flex items-center justify-center text-xs text-gray-400">A</div> Sequence (ลำดับ)</button>
+                        <button onclick="checkAnswer(this, false)" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition quiz-option flex items-center"><div class="w-6 h-6 border rounded-full mr-3 flex items-center justify-center text-xs text-gray-400">B</div> Selection (ทางเลือก)</button>
+                        <button onclick="checkAnswer(this, true)" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition quiz-option flex items-center"><div class="w-6 h-6 border rounded-full mr-3 flex items-center justify-center text-xs text-gray-400">C</div> Repetition/Loop (วนซ้ำ)</button>
+                    </div>
+                    <div class="feedback hidden mt-3 font-medium bg-gray-50 p-4 rounded-lg"></div>
+                </div>
+
+                <!-- Question 5 -->
+                <div class="quiz-item">
+                    <span class="inline-block bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded mb-2">ข้อที่ 5</span>
+                    <p class="font-bold text-lg mb-4">ทำไมเราถึงต้องมีจุด Start ได้เพียงจุดเดียวในผังงาน?</p>
+                    <div class="space-y-3">
+                        <button onclick="checkAnswer(this, false)" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition quiz-option flex items-center"><div class="w-6 h-6 border rounded-full mr-3 flex items-center justify-center text-xs text-gray-400">A</div> เพื่อความสวยงาม</button>
+                        <button onclick="checkAnswer(this, true)" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition quiz-option flex items-center"><div class="w-6 h-6 border rounded-full mr-3 flex items-center justify-center text-xs text-gray-400">B</div> เพื่อความชัดเจน ไม่สับสนว่าโปรแกรมเริ่มทำงานที่ไหน (Unambiguous)</button>
+                        <button onclick="checkAnswer(this, false)" class="w-full text-left p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition quiz-option flex items-center"><div class="w-6 h-6 border rounded-full mr-3 flex items-center justify-center text-xs text-gray-400">C</div> เพื่อประหยัดพื้นที่กระดาษ</button>
+                    </div>
+                    <div class="feedback hidden mt-3 font-medium bg-gray-50 p-4 rounded-lg"></div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-8">
+    <footer class="bg-gray-900 text-white py-12 border-t border-gray-800">
         <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-gray-400">© 2024 Computational Thinking Education Resource. Created for Students.</p>
+            <div class="flex justify-center items-center gap-2 mb-4">
+                 <i data-lucide="cpu" class="h-6 w-6 text-blue-500"></i>
+                 <span class="font-heading font-bold text-xl">CompThinking.EDU</span>
+            </div>
+            <p class="text-gray-400 text-sm mb-6">สื่อการสอนเพื่อการศึกษา พัฒนาทักษะกระบวนการคิดและอัลกอริทึมสำหรับนักเรียนไทย</p>
+            <div class="flex justify-center gap-4 text-gray-500 text-sm">
+                <span>© 2025 All Rights Reserved.</span>
+                <span>•</span>
+                <span>www.kruboat.com</span>
+            </div>
         </div>
     </footer>
 
     <!-- Back to top button -->
-    <button id="backToTop" onclick="scrollToTop()" class="fixed bottom-8 right-8 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition hidden z-40">
+    <button id="backToTop" onclick="scrollToTop()" class="fixed bottom-8 right-8 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition hidden z-40 transform hover:scale-110">
         <i data-lucide="arrow-up" class="h-6 w-6"></i>
     </button>
 
@@ -540,14 +740,28 @@
 
             // Reset all buttons
             document.querySelectorAll('.algo-tab-btn').forEach(btn => {
-                btn.classList.remove('bg-white', 'shadow-md', 'text-blue-600', 'border-blue-600', 'active');
+                btn.classList.remove('bg-white', 'shadow-md', 'text-blue-600', 'border-blue-100', 'active');
                 btn.classList.add('text-gray-600', 'border-transparent');
+                
+                // Reset icon background
+                const iconContainer = btn.querySelector('div:first-child');
+                if(iconContainer) {
+                   iconContainer.classList.remove('bg-blue-50');
+                   iconContainer.classList.add('bg-gray-100');
+                }
             });
 
             // Highlight active button
             const activeBtn = document.getElementById(`btn-${tabName}`);
             activeBtn.classList.remove('text-gray-600', 'border-transparent');
-            activeBtn.classList.add('bg-white', 'shadow-md', 'text-blue-600', 'border-blue-600', 'active');
+            activeBtn.classList.add('bg-white', 'shadow-md', 'text-blue-600', 'border-blue-100', 'active');
+            
+            // Highlight icon
+            const activeIconContainer = activeBtn.querySelector('div:first-child');
+            if(activeIconContainer) {
+                activeIconContainer.classList.remove('bg-gray-100');
+                activeIconContainer.classList.add('bg-blue-50');
+            }
         }
 
         // Quiz Logic
@@ -560,21 +774,40 @@
             buttons.forEach(b => {
                 b.disabled = true;
                 b.classList.add('opacity-50', 'cursor-not-allowed');
+                // Remove hover effect
+                b.classList.remove('hover:bg-gray-50');
             });
 
             feedback.classList.remove('hidden');
             
             if (isCorrect) {
-                btn.classList.remove('opacity-50');
-                btn.classList.add('bg-green-100', 'border-green-500', 'text-green-700');
-                feedback.textContent = "ถูกต้อง! เก่งมากครับ";
-                feedback.classList.add('text-green-600');
+                btn.classList.remove('opacity-50', 'border-gray-200');
+                btn.classList.add('bg-green-50', 'border-green-500', 'text-green-800');
+                const icon = btn.querySelector('div');
+                if(icon) {
+                    icon.classList.remove('text-gray-400', 'border');
+                    icon.classList.add('bg-green-500', 'text-white', 'border-green-500');
+                    icon.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i>';
+                    lucide.createIcons();
+                }
+
+                feedback.innerHTML = '<div class="flex items-center gap-2 text-green-700"><i data-lucide="check-circle" class="w-5 h-5"></i> <span>ถูกต้อง! เก่งมากครับ</span></div>';
+                feedback.classList.add('bg-green-50', 'border', 'border-green-100');
             } else {
-                btn.classList.remove('opacity-50');
-                btn.classList.add('bg-red-100', 'border-red-500', 'text-red-700');
-                feedback.textContent = "ยังไม่ถูกครับ ลองทบทวนเนื้อหาอีกครั้งนะ";
-                feedback.classList.add('text-red-600');
+                btn.classList.remove('opacity-50', 'border-gray-200');
+                btn.classList.add('bg-red-50', 'border-red-500', 'text-red-800');
+                 const icon = btn.querySelector('div');
+                if(icon) {
+                    icon.classList.remove('text-gray-400', 'border');
+                    icon.classList.add('bg-red-500', 'text-white', 'border-red-500');
+                    icon.innerHTML = '<i data-lucide="x" class="w-3 h-3"></i>';
+                    lucide.createIcons();
+                }
+
+                feedback.innerHTML = '<div class="flex items-center gap-2 text-red-700"><i data-lucide="x-circle" class="w-5 h-5"></i> <span>ยังไม่ถูกครับ ลองทบทวนเนื้อหาอีกครั้งนะ</span></div>';
+                feedback.classList.add('bg-red-50', 'border', 'border-red-100');
             }
+            lucide.createIcons();
         }
 
         // Mobile Menu Toggle
