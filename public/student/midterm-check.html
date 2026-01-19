@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบตรวจสอบผลการเรียนออนไลน์</title>
+    <!-- Google Fonts: Kanit -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f3f4f6;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e5e7eb' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .gradient-header {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Main Container -->
+    <div class="glass-panel w-full max-w-md rounded-2xl shadow-xl overflow-hidden relative">
+        
+        <!-- Header -->
+        <div class="gradient-header p-6 text-center text-white relative">
+            <div class="mb-3 inline-block p-3 rounded-full bg-white/20 backdrop-blur-sm">
+                <i class="fa-solid fa-graduation-cap text-3xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold mb-1">ประกาศผลการสอบเทคโนโลยี</h1>
+            <p class="text-blue-100 text-sm">กรอกรหัสนักเรียนเพื่อตรวจสอบข้อมูล</p>
+            
+            <!-- Setup Guide Button (Top Right) -->
+            <button onclick="toggleSetupModal()" class="absolute top-4 right-4 text-white/70 hover:text-white transition" title="วิธีเชื่อมต่อ Google Sheet">
+                <i class="fa-solid fa-circle-question text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Search Form -->
+        <div class="p-6">
+            <div class="mb-4">
+                <label for="studentId" class="block text-gray-700 text-sm font-medium mb-2 pl-1">รหัสนักเรียน</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-id-card text-gray-400"></i>
+                    </div>
+                    <input type="number" id="studentId" 
+                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-gray-50"
+                        placeholder="เช่น 7820"
+                        onkeypress="handleEnter(event)">
+                </div>
+            </div>
+            
+            <button onclick="searchResult()" 
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200 transform hover:scale-[1.02] shadow-lg flex justify-center items-center gap-2">
+                <i class="fa-solid fa-magnifying-glass"></i> ตรวจสอบผล
+            </button>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="hidden p-8 text-center">
+            <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-blue-200 border-t-blue-600 mb-3"></div>
+            <p class="text-gray-500 text-sm animate-pulse">กำลังค้นหาข้อมูล...</p>
+        </div>
+
+        <!-- Result Card -->
+        <div id="resultCard" class="hidden border-t border-gray-100 bg-white">
+            <div class="p-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-bold border-2 border-blue-200">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div>
+                        <h2 id="resName" class="text-xl font-bold text-gray-800">-</h2>
+                        <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mt-1">
+                            รหัสนักเรียน: <span id="resId">-</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span class="text-gray-500 text-sm"><i class="fa-solid fa-layer-group mr-2"></i>ระดับชั้น</span>
+                        <span id="resClass" class="font-semibold text-gray-700">-</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span class="text-gray-500 text-sm"><i class="fa-solid fa-door-open mr-2"></i>ห้อง</span>
+                        <span id="resRoom" class="font-semibold text-gray-700">-</span>
+                    </div>
+                    
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="text-center p-3 bg-blue-50 rounded-xl border border-blue-100">
+                                <div class="text-xs text-blue-500 mb-1">ผลการสอบ</div>
+                                <div id="resScore" class="text-lg font-bold text-blue-700">-</div>
+                            </div>
+                            <div class="text-center p-3 bg-orange-50 rounded-xl border border-orange-100">
+                                <div class="text-xs text-orange-500 mb-1">ผลการแก้</div>
+                                <div id="resFix" class="text-lg font-bold text-orange-700">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-gray-50 p-4 text-center border-t border-gray-100">
+                <button onclick="clearSearch()" class="text-gray-500 hover:text-gray-700 text-sm font-medium">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> ตรวจสอบใหม่
+                </button>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMsg" class="hidden p-6 text-center text-red-500 bg-red-50 m-6 rounded-xl border border-red-100">
+            <i class="fa-solid fa-circle-exclamation text-3xl mb-2 block"></i>
+            <span id="errorText">ไม่พบข้อมูล</span>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="fixed bottom-4 text-gray-400 text-xs text-center w-full">
+        © 2025 www.kruboat.com
+    </div>
+
+    <!-- Setup Modal (Instructions) -->
+    <div id="setupModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="p-6 border-b flex justify-between items-center sticky top-0 bg-white">
+                <h3 class="text-xl font-bold text-gray-800">วิธีเชื่อมต่อกับ Google Sheet</h3>
+                <button onclick="toggleSetupModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times text-xl"></i></button>
+            </div>
+            <div class="p-6 space-y-4 text-sm text-gray-700">
+                <p class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                    <i class="fa-solid fa-info-circle text-blue-500 mr-1"></i> ขณะนี้ระบบกำลังใช้ <b>ข้อมูลจำลอง (Mock Data)</b> เพื่อแสดงตัวอย่าง หากต้องการใช้ข้อมูลจริง โปรดทำตามขั้นตอนด้านล่าง
+                </p>
+
+                <ol class="list-decimal pl-5 space-y-3">
+                    <li>สร้าง Google Sheet และใส่ข้อมูลตามหัวข้อ: 
+                        <br><code class="bg-gray-100 px-1 rounded">รหัสนักเรียน | ชื่อ-นามสกุล | ชั้น | ห้อง | ผลการสอบ | ผลการแก้</code>
+                    </li>
+                    <li>ไปที่เมนู <b>Extensions (ส่วนขยาย)</b> > <b>Apps Script</b></li>
+                    <li>ลบโค้ดเก่าออก แล้ววางโค้ดด้านล่างนี้ลงไป:</li>
+                    <div class="relative group">
+                        <pre class="bg-gray-800 text-green-400 p-4 rounded-lg overflow-x-auto text-xs font-mono">
+function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Sheet1'); // ชื่อแผ่นงาน
+  var data = sheet.getDataRange().getValues();
+  var studentId = e.parameter.id;
+  var result = { found: false };
+
+  // วนลูปค้นหา (เริ่มแถวที่ 1 เพื่อข้ามหัวตาราง)
+  for (var i = 1; i < data.length; i++) {
+    // แปลงรหัสในชีตเป็น String เพื่อเทียบกับ input
+    if (String(data[i][0]) === String(studentId)) {
+      result = {
+        found: true,
+        id: data[i][0],
+        name: data[i][1],
+        level: data[i][2],
+        room: data[i][3],
+        score: data[i][4],
+        fixScore: data[i][5]
+      };
+      break;
+    }
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+                        <button onclick="copyCode(this)" class="absolute top-2 right-2 bg-white/20 hover:bg-white/30 text-white px-2 py-1 rounded text-xs transition">Copy</button>
+                    </div>
+                    <li>กด <b>Deploy (ทำให้ใช้งานได้)</b> > <b>New deployment (การทำให้ใช้งานได้รายการใหม่)</b></li>
+                    <li>เลือกประเภทเป็น <b>Web app</b>
+                        <ul class="list-disc pl-5 mt-1 text-gray-500">
+                            <li>Description: API</li>
+                            <li>Execute as: <b>Me</b></li>
+                            <li>Who has access: <b>Anyone (ทุกคน)</b> <span class="text-red-500">*สำคัญมาก</span></li>
+                        </ul>
+                    </li>
+                    <li>กด Deploy แล้วคัดลอก <b>Web App URL</b> มาใส่ในโค้ด JavaScript ของไฟล์นี้ (ตัวแปร `GOOGLE_SCRIPT_URL`)</li>
+                </ol>
+            </div>
+            <div class="p-4 bg-gray-50 text-right border-t">
+                <button onclick="toggleSetupModal()" class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg font-medium">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================= CONFIGURATION =================
+        // ใส่ URL ที่ได้จาก Google Apps Script ที่นี่ เพื่อใช้งานจริง
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8fnAlz5xZJwXl19ilGlVp7kJWgnGctuATpfVL4Zfg_57qBya34l6cwJ2Z3aZ4CtHy/exec"; 
+        // =================================================
+
+        // ข้อมูลจำลอง (ใช้เมื่อยังไม่ได้ใส่ URL)
+        const MOCK_DATA = [
+            { id: "66001", name: "ด.ช. รักเรียน เพียรศึกษา", level: "ม.1", room: "1", score: "82 (เกรด 4)", fixScore: "-" },
+            { id: "66002", name: "ด.ญ. ใจดี มีสุข", level: "ม.1", room: "2", score: "รอการแก้ไข", fixScore: "ผ่าน" },
+            { id: "66003", name: "นาย สมชาย เข้มแข็ง", level: "ม.4", room: "3", score: "75 (เกรด 3.5)", fixScore: "-" },
+            { id: "66004", name: "นางสาว แพรวา น่ารัก", level: "ม.6", room: "1", score: "ไม่ผ่าน", fixScore: "กำลังดำเนินการ" }
+        ];
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') searchResult();
+        }
+
+        function toggleSetupModal() {
+            const modal = document.getElementById('setupModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function copyCode(btn) {
+            const code = btn.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code);
+            const originalText = btn.innerText;
+            btn.innerText = "Copied!";
+            setTimeout(() => btn.innerText = originalText, 2000);
+        }
+
+        async function searchResult() {
+            const studentId = document.getElementById('studentId').value.trim();
+            
+            // Reset UI
+            document.getElementById('resultCard').classList.add('hidden');
+            document.getElementById('errorMsg').classList.add('hidden');
+
+            if (!studentId) {
+                showError("กรุณากรอกรหัสนักเรียน");
+                return;
+            }
+
+            // Show Loading
+            document.getElementById('loading').classList.remove('hidden');
+
+            try {
+                let data;
+
+                if (GOOGLE_SCRIPT_URL === "") {
+                    // ใช้ Mock Data (จำลองการโหลด 0.8 วินาที)
+                    await new Promise(r => setTimeout(r, 800));
+                    const found = MOCK_DATA.find(s => s.id === studentId);
+                    data = found ? { found: true, ...found } : { found: false };
+                    
+                    if(!data.found) {
+                        console.log("Mock Data IDs available: 66001, 66002, 66003, 66004");
+                    }
+                } else {
+                    // ดึงข้อมูลจาก Google Sheet จริง
+                    const response = await fetch(`${GOOGLE_SCRIPT_URL}?id=${studentId}`);
+                    data = await response.json();
+                }
+
+                document.getElementById('loading').classList.add('hidden');
+
+                if (data.found) {
+                    showResult(data);
+                } else {
+                    showError(`ไม่พบข้อมูลรหัสนักเรียน: ${studentId}`);
+                }
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loading').classList.add('hidden');
+                showError("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+            }
+        }
+
+        function showResult(data) {
+            document.getElementById('resId').innerText = data.id;
+            document.getElementById('resName').innerText = data.name;
+            document.getElementById('resClass').innerText = data.level;
+            document.getElementById('resRoom').innerText = data.room;
+            document.getElementById('resScore').innerText = data.score;
+            document.getElementById('resFix').innerText = data.fixScore;
+
+            // จัดสีตามผลการเรียน (ตัวอย่าง Logic ง่ายๆ)
+            const scoreEl = document.getElementById('resScore');
+            const fixEl = document.getElementById('resFix');
+
+            // Reset colors
+            scoreEl.className = "text-lg font-bold text-gray-700";
+            fixEl.className = "text-lg font-bold text-gray-700";
+
+            if (String(data.score).includes("ไม่ผ่าน") || String(data.score).includes("รอ")) {
+                scoreEl.classList.add('text-red-600');
+            } else {
+                scoreEl.classList.add('text-green-600');
+            }
+
+            if (String(data.fixScore).includes("ผ่าน")) {
+                fixEl.classList.add('text-green-600');
+            }
+
+            const card = document.getElementById('resultCard');
+            card.classList.remove('hidden');
+            
+            // Animation slide down
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                card.style.transition = 'all 0.4s ease-out';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 50);
+        }
+
+        function showError(msg) {
+            const errDiv = document.getElementById('errorMsg');
+            document.getElementById('errorText').innerText = msg;
+            errDiv.classList.remove('hidden');
+        }
+
+        function clearSearch() {
+            document.getElementById('studentId').value = '';
+            document.getElementById('resultCard').classList.add('hidden');
+            document.getElementById('studentId').focus();
+        }
+    </script>
+</body>
+</html>
