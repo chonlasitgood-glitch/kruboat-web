@@ -83,11 +83,6 @@
             text-transform: uppercase;
             box-shadow: 0 0 5px #f0f;
         }
-
-        /* Loading Spinner CSS (Optional purely CSS fallback) */
-        .loader {
-            display: none; /* Controlled by JS canvas drawing instead */
-        }
     </style>
 </head>
 <body>
@@ -105,15 +100,16 @@
     <div id="ui-overlay">
         <h1>Cyberpunk Hand Control</h1>
         <p>1. กำมือค้างไว้ (1 วินาที) เพื่อจับวัตถุ</p>
-        <p>2. แบมือ เพื่อปล่อย</p>
-        <p>3. ชูนิ้วชี้ เพื่อหมุน (Pointing)</p>
+        <p>2. จีบนิ้ว (ชี้+โป้ง) แล้วปล่อย เพื่อเปลี่ยนรูปร่าง</p>
+        <p>3. แบมือ เพื่อปล่อย</p>
         <div id="status-text" class="status-badge">SYSTEM READY</div>
     </div>
 
     <script>
         // --- 1. THREE.JS SETUP (The 3D World) ---
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x000000, 0.002);
+        // Removed Fog to keep it pitch black
+        // scene.fog = new THREE.FogExp2(0x000000, 0.002);
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.z = 5;
@@ -124,61 +120,194 @@
         document.getElementById('scene-container').appendChild(renderer.domElement);
 
         // Lights
-        const ambientLight = new THREE.AmbientLight(0x404040, 2); // Soft white light
+        const ambientLight = new THREE.AmbientLight(0x202020, 1); // Dimmer ambient
         scene.add(ambientLight);
 
-        const pointLight = new THREE.PointLight(0x00ffff, 1, 100);
+        // Keep static lights but dim them
+        const pointLight = new THREE.PointLight(0x00ffff, 0.5, 100);
         pointLight.position.set(5, 5, 5);
         scene.add(pointLight);
 
-        const magentaLight = new THREE.PointLight(0xff00ff, 1, 100);
+        const magentaLight = new THREE.PointLight(0xff00ff, 0.5, 100);
         magentaLight.position.set(-5, -5, 5);
         scene.add(magentaLight);
 
-        // The Cyberpunk Cube
-        const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-        const material = new THREE.MeshStandardMaterial({ 
-            color: 0x000000, 
-            roughness: 0.1,
-            metalness: 0.9,
-            emissive: 0x001133,
-            emissiveIntensity: 0.5
-        });
-        const cube = new THREE.Mesh(geometry, material);
-        
-        // Wireframe edges for that "Tron" look
-        const edges = new THREE.EdgesGeometry(geometry);
-        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x00ffff, linewidth: 2 });
-        const wireframe = new THREE.LineSegments(edges, lineMaterial);
-        cube.add(wireframe); // Add wireframe to cube so they move together
-        
-        scene.add(cube);
+        // --- ORBITING LIGHTS (New Feature) ---
+        const orbitLights = [];
+        const orbitData = [
+            { color: 0x00ffff, speed: 1.5, radius: 2.2, yOffset: 0.5 }, // Cyan
+            { color: 0xff00ff, speed: -1.2, radius: 2.8, yOffset: -0.5 }, // Magenta
+            { color: 0xffff00, speed: 2.0, radius: 1.8, yOffset: 0 }  // Yellow
+        ];
 
-        // Grid Floor
-        const gridHelper = new THREE.GridHelper(50, 50, 0xff00ff, 0x222222);
-        gridHelper.position.y = -3;
-        scene.add(gridHelper);
+        orbitData.forEach(data => {
+            const light = new THREE.PointLight(data.color, 1.5, 10);
+            
+            // Create "Fuzzy" Glow Mesh
+            const glowGroup = new THREE.Group();
+            
+            // Core (Solid)
+            const core = new THREE.Mesh(
+                new THREE.SphereGeometry(0.05, 16, 16),
+                new THREE.MeshBasicMaterial({ color: data.color })
+            );
+            glowGroup.add(core);
+
+            // Glow (Transparent)
+            const glow = new THREE.Mesh(
+                new THREE.SphereGeometry(0.3, 16, 16),
+                new THREE.MeshBasicMaterial({ 
+                    color: data.color, 
+                    transparent: true, 
+                    opacity: 0.4,
+                    blending: THREE.AdditiveBlending,
+                    depthWrite: false
+                })
+            );
+            glowGroup.add(glow);
+            
+            light.add(glowGroup);
+            scene.add(light);
+            
+            orbitLights.push({ 
+                obj: light, 
+                ...data, 
+                angle: Math.random() * Math.PI * 2 
+            });
+        });
+
+
+        // --- VISUAL EFFECTS: PARTICLES ---
+        const particleGeometry = new THREE.BufferGeometry();
+        const particleCount = 1500;
+        const posArray = new Float32Array(particleCount * 3);
+
+        for(let i = 0; i < particleCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 40; // Wider spread
+        }
+        particleGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const particleMaterial = new THREE.PointsMaterial({
+            size: 0.03,
+            color: 0x88ffff, // Slightly lighter cyan
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending
+        });
+        const particles = new THREE.Points(particleGeometry, particleMaterial);
+        scene.add(particles);
+
+
+        // --- OBJECTS & SHAPES ---
+        let currentShapeIndex = 0;
+        let playerObject; // Need a container to swap shapes easily
+        
+        // Shape Definitions
+        const shapes = [
+            { type: 'Cube', geometry: new THREE.BoxGeometry(1.5, 1.5, 1.5), color: 0xff00ff },
+            { type: 'Sphere', geometry: new THREE.IcosahedronGeometry(1, 2), color: 0x00ff00 },
+            { type: 'Torus', geometry: new THREE.TorusKnotGeometry(0.6, 0.2, 100, 16), color: 0xffff00 },
+            { type: 'Pyramid', geometry: new THREE.ConeGeometry(1, 1.5, 4), color: 0xff0000 },
+            { type: 'Diamond', geometry: new THREE.OctahedronGeometry(1), color: 0x00ffff }
+        ];
+
+        // Shared Materials
+        const baseMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x000000, 
+            roughness: 0.2, 
+            metalness: 0.9, 
+            transparent: true, 
+            opacity: 0.9,
+            emissiveIntensity: 0.2
+        });
+
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x00ffff, linewidth: 2 });
+        
+        function createPlayerObject(shapeIndex) {
+            const group = new THREE.Group();
+            const shapeData = shapes[shapeIndex];
+
+            // 1. Main Mesh
+            const mesh = new THREE.Mesh(shapeData.geometry, baseMaterial.clone());
+            mesh.material.emissive = new THREE.Color(0x001133);
+            group.add(mesh);
+            
+            // 2. Wireframe
+            const edges = new THREE.EdgesGeometry(shapeData.geometry);
+            const wireframe = new THREE.LineSegments(edges, lineMaterial.clone());
+            group.add(wireframe);
+
+            // 3. Inner Core
+            const coreGeometry = new THREE.IcosahedronGeometry(0.5, 0);
+            const coreMaterial = new THREE.MeshStandardMaterial({
+                color: shapeData.color,
+                emissive: shapeData.color,
+                emissiveIntensity: 1,
+                wireframe: true
+            });
+            const core = new THREE.Mesh(coreGeometry, coreMaterial);
+            group.add(core);
+
+            // Store references for animation
+            group.userData = { mesh, wireframe, core, color: shapeData.color };
+            return group;
+        }
+
+        // Initialize Player Object
+        playerObject = createPlayerObject(0);
+        scene.add(playerObject);
+
+        // Shockwave Effect Group
+        const shockwaves = new THREE.Group();
+        scene.add(shockwaves);
+
+        function triggerShockwave(position, color) {
+            const geometry = new THREE.RingGeometry(0.1, 0.2, 32);
+            const material = new THREE.MeshBasicMaterial({ 
+                color: color, 
+                side: THREE.DoubleSide, 
+                transparent: true, 
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending
+            });
+            const wave = new THREE.Mesh(geometry, material);
+            wave.position.copy(position);
+            wave.lookAt(camera.position); // Face camera
+            
+            // Animation data
+            wave.userData = { scale: 1, opacity: 0.8 };
+            shockwaves.add(wave);
+        }
+
+        // --- REMOVED GRID FLOOR ---
+        // const gridHelper = new THREE.GridHelper(50, 50, 0xff00ff, 0x222222);
+        // gridHelper.position.y = -3;
+        // scene.add(gridHelper);
 
         // Helper to calculate visible width/height at a given Z depth
         function getVisibleDimensions(depth, camera) {
-            const vFOV = camera.fov * Math.PI / 180; // convert vertical fov to radians
-            const distance = camera.position.z - depth; // distance from camera to object
+            const vFOV = camera.fov * Math.PI / 180; 
+            const distance = camera.position.z - depth; 
             const height = 2 * Math.tan(vFOV / 2) * distance;
             const width = height * camera.aspect;
             return { width, height };
         }
 
         // --- 2. LOGIC VARIABLES ---
-        let handX = 0, handY = 0; // Normalized 0-1
-        let isHandDetected = false;
-        let gestureState = 'IDLE'; // IDLE, FIST, POINTING, OPEN
-        let interactionState = 'IDLE'; // IDLE, CHARGING, GRABBED, ROTATING
-        let grabStartTime = 0;
-        const GRAB_DELAY = 1000; // 1 second
+        let handX = 0, handY = 0; 
         
-        // Smoothing variables
-        let targetRotationZ = 0;
-        let targetRotationX = 0;
+        // Smoothing Variables
+        let smoothHandX = 0.5, smoothHandY = 0.5;
+        let prevHandX = 0.5, prevHandY = 0.5;
+        const SMOOTHING_FACTOR = 0.15;
+
+        let isHandDetected = false;
+        let gestureState = 'IDLE'; // IDLE, FIST, OPEN, PINCH
+        let interactionState = 'IDLE'; // IDLE, CHARGING, GRABBED
+        let grabStartTime = 0;
+        const GRAB_DELAY = 1000; 
+
+        // Pinch Logic
+        let wasPinched = false; // State to track pinch-release cycle
         
         const statusElement = document.getElementById('status-text');
 
@@ -188,7 +317,6 @@
         const canvasCtx = canvasElement.getContext('2d');
 
         function onResults(results) {
-            // Clear canvas
             canvasCtx.save();
             canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
             canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
@@ -197,23 +325,25 @@
                 const landmarks = results.multiHandLandmarks[0];
                 isHandDetected = true;
 
-                // Draw Landmarks
                 drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {color: '#00ffff', lineWidth: 2});
                 drawLandmarks(canvasCtx, landmarks, {color: '#ff00ff', lineWidth: 1, radius: 2});
 
-                // --- GESTURE RECOGNITION ---
                 detectGesture(landmarks);
                 
-                // --- UPDATE CURSOR POSITION ---
-                const pointer = landmarks[9]; // Middle finger knuckle
-                handX = 1 - pointer.x; // Mirror X
-                handY = pointer.y;
+                // Cursor Smoothing
+                const pointer = landmarks[9]; 
+                const rawHandX = 1 - pointer.x; 
+                const rawHandY = pointer.y;
 
-                // Handle Interaction Logic
+                smoothHandX += (rawHandX - smoothHandX) * SMOOTHING_FACTOR;
+                smoothHandY += (rawHandY - smoothHandY) * SMOOTHING_FACTOR;
+
+                handX = smoothHandX;
+                handY = smoothHandY;
+
                 handleInteraction(landmarks);
 
             } else {
-                // --- FIX: FORCE RESET IF HAND IS LOST ---
                 isHandDetected = false;
                 resetInteraction();
             }
@@ -224,8 +354,9 @@
             if(interactionState !== 'IDLE') {
                 interactionState = 'IDLE';
                 gestureState = 'IDLE';
+                wasPinched = false;
                 updateStatus('SYSTEM READY');
-                wireframe.material.color.setHex(0x00ffff);
+                if(playerObject) playerObject.userData.wireframe.material.color.setHex(0x00ffff);
             }
         }
 
@@ -258,12 +389,10 @@
         }
 
         function detectGesture(landmarks) {
-            // FIX: Use Hand Scale (Wrist to Middle Finger MCP) for scale-invariant thresholds
             const wrist = landmarks[0];
             const middleMCP = landmarks[9];
             const handScale = distance(wrist, middleMCP); 
             
-            // Helper to check if finger is open (Tip further from wrist than PIP from wrist)
             const isFingerOpen = (tipIdx, pipIdx) => {
                 return distance(landmarks[tipIdx], wrist) > distance(landmarks[pipIdx], wrist) + (handScale * 0.1);
             };
@@ -273,40 +402,84 @@
             const isRingOpen = isFingerOpen(16, 14);
             const isPinkyOpen = isFingerOpen(20, 18);
             
-            // GESTURE LOGIC REFINED
-            
-            // OPEN: Require ALL main fingers to be open to drop
-            if (isIndexOpen && isMiddleOpen && isRingOpen && isPinkyOpen) {
+            // Check for Pinch (Index Tip close to Thumb Tip)
+            const pinchDist = distance(landmarks[8], landmarks[4]);
+            const isPinching = pinchDist < (handScale * 0.3); // Threshold relative to hand size
+
+            if (isPinching) {
+                gestureState = 'PINCH';
+            }
+            else if (isIndexOpen && isMiddleOpen && isRingOpen && isPinkyOpen) {
                 gestureState = 'OPEN';
             }
-            // FIST: Index, Middle, Ring, Pinky are CLOSED
             else if (!isIndexOpen && !isMiddleOpen && !isRingOpen && !isPinkyOpen) {
                 gestureState = 'FIST';
-            }
-            // POINTING: Index Open, Middle/Ring/Pinky Closed.
-            // Relaxed check: We don't care about the thumb for pointing to make it easier
-            else if (isIndexOpen && !isMiddleOpen && !isRingOpen && !isPinkyOpen) {
-                gestureState = 'POINTING';
             }
             else {
                 gestureState = 'UNKNOWN';
             }
         }
 
+        function switchShape() {
+            // Next Shape
+            currentShapeIndex = (currentShapeIndex + 1) % shapes.length;
+            
+            // Create New Object
+            const oldPos = playerObject.position.clone();
+            const oldRot = playerObject.rotation.clone();
+            
+            scene.remove(playerObject);
+            playerObject = createPlayerObject(currentShapeIndex);
+            
+            // Restore Transform
+            playerObject.position.copy(oldPos);
+            playerObject.rotation.copy(oldRot);
+            scene.add(playerObject);
+
+            // Effect
+            triggerShockwave(oldPos, shapes[currentShapeIndex].color);
+            updateStatus(`MORPHED: ${shapes[currentShapeIndex].type}`);
+        }
+
         function handleInteraction(landmarks) {
-            // Draw loading circle helper
             const centerX = (1 - landmarks[9].x) * canvasElement.width;
             const centerY = landmarks[9].y * canvasElement.height;
 
-            // FIX: IMMEDIATE RESET ON OPEN HAND
+            // --- SHAPE SWITCHING LOGIC (PINCH RELEASE) ---
+            if (gestureState === 'PINCH') {
+                wasPinched = true;
+                // Visual feedback for pinch
+                canvasCtx.beginPath();
+                canvasCtx.arc(centerX, centerY, 15, 0, 2 * Math.PI);
+                canvasCtx.fillStyle = 'rgba(255, 255, 0, 0.5)';
+                canvasCtx.fill();
+            } else {
+                if (wasPinched && gestureState === 'OPEN') {
+                    // Released pinch -> Trigger Switch
+                    switchShape();
+                    wasPinched = false;
+                    // Reset interaction state slightly to avoid conflicts
+                    if(interactionState === 'GRABBED') {
+                         // Keep grabbed
+                    }
+                } else if (gestureState === 'OPEN') {
+                    wasPinched = false;
+                }
+            }
+
+            // --- GRAB / DROP LOGIC ---
+
             if (gestureState === 'OPEN') {
                 if (interactionState !== 'IDLE') {
                     resetInteraction();
+                    prevHandX = handX;
+                    prevHandY = handY;
                 }
-                return; // Exit early
+                return;
             }
 
             if (gestureState === 'FIST') {
+                wasPinched = false; // Reset pinch if made fist
                 if (interactionState === 'IDLE' || interactionState === 'CHARGING') {
                     if (interactionState === 'IDLE') {
                         interactionState = 'CHARGING';
@@ -316,7 +489,6 @@
 
                     const elapsed = Date.now() - grabStartTime;
                     
-                    // Draw Loading Circle on Preview
                     canvasCtx.beginPath();
                     canvasCtx.arc(centerX, centerY, 20, 0, (elapsed / GRAB_DELAY) * 2 * Math.PI);
                     canvasCtx.strokeStyle = '#00ff00';
@@ -326,81 +498,108 @@
                     if (elapsed >= GRAB_DELAY) {
                         interactionState = 'GRABBED';
                         updateStatus('OBJECT LINKED');
-                        wireframe.material.color.setHex(0x00ff00);
+                        playerObject.userData.wireframe.material.color.setHex(0x00ff00);
+                        
+                        prevHandX = handX;
+                        prevHandY = handY;
                     }
                 }
-            } else if (gestureState === 'POINTING') {
-                 if (interactionState === 'GRABBED' || interactionState === 'ROTATING') {
-                    interactionState = 'ROTATING';
-                    updateStatus('ROTATING');
-                    wireframe.material.color.setHex(0xffff00);
-
-                    // Calculate Angle based on Index Finger (Wrist -> Tip)
-                    const visualWristX = 1 - landmarks[0].x; // Mirror X
-                    const visualWristY = landmarks[0].y;
-                    const visualTipX = 1 - landmarks[8].x; // Mirror X
-                    const visualTipY = landmarks[8].y;
-
-                    // Math.atan2(dy, dx) gives angle in radians
-                    const angle = Math.atan2(visualTipY - visualWristY, visualTipX - visualWristX);
-                    
-                    // Set target rotation
-                    // -angle reverses the direction to match mirror logic
-                    // -PI/2 aligns "Up" (screen -Y) to 0 rotation
-                    targetRotationZ = -angle - (Math.PI / 2); 
-                    targetRotationX = angle * 0.2; // Slight tilt
-                 }
             } else {
-                // If unknown gesture during charge, cancel charge
                 if (interactionState === 'CHARGING') {
                     interactionState = 'IDLE';
                     updateStatus('ABORTED');
                 }
-                // If UNKNOWN while GRABBED or ROTATING, we KEEP the state (don't drop)
-                // but we stop updating the rotation target (so it freezes in place)
             }
 
-            // Move Cube if Grabbed or Rotating
-            if (interactionState === 'GRABBED' || interactionState === 'ROTATING') {
-                const { width: visibleWidth, height: visibleHeight } = getVisibleDimensions(cube.position.z, camera);
-                const targetX = (handX - 0.5) * visibleWidth;
-                const targetY = -(handY - 0.5) * visibleHeight;
+            // Move Object
+            if (interactionState === 'GRABBED') {
+                const { width: visibleWidth, height: visibleHeight } = getVisibleDimensions(playerObject.position.z, camera);
                 
-                cube.position.x += (targetX - cube.position.x) * 0.2;
-                cube.position.y += (targetY - cube.position.y) * 0.2;
+                const deltaX = handX - prevHandX;
+                const deltaY = handY - prevHandY;
                 
-                if (interactionState === 'ROTATING') {
-                     // FIX: SHORTEST ANGLE INTERPOLATION
-                     // This prevents spinning when crossing the 180/-180 degree boundary
-                     let diffZ = targetRotationZ - cube.rotation.z;
-                     // Normalize diffZ to -PI to PI
-                     while (diffZ > Math.PI) diffZ -= 2 * Math.PI;
-                     while (diffZ < -Math.PI) diffZ += 2 * Math.PI;
+                prevHandX = handX;
+                prevHandY = handY;
 
-                     cube.rotation.z += diffZ * 0.15; // Slightly faster reaction
-                     cube.rotation.x += (targetRotationX - cube.rotation.x) * 0.1;
-                }
-            } else {
-                // Idle Animation
-                cube.rotation.x += 0.01;
-                cube.rotation.y += 0.01;
+                playerObject.position.x += deltaX * visibleWidth * 2.5; 
+                playerObject.position.y -= deltaY * visibleHeight * 2.5; 
+                
+                const borderX = visibleWidth / 2 - 0.75;
+                const borderY = visibleHeight / 2 - 0.75;
+                playerObject.position.x = Math.max(-borderX, Math.min(borderX, playerObject.position.x));
+                playerObject.position.y = Math.max(-borderY, Math.min(borderY, playerObject.position.y));
             }
         }
 
         function updateStatus(text) {
             statusElement.innerText = text;
             if(text === 'OBJECT LINKED') statusElement.style.color = '#0f0';
-            else if (text === 'ROTATING') statusElement.style.color = '#ff0';
+            else if(text.includes('MORPHED')) statusElement.style.color = '#ff0';
             else statusElement.style.color = '#f0f';
         }
 
         // --- 5. MAIN ANIMATION LOOP ---
         function animate() {
             requestAnimationFrame(animate);
+
+            const time = Date.now() * 0.001;
+
+            if (playerObject) {
+                // Rotate Main Object
+                playerObject.rotation.x += 0.005;
+                playerObject.rotation.y += 0.01;
+                
+                // Animate Core
+                const core = playerObject.userData.core;
+                core.rotation.x -= 0.02;
+                core.rotation.z += 0.02;
+                core.material.emissiveIntensity = 0.8 + Math.sin(time * 5) * 0.5;
+
+                // Pulsing
+                const pulseScale = 1 + Math.sin(time * 2) * 0.05;
+                playerObject.scale.set(pulseScale, pulseScale, pulseScale);
+
+                // Update Orbit Lights
+                orbitLights.forEach(item => {
+                    item.angle += item.speed * 0.02;
+                    
+                    const x = Math.cos(item.angle) * item.radius;
+                    const z = Math.sin(item.angle) * item.radius;
+                    // Add some vertical wave motion
+                    const y = item.yOffset + Math.sin(time * 2 + item.angle) * 0.3;
+
+                    // Follow Player Object Position
+                    item.obj.position.set(
+                        playerObject.position.x + x,
+                        playerObject.position.y + y,
+                        playerObject.position.z + z
+                    );
+                });
+            }
+
+            // Animate Particles
+            particles.rotation.y += 0.0005;
+            particles.rotation.x += 0.0002;
+
+            // Animate Shockwaves
+            for (let i = shockwaves.children.length - 1; i >= 0; i--) {
+                const wave = shockwaves.children[i];
+                wave.userData.scale += 0.1;
+                wave.userData.opacity -= 0.02;
+                
+                wave.scale.set(wave.userData.scale, wave.userData.scale, 1);
+                wave.material.opacity = wave.userData.opacity;
+
+                if (wave.userData.opacity <= 0) {
+                    shockwaves.remove(wave);
+                    wave.geometry.dispose();
+                    wave.material.dispose();
+                }
+            }
+
             renderer.render(scene, camera);
         }
 
-        // Handle Window Resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
