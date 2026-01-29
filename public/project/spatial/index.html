@@ -1,320 +1,541 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Spatial Math - The Future of Learning</title>
+    <title>Spatial Math: All-in-One</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     
+    <!-- LOAD SHARED SCRIPT DIRECTLY -->
+    <script src="./spatialscript.js"></script>
+
     <style>
-        body { 
-            font-family: 'Sarabun', sans-serif; 
-            background-color: #030712; /* Rich Black */
-            color: #f8fafc;
-            overflow-x: hidden;
-        }
-        h1, h2, h3, .tech-font { font-family: 'Orbitron', sans-serif; }
+        body { background-color: #0f172a; color: white; font-family: 'Poppins', sans-serif; overflow: hidden; }
+        .tech-font { font-family: 'Orbitron', sans-serif; }
+        .mirror-mode { transform: scaleX(-1); }
         
-        /* Animated Background Mesh */
-        .aurora-bg {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            background: 
-                radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.15), transparent 25%), 
-                radial-gradient(circle at 85% 30%, rgba(14, 165, 233, 0.15), transparent 25%);
-            filter: blur(100px);
-            animation: pulse-glow 10s infinite alternate;
-        }
-
-        @keyframes pulse-glow {
-            0% { transform: scale(1); opacity: 0.8; }
-            100% { transform: scale(1.1); opacity: 1; }
-        }
-
-        /* Glass Card Effect */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        }
+        #webcam-layer { position: absolute; inset: 0; z-index: 0; display: none; }
+        #canvas-layer { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+        #canvas-layer.interactive { pointer-events: auto; }
+        #ui-layer { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
+        .pointer-events-auto { pointer-events: auto; }
         
-        .glass-card:hover {
-            background: rgba(255, 255, 255, 0.07);
-            border-color: rgba(255, 255, 255, 0.2);
+        .home-card {
+            transition: all 0.3s ease;
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        .home-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 200, 255, 0.15);
+            border-color: #06b6d4;
+            box-shadow: 0 10px 30px -10px rgba(6, 182, 212, 0.5);
         }
-
-        /* Text Gradient */
-        .text-gradient {
-            background: linear-gradient(135deg, #22d3ee 0%, #818cf8 50%, #c084fc 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        /* Smooth Scroll */
-        html { scroll-behavior: smooth; }
+        .mode-section { display: none; height: 100%; width: 100%; }
+        .mode-section.active { display: block; }
     </style>
 </head>
-<body class="antialiased selection:bg-cyan-500 selection:text-white">
+<body>
 
-    <!-- Dynamic Background -->
-    <div class="aurora-bg"></div>
-    <div class="fixed inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10 pointer-events-none"></div>
+    <!-- 1. MEDIA LAYERS -->
+    <div id="webcam-layer">
+        <video id="webcam" class="mirror-mode w-full h-full object-cover" autoplay playsinline></video>
+        <canvas id="output_canvas" class="mirror-mode w-full h-full object-cover absolute top-0 left-0"></canvas>
+    </div>
+    
+    <div id="canvas-layer">
+        <canvas id="three_canvas" class="w-full h-full"></canvas>
+    </div>
 
-    <!-- Navigation -->
-    <nav class="fixed w-full z-50 transition-all duration-300 bg-black/20 backdrop-blur-md border-b border-white/5">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="relative">
-                    <div class="absolute inset-0 bg-cyan-500 blur-md opacity-50 rounded-full"></div>
-                    <i data-lucide="cuboid" class="relative text-cyan-400 w-8 h-8"></i>
+    <!-- 2. UI LAYER -->
+    <div id="ui-layer" class="flex flex-col h-full">
+        
+        <!-- HOME SCREEN -->
+        <div id="home-screen" class="mode-section active bg-slate-900 pointer-events-auto overflow-y-auto">
+            <div class="container mx-auto px-4 py-10 flex flex-col items-center min-h-screen justify-center">
+                <div class="text-center mb-12">
+                    <h1 class="text-4xl md:text-6xl font-bold text-cyan-400 tech-font mb-4">SPATIAL MATH</h1>
+                    <p class="text-slate-400 text-lg">Interactive 3D Learning Platform</p>
                 </div>
-                <span class="font-bold text-xl tracking-wider tech-font text-white">SPATIAL<span class="text-cyan-400">MATH</span></span>
-            </div>
-            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
-                <a href="#innovations" class="hover:text-white transition-colors relative group">
-                    Innovations
-                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-cyan-400 transition-all group-hover:w-full"></span>
-                </a>
-                <a href="#process" class="hover:text-white transition-colors relative group">
-                    How it Works
-                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-cyan-400 transition-all group-hover:w-full"></span>
-                </a>
-                <a href="#tech" class="hover:text-white transition-colors relative group">
-                    Technology
-                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-cyan-400 transition-all group-hover:w-full"></span>
-                </a>
-            </div>
-        </div>
-    </nav>
 
-    <!-- Hero Section -->
-    <header class="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-20">
-        <!-- Floating Elements -->
-        <div class="absolute top-1/4 left-10 w-24 h-24 bg-purple-600/20 rounded-full blur-3xl animate-bounce duration-[3s]"></div>
-        <div class="absolute bottom-1/4 right-10 w-32 h-32 bg-cyan-600/20 rounded-full blur-3xl animate-bounce duration-[4s]"></div>
-
-        <div class="relative z-10 max-w-5xl mx-auto">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8 animate-fade-in-up">
-                <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_10px_#4ade80]"></span>
-                <span class="text-xs font-bold tracking-widest uppercase text-slate-300">Research Project 2024</span>
-            </div>
-
-            <h1 class="text-5xl md:text-8xl font-black mb-8 leading-tight tracking-tight drop-shadow-2xl">
-                UNLEASH YOUR <br>
-                <span class="text-gradient">SPATIAL POTENTIAL</span>
-            </h1>
-
-            <p class="text-lg md:text-2xl text-slate-400 font-light mb-12 max-w-2xl mx-auto leading-relaxed">
-                สัมผัสประสบการณ์การเรียนรู้คณิตศาสตร์รูปแบบใหม่ <br class="hidden md:block">
-                ควบคุมวัตถุ 3 มิติด้วยมือเปล่า ผ่านเทคโนโลยี Web-based AR ที่ล้ำสมัย
-                โดยไม่ต้องติดตั้งแอปพลิเคชัน ลดข้อจำกัด เพิ่มโอกาสในการเรียนรู้
-            </p>
-
-            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center w-full">
-                <a href="spatial/app.html" class="group relative px-8 py-4 bg-white text-black rounded-xl font-bold text-lg overflow-hidden transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] w-full sm:w-auto">
-                    <div class="absolute inset-0 bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <span class="relative flex items-center justify-center gap-3">
-                        <i data-lucide="play" class="w-5 h-5 fill-current"></i> STUDENT MODE
-                    </span>
-                </a>
-
-                <a href="spatial/builder.html" class="group px-8 py-4 glass-card text-white rounded-xl font-bold text-lg transition-all hover:bg-white/10 hover:border-white/40 w-full sm:w-auto flex items-center justify-center gap-3">
-                    <i data-lucide="hammer" class="w-5 h-5 group-hover:text-cyan-400 transition-colors"></i> 
-                    BUILDER MODE
-                </a>
-            </div>
-        </div>
-
-        <!-- Scroll Indicator -->
-        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce text-slate-500">
-            <i data-lucide="chevron-down" class="w-8 h-8"></i>
-        </div>
-    </header>
-
-    <!-- Abstract / Innovation -->
-    <section id="innovations" class="py-32 relative">
-        <div class="container mx-auto px-6">
-            <div class="grid md:grid-cols-2 gap-16 items-center">
-                <div class="relative">
-                    <div class="absolute -inset-4 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-3xl blur-2xl opacity-20"></div>
-                    <div class="glass-card p-10 rounded-3xl relative h-full flex flex-col justify-center">
-                        <h3 class="text-3xl font-bold mb-6 text-white tech-font">RESEARCH ABSTRACT</h3>
-                        <p class="text-slate-300 text-lg leading-relaxed mb-6">
-                            งานวิจัยนี้มุ่งเน้นพัฒนาเครื่องมือส่งเสริมทักษะมิติสัมพันธ์ (Spatial Reasoning) 
-                            ซึ่งเป็นทักษะพื้นฐานสำคัญทางคณิตศาสตร์และวิศวกรรมศาสตร์ 
-                            โดยขจัดอุปสรรคด้านฮาร์ดแวร์และการเข้าถึง
-                        </p>
-                        <p class="text-slate-400 text-lg leading-relaxed">
-                            ระบบทำงานแบบ <span class="text-cyan-400 font-bold">100% Client-Side</span> ผ่านเว็บเบราว์เซอร์มาตรฐาน รองรับการประมวลผล AI บนอุปกรณ์ปลายทาง (Edge AI) ทำให้มีความรวดเร็ว ปลอดภัย และใช้งานได้ทันทีบนอุปกรณ์ที่หลากหลาย
-                        </p>
-                    </div>
-                </div>
-                <div>
-                    <h2 class="text-4xl md:text-5xl font-bold mb-8 leading-tight">
-                        Beyond the Screen <br>
-                        <span class="text-slate-500">Into Reality</span>
-                    </h2>
-                    <div class="space-y-8">
-                        <div class="flex gap-5 group">
-                            <div class="w-14 h-14 rounded-2xl bg-cyan-500/10 flex items-center justify-center shrink-0 border border-cyan-500/20 group-hover:bg-cyan-500/20 transition-colors">
-                                <i data-lucide="scan-face" class="text-cyan-400 w-7 h-7"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">Hand Tracking AI</h4>
-                                <p class="text-slate-400 leading-relaxed">
-                                    ใช้โมเดล Deep Learning ตรวจจับพิกัดมือ 21 จุด (Landmarks) แบบ Real-time เพื่อสร้างปฏิสัมพันธ์ที่แม่นยำและเป็นธรรมชาติเสมือนจับต้องวัตถุจริง
-                                </p>
-                            </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
+                    <button onclick="enterMode('SHAPE')" class="home-card p-8 rounded-2xl flex flex-col items-center text-center group">
+                        <div class="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-6 group-hover:bg-green-500/40 transition">
+                            <i data-lucide="shapes" class="w-10 h-10 text-green-400"></i>
                         </div>
-                        <div class="flex gap-5 group">
-                            <div class="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center shrink-0 border border-purple-500/20 group-hover:bg-purple-500/20 transition-colors">
-                                <i data-lucide="layers" class="text-purple-400 w-7 h-7"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">Interactive 3D Rendering</h4>
-                                <p class="text-slate-400 leading-relaxed">
-                                    แสดงผลกราฟิกสามมิติคุณภาพสูงด้วย WebGL ที่ตอบสนองต่อการหมุน (Rotation) และการเคลื่อนที่ (Translation) ตามสรีระของมือผู้ใช้งาน
-                                </p>
-                            </div>
+                        <h2 class="text-2xl font-bold text-white mb-2">1. Shapes</h2>
+                        <p class="text-slate-400 text-sm">Explore 3D geometry. Use mouse to rotate.</p>
+                    </button>
+
+                    <button onclick="enterMode('NET')" class="home-card p-8 rounded-2xl flex flex-col items-center text-center group">
+                        <div class="w-20 h-20 bg-pink-500/20 rounded-full flex items-center justify-center mb-6 group-hover:bg-pink-500/40 transition">
+                            <i data-lucide="box" class="w-10 h-10 text-pink-400"></i>
                         </div>
-                        <div class="flex gap-5 group">
-                            <div class="w-14 h-14 rounded-2xl bg-green-500/10 flex items-center justify-center shrink-0 border border-green-500/20 group-hover:bg-green-500/20 transition-colors">
-                                <i data-lucide="database" class="text-green-400 w-7 h-7"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-xl font-bold text-white mb-2 group-hover:text-green-400 transition-colors">Dynamic Content System</h4>
-                                <p class="text-slate-400 leading-relaxed">
-                                    ระบบจัดการโจทย์แบบ Cloud-based ช่วยให้ผู้สอนสามารถออกแบบ สร้าง และบันทึกชุดแบบทดสอบใหม่ๆ ได้อย่างไร้ขีดจำกัด
-                                </p>
-                            </div>
+                        <h2 class="text-2xl font-bold text-white mb-2">2. Nets</h2>
+                        <p class="text-slate-400 text-sm">Unfold shapes into flat patterns.</p>
+                    </button>
+
+                    <button onclick="enterMode('SPATIAL')" class="home-card p-8 rounded-2xl flex flex-col items-center text-center group">
+                        <div class="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mb-6 group-hover:bg-blue-500/40 transition">
+                            <i data-lucide="cuboid" class="w-10 h-10 text-blue-400"></i>
                         </div>
-                    </div>
+                        <h2 class="text-2xl font-bold text-white mb-2">3. Spatial AR</h2>
+                        <p class="text-slate-400 text-sm">Use your hand to solve 3D puzzles.</p>
+                    </button>
                 </div>
             </div>
         </div>
-    </section>
 
-    <!-- How it Works (New Section) -->
-    <section id="process" class="py-24 bg-gradient-to-b from-transparent to-black/40">
-        <div class="container mx-auto px-6">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-5xl font-bold mb-4 tech-font">HOW IT WORKS</h2>
-                <p class="text-slate-500 max-w-2xl mx-auto">กระบวนการทำงานเบื้องหลังที่ผสานโลกจริงและโลกเสมือนเข้าด้วยกัน</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <!-- Step 1 -->
-                <div class="glass-card p-8 rounded-2xl relative group hover:-translate-y-2 transition-transform duration-300">
-                    <div class="absolute -top-6 left-8 text-6xl font-black text-white/5 select-none group-hover:text-white/10 transition-colors">01</div>
-                    <div class="w-12 h-12 bg-blue-600/20 rounded-full flex items-center justify-center mb-6 text-blue-400">
-                        <i data-lucide="camera" class="w-6 h-6"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-white mb-3">Camera Input</h4>
-                    <p class="text-slate-400 text-sm">ระบบรับภาพวิดีโอจากกล้อง Webcam ของผู้ใช้งานโดยตรงผ่าน Browser API</p>
-                </div>
-
-                <!-- Step 2 -->
-                <div class="glass-card p-8 rounded-2xl relative group hover:-translate-y-2 transition-transform duration-300">
-                    <div class="absolute -top-6 left-8 text-6xl font-black text-white/5 select-none group-hover:text-white/10 transition-colors">02</div>
-                    <div class="w-12 h-12 bg-purple-600/20 rounded-full flex items-center justify-center mb-6 text-purple-400">
-                        <i data-lucide="cpu" class="w-6 h-6"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-white mb-3">AI Inference</h4>
-                    <p class="text-slate-400 text-sm">MediaPipe ทำการวิเคราะห์ภาพเพื่อระบุตำแหน่งของมือและนิ้วทั้ง 21 จุดแบบ Real-time</p>
-                </div>
-
-                <!-- Step 3 -->
-                <div class="glass-card p-8 rounded-2xl relative group hover:-translate-y-2 transition-transform duration-300">
-                    <div class="absolute -top-6 left-8 text-6xl font-black text-white/5 select-none group-hover:text-white/10 transition-colors">03</div>
-                    <div class="w-12 h-12 bg-cyan-600/20 rounded-full flex items-center justify-center mb-6 text-cyan-400">
-                        <i data-lucide="calculator" class="w-6 h-6"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-white mb-3">Logic & Physics</h4>
-                    <p class="text-slate-400 text-sm">คำนวณเวกเตอร์ 3 มิติ (Quaternion) เพื่อแปลงค่าพิกัดมือให้เป็นการเคลื่อนไหวของวัตถุ</p>
-                </div>
-
-                <!-- Step 4 -->
-                <div class="glass-card p-8 rounded-2xl relative group hover:-translate-y-2 transition-transform duration-300">
-                    <div class="absolute -top-6 left-8 text-6xl font-black text-white/5 select-none group-hover:text-white/10 transition-colors">04</div>
-                    <div class="w-12 h-12 bg-green-600/20 rounded-full flex items-center justify-center mb-6 text-green-400">
-                        <i data-lucide="box" class="w-6 h-6"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-white mb-3">AR Rendering</h4>
-                    <p class="text-slate-400 text-sm">Three.js วาดกราฟิก 3 มิติซ้อนทับลงบนภาพวิดีโอ ให้เสมือนวัตถุลอยอยู่บนมือจริง</p>
+        <!-- HUD (Shared) -->
+        <div id="hud" class="hidden w-full h-full relative">
+            <!-- Top Nav -->
+            <div class="absolute top-0 left-0 w-full p-4 flex justify-between items-start pointer-events-auto z-20">
+                <button onclick="goHome()" class="px-4 py-2 bg-slate-800/80 hover:bg-slate-700 border border-slate-600 rounded-lg text-white flex items-center gap-2 transition backdrop-blur">
+                    <i data-lucide="arrow-left"></i> Home
+                </button>
+                
+                <div id="status-panel" class="hidden flex-col items-end gap-2">
+                     <button id="toggleCam" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white font-bold shadow-lg shadow-cyan-500/20 flex items-center gap-2 transition">
+                        <i data-lucide="camera"></i> Start Camera
+                    </button>
+                    <div id="status-text" class="text-[10px] text-yellow-400 font-mono bg-black/50 px-2 py-1 rounded">Wait...</div>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <!-- Tech Stack Grid -->
-    <section id="tech" class="py-24 bg-black/30">
-        <div class="container mx-auto px-6">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-5xl font-bold mb-4 tech-font">POWERED BY</h2>
-                <p class="text-slate-500">ขับเคลื่อนด้วยเทคโนโลยีเว็บมาตรฐานระดับโลก เพื่อประสิทธิภาพสูงสุด</p>
+            <!-- Shape/Net Controls -->
+            <div id="studio-controls" class="hidden absolute bottom-8 left-1/2 transform -translate-x-1/2 pointer-events-auto flex flex-col items-center gap-4 w-full px-4">
+                <div id="net-slider-container" class="hidden w-full max-w-md bg-black/60 backdrop-blur p-4 rounded-xl border border-gray-700">
+                    <div class="flex justify-between text-sm text-gray-300 mb-2 font-bold">
+                        <span>Folded</span>
+                        <span>Flat</span>
+                    </div>
+                    <input type="range" id="unfold-slider" min="0" max="1" step="0.01" value="0" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <div id="shape-selector" class="bg-black/80 backdrop-blur border border-gray-700 rounded-2xl p-2 flex items-center gap-2 overflow-x-auto max-w-full">
+                    <!-- JS Injected -->
+                </div>
+                
+                <div class="text-white/50 text-xs mt-2 animate-pulse">
+                    <i data-lucide="mouse-pointer" class="inline w-3 h-3"></i> Drag to Rotate
+                </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Tech 1 -->
-                <div class="glass-card p-8 rounded-2xl transition duration-300 group">
-                    <div class="w-14 h-14 bg-orange-500/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-orange-500/20">
-                        <i data-lucide="flame" class="text-orange-500 w-7 h-7"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-white mb-2">Firebase</h4>
-                    <p class="text-sm text-slate-400">Cloud Firestore สำหรับจัดเก็บข้อมูลโจทย์และสถานะการเรียนรู้แบบ Real-time Database</p>
+            <!-- Spatial Controls -->
+            <div id="spatial-controls" class="hidden absolute right-0 top-16 bottom-0 w-64 bg-black/90 border-l border-gray-800 pointer-events-auto flex flex-col transform transition-transform duration-300 translate-x-full md:translate-x-0">
+                <div class="p-4 border-b border-gray-700 font-bold text-cyan-400 tech-font">LEVELS</div>
+                <div id="level-list" class="flex-grow overflow-y-auto p-2 space-y-2">
+                    <div class="text-center text-gray-500 text-sm mt-4">Loading...</div>
                 </div>
+                <div class="p-4 border-t border-gray-700 bg-gray-900">
+                    <div class="flex justify-between text-xs text-gray-400 mb-2">
+                        <span>COUNTER</span>
+                        <button onclick="resetCount()" class="text-red-400 hover:text-white">RESET</button>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="count(-1)" class="flex-1 bg-gray-700 hover:bg-gray-600 py-3 rounded text-white"><i data-lucide="minus"></i></button>
+                        <button onclick="count(1)" class="flex-1 bg-green-600 hover:bg-green-500 py-3 rounded text-white"><i data-lucide="plus"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="spatial-toggle" class="md:hidden absolute top-20 right-0 bg-cyan-600 p-2 rounded-l-lg pointer-events-auto text-white hidden" onclick="toggleSpatialMenu()">
+                <i data-lucide="list"></i>
+            </button>
 
-                <!-- Tech 2 -->
-                <div class="glass-card p-8 rounded-2xl transition duration-300 group">
-                    <div class="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-blue-500/20">
-                        <i data-lucide="cpu" class="text-blue-500 w-7 h-7"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-white mb-2">MediaPipe</h4>
-                    <p class="text-sm text-slate-400">Machine Learning Solution ประสิทธิภาพสูงสำหรับการตรวจจับมือบนอุปกรณ์ Edge Device</p>
-                </div>
-
-                <!-- Tech 3 -->
-                <div class="glass-card p-8 rounded-2xl transition duration-300 group">
-                    <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-white/20">
-                        <i data-lucide="box" class="text-white w-7 h-7"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-white mb-2">Three.js</h4>
-                    <p class="text-sm text-slate-400">JavaScript 3D Library มาตรฐานสำหรับการเรนเดอร์กราฟิก WebGL บนเบราว์เซอร์</p>
-                </div>
-
-                <!-- Tech 4 -->
-                <div class="glass-card p-8 rounded-2xl transition duration-300 group">
-                    <div class="w-14 h-14 bg-cyan-500/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-cyan-500/20">
-                        <i data-lucide="wind" class="text-cyan-500 w-7 h-7"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-white mb-2">Tailwind CSS</h4>
-                    <p class="text-sm text-slate-400">Utility-first CSS framework สำหรับการออกแบบ User Interface ที่ทันสมัยและตอบสนองได้ดี</p>
-                </div>
+            <div id="ar-toast" class="hidden absolute top-24 left-1/2 transform -translate-x-1/2 bg-black/60 px-6 py-2 rounded-full text-white backdrop-blur pointer-events-none border border-white/20">
+                Raise your hand to start
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- Footer -->
-    <footer class="border-t border-white/5 bg-black/40 pt-16 pb-8">
-        <div class="container mx-auto px-6 text-center">
-            <div class="flex justify-center items-center gap-2 mb-8 opacity-50 hover:opacity-100 transition-opacity">
-                <i data-lucide="cuboid" class="w-6 h-6"></i>
-                <span class="font-bold tracking-widest tech-font">AR SPATIAL MATH</span>
-            </div>
-            <p class="text-slate-500 text-sm">Developed for Educational Research Purposes.</p>
-            <p class="text-slate-600 text-xs mt-2">© 2024 All Rights Reserved.</p>
-        </div>
-    </footer>
+    <script type="module">
+        import { FilesetResolver, HandLandmarker } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-    <script>
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyAlfZHbCFxGK3p3nDoAPy3m9KqZzmX2s9I",
+            authDomain: "kruboat-web.firebaseapp.com",
+            projectId: "kruboat-web",
+            storageBucket: "kruboat-web.firebasestorage.app",
+            messagingSenderId: "61868765546",
+            appId: "1:61868765546:web:683b18ddf68c89dd317513"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app';
+
+        let mode = 'HOME';
+        let scene, camera, renderer, orbit;
+        let mainGroup; 
+        let handLandmarker;
+        let webcamRunning = false;
+        let lastVideoTime = -1;
+        let levels = [];
+        let spatialBlocks = [];
+        let countIdx = 0;
+
+        window.addEventListener('load', () => {
+            initAppWithRetry();
+        });
+
+        // --- ROBUST LOADING SYSTEM ---
+        function initAppWithRetry() {
+            let attempts = 0;
+            const maxAttempts = 50; 
+            
+            console.log("App: Checking for SpatialScript...");
+
+            const checker = setInterval(() => {
+                attempts++;
+                // Check if script AND init function exist
+                if (window.SpatialScript && window.SpatialScript.initThreeJS) {
+                    clearInterval(checker);
+                    console.log("App: SpatialScript found.");
+                    startThreeJS();
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(checker);
+                    alert("Initialization Timeout: 'spatialscript.js' did not load.\nPlease ensure the file is in the same folder and refresh.");
+                }
+            }, 100);
+        }
+
+        function startThreeJS() {
+            try {
+                const t = window.SpatialScript.initThreeJS('three_canvas');
+                if(!t) throw new Error("ThreeJS init failed");
+                
+                scene = t.scene;
+                camera = t.camera;
+                renderer = t.renderer;
+
+                orbit = new THREE.OrbitControls(camera, renderer.domElement);
+                orbit.enableDamping = true;
+                orbit.dampingFactor = 0.05;
+                orbit.enabled = false;
+
+                mainGroup = new THREE.Group();
+                scene.add(mainGroup);
+
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                    document.getElementById('output_canvas').width = window.innerWidth;
+                    document.getElementById('output_canvas').height = window.innerHeight;
+                });
+
+                requestAnimationFrame(animate);
+                setupAI(); 
+            } catch (e) {
+                console.error(e);
+                alert("Runtime Error: " + e.message);
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (mode === 'SHAPE' || mode === 'NET') orbit.update();
+            if (mode === 'SPATIAL' && webcamRunning) runAI();
+            if (renderer && scene && camera) renderer.render(scene, camera);
+        }
+
+        window.enterMode = function(newMode) {
+            try {
+                // *** FIX: Check if mainGroup exists first ***
+                if (!mainGroup) {
+                    alert("System not initialized yet. Please wait...");
+                    return;
+                }
+
+                mode = newMode;
+                document.getElementById('home-screen').classList.remove('active');
+                document.getElementById('hud').classList.remove('hidden');
+                
+                ['studio-controls', 'net-slider-container', 'status-panel', 'spatial-controls', 'spatial-toggle', 'ar-toast'].forEach(id => {
+                    document.getElementById(id).classList.add('hidden');
+                });
+                document.getElementById('webcam-layer').style.display = 'none';
+
+                // Safe clear
+                while(mainGroup.children.length > 0) mainGroup.remove(mainGroup.children[0]);
+                mainGroup.visible = true;
+                
+                camera.position.set(0, 0, 5);
+                camera.lookAt(0, 0, 0);
+
+                if (newMode === 'SHAPE' || newMode === 'NET') {
+                    if (window.SpatialScript.setupSceneMode) {
+                        window.SpatialScript.setupSceneMode(scene, 'STUDIO');
+                    }
+                    document.getElementById('canvas-layer').classList.add('interactive');
+                    orbit.enabled = true;
+                    
+                    document.getElementById('studio-controls').classList.remove('hidden');
+                    renderShapeSelector();
+                    
+                    if (newMode === 'NET') {
+                        document.getElementById('net-slider-container').classList.remove('hidden');
+                        document.getElementById('unfold-slider').value = 0;
+                    }
+                    loadObject('cube');
+
+                } else if (newMode === 'SPATIAL') {
+                    if (window.SpatialScript.setupSceneMode) {
+                        window.SpatialScript.setupSceneMode(scene, 'AR');
+                    }
+                    document.getElementById('canvas-layer').classList.remove('interactive');
+                    orbit.enabled = false;
+                    
+                    document.getElementById('webcam-layer').style.display = 'block';
+                    document.getElementById('status-panel').classList.remove('hidden');
+                    document.getElementById('spatial-controls').classList.remove('hidden');
+                    document.getElementById('spatial-toggle').classList.remove('hidden');
+                    
+                    mainGroup.visible = false;
+                    loadLevels();
+                }
+            } catch (e) {
+                console.error("Mode switch error:", e);
+                alert("Error switching mode: " + e.message);
+            }
+        };
+
+        window.goHome = function() {
+            mode = 'HOME';
+            document.getElementById('home-screen').classList.add('active');
+            document.getElementById('hud').classList.add('hidden');
+            document.getElementById('webcam-layer').style.display = 'none';
+            if (webcamRunning) toggleCamera();
+        };
+
+        function renderShapeSelector() {
+            const shapes = ['cube', 'cuboid', 'cone', 'cylinder', 'pyramid', 'circle'];
+            const container = document.getElementById('shape-selector');
+            container.innerHTML = '';
+            shapes.forEach(s => {
+                const btn = document.createElement('button');
+                btn.className = "w-10 h-10 rounded-full bg-gray-700 hover:bg-gray-600 border border-gray-500 flex items-center justify-center transition focus:border-cyan-400";
+                let icon = 'box';
+                if(s === 'circle') icon = 'circle';
+                if(s === 'pyramid' || s === 'cone') icon = 'triangle';
+                btn.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 text-white"></i>`;
+                btn.onclick = () => loadObject(s);
+                container.appendChild(btn);
+            });
+            lucide.createIcons();
+        }
+
+        function loadObject(type) {
+            if (!mainGroup) return;
+            while(mainGroup.children.length > 0) mainGroup.remove(mainGroup.children[0]);
+            if (mode === 'NET') {
+                const net = window.SpatialScript.createNet(type);
+                mainGroup.add(net);
+                const slider = document.getElementById('unfold-slider');
+                slider.oninput = (e) => window.SpatialScript.updateNetAnimation(net, parseFloat(e.target.value));
+                slider.value = 0;
+                window.SpatialScript.updateNetAnimation(net, 0);
+            } else {
+                const mesh = window.SpatialScript.createShape(type);
+                mainGroup.add(mesh);
+            }
+        }
+
+        async function loadLevels() {
+            const list = document.getElementById('level-list');
+            list.innerHTML = '<div class="text-center text-gray-500 animate-pulse">Connecting...</div>';
+            try {
+                if (!auth.currentUser) await signInAnonymously(auth);
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'spatial_math_levels');
+                const snapshot = await getDocs(colRef);
+                levels = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                levels.sort((a,b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+                
+                list.innerHTML = '';
+                if (levels.length === 0) {
+                    list.innerHTML = '<div class="text-center text-gray-500">No levels found.</div>';
+                    return;
+                }
+                levels.forEach(lvl => {
+                    const div = document.createElement('div');
+                    div.className = "p-3 bg-gray-800 rounded hover:bg-gray-700 cursor-pointer border border-gray-600 mb-2";
+                    div.innerHTML = `<div class="font-bold text-white text-sm">${lvl.name}</div><div class="text-[10px] text-gray-400">${lvl.difficulty}</div>`;
+                    div.onclick = () => spawnLevel(lvl);
+                    list.appendChild(div);
+                });
+            } catch(e) {
+                console.error(e);
+                list.innerHTML = '<div class="text-red-400 text-center text-xs">Load Failed.</div>';
+            }
+        }
+
+        function spawnLevel(lvl) {
+            if (!mainGroup) return;
+            while(mainGroup.children.length > 0) mainGroup.remove(mainGroup.children[0]);
+            spatialBlocks = [];
+            countIdx = 0;
+            if (lvl.blocks) {
+                let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity, minZ=Infinity, maxZ=-Infinity;
+                lvl.blocks.forEach(b => {
+                    minX = Math.min(minX, b.x); maxX = Math.max(maxX, b.x);
+                    minY = Math.min(minY, b.y); maxY = Math.max(maxY, b.y);
+                    minZ = Math.min(minZ, b.z); maxZ = Math.max(maxZ, b.z);
+                });
+                const cx = (minX + maxX) / 2;
+                const cy = (minY + maxY) / 2;
+                const cz = (minZ + maxZ) / 2;
+                lvl.blocks.forEach(pos => {
+                    const mesh = window.SpatialScript.createBlockMesh(pos.x - cx, pos.y - cy, pos.z - cz);
+                    mainGroup.add(mesh);
+                    spatialBlocks.push(mesh);
+                });
+                spatialBlocks.sort((a, b) => {
+                    if (Math.abs(a.position.y - b.position.y) > 0.1) return a.position.y - b.position.y;
+                    return a.position.x - b.position.x;
+                });
+            }
+            document.getElementById('spatial-controls').classList.add('translate-x-full');
+        }
+
+        window.count = function(dir) {
+            if (dir === 1 && countIdx < spatialBlocks.length) {
+                const b = spatialBlocks[countIdx];
+                const mat = b.material.length ? b.material[0] : b.material;
+                mat.color.setHex(window.SpatialScript.COLORS.highlight);
+                mat.emissive.setHex(window.SpatialScript.COLORS.highlightEmissive);
+                const s = b.scale.x;
+                b.scale.set(s*1.2, s*1.2, s*1.2);
+                setTimeout(() => b.scale.set(s,s,s), 150);
+                countIdx++;
+            } else if (dir === -1 && countIdx > 0) {
+                countIdx--;
+                const b = spatialBlocks[countIdx];
+                const mat = b.material.length ? b.material[0] : b.material;
+                mat.color.setHex(window.SpatialScript.COLORS.block);
+                mat.emissive.setHex(window.SpatialScript.COLORS.blockEmissive);
+            }
+        };
+        window.resetCount = function() {
+            countIdx = 0;
+            spatialBlocks.forEach(b => {
+                const mat = b.material.length ? b.material[0] : b.material;
+                mat.color.setHex(window.SpatialScript.COLORS.block);
+                mat.emissive.setHex(window.SpatialScript.COLORS.blockEmissive);
+            });
+        };
+        window.toggleSpatialMenu = function() {
+            document.getElementById('spatial-controls').classList.toggle('translate-x-full');
+        };
+
+        const video = document.getElementById('webcam');
+        const btnCam = document.getElementById('toggleCam');
+        const statusText = document.getElementById('status-text');
+
+        async function setupAI() {
+            try {
+                const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm");
+                handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                    baseOptions: {
+                        modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
+                        delegate: "GPU"
+                    },
+                    runningMode: "VIDEO",
+                    numHands: 1
+                });
+                statusText.innerText = "AI Ready";
+                statusText.classList.replace('text-yellow-400', 'text-green-400');
+            } catch(e) {
+                console.error(e);
+                statusText.innerText = "AI Error";
+                statusText.classList.replace('text-yellow-400', 'text-red-400');
+            }
+        }
+
+        window.toggleCamera = function() {
+            if(webcamRunning) {
+                webcamRunning = false;
+                if(video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+                video.srcObject = null;
+                btnCam.innerHTML = `<i data-lucide="camera"></i> Start`;
+                btnCam.classList.replace('bg-red-600', 'bg-cyan-600');
+                btnCam.classList.replace('hover:bg-red-500', 'hover:bg-cyan-500');
+                mainGroup.visible = false;
+                document.getElementById('ar-toast').classList.add('hidden');
+            } else {
+                webcamRunning = true;
+                navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } }).then(stream => {
+                    video.srcObject = stream;
+                });
+                btnCam.innerHTML = `<i data-lucide="stop-circle"></i> Stop`;
+                btnCam.classList.replace('bg-cyan-600', 'bg-red-600');
+                btnCam.classList.replace('hover:bg-cyan-500', 'hover:bg-red-500');
+                document.getElementById('ar-toast').classList.remove('hidden');
+            }
+            lucide.createIcons();
+        };
+        btnCam.onclick = window.toggleCamera;
+
+        const targetPos = new THREE.Vector3();
+        const targetQuat = new THREE.Quaternion();
+
+        function runAI() {
+            if (!handLandmarker || !video.videoWidth) return;
+            if (lastVideoTime !== video.currentTime) {
+                lastVideoTime = video.currentTime;
+                const results = handLandmarker.detectForVideo(video, performance.now());
+                const ctx = document.getElementById('output_canvas').getContext('2d');
+                ctx.clearRect(0,0,window.innerWidth, window.innerHeight);
+
+                if (results.landmarks && results.landmarks.length > 0) {
+                    const landmarks = results.landmarks[0];
+                    const indexTip = landmarks[8];
+                    const wrist = landmarks[0];
+                    const middleMCP = landmarks[9];
+
+                    const screenX = (1 - indexTip.x) * 2 - 1;
+                    const screenY = -(indexTip.y * 2 - 1);
+                    const palmSize = Math.hypot(middleMCP.x - wrist.x, middleMCP.y - wrist.y);
+                    const zDepth = (palmSize * 20) - 7; 
+
+                    const vector = new THREE.Vector3(screenX, screenY, 0.5);
+                    vector.unproject(camera);
+                    const dir = vector.sub(camera.position).normalize();
+                    const distance = Math.abs((camera.position.z - zDepth) / dir.z);
+                    const pos = camera.position.clone().add(dir.multiplyScalar(distance));
+                    pos.y += 1.5; 
+                    targetPos.copy(pos);
+
+                    const vFinger = new THREE.Vector3((1-indexTip.x)-(1-landmarks[5].x), -(indexTip.y-landmarks[5].y), -(indexTip.z-landmarks[5].z)).normalize();
+                    const vPalm = new THREE.Vector3((1-landmarks[17].x)-(1-landmarks[5].x), -(landmarks[17].y-landmarks[5].y), -(landmarks[17].z-landmarks[5].z)).normalize();
+                    const vZ = new THREE.Vector3().crossVectors(vPalm, vFinger).normalize();
+                    if(results.handedness[0][0].categoryName === "Right") vZ.negate();
+                    const vX = new THREE.Vector3().crossVectors(vFinger, vZ).normalize();
+                    const m = new THREE.Matrix4().makeBasis(vX, vFinger, vZ);
+                    targetQuat.setFromRotationMatrix(m);
+
+                    mainGroup.visible = true;
+                    document.getElementById('ar-toast').innerText = "Hand Detected";
+                    document.getElementById('ar-toast').classList.add('bg-green-600/80');
+                } else {
+                    document.getElementById('ar-toast').innerText = "Show your hand";
+                    document.getElementById('ar-toast').classList.remove('bg-green-600/80');
+                }
+            }
+            if(mainGroup && mainGroup.visible) {
+                mainGroup.position.lerp(targetPos, 0.1);
+                mainGroup.quaternion.slerp(targetQuat, 0.1);
+            }
+        }
+
         lucide.createIcons();
     </script>
 </body>

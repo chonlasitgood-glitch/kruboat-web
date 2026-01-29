@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Geometry & Nets - Rebuilt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Prompt', sans-serif; background-color: #f8fafc; }
+        canvas { display: block; width: 100vw; height: 100vh; outline: none; }
+        
+        /* UI Styles */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        
+        .shape-btn { transition: all 0.2s ease; }
+        .shape-btn.active {
+            background-color: #3b82f6; color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+        }
+        .shape-btn:hover:not(.active) { background-color: #f1f5f9; }
+
+        /* Custom Toggle */
+        .toggle-checkbox:checked { right: 0; border-color: #3b82f6; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #3b82f6; }
+        .toggle-checkbox:checked + .toggle-label:before { transform: translateX(100%); }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="canvas-container" class="w-full h-screen relative">
+        
+        <!-- Header -->
+        <div class="absolute top-6 left-0 w-full text-center pointer-events-none z-10 px-4">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight">3D Geometry & Nets</h1>
+            <p class="text-slate-500 mt-2 text-sm font-medium">Select a shape and toggle Net Mode</p>
+            <div class="mt-4 flex justify-center pointer-events-auto">
+                <span id="current-shape-name" class="text-xl font-semibold text-blue-600 glass-panel px-8 py-2 rounded-full min-w-[160px]">
+                    Cube
+                </span>
+            </div>
+        </div>
+
+        <!-- Controls (Right Side) -->
+        <div class="absolute right-6 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-4 items-end">
+            
+            <div class="glass-panel p-5 rounded-2xl w-48 flex flex-col gap-4">
+                <!-- Net Toggle -->
+                <div class="flex flex-col gap-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-bold text-slate-700">Net Mode</span>
+                        <div class="relative inline-block w-12 h-6 cursor-pointer">
+                            <input type="checkbox" id="net-toggle" class="peer sr-only">
+                            <div onclick="toggleNetMode()" class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-[10px] text-slate-400 font-medium px-1">
+                        <span>3D</span>
+                        <span>Unfold</span>
+                    </div>
+                </div>
+
+                <hr class="border-slate-100">
+
+                <!-- Zoom -->
+                <div class="flex flex-col gap-2">
+                    <span class="text-xs font-medium text-slate-500">Zoom</span>
+                    <input type="range" id="zoom-slider" min="10" max="100" value="60" class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                </div>
+            </div>
+
+            <!-- Auto Rotate -->
+            <button onclick="toggleRotation()" id="btn-rotate" class="glass-panel p-3 rounded-full text-blue-600 hover:scale-105 transition-transform" title="Toggle Auto-Rotation">
+                <svg id="icon-pause" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <svg id="icon-play" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </button>
+        </div>
+
+        <!-- Shape Selector (Bottom) -->
+        <div class="absolute bottom-8 left-0 w-full px-4 z-10">
+            <div class="max-w-4xl mx-auto glass-panel p-2 rounded-2xl">
+                <div class="grid grid-cols-6 gap-2">
+                    <button onclick="changeShape('cube')" class="shape-btn active rounded-xl py-3 text-sm font-medium" id="btn-cube">Cube</button>
+                    <button onclick="changeShape('cuboid')" class="shape-btn rounded-xl py-3 text-sm font-medium text-slate-600" id="btn-cuboid">Cuboid</button>
+                    <button onclick="changeShape('cylinder')" class="shape-btn rounded-xl py-3 text-sm font-medium text-slate-600" id="btn-cylinder">Cylinder</button>
+                    <button onclick="changeShape('sphere')" class="shape-btn rounded-xl py-3 text-sm font-medium text-slate-600" id="btn-sphere">Sphere</button>
+                    <button onclick="changeShape('cone')" class="shape-btn rounded-xl py-3 text-sm font-medium text-slate-600" id="btn-cone">Cone</button>
+                    <button onclick="changeShape('pyramid')" class="shape-btn rounded-xl py-3 text-sm font-medium text-slate-600" id="btn-pyramid">Pyramid</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logic -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- Configuration & Global State ---
+        const CONFIG = {
+            animSpeed: 0.04,
+            colors: {
+                mesh: 0x2563eb, // Darker blue for better visibility
+                inner: 0x60a5fa, // Lighter blue for inside
+                edges: 0xffffff,
+                bg: 0xf8fafc
+            }
+        };
+
+        let scene, camera, renderer, controls;
+        let currentSystem = null; // Stores the current shape logic
+        let isNetMode = false;
+        let isRotating = true;
+        let currentFold = 0; // 0 = 3D (Closed), 1 = Net (Open)
+        let targetFold = 0;
+
+        // Shared Materials
+        const matMain = new THREE.MeshStandardMaterial({ 
+            color: CONFIG.colors.mesh, 
+            roughness: 0.5, 
+            metalness: 0.1, 
+            side: THREE.DoubleSide,
+            polygonOffset: true,
+            polygonOffsetFactor: 1, // Fix Z-fighting with edges
+            polygonOffsetUnits: 1
+        });
+        const matLines = new THREE.LineBasicMaterial({ 
+            color: CONFIG.colors.edges, 
+            opacity: 0.8, 
+            transparent: true,
+            linewidth: 2 
+        });
+
+        // --- Init Function ---
+        function init() {
+            const container = document.getElementById('canvas-container');
+
+            // 1. Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(CONFIG.colors.bg);
+
+            // 2. Camera
+            camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(10, 10, 10);
+
+            // 3. Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // 4. Controls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 2;
+            controls.minDistance = 5;
+            controls.maxDistance = 40;
+
+            // 5. Lighting
+            const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambient);
+            
+            const sun = new THREE.DirectionalLight(0xffffff, 1);
+            sun.position.set(10, 20, 10);
+            sun.castShadow = true;
+            sun.shadow.mapSize.width = 2048;
+            sun.shadow.mapSize.height = 2048;
+            scene.add(sun);
+            
+            const fill = new THREE.DirectionalLight(0xeef2ff, 0.5);
+            fill.position.set(-10, 0, -10);
+            scene.add(fill);
+
+            // 6. Floor
+            const plane = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.ShadowMaterial({ opacity: 0.05 }));
+            plane.rotation.x = -Math.PI / 2;
+            plane.position.y = -2;
+            plane.receiveShadow = true;
+            scene.add(plane);
+
+            // 7. Events
+            window.addEventListener('resize', onResize);
+            document.getElementById('zoom-slider').addEventListener('input', onZoom);
+
+            // 8. Start
+            changeShape('cube');
+            animate();
+        }
+
+        // --- Helper: Create Plate Mesh ---
+        // Creates a flat mesh with thickness, centered locally but offset so pivot is at edge?
+        // No, let's keep pivot logic clean: 
+        // Pivot Group (0,0,0) -> Mesh Positioned relative to Pivot.
+        function createPlate(w, h, d) {
+            const geo = new THREE.BoxGeometry(w, h, d);
+            const mesh = new THREE.Mesh(geo, matMain);
+            mesh.castShadow = true; mesh.receiveShadow = true;
+            const edges = new THREE.EdgesGeometry(geo);
+            const lines = new THREE.LineSegments(edges, matLines);
+            mesh.add(lines);
+            return mesh;
+        }
+
+        // --- SHAPE BUILDERS (Re-engineered Pivots) ---
+
+        // 1. CUBE SYSTEM (Cross Net)
+        // Hierarchy: Base is static. Front/Back/Left/Right hinge on Base. Top hinges on Front.
+        function buildCubeSystem() {
+            const s = 2; // Size
+            const thickness = 0.05;
+            const root = new THREE.Group();
+
+            // BASE
+            const base = createPlate(s, thickness, s);
+            root.add(base);
+
+            // Helper to make hinged side
+            function makeSide(x, z, axis, dir) {
+                const pivot = new THREE.Group();
+                // Place pivot at the edge of the base
+                pivot.position.set(x * s/2, 0, z * s/2);
+                
+                const mesh = createPlate(axis==='z'?s:thickness, thickness, axis==='x'?s:thickness);
+                // Offset mesh so its edge touches the pivot
+                // If pivoting on Z axis (Front/Back), we move mesh along Z.
+                // If Front (Z+), mesh moves +Z/2.
+                // But wait, the mesh is s wide. Center is s/2 away from pivot.
+                
+                if (axis === 'x') { // Left/Right
+                     mesh.position.set(dir * s/2, 0, 0);
+                     mesh.geometry = new THREE.BoxGeometry(s, thickness, s); // Reuse Box
+                } else { // Front/Back
+                     mesh.position.set(0, 0, dir * s/2);
+                     mesh.geometry = new THREE.BoxGeometry(s, thickness, s);
+                }
+                pivot.add(mesh);
+                return { pivot, mesh };
+            }
+
+            // Sides
+            const front = makeSide(0, 1, 'z', 1); // Z+ edge
+            root.add(front.pivot);
+            
+            const back = makeSide(0, -1, 'z', -1);
+            root.add(back.pivot);
+            
+            const right = makeSide(1, 0, 'x', 1);
+            root.add(right.pivot);
+            
+            const left = makeSide(-1, 0, 'x', -1);
+            root.add(left.pivot);
+
+            // Top (Attached to Front)
+            // Pivot is at the far edge of the Front face.
+            const topPivot = new THREE.Group();
+            topPivot.position.set(0, 0, s); // Relative to Front Pivot (which is at Base Edge) -> Far edge is s away
+            // No, Front Mesh is at z = s/2 relative to Front Pivot. Far edge is at z = s.
+            // So Top Pivot goes at (0, 0, s) inside Front Pivot. (Correct)
+            
+            const topMesh = createPlate(s, thickness, s);
+            topMesh.position.set(0, 0, s/2); // Extends further out
+            topPivot.add(topMesh);
+            front.pivot.add(topPivot); // Child of Front
+
+            return {
+                root,
+                animate: (t) => {
+                    // t=0 (Closed), t=1 (Open)
+                    // When closed, Front rotates 90 deg UP around X axis.
+                    // Math: Z+ edge. Rotate -90 on X axis makes it vertical.
+                    const angle = t * (Math.PI/2);
+                    
+                    front.pivot.rotation.x = -Math.PI/2 + angle; // -90 to 0
+                    back.pivot.rotation.x = Math.PI/2 - angle;   // 90 to 0
+                    right.pivot.rotation.z = Math.PI/2 - angle;  // 90 to 0
+                    left.pivot.rotation.z = -Math.PI/2 + angle;  // -90 to 0
+                    
+                    // Top: When Front is vertical (-90), Top is horizontal (-90 relative to Front).
+                    // When Front is flat (0), Top is flat (0 relative to Front).
+                    topPivot.rotation.x = -Math.PI/2 + angle;
+                }
+            };
+        }
+
+        // 2. CUBOID SYSTEM (Long Cross)
+        function buildCuboidSystem() {
+            const w = 1.5, h = 1, d = 2.5; // Width, Height, Depth
+            const th = 0.05;
+            const root = new THREE.Group();
+
+            // Base
+            const base = createPlate(w, th, d);
+            root.add(base);
+
+            // Front (Z+) - Hinges on Width edge. Height becomes length.
+            const frontP = new THREE.Group();
+            frontP.position.set(0, 0, d/2);
+            const frontM = createPlate(w, th, h); // Becomes vertical face
+            frontM.position.set(0, 0, h/2); // Extends h/2
+            frontP.add(frontM);
+            root.add(frontP);
+
+            // Back (Z-)
+            const backP = new THREE.Group();
+            backP.position.set(0, 0, -d/2);
+            const backM = createPlate(w, th, h);
+            backM.position.set(0, 0, -h/2);
+            backP.add(backM);
+            root.add(backP);
+
+            // Right (X+)
+            const rightP = new THREE.Group();
+            rightP.position.set(w/2, 0, 0);
+            const rightM = createPlate(h, th, d); // Height is now width
+            rightM.position.set(h/2, 0, 0);
+            rightP.add(rightM);
+            root.add(rightP);
+
+            // Left (X-)
+            const leftP = new THREE.Group();
+            leftP.position.set(-w/2, 0, 0);
+            const leftM = createPlate(h, th, d);
+            leftM.position.set(-h/2, 0, 0);
+            leftP.add(leftM);
+            root.add(leftP);
+
+            // Top (Attached to Front)
+            const topP = new THREE.Group();
+            topP.position.set(0, 0, h); // At end of front face
+            const topM = createPlate(w, th, d); // Matches base
+            topM.position.set(0, 0, d/2);
+            topP.add(topM);
+            frontP.add(topP);
+
+            return {
+                root,
+                animate: (t) => {
+                    const ang = t * (Math.PI/2);
+                    frontP.rotation.x = -Math.PI/2 + ang;
+                    backP.rotation.x = Math.PI/2 - ang;
+                    rightP.rotation.z = Math.PI/2 - ang;
+                    leftP.rotation.z = -Math.PI/2 + ang;
+                    topP.rotation.x = -Math.PI/2 + ang;
+                }
+            };
+        }
+
+        // 3. PYRAMID SYSTEM (Star)
+        function buildPyramidSystem() {
+            const size = 2;
+            const height = 2.5;
+            const half = size/2;
+            const root = new THREE.Group();
+
+            // Base
+            root.add(createPlate(size, 0.05, size));
+
+            // Logic: 4 Triangles
+            // Pivot at edge.
+            // Closed angle: calculated from geometry.
+            // Open angle: -PI/2 (Flat on ground)
+            
+            const slantHeight = Math.sqrt(half*half + height*height);
+            // Angle to horizontal plane (ground)
+            const elevationAngle = Math.atan(height/half); 
+            // We rotate from flat (0) UP to elevationAngle.
+            // But wait, our "Flat" state corresponds to Mesh being flat on ground.
+            // Pivot X axis. Mesh lies on +Z. 
+            // Rotate -90 (vertical). Rotate -(PI-elevation)?
+            // Let's visualize: 
+            // Mesh starts Flat (Z+). 
+            // To close, we lift it up. Rotation is NEGATIVE X.
+            // Angle = -elevationAngle.
+            // Wait, angle between base and face is elevationAngle? No.
+            // Angle is atan(h/half).
+            // So rotation target is -elevationAngle radians? No.
+            // Flat = 0. Up = -elevationAngle.
+            // Wait, if elevation is 90 (infinite height), rot is -90. Correct.
+
+            const faces = [];
+            for(let i=0; i<4; i++) {
+                const pivot = new THREE.Group();
+                const shape = new THREE.Shape();
+                shape.moveTo(-half, 0);
+                shape.lineTo(half, 0);
+                shape.lineTo(0, slantHeight);
+                shape.lineTo(-half, 0);
+                
+                const geo = new THREE.ShapeGeometry(shape);
+                const mesh = new THREE.Mesh(geo, matMain);
+                mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo), matLines));
+                
+                // Rotate mesh geometry so it lays flat on Z+ relative to pivot
+                // Current ShapeGeo is XY plane. Y is Up.
+                mesh.rotation.x = -Math.PI/2; // Lay flat on XZ. Tip at Z+.
+                // Fix offset: Base of triangle is at Y=0. Tip at Y=slant.
+                // After rot X -90, Base is Z=0. Tip is Z=slant.
+                // This is perfect. Pivot is at 0,0,0.
+                
+                pivot.add(mesh);
+                
+                // Position Pivot
+                if(i===0) { pivot.position.set(0, 0, half); } // Front
+                if(i===1) { pivot.position.set(0, 0, -half); pivot.rotation.y = Math.PI; } // Back
+                if(i===2) { pivot.position.set(half, 0, 0); pivot.rotation.y = -Math.PI/2; } // Right
+                if(i===3) { pivot.position.set(-half, 0, 0); pivot.rotation.y = Math.PI/2; } // Left
+                
+                root.add(pivot);
+                faces.push(pivot);
+            }
+
+            return {
+                root,
+                animate: (t) => {
+                    // t=0 (Closed), t=1 (Open)
+                    // Closed Rot: -elevationAngle
+                    // Open Rot: 0
+                    const target = -elevationAngle * (1-t);
+                    faces.forEach(f => {
+                        // We must preserve the Y rotation, only animate X local
+                        f.rotateX(target - f.rotation.x); // Incremental or absolute?
+                        // Three.js Euler is order dependent. 
+                        // Better to set X directly if order is XYZ (default).
+                        f.rotation.x = target;
+                    });
+                }
+            };
+        }
+
+        // 4. CYLINDER SYSTEM (Rolling Carpet)
+        function buildCylinderSystem() {
+            const r = 1.5;
+            const h = 3;
+            const segs = 24; // Smoothness
+            const panelW = (2 * Math.PI * r) / segs;
+            const stepAngle = (2 * Math.PI) / segs; // External angle
+            
+            const root = new THREE.Group();
+            
+            // We chain panels. Panel 0 is anchor.
+            // Panel 0 Position: Back of cylinder (-r).
+            // Panel 0 Rotation: Facing back.
+            
+            const panels = [];
+            let parent = root;
+
+            for(let i=0; i<segs; i++) {
+                const pivot = new THREE.Group();
+                const geo = new THREE.BoxGeometry(panelW, h, 0.05);
+                const mesh = new THREE.Mesh(geo, matMain);
+                mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo), matLines));
+                
+                if (i===0) {
+                    pivot.position.set(0, 0, -r);
+                    pivot.rotation.y = Math.PI; // Face outward
+                    mesh.position.set(0, 0, 0); // Center on pivot? 
+                    // No, for chain, pivot must be at LEFT edge.
+                    // Let's redefine: Panel 0 is centered.
+                    // Panel 1 pivot is at Panel 0 Right Edge.
+                    mesh.position.set(panelW/2, 0, 0); // Mesh center is right of pivot
+                } else {
+                    pivot.position.set(panelW, 0, 0); // Pivot at end of prev
+                    mesh.position.set(panelW/2, 0, 0);
+                }
+                
+                pivot.add(mesh);
+                parent.add(pivot);
+                parent = pivot; // Next panel children of this one
+                panels.push(pivot);
+            }
+
+            // Caps (Top and Bottom)
+            // Attached to Panel 0? Or Middle?
+            // Standard net: attached to one of the panels. Panel 0 is fine.
+            const capGeo = new THREE.CylinderGeometry(r, r, 0.05, 32);
+            
+            // Top Cap
+            const topP = new THREE.Group();
+            topP.position.set(panelW/2, h/2, 0); // Top Center of Panel 0 mesh
+            const topM = new THREE.Mesh(capGeo, matMain);
+            topM.add(new THREE.LineSegments(new THREE.EdgesGeometry(capGeo), matLines));
+            topM.position.set(0, 0, r); // Offset radius so hinge is at edge
+            topM.rotation.x = Math.PI/2;
+            topP.add(topM);
+            panels[0].children[0].add(topP); // Add to Mesh of Panel 0
+
+            // Bottom Cap
+            const botP = new THREE.Group();
+            botP.position.set(panelW/2, -h/2, 0);
+            const botM = new THREE.Mesh(capGeo, matMain);
+            botM.add(new THREE.LineSegments(new THREE.EdgesGeometry(capGeo), matLines));
+            botM.position.set(0, 0, r);
+            botM.rotation.x = Math.PI/2;
+            botP.add(botM);
+            panels[0].children[0].add(botP);
+
+            return {
+                root,
+                animate: (t) => {
+                    // t=0 (Closed), t=1 (Flat)
+                    
+                    // Unroll body
+                    // Each pivot rotates -stepAngle relative to parent
+                    // Flat: 0
+                    const ang = -stepAngle * (1-t);
+                    panels.forEach((p, i) => {
+                        if(i > 0) p.rotation.y = ang;
+                    });
+                    
+                    // Caps
+                    // Closed: Top -90, Bot +90 (relative to vertical panel)
+                    // Open: Top -180, Bot 180 (Flat)
+                    topP.rotation.x = -Math.PI/2 - (t * Math.PI/2);
+                    botP.rotation.x = Math.PI/2 + (t * Math.PI/2);
+                }
+            };
+        }
+
+        // 5. CONE SYSTEM (Petals)
+        // A cone net is a sector. We simulate this with petals hinged at base.
+        function buildConeSystem() {
+            const r = 1.8;
+            const h = 3;
+            const segs = 18;
+            const root = new THREE.Group();
+
+            // Base
+            const base = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.05, 32), matMain);
+            base.add(new THREE.LineSegments(new THREE.EdgesGeometry(base.geometry), matLines));
+            base.position.y = -h/2;
+            root.add(base);
+
+            const slant = Math.sqrt(r*r + h*h);
+            const slope = Math.atan(h/r); // Angle up from ground
+            const petalW = (2*Math.PI*r)/segs;
+
+            const petals = [];
+            for(let i=0; i<segs; i++) {
+                const pivot = new THREE.Group();
+                const ang = i * (2*Math.PI/segs);
+                pivot.position.set(Math.cos(ang)*r, -h/2, Math.sin(ang)*r);
+                pivot.rotation.y = -ang - Math.PI/2; // Point inward
+                
+                const shape = new THREE.Shape();
+                shape.moveTo(-petalW/2, 0);
+                shape.lineTo(petalW/2, 0);
+                shape.lineTo(0, slant);
+                shape.lineTo(-petalW/2, 0);
+                
+                const mesh = new THREE.Mesh(new THREE.ShapeGeometry(shape), matMain);
+                mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), matLines));
+                
+                // Lay flat on Z+ initially
+                mesh.rotation.x = -Math.PI/2; 
+                
+                pivot.add(mesh);
+                root.add(pivot);
+                petals.push(pivot);
+            }
+
+            return {
+                root,
+                animate: (t) => {
+                    // Closed: Up by 'slope' angle
+                    // Open: Flat (0)
+                    // Since mesh starts flat on Z+:
+                    // Rotation needed for closed = -slope
+                    // Rotation needed for open = 0
+                    const target = -slope * (1-t);
+                    petals.forEach(p => p.rotation.x = target);
+                }
+            };
+        }
+
+        // 6. SPHERE SYSTEM (Orange Peel)
+        function buildSphereSystem() {
+            const r = 2;
+            const segs = 12;
+            const root = new THREE.Group();
+            
+            // No base for sphere, just segments attached to a pole.
+            // Let's use Bottom Pole as center.
+            const petals = [];
+            
+            for(let i=0; i<segs; i++) {
+                const pivot = new THREE.Group();
+                pivot.position.set(0, -r, 0);
+                pivot.rotation.y = i * (2*Math.PI/segs);
+                
+                // Geometry: Slice of sphere
+                // Phi: 0 to PI. Theta: slice.
+                const geo = new THREE.SphereGeometry(r, 8, 16, 
+                    -Math.PI/segs, 2*Math.PI/segs, // Theta width
+                    0, Math.PI // Top to Bottom
+                );
+                // The geometry is centered at 0,0,0 (Sphere center).
+                // We want to rotate it around Bottom Pole (0, -r, 0).
+                // And we want the bottom of the geometry (Phi=PI) to be at the pivot.
+                // So we translate Geometry UP by r.
+                geo.translate(0, r, 0);
+                
+                const mesh = new THREE.Mesh(geo, matMain);
+                mesh.add(new THREE.LineSegments(new THREE.WireframeGeometry(geo), matLines));
+                
+                pivot.add(mesh);
+                root.add(pivot);
+                petals.push(pivot);
+            }
+
+            return {
+                root,
+                animate: (t) => {
+                    // Bloom
+                    const angle = t * (Math.PI/2.2);
+                    petals.forEach(p => p.rotation.x = angle);
+                }
+            };
+        }
+
+
+        // --- Interaction Logic ---
+        
+        window.changeShape = function(type) {
+            if (currentSystem) scene.remove(currentSystem.root);
+            
+            // Build new
+            switch(type) {
+                case 'cube': currentSystem = buildCubeSystem(); break;
+                case 'cuboid': currentSystem = buildCuboidSystem(); break;
+                case 'cylinder': currentSystem = buildCylinderSystem(); break;
+                case 'cone': currentSystem = buildConeSystem(); break;
+                case 'pyramid': currentSystem = buildPyramidSystem(); break;
+                case 'sphere': currentSystem = buildSphereSystem(); break;
+            }
+            
+            scene.add(currentSystem.root);
+            currentSystem.animate(currentFold);
+            
+            // UI
+            document.querySelectorAll('.shape-btn').forEach(b => {
+                b.classList.remove('active', 'bg-blue-600', 'text-white');
+                b.classList.add('text-slate-600');
+            });
+            const btn = document.getElementById('btn-'+type);
+            btn.classList.add('active');
+            btn.classList.remove('text-slate-600');
+            document.getElementById('current-shape-name').innerText = type.charAt(0).toUpperCase() + type.slice(1);
+        };
+        
+        window.toggleNetMode = function() {
+            const chk = document.getElementById('net-toggle');
+            isNetMode = !isNetMode;
+            chk.checked = isNetMode;
+            targetFold = isNetMode ? 1 : 0;
+            
+            if(isNetMode && isRotating) toggleRotation(); // Stop rotation when unfolding
+        };
+        
+        window.toggleRotation = function() {
+            isRotating = !isRotating;
+            controls.autoRotate = isRotating;
+            const play = document.getElementById('icon-play');
+            const pause = document.getElementById('icon-pause');
+            if(isRotating) { play.classList.add('hidden'); pause.classList.remove('hidden'); }
+            else { play.classList.remove('hidden'); pause.classList.add('hidden'); }
+        };
+
+        function onZoom(e) {
+            const val = e.target.value; // 10 to 100
+            // Invert logic: 100 = Close (Dist 5), 10 = Far (Dist 40)
+            const dist = 40 - ((val - 10) / 90) * 35;
+            
+            // Keep current angle, change distance
+            const vec = new THREE.Vector3().copy(camera.position).sub(controls.target);
+            vec.setLength(dist);
+            camera.position.copy(controls.target).add(vec);
+        }
+
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Smooth Fold Animation
+            if (Math.abs(currentFold - targetFold) > 0.001) {
+                currentFold += (targetFold - currentFold) * CONFIG.animSpeed;
+                if(currentSystem) currentSystem.animate(currentFold);
+            } else {
+                currentFold = targetFold;
+                if(currentSystem) currentSystem.animate(currentFold);
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        init();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Geometry Learning</title>
+    <!-- Tailwind CSS for UI styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Import Map for Three.js Module -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Prompt', sans-serif; background-color: #f8fafc; }
+        canvas { display: block; width: 100vw; height: 100vh; }
+        
+        /* Button Styles */
+        .shape-btn {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .shape-btn:active {
+            transform: scale(0.95);
+        }
+        .shape-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+        }
+        .shape-btn:hover:not(.active) {
+            background-color: #f1f5f9;
+        }
+
+        /* Control Button (Rotate/Pause) */
+        .control-btn {
+            transition: all 0.2s;
+        }
+        .control-btn:hover {
+            background-color: #eff6ff;
+            color: #2563eb;
+        }
+        .control-btn.active {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        /* Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        /* Thumb */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #3b82f6;
+            border: 3px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            margin-top: -7px; /* Align center */
+        }
+        
+        /* Track */
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 999px;
+        }
+
+        /* Firefox Support */
+        input[type=range]::-moz-range-thumb {
+            height: 18px;
+            width: 18px;
+            border: 3px solid white;
+            border-radius: 50%;
+            background: #3b82f6;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-moz-range-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 999px;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container" class="w-full h-screen relative">
+        
+        <!-- Header & Title -->
+        <div class="absolute top-6 left-0 w-full text-center pointer-events-none z-10 px-4">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-800 drop-shadow-sm tracking-tight">3D Geometry</h1>
+            <p class="text-slate-500 mt-2 text-sm font-medium">Select a shape below</p>
+            <div class="mt-4 flex justify-center pointer-events-auto">
+                <span id="current-shape-name" class="text-xl font-semibold text-blue-600 bg-white/95 px-8 py-2 rounded-full shadow-sm border border-slate-100 min-w-[160px]">
+                    Cube
+                </span>
+            </div>
+        </div>
+
+        <!-- Right Side Controls (Desktop) / Bottom Floating (Mobile) -->
+        <div class="absolute z-20 
+                    bottom-28 left-1/2 -translate-x-1/2 
+                    md:bottom-auto md:left-auto md:top-1/2 md:right-6 md:translate-x-0 md:-translate-y-1/2">
+            
+            <div class="bg-white/90 backdrop-blur-md p-3 rounded-2xl shadow-xl border border-white/50 flex flex-row md:flex-col items-center gap-4">
+                
+                <!-- Rotation Toggle Button -->
+                <button onclick="toggleRotation()" id="btn-rotate" class="control-btn p-3 rounded-full text-slate-500 hover:text-blue-600 active bg-blue-50 text-blue-600" title="Toggle Rotation">
+                    <!-- Pause Icon (Show when rotating) -->
+                    <svg id="icon-pause" class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <!-- Play Icon (Show when paused) -->
+                    <svg id="icon-play" class="w-6 h-6 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </button>
+
+                <div class="w-px h-8 bg-slate-200 md:w-8 md:h-px"></div>
+
+                <!-- Zoom Controls Group -->
+                <div class="flex flex-row md:flex-col items-center gap-2">
+                    
+                    <span class="text-blue-500 pointer-events-none">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </span>
+
+                    <!-- Slider Wrapper -->
+                    <div class="relative w-32 h-6 flex items-center justify-center md:w-6 md:h-32">
+                        <input type="range" id="zoom-slider" min="0" max="100" value="30" 
+                               class="w-full h-full md:absolute md:w-[128px] md:h-6 md:origin-center md:-rotate-90">
+                    </div>
+
+                    
+                    <span class="text-slate-400 pointer-events-none">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+                    </span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Shape Selection Menu -->
+        <div class="absolute bottom-8 left-0 w-full px-4 z-10">
+            <div class="max-w-4xl mx-auto bg-white/90 backdrop-blur-xl p-2 rounded-2xl shadow-xl border border-white/50">
+                <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
+                    <button onclick="window.changeShape('cube')" class="shape-btn active rounded-xl py-3 px-1 flex flex-col items-center justify-center gap-1 border border-transparent" id="btn-cube">
+                        <span class="text-sm font-medium">Cube</span>
+                    </button>
+                    <button onclick="window.changeShape('cuboid')" class="shape-btn bg-transparent text-slate-600 rounded-xl py-3 px-1 flex flex-col items-center justify-center gap-1 border border-transparent" id="btn-cuboid">
+                        <span class="text-sm font-medium">Cuboid</span>
+                    </button>
+                    <button onclick="window.changeShape('cylinder')" class="shape-btn bg-transparent text-slate-600 rounded-xl py-3 px-1 flex flex-col items-center justify-center gap-1 border border-transparent" id="btn-cylinder">
+                        <span class="text-sm font-medium">Cylinder</span>
+                    </button>
+                    <button onclick="window.changeShape('sphere')" class="shape-btn bg-transparent text-slate-600 rounded-xl py-3 px-1 flex flex-col items-center justify-center gap-1 border border-transparent" id="btn-sphere">
+                        <span class="text-sm font-medium">Sphere</span>
+                    </button>
+                    <button onclick="window.changeShape('cone')" class="shape-btn bg-transparent text-slate-600 rounded-xl py-3 px-1 flex flex-col items-center justify-center gap-1 border border-transparent" id="btn-cone">
+                        <span class="text-sm font-medium">Cone</span>
+                    </button>
+                    <button onclick="window.changeShape('pyramid')" class="shape-btn bg-transparent text-slate-600 rounded-xl py-3 px-1 flex flex-col items-center justify-center gap-1 border border-transparent" id="btn-pyramid">
+                        <span class="text-sm font-medium">Pyramid</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Three.js Script -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // Global Variables
+        let scene, camera, renderer, controls;
+        let currentMesh = null;
+        let zoomSlider;
+        let isAutoRotating = true;
+        
+        // Configuration
+        const MIN_DISTANCE = 3;    
+        const MAX_DISTANCE = 25;   
+        const INITIAL_SLIDER_VAL = 75; // ปรับให้ใหญ่ขึ้นตามที่ขอ (50 = กลางๆ ไม่เล็กไม่ใหญ่เกินไป)
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+            zoomSlider = document.getElementById('zoom-slider');
+
+            // 1. Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf8fafc); 
+
+            // 2. Camera
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+            
+            // ตั้งค่ามุมกล้องเริ่มต้นให้เป็นมุมเฉียง (Isometric-like) เห็น 3 ด้าน (บน, หน้า, ข้าง)
+            camera.position.set(10, 8, 10); 
+
+            // 3. Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // 4. Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+            dirLight.position.set(8, 12, 10);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 2048;
+            dirLight.shadow.mapSize.height = 2048;
+            dirLight.shadow.bias = -0.0001;
+            scene.add(dirLight);
+            
+            const fillLight = new THREE.DirectionalLight(0xeef2ff, 0.4);
+            fillLight.position.set(-8, 2, -10);
+            scene.add(fillLight);
+
+            // 5. Floor
+            const planeGeometry = new THREE.PlaneGeometry(50, 50);
+            const planeMaterial = new THREE.ShadowMaterial({ opacity: 0.05 });
+            const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            plane.rotation.x = -Math.PI / 2;
+            plane.position.y = -1.5;
+            plane.receiveShadow = true;
+            scene.add(plane);
+
+            // 6. Controls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 2.0;
+            controls.enableZoom = true;
+            controls.minDistance = MIN_DISTANCE;
+            controls.maxDistance = MAX_DISTANCE;
+
+            // Set Initial Camera Position (Slightly further away)
+            zoomSlider.value = INITIAL_SLIDER_VAL;
+            updateCameraFromSlider(INITIAL_SLIDER_VAL); 
+
+            // --- Slider Logic ---
+            zoomSlider.addEventListener('input', (e) => {
+                const value = parseInt(e.target.value);
+                updateCameraFromSlider(value);
+                // Pause rotation when user interacts with slider manually
+                if (isAutoRotating) {
+                    toggleRotation(); 
+                }
+            });
+
+            // Initial Shape
+            createShape('cube');
+
+            // Animation Loop
+            animate();
+
+            // Resize Handler
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        // Helper: Convert Slider Value (0-100) to Camera Distance
+        function updateCameraFromSlider(value) {
+            // Slider 0 = Max Distance (Far), 100 = Min Distance (Close)
+            const percent = value / 100;
+            const distance = MAX_DISTANCE - (percent * (MAX_DISTANCE - MIN_DISTANCE));
+            
+            // Move camera along the vector from target
+            const direction = new THREE.Vector3().copy(camera.position).sub(controls.target).normalize();
+            // Handle case where camera might be at target (rare but possible)
+            if (direction.length() === 0) direction.set(0, 0, 1);
+            
+            camera.position.copy(controls.target).add(direction.multiplyScalar(distance));
+        }
+
+        function createShape(type) {
+            if (currentMesh) {
+                scene.remove(currentMesh);
+                currentMesh.geometry.dispose();
+                currentMesh.material.dispose();
+            }
+
+            let geometry;
+            const material = new THREE.MeshStandardMaterial({ 
+                color: 0x3b82f6,
+                roughness: 0.2,
+                metalness: 0.1,
+                side: THREE.DoubleSide
+            });
+
+            switch(type) {
+                case 'cube':
+                    geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+                    updateLabel("Cube", "btn-cube");
+                    break;
+                case 'cuboid':
+                    geometry = new THREE.BoxGeometry(1.5, 1, 2.5);
+                    updateLabel("Cuboid", "btn-cuboid");
+                    break;
+                case 'cylinder':
+                    geometry = new THREE.CylinderGeometry(1, 1, 2, 64);
+                    updateLabel("Cylinder", "btn-cylinder");
+                    break;
+                case 'sphere':
+                    geometry = new THREE.SphereGeometry(1.2, 64, 64);
+                    updateLabel("Sphere", "btn-sphere");
+                    break;
+                case 'cone':
+                    geometry = new THREE.ConeGeometry(1.2, 2.5, 64);
+                    updateLabel("Cone", "btn-cone");
+                    break;
+                case 'pyramid':
+                    geometry = new THREE.ConeGeometry(1.5, 2, 4);
+                    updateLabel("Pyramid", "btn-pyramid");
+                    break;
+                default:
+                    geometry = new THREE.BoxGeometry(1, 1, 1);
+            }
+
+            currentMesh = new THREE.Mesh(geometry, material);
+            currentMesh.castShadow = true;
+            currentMesh.receiveShadow = true;
+            
+            // Clean Edges
+            let thresholdAngle = 1;
+            if (type === 'sphere') thresholdAngle = 30; 
+            else if (type === 'cone' || type === 'cylinder') thresholdAngle = 20; 
+            
+            const edges = new THREE.EdgesGeometry(geometry, thresholdAngle);
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x1e293b, opacity: 0.3, transparent: true }));
+            currentMesh.add(line);
+
+            if (type === 'pyramid') {
+                currentMesh.rotation.y = Math.PI / 4;
+            }
+
+            scene.add(currentMesh);
+        }
+
+        function updateLabel(text, btnId) {
+            document.getElementById('current-shape-name').innerText = text;
+            document.querySelectorAll('.shape-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-white');
+                btn.classList.add('bg-transparent', 'text-slate-600'); 
+            });
+            const activeBtn = document.getElementById(btnId);
+            if(activeBtn) {
+                activeBtn.classList.remove('bg-transparent', 'text-slate-600');
+                activeBtn.classList.add('active', 'text-white');
+            }
+        }
+
+        // Toggle Rotation Function
+        window.toggleRotation = function() {
+            isAutoRotating = !isAutoRotating;
+            controls.autoRotate = isAutoRotating;
+            
+            const btn = document.getElementById('btn-rotate');
+            const playIcon = document.getElementById('icon-play');
+            const pauseIcon = document.getElementById('icon-pause');
+            
+            if (isAutoRotating) {
+                btn.classList.add('active', 'bg-blue-50', 'text-blue-600');
+                btn.classList.remove('text-slate-500');
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+            } else {
+                btn.classList.remove('active', 'bg-blue-50', 'text-blue-600');
+                btn.classList.add('text-slate-500');
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+            }
+        };
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+
+            // Sync Slider with Camera (Prevent jitter)
+            if (zoomSlider && controls) {
+                const currentDist = camera.position.distanceTo(controls.target);
+                // percent = (MAX - current) / (MAX - MIN)
+                let percent = (MAX_DISTANCE - currentDist) / (MAX_DISTANCE - MIN_DISTANCE);
+                percent = Math.max(0, Math.min(1, percent));
+                const sliderVal = percent * 100;
+
+                // Update UI only if difference is significant
+                if (Math.abs(zoomSlider.value - sliderVal) > 2) {
+                     zoomSlider.value = sliderVal;
+                }
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.changeShape = function(type) {
+            createShape(type);
+        };
+
+        init();
+    </script>
+</body>
+</html>
