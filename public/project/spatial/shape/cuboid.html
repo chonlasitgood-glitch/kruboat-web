@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รูปคลี่ทรงสี่เหลี่ยมมุมฉาก (Cuboid Net)</title>
+    
+    <!-- Import Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Import Google Fonts (Sarabun for Thai) -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Sarabun', sans-serif; overflow: hidden; }
+        #canvas-container { width: 100vw; height: 100vh; display: block; }
+        
+        /* Custom slider styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            margin-top: -8px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+    </style>
+
+    <!-- Import Three.js via CDN -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+
+    <!-- UI Overlay -->
+    <div class="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-200 max-w-sm w-full">
+        <h1 class="text-2xl font-bold text-gray-800 mb-1">รูปคลี่ทรงสี่เหลี่ยมมุมฉาก</h1>
+        <p class="text-sm text-gray-500 mb-6">Cuboid Net (Horizontal)</p>
+
+        <div class="space-y-4">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-blue-600 font-semibold">กางออก (Net)</span>
+                <span class="text-blue-600 font-semibold">ประกอบ (Solid)</span>
+            </div>
+            
+            <input type="range" id="foldSlider" min="0" max="100" value="0" class="w-full">
+            
+            <div class="flex justify-between text-xs text-gray-400 mt-1">
+                <span>0%</span>
+                <span id="percentDisplay">0%</span>
+                <span>100%</span>
+            </div>
+        </div>
+
+        <div class="mt-6 p-3 bg-blue-50 rounded-lg border border-blue-100">
+            <h3 class="font-semibold text-blue-800 text-sm mb-1">คำแนะนำ:</h3>
+            <ul class="text-xs text-blue-700 list-disc list-inside space-y-1">
+                <li>ลากปุ่มวงกลมเพื่อ หุบ หรือ คลี่ รูปทรง</li>
+                <li>คลิกซ้าย + ลาก เพื่อหมุนมุมกล้อง</li>
+                <li>เลื่อนลูกกลิ้งเมาส์ เพื่อซูมเข้า-ออก</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Main Logic -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- Configuration ---
+        // ปรับขนาดใหม่ให้เป็นแนวนอน
+        const DIM_X = 5;  // Width (Base X) - ยาว
+        const DIM_Z = 3;  // Depth (Base Z) - กว้าง
+        const DIM_Y = 2;  // Height (Extrusion Length) - สูง (เตี้ยลง)
+        
+        const MAX_FOLD_ANGLE = Math.PI / 2; // 90 degrees
+
+        // --- Scene Setup ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xffffff);
+
+        // Camera
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(12, 14, 14);
+        camera.lookAt(0, 0, 0);
+
+        // Renderer
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
+
+        // Controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(5, 10, 7);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        // Grid
+        const gridHelper = new THREE.GridHelper(30, 30, 0x888888, 0xe5e7eb);
+        scene.add(gridHelper);
+        
+        // --- Materials ---
+        const faceMaterial = new THREE.MeshPhongMaterial({
+            color: 0x3b82f6, // Blue
+            transparent: true,
+            opacity: 0.7,
+            side: THREE.DoubleSide,
+            shininess: 30,
+            flatShading: true
+        });
+
+        const edgeMaterial = new THREE.LineBasicMaterial({
+            color: 0x000000,
+            linewidth: 2
+        });
+
+        // --- Helper Functions ---
+
+        // Create a Rectangular Mesh centered at (0,0,0) on XZ plane
+        function createRectMesh(width, depth) {
+            const geometry = new THREE.PlaneGeometry(width, depth);
+            const mesh = new THREE.Mesh(geometry, faceMaterial);
+            mesh.rotation.x = -Math.PI / 2; // Lay flat
+            
+            const edgesGeo = new THREE.EdgesGeometry(geometry);
+            const edges = new THREE.LineSegments(edgesGeo, edgeMaterial);
+            mesh.add(edges);
+            
+            return mesh;
+        }
+
+        // --- Build Cuboid Structure ---
+
+        const cuboidGroup = new THREE.Group();
+        scene.add(cuboidGroup);
+
+        // 1. Base (Bottom Face) - Static
+        // Size: DIM_X * DIM_Z
+        const baseMesh = createRectMesh(DIM_X, DIM_Z);
+        cuboidGroup.add(baseMesh);
+
+        const pivots = [];
+
+        // Helper to add a side
+        // px, py, pz: pivot position
+        // offX, offZ: mesh center offset from pivot
+        // w, d: dimensions of the face mesh
+        // axis, dir: rotation axis and direction
+        function addFace(px, py, pz, offX, offZ, w, d, axis, dir, parent = cuboidGroup) {
+            const pivot = new THREE.Group();
+            pivot.position.set(px, py, pz);
+            parent.add(pivot);
+
+            const mesh = createRectMesh(w, d);
+            mesh.position.set(offX, 0, offZ);
+            pivot.add(mesh);
+
+            pivots.push({ group: pivot, axis: axis, dir: dir });
+            return pivot;
+        }
+
+        // 2. Right Face (Attached to X+)
+        // Hinge is along Z axis (Length DIM_Z).
+        // The face extends outwards by DIM_Y (Height).
+        // So Mesh Size is DIM_Y (as X) x DIM_Z (as Z).
+        addFace(
+            DIM_X / 2, 0, 0,       // Pivot Position (Right edge of Base)
+            DIM_Y / 2, 0,          // Mesh Center Offset (Move out by half height)
+            DIM_Y, DIM_Z,          // Mesh Dimensions
+            'z', 1                 // Rotate Z axis, +1 direction
+        );
+
+        // 3. Left Face (Attached to X-)
+        // Same dimensions as Right Face.
+        addFace(
+            -DIM_X / 2, 0, 0,      // Pivot Position (Left edge of Base)
+            -DIM_Y / 2, 0,         // Mesh Center Offset (Move left by half height)
+            DIM_Y, DIM_Z,          // Mesh Dimensions
+            'z', -1                // Rotate Z axis, -1 direction
+        );
+
+        // 4. Front Face (Attached to Z+)
+        // Hinge is along X axis (Length DIM_X).
+        // The face extends outwards by DIM_Y (Height).
+        // So Mesh Size is DIM_X (as X) x DIM_Y (as Z).
+        addFace(
+            0, 0, DIM_Z / 2,       // Pivot Position (Front edge of Base)
+            0, DIM_Y / 2,          // Mesh Center Offset (Move front by half height)
+            DIM_X, DIM_Y,          // Mesh Dimensions
+            'x', -1                // Rotate X axis, -1 direction (Standard Threejs X rotation rule)
+        );
+
+        // 5. Back Face (Attached to Z-)
+        // Same dimensions as Front Face.
+        const backPivot = addFace(
+            0, 0, -DIM_Z / 2,      // Pivot Position (Back edge of Base)
+            0, -DIM_Y / 2,         // Mesh Center Offset (Move back by half height)
+            DIM_X, DIM_Y,          // Mesh Dimensions
+            'x', 1                 // Rotate X axis, +1 direction
+        );
+
+        // 6. Top Face (Lid) - Attached to Back Face
+        // This is the child of backPivot.
+        // It must match the Base dimensions (DIM_X * DIM_Z).
+        // Pivot Location: At the end of the Back Face.
+        // Back Face extends -DIM_Y along Z (relative to pivot).
+        // So Lid Pivot is at Z = -DIM_Y.
+        addFace(
+            0, 0, -DIM_Y,          // Pivot Position relative to Back Pivot
+            0, -DIM_Z / 2,         // Mesh Center Offset (Move further back by half Depth)
+            DIM_X, DIM_Z,          // Mesh Dimensions (Same as Base)
+            'x', 1,                // Rotate X axis, same direction as back face
+            backPivot              // Attach to Back Pivot
+        );
+
+
+        // --- Animation Logic ---
+
+        const slider = document.getElementById('foldSlider');
+        const percentDisplay = document.getElementById('percentDisplay');
+
+        function updateFold() {
+            const val = parseInt(slider.value);
+            const t = val / 100; // 0 to 1
+            
+            percentDisplay.textContent = `${val}%`;
+
+            // Calculate current angle (0 to 90 degrees)
+            const angle = t * MAX_FOLD_ANGLE;
+
+            pivots.forEach(p => {
+                if (p.axis === 'z') {
+                    p.group.rotation.z = angle * p.dir;
+                } else if (p.axis === 'x') {
+                    p.group.rotation.x = angle * p.dir;
+                }
+            });
+        }
+
+        slider.addEventListener('input', updateFold);
+
+        // --- Render Loop ---
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Initialize state
+        updateFold();
+        animate();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Geometric Nets 3D</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Sarabun', sans-serif; overflow: hidden; background-color: #f8fafc; touch-action: none; }
+        #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 0; }
+        
+        /* Custom Scrollbar for Shape Selector */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Slider Styling - Compact Version */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px; /* Reduced from 24px */
+            width: 18px;  /* Reduced from 24px */
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #3b82f6;
+            cursor: pointer;
+            margin-top: -7px; /* Adjusted alignment */
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #e2e8f0; 
+            border-radius: 2px;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.90);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(255, 255, 255, 0.6);
+        }
+        
+        .shape-btn {
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            color: #6b7280;
+        }
+        .shape-btn.active {
+            background-color: #eff6ff;
+            border-color: #3b82f6;
+            color: #1d4ed8;
+            font-weight: 600;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+    </style>
+
+    <!-- Import Three.js -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <!-- 1. Header (Minimal) -->
+    <div class="absolute top-0 left-0 w-full p-4 z-10 pointer-events-none">
+        <div class="flex flex-col items-start pointer-events-auto">
+            <h1 class="text-lg font-bold text-gray-800 drop-shadow-sm">รูปคลี่เรขาคณิต 3 มิติ</h1>
+            <div class="flex items-center space-x-2 mt-1">
+                <span id="currentShapeName" class="text-xs font-semibold text-blue-600 bg-white/90 px-3 py-1 rounded-full shadow-sm border border-blue-100">
+                    ลูกบาศก์ (Cube)
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. 3D Canvas -->
+    <div id="canvas-container"></div>
+
+    <!-- 4. Bottom Dock Controls (More Compact) -->
+    <div class="fixed bottom-0 left-0 w-full z-30 glass-panel rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-safe transition-transform duration-300 transform translate-y-0">
+        <!-- Reduced padding from p-5 to p-3, and max-width adjustment -->
+        <div class="px-4 pt-4 pb-6 max-w-xl mx-auto space-y-3">
+            
+            <!-- Sliders Row (Compact Gap) -->
+            <div class="grid grid-cols-2 gap-4 items-center">
+                <!-- Zoom Slider -->
+                <div class="flex flex-col space-y-1">
+                    <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                        <span>Zoom</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path></svg>
+                        <input type="range" id="zoomSlider" min="0" max="100" value="40">
+                    </div>
+                </div>
+
+                <!-- Fold Slider -->
+                <div class="flex flex-col space-y-1 opacity-100 transition-opacity duration-200" id="foldControlGroup">
+                    <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                        <span>Fold</span>
+                        <span id="foldPercent" class="text-blue-600 font-bold">100%</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        <input type="range" id="foldSlider" min="0" max="100" value="100">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="h-px bg-gray-200/80 w-full"></div>
+
+            <!-- Shape Selector (Compact Buttons) -->
+            <!-- Reduced padding on container and buttons -->
+            <div class="flex space-x-2 overflow-x-auto hide-scrollbar py-1 justify-start md:justify-center">
+                
+                <button onclick="app.setShape('cube')" class="shape-btn active flex-shrink-0 px-4 py-2 rounded-lg transition-all active:scale-95 hover:border-blue-300">
+                    <span class="text-xs font-medium whitespace-nowrap">Cube</span>
+                </button>
+                
+                <button onclick="app.setShape('cuboid')" class="shape-btn flex-shrink-0 px-4 py-2 rounded-lg transition-all active:scale-95 hover:border-blue-300">
+                    <span class="text-xs font-medium whitespace-nowrap">Cuboid</span>
+                </button>
+
+                <button onclick="app.setShape('cone')" class="shape-btn flex-shrink-0 px-4 py-2 rounded-lg transition-all active:scale-95 hover:border-blue-300">
+                    <span class="text-xs font-medium whitespace-nowrap">Cone</span>
+                </button>
+
+                <button onclick="app.setShape('cylinder')" class="shape-btn flex-shrink-0 px-4 py-2 rounded-lg transition-all active:scale-95 hover:border-blue-300">
+                    <span class="text-xs font-medium whitespace-nowrap">Cylinder</span>
+                </button>
+
+                <button onclick="app.setShape('pyramid')" class="shape-btn flex-shrink-0 px-4 py-2 rounded-lg transition-all active:scale-95 hover:border-blue-300">
+                    <span class="text-xs font-medium whitespace-nowrap">Pyramid</span>
+                </button>
+
+                <button onclick="app.setShape('sphere')" class="shape-btn flex-shrink-0 px-4 py-2 rounded-lg transition-all active:scale-95 hover:border-blue-300">
+                    <span class="text-xs font-medium whitespace-nowrap">Sphere</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- GLOBAL VARIABLES ---
+        let scene, camera, renderer, controls;
+        let currentShapeInstance = null; // Object { root: THREE.Group, update: function(percent) }
+        let currentShapeType = 'cube';
+
+        // --- INITIALIZATION ---
+        function init() {
+            const container = document.getElementById('canvas-container');
+
+            // 1. Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf8fafc);
+
+            // 2. Camera
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+            
+            // 3. Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // 4. Controls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.enableZoom = false; // Disable mouse wheel and pinch zoom
+            controls.minDistance = 2;
+            controls.maxDistance = 50;
+
+            // *** CAMERA OFFSET TRICK ***
+            // Shift the controls target DOWN (-Y).
+            // This forces the camera to look lower, which effectively shifts the object (at 0,0,0) UPWARDS in the viewport.
+            controls.target.set(0, -1, 0); 
+            camera.position.set(10, 10, 10); // Adjusted Y to match the new target flow
+            controls.update();
+
+            // 5. Lights (Common for all)
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(5, 10, 7);
+            dirLight.castShadow = true;
+            scene.add(dirLight);
+
+            // Removed GridHelper here
+            // const gridHelper = new THREE.GridHelper(30, 30, 0x888888, 0xe5e7eb);
+            // scene.add(gridHelper);
+
+            // 6. Events
+            window.addEventListener('resize', onWindowResize);
+            document.getElementById('foldSlider').addEventListener('input', onFoldInput);
+            document.getElementById('zoomSlider').addEventListener('input', onZoomInput);
+
+            // 7. Load Default Shape
+            loadShape('cube');
+            
+            // 8. Start Loop
+            animate();
+        }
+
+        // --- SHAPE GENERATORS (Logic from uploaded files) ---
+        
+        const materials = {
+            face: new THREE.MeshPhongMaterial({
+                color: 0x3b82f6, transparent: true, opacity: 0.85, 
+                side: THREE.DoubleSide, flatShading: true,
+                polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1
+            }),
+            edge: new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 2 })
+        };
+
+        // 1. CUBE
+        function createCube() {
+            const root = new THREE.Group();
+            const SIDE = 4;
+            const HALF = SIDE/2;
+            const pivots = [];
+
+            function makeFace() {
+                const g = new THREE.PlaneGeometry(SIDE, SIDE);
+                const m = new THREE.Mesh(g, materials.face);
+                m.rotation.x = -Math.PI/2;
+                m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g), materials.edge));
+                return m;
+            }
+            function addPivot(px, py, pz, offX, offZ, axis, dir, parent=root) {
+                const piv = new THREE.Group();
+                piv.position.set(px, py, pz);
+                parent.add(piv);
+                const mesh = makeFace();
+                mesh.position.set(offX, 0, offZ);
+                piv.add(mesh);
+                pivots.push({ group: piv, axis, dir });
+                return piv;
+            }
+
+            root.add(makeFace()); // Base
+            addPivot(HALF, 0, 0, HALF, 0, 'z', 1); // Right
+            addPivot(-HALF, 0, 0, -HALF, 0, 'z', -1); // Left
+            addPivot(0, 0, HALF, 0, HALF, 'x', -1); // Front
+            const back = addPivot(0, 0, -HALF, 0, -HALF, 'x', 1); // Back
+            addPivot(0, 0, -SIDE, 0, -HALF, 'x', 1, back); // Lid
+
+            return {
+                root,
+                update: (t) => {
+                    const angle = t * (Math.PI/2);
+                    pivots.forEach(p => p.group.rotation[p.axis] = angle * p.dir);
+                }
+            };
+        }
+
+        // 2. CUBOID
+        function createCuboid() {
+            const root = new THREE.Group();
+            const DX=5, DZ=3, DY=2; // W, D, H
+            const pivots = [];
+
+            function makeRect(w, d) {
+                const g = new THREE.PlaneGeometry(w, d);
+                const m = new THREE.Mesh(g, materials.face);
+                m.rotation.x = -Math.PI/2;
+                m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g), materials.edge));
+                return m;
+            }
+            function addPivot(px, py, pz, offX, offZ, w, d, axis, dir, parent=root) {
+                const piv = new THREE.Group();
+                piv.position.set(px, py, pz);
+                parent.add(piv);
+                const mesh = makeRect(w, d);
+                mesh.position.set(offX, 0, offZ);
+                piv.add(mesh);
+                pivots.push({ group: piv, axis, dir });
+                return piv;
+            }
+
+            root.add(makeRect(DX, DZ)); // Base
+            addPivot(DX/2, 0, 0, DY/2, 0, DY, DZ, 'z', 1); // Right
+            addPivot(-DX/2, 0, 0, -DY/2, 0, DY, DZ, 'z', -1); // Left
+            addPivot(0, 0, DZ/2, 0, DY/2, DX, DY, 'x', -1); // Front
+            const back = addPivot(0, 0, -DZ/2, 0, -DY/2, DX, DY, 'x', 1); // Back
+            addPivot(0, 0, -DY, 0, -DZ/2, DX, DZ, 'x', 1, back); // Top
+
+            return {
+                root,
+                update: (t) => {
+                    const angle = t * (Math.PI/2);
+                    pivots.forEach(p => p.group.rotation[p.axis] = angle * p.dir);
+                }
+            };
+        }
+
+        // 3. CONE
+        function createCone() {
+            const root = new THREE.Group();
+            root.position.y = 0.01;
+            
+            const R = 2.5, S = 6;
+            const H = Math.sqrt(S*S - R*R);
+            const SEGS = 60;
+            
+            // Math
+            const SEG_ANGLE = 2 * Math.asin((R/S) * Math.sin(Math.PI/SEGS));
+            const BEND_ANGLE = 2 * Math.asin(Math.sin(Math.PI/SEGS) * (H/S));
+            const TARGET_LIFT = Math.PI - Math.atan2(H, R);
+
+            // Base
+            const baseGeo = new THREE.CircleGeometry(R, SEGS);
+            baseGeo.rotateX(-Math.PI/2).rotateY(-Math.PI/2);
+            const base = new THREE.Mesh(baseGeo, new THREE.MeshPhongMaterial({color: 0x2563eb, side:THREE.DoubleSide, transparent:true, opacity:0.85}));
+            base.add(new THREE.LineSegments(new THREE.EdgesGeometry(baseGeo), new THREE.LineBasicMaterial({color: 0x1e3a8a})));
+            root.add(base);
+
+            // Fan Structure
+            const lifter = new THREE.Group();
+            const anchor = new THREE.Group();
+            anchor.position.x = -R;
+            anchor.add(lifter);
+            root.add(anchor);
+
+            const tipNode = new THREE.Group();
+            tipNode.position.x = -S;
+            lifter.add(tipNode);
+
+            const jointsF = [], jointsB = [];
+
+            function buildChain(parent, count, isFront) {
+                let curr = parent;
+                for(let i=0; i<count; i++) {
+                    const piv = new THREE.Group();
+                    curr.add(piv);
+                    
+                    // Slice Shape
+                    const shape = new THREE.Shape();
+                    shape.moveTo(0,0);
+                    shape.lineTo(S,0);
+                    shape.lineTo(S*Math.cos(SEG_ANGLE), S*Math.sin(SEG_ANGLE)*(isFront?-1:1));
+                    shape.lineTo(0,0);
+                    const geo = new THREE.ShapeGeometry(shape);
+                    geo.rotateX(-Math.PI/2);
+                    const mesh = new THREE.Mesh(geo, materials.face);
+                    piv.add(mesh);
+
+                    const next = new THREE.Group();
+                    next.rotation.y = SEG_ANGLE * (isFront ? 1 : -1);
+                    piv.add(next);
+                    
+                    (isFront ? jointsF : jointsB).push(piv);
+                    curr = next;
+                }
+            }
+            buildChain(tipNode, SEGS/2, true);
+            buildChain(tipNode, SEGS/2, false);
+
+            return {
+                root,
+                update: (t) => {
+                    const ease = t*t*(3-2*t); // Smooth ease
+                    lifter.rotation.z = -ease * TARGET_LIFT;
+                    const bend = ease * BEND_ANGLE;
+                    jointsF.forEach(j => j.rotation.x = bend);
+                    jointsB.forEach(j => j.rotation.x = -bend);
+                }
+            };
+        }
+
+        // 4. CYLINDER
+        function createCylinder() {
+            const root = new THREE.Group();
+            const R=2, H=5;
+            const SEGS = 36;
+            const W = (2*Math.PI*R)/SEGS;
+            const jointsR=[], jointsL=[], caps=[];
+
+            function makeStrip() {
+                const g = new THREE.PlaneGeometry(W, H);
+                const m = new THREE.Mesh(g, materials.face);
+                m.rotation.x = -Math.PI/2;
+                return m;
+            }
+            function buildChain(parent, count, dir, arr) {
+                let curr = parent;
+                for(let i=0; i<count; i++) {
+                    const piv = new THREE.Group();
+                    piv.position.set(i===0?0:(dir*W), 0, 0);
+                    curr.add(piv);
+                    const m = makeStrip();
+                    m.position.set(dir*W/2, 0, 0);
+                    piv.add(m);
+                    arr.push(piv);
+                    curr = piv;
+                }
+            }
+            
+            buildChain(root, SEGS/2, 1, jointsR);
+            buildChain(root, SEGS/2, -1, jointsL);
+
+            // Caps
+            const topPiv = new THREE.Group(); topPiv.position.z = -H/2; root.add(topPiv);
+            const topCap = new THREE.Mesh(new THREE.CircleGeometry(R, 32).rotateX(-Math.PI/2), materials.face);
+            topCap.position.z = -R; topPiv.add(topCap);
+            caps.push({g:topPiv, d:1});
+
+            const botPiv = new THREE.Group(); botPiv.position.z = H/2; root.add(botPiv);
+            const botCap = new THREE.Mesh(new THREE.CircleGeometry(R, 32).rotateX(-Math.PI/2), materials.face);
+            botCap.position.z = R; botPiv.add(botCap);
+            caps.push({g:botPiv, d:-1});
+
+            const MAX_JOINT = (Math.PI*2)/SEGS;
+            
+            return {
+                root,
+                update: (t) => {
+                    const ease = t*t*(3-2*t);
+                    caps.forEach(c => c.g.rotation.x = ease * (Math.PI/2) * c.d);
+                    const jointRot = ease * MAX_JOINT;
+                    const baseRot = ease * (MAX_JOINT/2);
+                    jointsR.forEach((j,i) => j.rotation.z = (i===0?baseRot:jointRot));
+                    jointsL.forEach((j,i) => j.rotation.z = -(i===0?baseRot:jointRot));
+                }
+            };
+        }
+
+        // 5. PYRAMID
+        function createPyramid() {
+            const root = new THREE.Group();
+            const B=4, H=4, HB=2;
+            const MAX_FOLD = Math.PI - Math.acos(HB/H);
+            const pivots = [];
+
+            // Base
+            const base = new THREE.Mesh(new THREE.PlaneGeometry(B,B).rotateX(-Math.PI/2), materials.face);
+            base.add(new THREE.LineSegments(new THREE.EdgesGeometry(base.geometry), materials.edge));
+            root.add(base);
+
+            function makeTri(v1, v2, v3) {
+                const g = new THREE.BufferGeometry();
+                g.setAttribute('position', new THREE.BufferAttribute(new Float32Array([...v1,...v2,...v3]), 3));
+                g.computeVertexNormals();
+                const m = new THREE.Mesh(g, materials.face);
+                m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g), materials.edge));
+                return m;
+            }
+
+            function addSide(px, py, pz, axis, dir, vTip) {
+                const piv = new THREE.Group();
+                piv.position.set(px, py, pz);
+                root.add(piv);
+                
+                // Construct triangle relative to pivot
+                // Base of triangle is on axis. Tip is vTip.
+                // Corners are relative to pivot
+                let c1, c2;
+                if(axis==='z') { c1=[0,0,-HB]; c2=[0,0,HB]; }
+                else { c1=[HB,0,0]; c2=[-HB,0,0]; }
+
+                const m = makeTri(c1, c2, vTip);
+                piv.add(m);
+                pivots.push({group:piv, axis, dir});
+            }
+
+            addSide(HB,0,0, 'z', 1, [H,0,0]); // Right
+            addSide(-HB,0,0, 'z', -1, [-H,0,0]); // Left
+            addSide(0,0,-HB, 'x', 1, [0,0,-H]); // Back
+            addSide(0,0,HB, 'x', -1, [0,0,H]); // Front
+
+            return {
+                root,
+                update: (t) => {
+                    const a = t * MAX_FOLD;
+                    pivots.forEach(p => p.group.rotation[p.axis] = a * p.dir);
+                }
+            };
+        }
+
+        // 6. SPHERE
+        function createSphere() {
+            const root = new THREE.Group();
+            const geo = new THREE.SphereGeometry(3, 64, 64);
+            const mat = new THREE.MeshPhongMaterial({color: 0x3b82f6, transparent:true, opacity:0.9, shininess:60});
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.y = 3;
+            root.add(mesh);
+            
+            // Shadow
+            const sg = new THREE.CircleGeometry(3.5, 32).rotateX(-Math.PI/2);
+            const sm = new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:0.1});
+            const s = new THREE.Mesh(sg, sm);
+            s.position.y = 0.05;
+            root.add(s);
+
+            return {
+                root,
+                update: (t) => {} // No folding
+            };
+        }
+
+        // --- APP LOGIC ---
+
+        const ShapeFactory = {
+            cube: { name: 'ลูกบาศก์ (Cube)', fn: createCube },
+            cuboid: { name: 'ทรงสี่เหลี่ยมมุมฉาก (Cuboid)', fn: createCuboid },
+            cone: { name: 'ทรงกรวย (Cone)', fn: createCone },
+            cylinder: { name: 'ทรงกระบอก (Cylinder)', fn: createCylinder },
+            pyramid: { name: 'พีระมิด (Pyramid)', fn: createPyramid },
+            sphere: { name: 'ทรงกลม (Sphere)', fn: createSphere, noFold: true }
+        };
+
+        window.app = {
+            setShape: function(type) {
+                loadShape(type);
+            }
+        };
+
+        function loadShape(type) {
+            // 1. Cleanup
+            if (currentShapeInstance) {
+                scene.remove(currentShapeInstance.root);
+                currentShapeInstance = null;
+            }
+
+            // 2. UI Update
+            document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`button[onclick="app.setShape('${type}')"]`).classList.add('active');
+            
+            const shapeData = ShapeFactory[type];
+            document.getElementById('currentShapeName').textContent = shapeData.name;
+            currentShapeType = type;
+
+            // 3. Create Logic
+            currentShapeInstance = shapeData.fn();
+            scene.add(currentShapeInstance.root);
+
+            // 4. Reset Sliders
+            const foldSlider = document.getElementById('foldSlider');
+            const foldGroup = document.getElementById('foldControlGroup');
+
+            // Default to 100% (Solid)
+            foldSlider.value = 100;
+            document.getElementById('foldPercent').textContent = '100%';
+
+            if (shapeData.noFold) {
+                foldGroup.style.opacity = '0';
+                foldGroup.style.pointerEvents = 'none';
+            } else {
+                foldGroup.style.opacity = '1';
+                foldGroup.style.pointerEvents = 'auto';
+                // Initial update to 100%
+                currentShapeInstance.update(1);
+            }
+
+            // 5. Reset Camera nicely
+            controls.reset();
+            // Important: Re-apply offset to keep model lifted
+            controls.target.set(0, -1, 0); 
+            camera.position.set(10, 10, 10);
+            camera.lookAt(0, -1, 0); // Match target
+            
+            document.getElementById('zoomSlider').value = 40; // Default
+            updateZoom(40);
+        }
+
+        function onFoldInput(e) {
+            const val = parseInt(e.target.value);
+            document.getElementById('foldPercent').textContent = `${val}%`;
+            if (currentShapeInstance) {
+                currentShapeInstance.update(val / 100);
+            }
+        }
+
+        function onZoomInput(e) {
+            updateZoom(parseInt(e.target.value));
+        }
+
+        function updateZoom(val) {
+            // Map 0-100 to Distance Range (Far to Near)
+            // 0 -> 40 (Far), 100 -> 5 (Near)
+            const minD = 5;
+            const maxD = 40;
+            const dist = maxD - (val/100 * (maxD - minD));
+            
+            // Maintain vector direction but change length
+            const dir = new THREE.Vector3().copy(camera.position).sub(controls.target).normalize();
+            camera.position.copy(controls.target).add(dir.multiplyScalar(dist));
+            camera.updateProjectionMatrix();
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Boot
+        init();
+
+    </script>
+</body>
+</html>

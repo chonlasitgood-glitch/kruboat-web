@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ทรงกลม (Sphere)</title>
+    
+    <!-- Import Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Import Google Fonts (Sarabun for Thai) -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Sarabun', sans-serif; overflow: hidden; }
+        #canvas-container { width: 100vw; height: 100vh; display: block; }
+    </style>
+
+    <!-- Import Three.js via CDN -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+
+    <!-- UI Overlay -->
+    <div class="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-200 max-w-sm w-full">
+        <h1 class="text-2xl font-bold text-gray-800 mb-1">ทรงกลม</h1>
+        <p class="text-sm text-gray-500 mb-6">Sphere 3D Model</p>
+
+        <!-- Info Box instead of Slider -->
+        <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 text-center">
+            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm border border-blue-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h3 class="font-semibold text-blue-800 text-sm mb-2">ทำไมถึงไม่มีรูปคลี่?</h3>
+            <p class="text-xs text-blue-600 leading-relaxed">
+                ทรงกลมเป็นพื้นผิวโค้งที่มีความโค้งแบบ Gaussian Curvature เป็นบวก ไม่สามารถคลี่ออกเป็นแผ่นราบ (Flat Plane) ได้โดยไม่เกิดการฉีกขาดหรือยืดขยาย
+            </p>
+        </div>
+
+        <div class="mt-6">
+            <h3 class="font-semibold text-gray-600 text-sm mb-2">การควบคุม:</h3>
+            <ul class="text-xs text-gray-500 list-disc list-inside space-y-1">
+                <li>คลิกซ้าย + ลาก เพื่อหมุนดูรอบวัตถุ</li>
+                <li>เลื่อนลูกกลิ้งเมาส์ เพื่อซูมเข้า-ออก</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Main Logic -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- Configuration ---
+        const RADIUS = 3;
+        const SEGMENTS = 64; // High resolution for smooth sphere
+
+        // --- Scene Setup ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf8fafc); // Matches previous theme
+
+        // Camera
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 10, 15); 
+        camera.lookAt(0, 0, 0);
+
+        // Renderer
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
+
+        // Controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.autoRotate = false; // Add auto rotation for static display
+        controls.autoRotateSpeed = 2.0;
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(5, 10, 7);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        // Grid
+        const gridHelper = new THREE.GridHelper(30, 30, 0x888888, 0xe5e7eb);
+        scene.add(gridHelper);
+        
+        // --- Geometry Builders ---
+
+        // Sphere
+        const geometry = new THREE.SphereGeometry(RADIUS, SEGMENTS, SEGMENTS);
+        
+        // Material (Matches "Seamless" style: Blue, slightly transparent, smooth shading)
+        const material = new THREE.MeshPhongMaterial({
+            color: 0x3b82f6, // Blue
+            transparent: true,
+            opacity: 0.9,
+            side: THREE.DoubleSide,
+            flatShading: false, // Smooth shading for sphere
+            shininess: 60,
+            specular: 0x444444
+        });
+
+        const sphere = new THREE.Mesh(geometry, material);
+        
+        // Lift slightly so it sits on the grid center visually
+        sphere.position.y = RADIUS; 
+        
+        // Add subtle shadow plane
+        const shadowGeo = new THREE.CircleGeometry(RADIUS * 1.2, 32);
+        shadowGeo.rotateX(-Math.PI / 2);
+        const shadowMat = new THREE.MeshBasicMaterial({ 
+            color: 0x000000, 
+            transparent: true, 
+            opacity: 0.1 
+        });
+        const shadowPlane = new THREE.Mesh(shadowGeo, shadowMat);
+        shadowPlane.position.y = 0.05; // Just above grid
+        
+        scene.add(shadowPlane);
+        scene.add(sphere);
+
+        // --- Render Loop ---
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+
+    </script>
+</body>
+</html>

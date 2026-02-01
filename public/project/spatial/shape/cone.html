@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รูปคลี่ทรงกรวย (Cone Net) - Seamless</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Sarabun', sans-serif; overflow: hidden; }
+        #canvas-container { width: 100vw; height: 100vh; display: block; }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%;
+            background: #3b82f6; cursor: pointer; margin-top: -8px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; cursor: pointer; background: #cbd5e1; border-radius: 2px;
+        }
+    </style>
+    <script type="importmap">
+        { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <div class="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-200 max-w-sm w-full">
+        <h1 class="text-2xl font-bold text-gray-800 mb-1">รูปคลี่ทรงกรวย</h1>
+        <p class="text-sm text-gray-500 mb-6">Cone Net (Seamless)</p>
+        <div class="space-y-4">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-blue-600 font-semibold">กางออก (Net)</span>
+                <span class="text-blue-600 font-semibold">ประกอบ (Solid)</span>
+            </div>
+            <input type="range" id="foldSlider" min="0" max="100" value="0" class="w-full">
+            <div class="flex justify-between text-xs text-gray-400 mt-1"><span>0%</span><span id="percentDisplay">0%</span><span>100%</span></div>
+        </div>
+        <div class="mt-6 p-3 bg-green-50 rounded-lg border border-green-100">
+            <h3 class="font-semibold text-green-800 text-sm mb-1">สถานะการแก้ไข:</h3>
+            <ul class="text-xs text-green-700 list-disc list-inside space-y-1">
+                <li>ลบเส้นขอบขาว (Wireframe) ออกทั้งหมด</li>
+                <li>ผิวเรียบเนียน (Seamless)</li>
+                <li>ประกบสนิทไม่มีช่องว่าง</li>
+            </ul>
+        </div>
+    </div>
+    <div id="canvas-container"></div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // 1. Config
+        const BASE_RADIUS = 2.5; 
+        const SLANT_HEIGHT = 6; 
+        const CONE_HEIGHT = Math.sqrt(SLANT_HEIGHT**2 - BASE_RADIUS**2);
+        const SEGMENTS = 60; 
+        const HALF_SEGMENTS = SEGMENTS / 2;
+
+        // *** EXACT MATH CALCULATION ***
+        // 1. คำนวณมุมของแต่ละแผ่นสามเหลี่ยม (Segment Angle) โดยใช้ความยาวคอร์ด (Chord Length)
+        // สูตร: sin(theta/2) = (R/L) * sin(PI/N)
+        const SEGMENT_ANGLE = 2 * Math.asin( (BASE_RADIUS / SLANT_HEIGHT) * Math.sin(Math.PI / SEGMENTS) );
+
+        // 2. คำนวณมุมพับจริงใน 3 มิติ (Dihedral Angle Deviation)
+        // สูตรสำหรับพีระมิดฐานปกติ: sin(delta/2) = sin(PI/N) * cos(alpha) โดยที่ alpha คือมุมยอดครึ่งซีก
+        const COS_APEX_HALF = CONE_HEIGHT / SLANT_HEIGHT; 
+        const SIN_DELTA_2 = Math.sin(Math.PI / SEGMENTS) * COS_APEX_HALF;
+        const EXACT_BEND_ANGLE = 2 * Math.asin(SIN_DELTA_2);
+
+        // 2. Setup
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf8fafc);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 10, 18);
+        camera.lookAt(0, 3, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 3, 0);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(5, 10, 7);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+        
+        const gridHelper = new THREE.GridHelper(30, 30, 0x888888, 0xe5e7eb);
+        scene.add(gridHelper);
+        
+        // Materials
+        const faceMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0x3b82f6, 
+            transparent: true, 
+            opacity: 0.85,  // เพิ่มความทึบเล็กน้อยเพื่อให้สีชัดขึ้นเมื่อไม่มีเส้นขอบ
+            side: THREE.DoubleSide, 
+            flatShading: true, // ยังคง flatShading เพื่อให้เห็นมิติการพับเวลาแสงตกกระทบ
+            polygonOffset: true,
+            polygonOffsetFactor: 1, 
+            polygonOffsetUnits: 1
+        });
+        
+        const baseMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0x2563eb,
+            transparent: true, 
+            opacity: 0.85, 
+            side: THREE.DoubleSide,
+            polygonOffset: true,
+            polygonOffsetFactor: 2,
+            polygonOffsetUnits: 2
+        });
+
+        // ลบ edgeMaterial (เส้นขาว) ออก หรือไม่ได้ใช้งานแล้ว
+        const borderMaterial = new THREE.LineBasicMaterial({ color: 0x1e3a8a, linewidth: 2 });
+
+        // --- Helper Functions ---
+
+        function createCircleMesh(radius) {
+            const geometry = new THREE.CircleGeometry(radius, SEGMENTS);
+            geometry.rotateX(-Math.PI / 2); 
+            geometry.rotateY(-Math.PI/2); 
+            const mesh = new THREE.Mesh(geometry, baseMaterial);
+            // เก็บเส้นขอบวงกลมฐานไว้ (สีน้ำเงินเข้ม) เพื่อความสวยงาม
+            mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geometry), borderMaterial));
+            return mesh;
+        }
+
+        function createSliceMeshXZ(angle, length, mirror = false) {
+            const shape = new THREE.Shape();
+            shape.moveTo(0, 0); 
+            
+            const x = length; 
+            const y = 0;
+            const px = length * Math.cos(angle);
+            const py = length * Math.sin(angle) * (mirror ? -1 : 1);
+            
+            shape.lineTo(x, y); 
+            shape.lineTo(px, py); 
+            shape.lineTo(0, 0); 
+
+            const geometry = new THREE.ShapeGeometry(shape);
+            geometry.rotateX(-Math.PI / 2);
+
+            const mesh = new THREE.Mesh(geometry, faceMaterial);
+            
+            // *** REMOVED: ไม่ใส่เส้นขอบสีขาว (edgeMaterial) แล้ว ***
+            // mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geometry), edgeMaterial));
+            
+            return mesh;
+        }
+
+        // --- Build Logic ---
+        const coneGroup = new THREE.Group();
+        coneGroup.position.y = 0.01;
+        scene.add(coneGroup);
+
+        // 1. Base Circle
+        const baseMesh = createCircleMesh(BASE_RADIUS);
+        coneGroup.add(baseMesh);
+
+        // 2. Fan Anchor
+        const fanAnchor = new THREE.Group();
+        fanAnchor.position.set(-BASE_RADIUS, 0, 0);
+        coneGroup.add(fanAnchor);
+
+        // 3. Lifter
+        const lifter = new THREE.Group();
+        fanAnchor.add(lifter);
+
+        // 4. TipNode
+        const tipNode = new THREE.Group();
+        tipNode.position.set(-SLANT_HEIGHT, 0, 0);
+        lifter.add(tipNode);
+
+        // 5. Chains
+        const jointsFront = []; 
+        const jointsBack = [];  
+
+        function buildChain(parent, count, isFront) {
+            let currentParent = parent;
+            const chain = [];
+            for (let i = 0; i < count; i++) {
+                const pivot = new THREE.Group();
+                currentParent.add(pivot);
+                
+                const mesh = createSliceMeshXZ(SEGMENT_ANGLE, SLANT_HEIGHT, !isFront);
+                pivot.add(mesh);
+                
+                const nextAnchor = new THREE.Group();
+                const angleDir = isFront ? 1 : -1;
+                nextAnchor.rotation.y = SEGMENT_ANGLE * angleDir;
+                
+                pivot.add(nextAnchor);
+                chain.push(pivot);
+                currentParent = nextAnchor;
+            }
+            return chain;
+        }
+
+        jointsFront.push(...buildChain(tipNode, HALF_SEGMENTS, true));
+        jointsBack.push(...buildChain(tipNode, HALF_SEGMENTS, false));
+
+        // --- Animation ---
+        const slider = document.getElementById('foldSlider');
+        const percentDisplay = document.getElementById('percentDisplay');
+
+        // Lift Angle Calculation
+        const TARGET_ANGLE_RAD = Math.PI - Math.atan2(CONE_HEIGHT, BASE_RADIUS);
+
+        function updateFold() {
+            let val = parseInt(slider.value);
+            if (val > 99) val = 100;
+            if (val < 1) val = 0;
+
+            const t = val / 100; 
+            percentDisplay.textContent = `${val}%`;
+
+            const ease = t * t * (3 - 2 * t);
+
+            // Lift
+            lifter.rotation.z = -ease * TARGET_ANGLE_RAD;
+
+            // Curl
+            const currentBend = ease * EXACT_BEND_ANGLE;
+            
+            jointsFront.forEach(p => p.rotation.x = currentBend);
+            jointsBack.forEach(p => p.rotation.x = -currentBend);
+        }
+
+        slider.addEventListener('input', updateFold);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Init
+        updateFold();
+        animate();
+    </script>
+</body>
+</html>

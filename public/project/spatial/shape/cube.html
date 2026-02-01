@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รูปคลี่ลูกบาศก์ (Cube Net)</title>
+    
+    <!-- Import Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Import Google Fonts (Sarabun for Thai) -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Sarabun', sans-serif; overflow: hidden; }
+        #canvas-container { width: 100vw; height: 100vh; display: block; }
+        
+        /* Custom slider styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            margin-top: -8px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+    </style>
+
+    <!-- Import Three.js via CDN -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+
+    <!-- UI Overlay -->
+    <div class="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-200 max-w-sm w-full">
+        <h1 class="text-2xl font-bold text-gray-800 mb-1">รูปคลี่ลูกบาศก์</h1>
+        <p class="text-sm text-gray-500 mb-6">Cube Net</p>
+
+        <div class="space-y-4">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-blue-600 font-semibold">กางออก (Net)</span>
+                <span class="text-blue-600 font-semibold">ประกอบ (Cube)</span>
+            </div>
+            
+            <input type="range" id="foldSlider" min="0" max="100" value="0" class="w-full">
+            
+            <div class="flex justify-between text-xs text-gray-400 mt-1">
+                <span>0%</span>
+                <span id="percentDisplay">0%</span>
+                <span>100%</span>
+            </div>
+        </div>
+
+        <div class="mt-6 p-3 bg-blue-50 rounded-lg border border-blue-100">
+            <h3 class="font-semibold text-blue-800 text-sm mb-1">คำแนะนำ:</h3>
+            <ul class="text-xs text-blue-700 list-disc list-inside space-y-1">
+                <li>ลากปุ่มวงกลมเพื่อ หุบ หรือ คลี่ รูปทรง</li>
+                <li>คลิกซ้าย + ลาก เพื่อหมุนมุมกล้อง</li>
+                <li>เลื่อนลูกกลิ้งเมาส์ เพื่อซูมเข้า-ออก</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Main Logic -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- Configuration ---
+        const SIDE_LENGTH = 4;
+        const HALF_SIDE = SIDE_LENGTH / 2;
+        const MAX_FOLD_ANGLE = Math.PI / 2; // 90 degrees
+
+        // --- Scene Setup ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xffffff);
+
+        // Camera
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(10, 12, 12);
+        camera.lookAt(0, 0, 0);
+
+        // Renderer
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
+
+        // Controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(5, 10, 7);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        // Grid
+        const gridHelper = new THREE.GridHelper(30, 30, 0x888888, 0xe5e7eb);
+        scene.add(gridHelper);
+        
+        // --- Materials ---
+        const faceMaterial = new THREE.MeshPhongMaterial({
+            color: 0x3b82f6, // Blue
+            transparent: true,
+            opacity: 0.7,
+            side: THREE.DoubleSide,
+            shininess: 30,
+            flatShading: true
+        });
+
+        const edgeMaterial = new THREE.LineBasicMaterial({
+            color: 0x000000,
+            linewidth: 2
+        });
+
+        // --- Helper Functions ---
+
+        // Create a Square Mesh centered at (0,0,0) in XZ plane
+        function createSquareMesh() {
+            const geometry = new THREE.PlaneGeometry(SIDE_LENGTH, SIDE_LENGTH);
+            const mesh = new THREE.Mesh(geometry, faceMaterial);
+            mesh.rotation.x = -Math.PI / 2; // Lay flat
+            
+            const edgesGeo = new THREE.EdgesGeometry(geometry);
+            const edges = new THREE.LineSegments(edgesGeo, edgeMaterial);
+            mesh.add(edges);
+            
+            return mesh;
+        }
+
+        // --- Build Cube Structure ---
+        // Strategy: Use a Hierarchy of Pivots.
+        // Base -> Side Pivots -> Side Meshes
+        // Back Pivot -> Top Pivot -> Top Mesh
+
+        const cubeGroup = new THREE.Group();
+        scene.add(cubeGroup);
+
+        // 1. Center Base
+        const baseMesh = createSquareMesh();
+        cubeGroup.add(baseMesh);
+
+        const pivots = [];
+
+        // Helper to add a side
+        // pos: pivot position relative to parent
+        // meshOffset: mesh position relative to pivot
+        // axis: rotation axis ('x' or 'z')
+        // dir: rotation direction (1 or -1)
+        // parent: parent group (default is cubeGroup)
+        function addFace(px, py, pz, offX, offZ, axis, dir, parent = cubeGroup) {
+            const pivot = new THREE.Group();
+            pivot.position.set(px, py, pz);
+            parent.add(pivot);
+
+            const mesh = createSquareMesh();
+            // Position mesh relative to pivot so the edge aligns
+            mesh.position.set(offX, 0, offZ);
+            pivot.add(mesh);
+
+            pivots.push({ group: pivot, axis: axis, dir: dir });
+            return pivot;
+        }
+
+        // 2. Right Face
+        // Pivot at Right Edge (X=2). 
+        // Mesh center at X=2 (relative to pivot).
+        // Rotates around Z axis. +Z rotation lifts X+ to Y+. (Dir = 1)
+        addFace(HALF_SIDE, 0, 0, HALF_SIDE, 0, 'z', 1);
+
+        // 3. Left Face
+        // Pivot at Left Edge (X=-2).
+        // Mesh center at X=-2 (relative to pivot).
+        // Rotates around Z axis. -Z rotation lifts X- to Y+. (Dir = -1)
+        addFace(-HALF_SIDE, 0, 0, -HALF_SIDE, 0, 'z', -1);
+
+        // 4. Front Face
+        // Pivot at Front Edge (Z=2).
+        // Mesh center at Z=2 (relative to pivot).
+        // Rotates around X axis. -X rotation lifts Z+ to Y+. (Dir = -1)
+        addFace(0, 0, HALF_SIDE, 0, HALF_SIDE, 'x', -1);
+
+        // 5. Back Face
+        // Pivot at Back Edge (Z=-2).
+        // Mesh center at Z=-2 (relative to pivot).
+        // Rotates around X axis. +X rotation lifts Z- to Y+. (Dir = 1)
+        const backPivot = addFace(0, 0, -HALF_SIDE, 0, -HALF_SIDE, 'x', 1);
+
+        // 6. Top Face (Lid) - Attached to Back Face
+        // This is the child of backPivot.
+        // Position relative to Back Pivot:
+        // Back Pivot is at World Z=-2.
+        // The "Far Edge" of the Back Face (where Lid attaches) is at World Z=-6.
+        // So distance is -4 along Z (relative to Back Pivot).
+        // Mesh center relative to Lid Pivot is -2 along Z.
+        // Rotates around X axis. +X rotation lifts Z- to Y+ (relative to the now vertical wall).
+        addFace(0, 0, -SIDE_LENGTH, 0, -HALF_SIDE, 'x', 1, backPivot);
+
+
+        // --- Animation Logic ---
+
+        const slider = document.getElementById('foldSlider');
+        const percentDisplay = document.getElementById('percentDisplay');
+
+        function updateFold() {
+            const val = parseInt(slider.value);
+            const t = val / 100; // 0 to 1
+            
+            percentDisplay.textContent = `${val}%`;
+
+            // Calculate current angle (0 to 90 degrees)
+            const angle = t * MAX_FOLD_ANGLE;
+
+            pivots.forEach(p => {
+                if (p.axis === 'z') {
+                    p.group.rotation.z = angle * p.dir;
+                } else if (p.axis === 'x') {
+                    p.group.rotation.x = angle * p.dir;
+                }
+            });
+        }
+
+        slider.addEventListener('input', updateFold);
+
+        // --- Render Loop ---
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Initialize state
+        updateFold();
+        animate();
+
+    </script>
+</body>
+</html>

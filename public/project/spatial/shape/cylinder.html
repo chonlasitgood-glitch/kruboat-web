@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รูปคลี่ทรงกระบอก (Cylinder Net) - Seamless</title>
+    
+    <!-- Import Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Import Google Fonts (Sarabun for Thai) -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Sarabun', sans-serif; overflow: hidden; }
+        #canvas-container { width: 100vw; height: 100vh; display: block; }
+        
+        /* Custom slider styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            margin-top: -8px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+    </style>
+
+    <!-- Import Three.js via CDN -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+
+    <!-- UI Overlay -->
+    <div class="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-200 max-w-sm w-full">
+        <h1 class="text-2xl font-bold text-gray-800 mb-1">รูปคลี่ทรงกระบอก</h1>
+        <p class="text-sm text-gray-500 mb-6">Cylinder Net (Seamless)</p>
+
+        <div class="space-y-4">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-blue-600 font-semibold">กางออก (Net)</span>
+                <span class="text-blue-600 font-semibold">ประกอบ (Solid)</span>
+            </div>
+            
+            <input type="range" id="foldSlider" min="0" max="100" value="0" class="w-full">
+            
+            <div class="flex justify-between text-xs text-gray-400 mt-1">
+                <span>0%</span>
+                <span id="percentDisplay">0%</span>
+                <span>100%</span>
+            </div>
+        </div>
+
+        <div class="mt-6 p-3 bg-green-50 rounded-lg border border-green-100">
+            <h3 class="font-semibold text-green-800 text-sm mb-1">สถานะการแก้ไข:</h3>
+            <ul class="text-xs text-green-700 list-disc list-inside space-y-1">
+                <li>ลบเส้นโครงร่าง (Wireframe) ออกทั้งหมด</li>
+                <li>ปรับความทึบแสงให้ผิวดูเนียนตา</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Main Logic -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- Configuration ---
+        const RADIUS = 2;
+        const HEIGHT = 5; 
+        const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+        
+        const SEGMENTS = 36; 
+        const SEGMENT_WIDTH = CIRCUMFERENCE / SEGMENTS;
+        const HALF_CHAIN = 18;
+
+        // --- Scene Setup ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf8fafc); // ปรับพื้นหลังให้อ่อนลงเล็กน้อยเหมือนทรงกรวย
+
+        // Camera
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 15, 15); 
+        camera.lookAt(0, 0, 0);
+
+        // Renderer
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
+
+        // Controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(5, 10, 7);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        // Grid
+        const gridHelper = new THREE.GridHelper(30, 30, 0x888888, 0xe5e7eb);
+        scene.add(gridHelper);
+        
+        // --- Materials ---
+        // ปรับวัสดุให้ทึบขึ้นเล็กน้อยและลบเส้นขอบออก
+        const faceMaterial = new THREE.MeshPhongMaterial({
+            color: 0x3b82f6, // Blue
+            transparent: true,
+            opacity: 0.85, // เพิ่มความทึบ
+            side: THREE.DoubleSide,
+            flatShading: true,
+            polygonOffset: true,
+            polygonOffsetFactor: 1, 
+            polygonOffsetUnits: 1
+        });
+
+        // ไม่ได้ใช้งาน edgeMaterial และ borderMaterial แล้ว
+        // const edgeMaterial = ... 
+        // const borderMaterial = ...
+
+        // --- Geometry Builders ---
+
+        function createStripMesh(width, height) {
+            const geometry = new THREE.PlaneGeometry(width, height);
+            const mesh = new THREE.Mesh(geometry, faceMaterial);
+            mesh.rotation.x = -Math.PI / 2; 
+            
+            // *** REMOVED: ลบเส้น Grid บนแผ่นสี่เหลี่ยมออก ***
+            // const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geometry), edgeMaterial);
+            // mesh.add(edges);
+            
+            return mesh;
+        }
+
+        function createCircleMesh(radius) {
+            const geometry = new THREE.CircleGeometry(radius, 64);
+            const mesh = new THREE.Mesh(geometry, faceMaterial);
+            mesh.rotation.x = -Math.PI / 2; 
+            
+            // *** REMOVED: ลบเส้นขอบวงกลมออก ***
+            // const edgeGeo = new THREE.EdgesGeometry(geometry);
+            // const border = new THREE.LineSegments(edgeGeo, borderMaterial);
+            // mesh.add(border);
+
+            return mesh;
+        }
+
+        // --- Build Cylinder Net ---
+
+        const cylinderGroup = new THREE.Group();
+        scene.add(cylinderGroup);
+
+        const jointsRight = [];
+        const jointsLeft = [];
+        const capPivots = [];
+
+        // 1. Right Chain
+        let parentRight = cylinderGroup;
+        for (let i = 0; i < HALF_CHAIN; i++) {
+            const pivot = new THREE.Group();
+            
+            if (i === 0) {
+                pivot.position.set(0, 0, 0);
+            } else {
+                pivot.position.set(SEGMENT_WIDTH, 0, 0); 
+            }
+            parentRight.add(pivot);
+
+            const mesh = createStripMesh(SEGMENT_WIDTH, HEIGHT);
+            mesh.position.set(SEGMENT_WIDTH / 2, 0, 0);
+            pivot.add(mesh);
+
+            jointsRight.push(pivot);
+            parentRight = pivot; 
+        }
+
+        // 2. Left Chain
+        let parentLeft = cylinderGroup;
+        for (let i = 0; i < HALF_CHAIN; i++) {
+            const pivot = new THREE.Group();
+            
+            if (i === 0) {
+                pivot.position.set(0, 0, 0);
+            } else {
+                pivot.position.set(-SEGMENT_WIDTH, 0, 0);
+            }
+            parentLeft.add(pivot);
+
+            const mesh = createStripMesh(SEGMENT_WIDTH, HEIGHT);
+            mesh.position.set(-SEGMENT_WIDTH / 2, 0, 0);
+            pivot.add(mesh);
+
+            jointsLeft.push(pivot);
+            parentLeft = pivot;
+        }
+
+        // 3. Caps
+        
+        // Top Cap (Z-)
+        const pivotTop = new THREE.Group();
+        pivotTop.position.set(0, 0, -HEIGHT / 2);
+        cylinderGroup.add(pivotTop);
+        
+        const capTop = createCircleMesh(RADIUS);
+        capTop.position.set(0, 0, -RADIUS); 
+        pivotTop.add(capTop);
+        capPivots.push({ group: pivotTop, dir: 1 });
+
+        // Bottom Cap (Z+)
+        const pivotBottom = new THREE.Group();
+        pivotBottom.position.set(0, 0, HEIGHT / 2);
+        cylinderGroup.add(pivotBottom);
+
+        const capBottom = createCircleMesh(RADIUS);
+        capBottom.position.set(0, 0, RADIUS); 
+        pivotBottom.add(capBottom);
+        capPivots.push({ group: pivotBottom, dir: -1 });
+
+
+        // --- Animation Logic ---
+
+        const slider = document.getElementById('foldSlider');
+        const percentDisplay = document.getElementById('percentDisplay');
+
+        const MAX_JOINT_ANGLE = (Math.PI * 2) / SEGMENTS; 
+        const HALF_ANGLE = MAX_JOINT_ANGLE / 2;
+
+        function updateFold() {
+            let val = parseInt(slider.value);
+            // Snap to 100%
+            if (val > 99) val = 100;
+            if (val < 1) val = 0;
+
+            const t = val / 100; 
+            percentDisplay.textContent = `${val}%`;
+
+            // Ease function
+            const ease = t * t * (3 - 2 * t);
+
+            // 1. Fold Caps
+            const capAngle = ease * (Math.PI / 2);
+            capPivots.forEach(p => {
+                p.group.rotation.x = capAngle * p.dir;
+            });
+
+            // 2. Curl Body
+            const jointAngle = ease * MAX_JOINT_ANGLE;
+            const baseAngle = ease * HALF_ANGLE;
+            
+            // Right Chain
+            jointsRight.forEach((pivot, i) => {
+                if (i === 0) {
+                     pivot.rotation.z = baseAngle;
+                } else {
+                     pivot.rotation.z = jointAngle;
+                }
+            });
+
+            // Left Chain
+            jointsLeft.forEach((pivot, i) => {
+                if (i === 0) {
+                     pivot.rotation.z = -baseAngle;
+                } else {
+                     pivot.rotation.z = -jointAngle;
+                }
+            });
+        }
+
+        slider.addEventListener('input', updateFold);
+
+        // --- Render Loop ---
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        updateFold();
+        animate();
+
+    </script>
+</body>
+</html>
