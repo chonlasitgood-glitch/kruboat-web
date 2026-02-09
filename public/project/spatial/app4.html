@@ -30,11 +30,11 @@
         /* --- Shared Styles --- */
         .tech-font { font-family: 'Orbitron', sans-serif; }
         .glass-panel-dark {
-            background: rgba(15, 23, 42, 0.85); /* Slate-900 with opacity */
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(15, 23, 42, 0.9); /* Darker opacity for better contrast at bottom */
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border-top: 1px solid rgba(56, 189, 248, 0.2); /* Cyan border hint */
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 -4px 30px rgba(0,0,0,0.6);
         }
 
         .neon-slider { -webkit-appearance: none; width: 100%; background: transparent; }
@@ -161,11 +161,10 @@
     </div>
 
 
-    <!-- ================= COUNTING APP CONTAINER (UPDATED) ================= -->
+    <!-- ================= COUNTING APP CONTAINER (UPDATED LAYOUT) ================= -->
     <div id="counting-app" class="hidden absolute inset-0 bg-[#0f172a]">
-        <!-- Top Left Controls -->
-        <div class="absolute top-4 left-4 z-10 flex flex-col gap-3 max-w-[260px]">
-            <!-- Header Info -->
+        <!-- Top Left Info (Header Only) -->
+        <div class="absolute top-4 left-4 z-10 flex flex-col gap-3 max-w-[260px] pointer-events-none">
             <div>
                 <h1 class="text-lg font-bold text-white drop-shadow-md tech-font text-green-400">FACE & CORNER</h1>
                 <div class="flex items-center mt-1">
@@ -174,45 +173,6 @@
                     </span>
                 </div>
             </div>
-
-            <!-- Face Counter Control -->
-            <div class="bg-black/60 p-3 rounded-xl border-l-4 border-blue-500 backdrop-blur-md shadow-lg">
-                <div class="flex justify-between items-center mb-2">
-                    <p class="text-[10px] text-slate-400 uppercase tracking-wider">Faces (จำนวนหน้า)</p>
-                    <p id="countFaceDisplay" class="text-sm font-bold text-blue-300">0 / 6</p>
-                </div>
-                <div class="bg-slate-800/50 p-1 rounded-lg border border-slate-600 flex items-center justify-between gap-1">
-                    <button id="btnPrevFace" class="p-1.5 bg-slate-700 hover:bg-slate-600 rounded-md text-white transition">
-                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                    </button>
-                    <span class="text-gray-300 text-[10px] font-bold uppercase tracking-wider">COUNT FACES</span>
-                    <button id="btnNextFace" class="p-1.5 bg-blue-600 hover:bg-blue-500 rounded-md text-white transition shadow-sm">
-                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Corner Counter Control -->
-            <div class="bg-black/60 p-3 rounded-xl border-l-4 border-yellow-500 backdrop-blur-md shadow-lg">
-                <div class="flex justify-between items-center mb-2">
-                    <p class="text-[10px] text-slate-400 uppercase tracking-wider">Corners (จำนวนมุม)</p>
-                    <p id="countCornerDisplay" class="text-sm font-bold text-yellow-300">0 / 8</p>
-                </div>
-                <div class="bg-slate-800/50 p-1 rounded-lg border border-slate-600 flex items-center justify-between gap-1">
-                    <button id="btnPrevCorner" class="p-1.5 bg-slate-700 hover:bg-slate-600 rounded-md text-white transition">
-                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                    </button>
-                    <span class="text-gray-300 text-[10px] font-bold uppercase tracking-wider">COUNT CORNERS</span>
-                    <button id="btnNextCorner" class="p-1.5 bg-yellow-600 hover:bg-yellow-500 rounded-md text-white transition shadow-sm">
-                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                    </button>
-                </div>
-            </div>
-            
-             <!-- Reset All Button -->
-             <button id="btnResetCounts" class="w-full py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2">
-                <i data-lucide="rotate-ccw" class="w-3 h-3"></i> RESET COUNTS
-            </button>
         </div>
 
         <!-- Top Right Controls -->
@@ -230,17 +190,54 @@
         <!-- 3D Canvas -->
         <div id="counting-canvas-container"></div>
 
-        <!-- Bottom Controls -->
+        <!-- Bottom Controls (Moved Face/Corner counts here) -->
         <div class="fixed bottom-0 left-0 w-full z-30 glass-panel-dark rounded-t-2xl pb-safe transition-transform duration-300">
-            <div class="px-5 pt-5 pb-8 max-w-xl mx-auto space-y-4">
-                <!-- Shape Selector -->
-                <div class="flex space-x-3 overflow-x-auto hide-scrollbar py-1" id="count-shape-buttons">
-                    <button data-shape="cube" class="shape-btn active flex-shrink-0 px-4 py-2 rounded-lg"><span class="text-xs">Cube</span></button>
-                    <button data-shape="cuboid" class="shape-btn flex-shrink-0 px-4 py-2 rounded-lg"><span class="text-xs">Cuboid</span></button>
-                    <button data-shape="cone" class="shape-btn flex-shrink-0 px-4 py-2 rounded-lg"><span class="text-xs">Cone</span></button>
-                    <button data-shape="cylinder" class="shape-btn flex-shrink-0 px-4 py-2 rounded-lg"><span class="text-xs">Cylinder</span></button>
-                    <button data-shape="pyramid" class="shape-btn flex-shrink-0 px-4 py-2 rounded-lg"><span class="text-xs">Pyramid</span></button>
-                    <button data-shape="sphere" class="shape-btn flex-shrink-0 px-4 py-2 rounded-lg"><span class="text-xs">Sphere</span></button>
+            <div class="px-4 pt-4 pb-8 max-w-2xl mx-auto flex flex-col gap-3">
+                
+                <!-- Counters Row -->
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- Face Counter Control -->
+                    <div class="bg-slate-800/60 p-2 rounded-xl border border-blue-500/30 flex flex-col gap-1 shadow-lg">
+                        <div class="flex justify-between items-center px-1">
+                            <span class="text-[10px] text-slate-400 font-bold tracking-wider">FACES</span>
+                            <span id="countFaceDisplay" class="text-sm font-bold text-blue-300">0 / 6</span>
+                        </div>
+                        <div class="flex items-center justify-between gap-1">
+                            <button id="btnPrevFace" class="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-white w-full flex justify-center transition active:scale-95"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+                            <button id="btnNextFace" class="p-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white w-full flex justify-center transition active:scale-95 shadow-md shadow-blue-500/20"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Corner Counter Control -->
+                    <div class="bg-slate-800/60 p-2 rounded-xl border border-yellow-500/30 flex flex-col gap-1 shadow-lg">
+                        <div class="flex justify-between items-center px-1">
+                            <span class="text-[10px] text-slate-400 font-bold tracking-wider">CORNERS</span>
+                            <span id="countCornerDisplay" class="text-sm font-bold text-yellow-300">0 / 8</span>
+                        </div>
+                        <div class="flex items-center justify-between gap-1">
+                            <button id="btnPrevCorner" class="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-white w-full flex justify-center transition active:scale-95"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+                            <button id="btnNextCorner" class="p-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg text-white w-full flex justify-center transition active:scale-95 shadow-md shadow-yellow-500/20"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="h-px bg-slate-700/50 w-full"></div>
+
+                <!-- Reset & Shape Selector Row -->
+                <div class="flex items-center gap-3">
+                    <button id="btnResetCounts" class="p-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl flex-shrink-0 transition active:scale-95" title="Reset Counts">
+                        <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                    </button>
+                    
+                    <div class="flex-grow overflow-x-auto hide-scrollbar flex space-x-2 py-1" id="count-shape-buttons">
+                        <button data-shape="cube" class="shape-btn active flex-shrink-0 px-4 py-2 rounded-lg"><span class="text-xs font-medium">Cube</span></button>
+                        <button data-shape="cuboid" class="shape-btn flex-shrink-0 px-4 py-2 rounded-lg"><span class="text-xs font-medium">Cuboid</span></button>
+                        <button data-shape="cone" class="shape-btn flex-shrink-0 px-4 py-2 rounded-lg"><span class="text-xs font-medium">Cone</span></button>
+                        <button data-shape="cylinder" class="shape-btn flex-shrink-0 px-4 py-2 rounded-lg"><span class="text-xs font-medium">Cylinder</span></button>
+                        <button data-shape="pyramid" class="shape-btn flex-shrink-0 px-4 py-2 rounded-lg"><span class="text-xs font-medium">Pyramid</span></button>
+                        <button data-shape="sphere" class="shape-btn flex-shrink-0 px-4 py-2 rounded-lg"><span class="text-xs font-medium">Sphere</span></button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -781,7 +778,8 @@
                     // No corners
                 }
 
-                group.add(group);
+                // Apply 90% Scale
+                group.scale.setScalar(0.9);
                 this.resetCounts();
             }
         };
