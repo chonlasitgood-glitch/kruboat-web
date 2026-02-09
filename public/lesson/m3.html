@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>วิทยาการคำนวณ ม.3 - สื่อการเรียนรู้ออนไลน์</title>
+    
+    <!-- Google Fonts: Prompt for modern Thai typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #0284c7, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888; 
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555; 
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans leading-relaxed">
+
+    <!-- Navigation -->
+    <nav class="bg-white/95 backdrop-blur-sm fixed w-full z-50 shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-microchip text-brand-600 text-2xl mr-2"></i>
+                    <span class="font-bold text-xl tracking-tight text-gray-900">CS Mathayom 3</span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#home" class="text-gray-600 hover:text-brand-600 font-medium transition">หน้าแรก</a>
+                    <a href="#unit1" class="text-gray-600 hover:text-brand-600 font-medium transition">1. ข้อมูล</a>
+                    <a href="#unit2" class="text-gray-600 hover:text-brand-600 font-medium transition">2. ความน่าเชื่อถือ</a>
+                    <a href="#unit3" class="text-gray-600 hover:text-brand-600 font-medium transition">3. ไอที & กฎหมาย</a>
+                    <a href="#unit4" class="text-gray-600 hover:text-brand-600 font-medium transition">4. แอปพลิเคชัน</a>
+                    <a href="#quiz" class="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-800 transition shadow-md">แบบทดสอบ</a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-gray-600 hover:text-gray-900 focus:outline-none">
+                        <i class="fa-solid fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu Panel -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#home" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-brand-600 hover:bg-gray-50">หน้าแรก</a>
+                <a href="#unit1" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-brand-600 hover:bg-gray-50">1. การจัดการข้อมูล</a>
+                <a href="#unit2" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-brand-600 hover:bg-gray-50">2. ความน่าเชื่อถือ</a>
+                <a href="#unit3" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-brand-600 hover:bg-gray-50">3. การใช้เทคโนโลยี</a>
+                <a href="#unit4" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-brand-600 hover:bg-gray-50">4. แอปพลิเคชัน</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="home" class="pt-24 pb-12 md:pt-32 md:pb-20 bg-gradient-to-br from-brand-50 via-white to-blue-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 mb-10 md:mb-0">
+                <div class="inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-wider text-brand-600 uppercase bg-brand-100 rounded-full">
+                    รายวิชาพื้นฐานวิทยาศาสตร์และเทคโนโลยี
+                </div>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                    วิทยาการคำนวณ <br><span class="gradient-text">มัธยมศึกษาปีที่ 3</span>
+                </h1>
+                <p class="text-lg text-gray-600 mb-8 max-w-lg">
+                    เรียนรู้การจัดการข้อมูล, การรู้เท่าทันสื่อ, กฎหมายคอมพิวเตอร์ และพื้นฐาน IoT เพื่อก้าวทันโลกยุคดิจิทัล ตามหลักสูตรแกนกลางฯ ฉบับปรับปรุง พ.ศ. 2560
+                </p>
+                <div class="flex gap-4">
+                    <a href="#unit1" class="px-6 py-3 bg-brand-600 text-white font-semibold rounded-lg shadow-lg hover:bg-brand-800 transition transform hover:-translate-y-1">
+                        เริ่มบทเรียน
+                    </a>
+                    <a href="https://github.com" target="_blank" class="px-6 py-3 bg-white text-gray-700 border border-gray-300 font-semibold rounded-lg hover:bg-gray-50 transition flex items-center gap-2">
+                        <i class="fa-brands fa-github"></i> แหล่งข้อมูลเพิ่มเติม
+                    </a>
+                </div>
+            </div>
+            <div class="md:w-1/2 flex justify-center">
+                <img src="https://placehold.co/600x400/e0f2fe/0284c7?text=Computing+Science+M.3&font=roboto" alt="Computing Science Illustration" class="rounded-2xl shadow-2xl w-full max-w-md md:max-w-full">
+            </div>
+        </div>
+    </header>
+
+    <!-- Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-24">
+
+        <!-- Unit 1: Data Management -->
+        <section id="unit1" class="scroll-mt-24">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 text-xl font-bold">1</div>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900">การจัดการข้อมูล (Data Management)</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Content Block -->
+                <div class="lg:col-span-2 space-y-8">
+                    
+                    <!-- 1.1 Collection -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 card-hover">
+                        <h3 class="text-xl font-bold text-brand-800 mb-4 border-l-4 border-brand-500 pl-3">1. การเก็บรวบรวมข้อมูล</h3>
+                        <p class="text-gray-600 mb-4">
+                            การเก็บรวบรวมข้อมูลเป็นจุดเริ่มต้นสำคัญของวิทยาการข้อมูล (Data Science) โดยแบ่งประเภทข้อมูลตามแหล่งที่มาได้ 2 ประเภท:
+                        </p>
+                        <ul class="space-y-3 mb-4">
+                            <li class="flex items-start">
+                                <i class="fa-solid fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                <span><strong>ข้อมูลปฐมภูมิ (Primary Data):</strong> ข้อมูลที่เก็บจากแหล่งกำเนิดโดยตรง เช่น การสัมภาษณ์, การสังเกต, การทดลอง, หรือการทำแบบสอบถามด้วย Google Forms</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa-solid fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                <span><strong>ข้อมูลทุติยภูมิ (Secondary Data):</strong> ข้อมูลที่มีผู้อื่นรวบรวมไว้แล้ว เช่น สถิติจากสำนักงานสถิติแห่งชาติ, รายงานวิจัย, หรือ Dataset จาก Kaggle</span>
+                            </li>
+                        </ul>
+                        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                            <h4 class="font-semibold text-yellow-800"><i class="fa-solid fa-lightbulb mr-2"></i>สิ่งที่ต้องคำนึงถึง</h4>
+                            <p class="text-sm text-yellow-800 mt-1">ความทันสมัยของข้อมูล, ความถูกต้องแม่นยำ, และความสอดคล้องกับวัตถุประสงค์</p>
+                        </div>
+                    </div>
+
+                    <!-- 1.2 Processing -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 card-hover">
+                        <h3 class="text-xl font-bold text-brand-800 mb-4 border-l-4 border-brand-500 pl-3">2. การประมวลผลข้อมูล</h3>
+                        <p class="text-gray-600 mb-4">
+                            หลังจากได้ข้อมูลมาแล้ว ต้องนำมาผ่านกระบวนการเพื่อให้ได้สารสนเทศ (Information) ที่มีประโยชน์:
+                        </p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h4 class="font-bold text-gray-800 mb-2">Data Cleaning</h4>
+                                <p class="text-sm text-gray-600">การทำความสะอาดข้อมูล เช่น ลบข้อมูลขยะ, แก้ไขคำผิด, จัดการค่าว่าง (Null)</p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h4 class="font-bold text-gray-800 mb-2">Data Analysis</h4>
+                                <p class="text-sm text-gray-600">การวิเคราะห์ เช่น หาค่าเฉลี่ย (Mean), ค่ามัธยฐาน (Median), ส่วนเบี่ยงเบนมาตรฐาน</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 1.3 Software -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 card-hover">
+                        <h3 class="text-xl font-bold text-brand-800 mb-4 border-l-4 border-brand-500 pl-3">3. ซอฟต์แวร์จัดการข้อมูล</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center p-3 border rounded-lg hover:bg-gray-50">
+                                <i class="fa-solid fa-table text-green-600 text-2xl mr-4"></i>
+                                <div>
+                                    <h4 class="font-bold">Spreadsheet (Excel / Google Sheets)</h4>
+                                    <p class="text-sm text-gray-500">เหมาะสำหรับข้อมูลตาราง การคำนวณพื้นฐาน และสร้างกราฟ</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 border rounded-lg hover:bg-gray-50">
+                                <i class="fa-brands fa-python text-blue-600 text-2xl mr-4"></i>
+                                <div>
+                                    <h4 class="font-bold">Python & Libraries (Pandas)</h4>
+                                    <p class="text-sm text-gray-500">เหมาะสำหรับข้อมูลขนาดใหญ่ (Big Data) และการวิเคราะห์ซับซ้อน</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 border rounded-lg hover:bg-gray-50">
+                                <i class="fa-solid fa-chart-pie text-orange-500 text-2xl mr-4"></i>
+                                <div>
+                                    <h4 class="font-bold">Visualization Tools (Data Studio / Tableau)</h4>
+                                    <p class="text-sm text-gray-500">เน้นการนำเสนอข้อมูลในรูปแบบ Dashboard</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                
+                <!-- Sidebar Image/Visual -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="sticky top-24">
+                        <img src="https://placehold.co/400x500/f8fafc/cbd5e1?text=Data+Processing+Cycle\nInput->Process->Output&font=roboto" alt="Data Cycle" class="w-full rounded-xl shadow-md mb-6">
+                        <div class="bg-brand-900 text-white p-6 rounded-xl">
+                            <h4 class="font-bold text-lg mb-2">รู้หรือไม่?</h4>
+                            <p class="text-sm opacity-90">
+                                "Garbage In, Garbage Out" (GIGO) เป็นคำกล่าวที่เตือนว่า ถ้าเรานำข้อมูลคุณภาพต่ำ (ขยะ) เข้าสู่ระบบ ผลลัพธ์ที่ได้จากการประมวลผลก็จะไร้คุณภาพเช่นกัน
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-gray-200">
+
+        <!-- Unit 2: Data Reliability -->
+        <section id="unit2" class="scroll-mt-24">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-xl font-bold">2</div>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900">ความน่าเชื่อถือของข้อมูล</h2>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                <div class="md:flex">
+                    <div class="md:w-1/2 p-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">การประเมินความน่าเชื่อถือ (PROMPT)</h3>
+                        <p class="text-gray-600 mb-6">
+                            ในยุคข้อมูลข่าวสาร การตรวจสอบข้อมูลก่อนเชื่อหรือแชร์เป็นเรื่องสำคัญ หลักการ PROMPT เป็นเทคนิคง่ายๆ ในการตรวจสอบ:
+                        </p>
+                        <ul class="space-y-4">
+                            <li class="flex">
+                                <span class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex-shrink-0 flex items-center justify-center font-bold mr-3">P</span>
+                                <div>
+                                    <strong class="block text-gray-800">Presentation (การนำเสนอ)</strong>
+                                    <span class="text-sm text-gray-500">รูปแบบการนำเสนอเป็นมืออาชีพหรือไม่ ใช้ภาษาถูกต้องไหม</span>
+                                </div>
+                            </li>
+                            <li class="flex">
+                                <span class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex-shrink-0 flex items-center justify-center font-bold mr-3">R</span>
+                                <div>
+                                    <strong class="block text-gray-800">Relevance (ความสัมพันธ์)</strong>
+                                    <span class="text-sm text-gray-500">เนื้อหาตรงกับหัวข้อที่ต้องการหรือไม่</span>
+                                </div>
+                            </li>
+                            <li class="flex">
+                                <span class="w-8 h-8 rounded-full bg-yellow-100 text-yellow-600 flex-shrink-0 flex items-center justify-center font-bold mr-3">O</span>
+                                <div>
+                                    <strong class="block text-gray-800">Objectivity (วัตถุประสงค์)</strong>
+                                    <span class="text-sm text-gray-500">มีเจตนาแอบแฝง โฆษณา หรือมีอคติหรือไม่</span>
+                                </div>
+                            </li>
+                            <li class="flex">
+                                <span class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex-shrink-0 flex items-center justify-center font-bold mr-3">M</span>
+                                <div>
+                                    <strong class="block text-gray-800">Method (วิธีการ)</strong>
+                                    <span class="text-sm text-gray-500">มีกระบวนการเก็บข้อมูลที่ชัดเจน น่าเชื่อถือ</span>
+                                </div>
+                            </li>
+                            <li class="flex">
+                                <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex-shrink-0 flex items-center justify-center font-bold mr-3">P</span>
+                                <div>
+                                    <strong class="block text-gray-800">Provenance (แหล่งที่มา)</strong>
+                                    <span class="text-sm text-gray-500">ระบุผู้เขียนหรือหน่วยงานชัดเจน</span>
+                                </div>
+                            </li>
+                            <li class="flex">
+                                <span class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex-shrink-0 flex items-center justify-center font-bold mr-3">T</span>
+                                <div>
+                                    <strong class="block text-gray-800">Timeliness (ความทันสมัย)</strong>
+                                    <span class="text-sm text-gray-500">ข้อมูลเป็นปัจจุบัน ไม่เก่าเกินไป</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="md:w-1/2 bg-gray-50 p-8 flex flex-col justify-center border-l border-gray-100">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">เทคนิคการสืบค้นข้อมูล (Search Techniques)</h3>
+                        <div class="space-y-4">
+                            <div class="bg-white p-4 rounded-lg shadow-sm">
+                                <code class="text-red-600 font-bold">"คำค้น"</code>
+                                <p class="text-sm mt-1">ใช้เครื่องหมายคำพูดเพื่อค้นหาคำที่ติดกันและตรงตัวเป๊ะๆ</p>
+                                <p class="text-xs text-gray-400 mt-1">Ex. "ภาวะโลกร้อน"</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow-sm">
+                                <code class="text-red-600 font-bold">site:</code>
+                                <p class="text-sm mt-1">เจาะจงค้นหาเฉพาะเว็บไซต์นามสกุลที่ต้องการ</p>
+                                <p class="text-xs text-gray-400 mt-1">Ex. ขยะอิเล็กทรอนิกส์ site:ac.th (หาเฉพาะเว็บสถานศึกษา)</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow-sm">
+                                <code class="text-red-600 font-bold">filetype:</code>
+                                <p class="text-sm mt-1">ระบุประเภทไฟล์ที่ต้องการ</p>
+                                <p class="text-xs text-gray-400 mt-1">Ex. คู่มือ Python filetype:pdf</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">การรู้เท่าทันสื่อ (Media Literacy)</h3>
+                            <p class="text-sm text-gray-600">
+                                ระวัง <strong>Fake News (ข่าวลวง)</strong>, <strong>Clickbait (พาดหัวล่อเป้า)</strong>, และ <strong>Deepfake</strong> (การปลอมแปลงใบหน้า/เสียงด้วย AI) ควรตรวจสอบจากหลายแหล่งก่อนแชร์เสมอ
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-gray-200">
+
+        <!-- Unit 3: IT Usage & Law -->
+        <section id="unit3" class="scroll-mt-24">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-xl font-bold">3</div>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900">การใช้เทคโนโลยีสารสนเทศและกฎหมาย</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Law Card -->
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-purple-500">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4"><i class="fa-solid fa-gavel mr-2"></i>พ.ร.บ. คอมพิวเตอร์ฯ</h3>
+                    <p class="text-gray-600 mb-4 text-sm">สาระสำคัญของ พ.ร.บ. ว่าด้วยการกระทำความผิดเกี่ยวกับคอมพิวเตอร์ (ฉบับแก้ไข 2560) ที่นักเรียนควรรู้:</p>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded mt-1 mr-2">ระวัง</span>
+                            <p class="text-sm text-gray-700"><strong>การเข้าถึงระบบโดยมิชอบ (Hacking):</strong> จำคุกไม่เกิน 6 เดือน หรือปรับไม่เกิน 1 หมื่นบาท</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded mt-1 mr-2">ระวัง</span>
+                            <p class="text-sm text-gray-700"><strong>กดแชร์ข้อมูลเท็จ/บิดเบือน:</strong> ที่สร้างความเสียหายต่อความมั่นคง หรือตื่นตระหนก ปรับไม่เกิน 1 แสนบาท / จำคุกไม่เกิน 5 ปี</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded mt-1 mr-2">ระวัง</span>
+                            <p class="text-sm text-gray-700"><strong>ตัดต่อภาพให้ผู้อื่นเสียหาย:</strong> จำคุกไม่เกิน 3 ปี ปรับไม่เกิน 2 แสนบาท</p>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded mt-1 mr-2">ระวัง</span>
+                            <p class="text-sm text-gray-700"><strong>ขโมยข้อมูลบัตรเครดิต/ธุรกรรม:</strong> โทษหนักทั้งจำทั้งปรับ</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CC Card -->
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-blue-500">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4"><i class="fa-brands fa-creative-commons mr-2"></i>สัญญาอนุญาต (Creative Commons)</h3>
+                    <p class="text-gray-600 mb-4 text-sm">การคุ้มครองสิทธิ์และการนำผลงานผู้อื่นไปใช้:</p>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center p-3 border rounded-lg">
+                            <i class="fa-brands fa-creative-commons-by text-3xl text-gray-700 mb-2"></i>
+                            <h4 class="font-bold text-sm">CC BY</h4>
+                            <p class="text-xs text-gray-500">ต้องให้เครดิตเจ้าของผลงาน</p>
+                        </div>
+                        <div class="text-center p-3 border rounded-lg">
+                            <i class="fa-brands fa-creative-commons-nc text-3xl text-gray-700 mb-2"></i>
+                            <h4 class="font-bold text-sm">CC NC</h4>
+                            <p class="text-xs text-gray-500">ห้ามใช้เพื่อการค้า (Non-Commercial)</p>
+                        </div>
+                        <div class="text-center p-3 border rounded-lg">
+                            <i class="fa-brands fa-creative-commons-nd text-3xl text-gray-700 mb-2"></i>
+                            <h4 class="font-bold text-sm">CC ND</h4>
+                            <p class="text-xs text-gray-500">ห้ามดัดแปลงแก้ไข (No Derivatives)</p>
+                        </div>
+                        <div class="text-center p-3 border rounded-lg">
+                            <i class="fa-brands fa-creative-commons-sa text-3xl text-gray-700 mb-2"></i>
+                            <h4 class="font-bold text-sm">CC SA</h4>
+                            <p class="text-xs text-gray-500">อนุญาตต่อด้วยสัญญาเดิม (Share Alike)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-gray-200">
+
+        <!-- Unit 4: Application Development & IoT -->
+        <section id="unit4" class="scroll-mt-24">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-xl font-bold">4</div>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900">การพัฒนาแอปพลิเคชัน & IoT</h2>
+            </div>
+
+            <div class="bg-gray-900 text-white rounded-2xl p-8 mb-8">
+                <div class="flex flex-col md:flex-row items-center gap-8">
+                    <div class="md:w-2/3">
+                        <h3 class="text-2xl font-bold text-green-400 mb-4">IoT (Internet of Things) คืออะไร?</h3>
+                        <p class="mb-4 text-gray-300">
+                            คือเทคโนโลยีที่ทำให้อุปกรณ์ต่างๆ (Things) สามารถเชื่อมโยงและส่งข้อมูลถึงกันได้ผ่านอินเทอร์เน็ต โดยไม่ต้องใช้คนสั่งการตลอดเวลา
+                        </p>
+                        <h4 class="font-bold text-lg mb-2">องค์ประกอบของ IoT</h4>
+                        <ul class="list-disc list-inside text-gray-400 space-y-1">
+                            <li><strong>Smart Device:</strong> อุปกรณ์ที่มีไมโครคอนโทรลเลอร์ (เช่น แผงวงจร KidBright, ESP32)</li>
+                            <li><strong>Cloud Processing:</strong> ระบบประมวลผลบนคลาวด์</li>
+                            <li><strong>Connectivity:</strong> เครือข่ายอินเทอร์เน็ต (Wi-Fi, 5G, Bluetooth)</li>
+                        </ul>
+                    </div>
+                    <div class="md:w-1/3">
+                        <img src="https://placehold.co/400x300/1f2937/4ade80?text=IoT+Architecture\nSensors+%2B+Network&font=roboto" alt="IoT Diagram" class="rounded-lg shadow-lg w-full">
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">วงจรการพัฒนาแอปพลิเคชัน (SDLC)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Step 1 -->
+                <div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm relative overflow-hidden group hover:border-brand-500 transition">
+                    <div class="absolute -right-4 -top-4 w-16 h-16 bg-brand-100 rounded-full opacity-50"></div>
+                    <span class="text-4xl font-bold text-brand-200 absolute right-2 bottom-2 group-hover:text-brand-500 transition">1</span>
+                    <h4 class="font-bold text-gray-800">วิเคราะห์ (Analysis)</h4>
+                    <p class="text-sm text-gray-500 mt-2">กำหนดปัญหา ความต้องการของผู้ใช้ (User Requirement)</p>
+                </div>
+                <!-- Step 2 -->
+                <div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm relative overflow-hidden group hover:border-brand-500 transition">
+                    <div class="absolute -right-4 -top-4 w-16 h-16 bg-brand-100 rounded-full opacity-50"></div>
+                    <span class="text-4xl font-bold text-brand-200 absolute right-2 bottom-2 group-hover:text-brand-500 transition">2</span>
+                    <h4 class="font-bold text-gray-800">ออกแบบ (Design)</h4>
+                    <p class="text-sm text-gray-500 mt-2">ออกแบบหน้าจอ (UI), ประสบการณ์ (UX) และ Flowchart</p>
+                </div>
+                <!-- Step 3 -->
+                <div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm relative overflow-hidden group hover:border-brand-500 transition">
+                    <div class="absolute -right-4 -top-4 w-16 h-16 bg-brand-100 rounded-full opacity-50"></div>
+                    <span class="text-4xl font-bold text-brand-200 absolute right-2 bottom-2 group-hover:text-brand-500 transition">3</span>
+                    <h4 class="font-bold text-gray-800">พัฒนา (Development)</h4>
+                    <p class="text-sm text-gray-500 mt-2">เขียนโปรแกรม (Coding) สร้างแอปพลิเคชันตามที่ออกแบบ</p>
+                </div>
+                <!-- Step 4 -->
+                <div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm relative overflow-hidden group hover:border-brand-500 transition">
+                    <div class="absolute -right-4 -top-4 w-16 h-16 bg-brand-100 rounded-full opacity-50"></div>
+                    <span class="text-4xl font-bold text-brand-200 absolute right-2 bottom-2 group-hover:text-brand-500 transition">4</span>
+                    <h4 class="font-bold text-gray-800">ทดสอบ (Testing)</h4>
+                    <p class="text-sm text-gray-500 mt-2">หาข้อผิดพลาด (Bug) และแก้ไขก่อนนำไปใช้จริง</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz Section -->
+        <section id="quiz" class="py-12 bg-indigo-50 rounded-3xl mx-[-1rem] px-4 md:px-12">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-indigo-900">ทดสอบความรู้ท้ายบท (10 ข้อ)</h2>
+                <p class="text-indigo-600">ลองทำแบบทดสอบเพื่อทบทวนความเข้าใจ</p>
+            </div>
+
+            <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <form id="quiz-form">
+                    <!-- Question 1 -->
+                    <div class="mb-6 border-b pb-6">
+                        <p class="font-semibold text-gray-800 mb-3">1. ข้อมูลที่นักเรียนเก็บรวบรวมด้วยตนเองจากการสัมภาษณ์ปราชญ์ชาวบ้าน เรียกว่าข้อมูลประเภทใด?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q1" value="a" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ก. ข้อมูลทุติยภูมิ</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q1" value="b" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ข. ข้อมูลปฐมภูมิ</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q1" value="c" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ค. ข้อมูลสารสนเทศ</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Question 2 -->
+                    <div class="mb-6 border-b pb-6">
+                        <p class="font-semibold text-gray-800 mb-3">2. การหาค่าเฉลี่ย (Mean) ของคะแนนสอบ จัดอยู่ในขั้นตอนใดของการจัดการข้อมูล?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q2" value="a" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ก. การเก็บรวบรวมข้อมูล (Collection)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q2" value="b" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ข. การประมวลผลข้อมูล (Processing)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q2" value="c" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ค. การนำเสนอข้อมูล (Presentation)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Question 3 -->
+                    <div class="mb-6 border-b pb-6">
+                        <p class="font-semibold text-gray-800 mb-3">3. ซอฟต์แวร์ใดเหมาะสมที่สุดสำหรับการวิเคราะห์ข้อมูลในรูปแบบตารางและการสร้างกราฟเบื้องต้น?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q3" value="a" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ก. Microsoft Word</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q3" value="b" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ข. Google Sheets</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q3" value="c" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ค. Adobe Photoshop</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Question 4 -->
+                    <div class="mb-6 border-b pb-6">
+                        <p class="font-semibold text-gray-800 mb-3">4. ในหลักการ PROMPT ตัวอักษร T (Timeliness) หมายถึงสิ่งใดในการประเมินความน่าเชื่อถือ?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q4" value="a" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ก. ความทันสมัยของข้อมูล (เป็นปัจจุบัน)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q4" value="b" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ข. ความถูกต้องของไวยากรณ์</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q4" value="c" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ค. วัตถุประสงค์ของผู้เขียน</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Question 5 -->
+                     <div class="mb-6 border-b pb-6">
+                        <p class="font-semibold text-gray-800 mb-3">5. ข้อใดไม่ใช่เทคนิคการสืบค้นข้อมูลให้แม่นยำ?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q5" value="a" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ก. ใช้เครื่องหมาย "..." ครอบคำค้น</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q5" value="b" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ข. ระบุประเภทไฟล์ด้วย filetype:</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q5" value="c" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ค. พิมพ์ประโยคยาวๆ เหมือนคุยกับเพื่อน</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Question 6 -->
+                    <div class="mb-6 border-b pb-6">
+                        <p class="font-semibold text-gray-800 mb-3">6. หากพบข่าวลวง (Fake News) ในสื่อสังคมออนไลน์ นักเรียนควรปฏิบัติตนอย่างไรเหมาะสมที่สุด?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q6" value="a" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ก. แชร์ต่อทันทีเพื่อเตือนเพื่อนๆ</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q6" value="b" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ข. ตรวจสอบแหล่งที่มาก่อน และไม่ส่งต่อหากไม่แน่ใจ</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q6" value="c" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ค. เข้าไปด่าผู้โพสต์ด้วยถ้อยคำรุนแรง</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Question 7 -->
+                    <div class="mb-6 border-b pb-6">
+                        <p class="font-semibold text-gray-800 mb-3">7. หากต้องการนำรูปภาพจากอินเทอร์เน็ตไปใช้ทำรายงานส่งครู ควรเลือกภาพที่มีสัญญาอนุญาตแบบใด?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q7" value="a" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ก. CC BY (แสดงที่มา)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q7" value="b" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ข. สงวนลิขสิทธิ์ (All Rights Reserved)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q7" value="c" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ค. ห้ามนำไปใช้ทุกกรณี</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Question 8 -->
+                    <div class="mb-6 border-b pb-6">
+                        <p class="font-semibold text-gray-800 mb-3">8. การกระทำใดมีความผิดตาม พ.ร.บ. คอมพิวเตอร์ฯ?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q8" value="a" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ก. พิมพ์งานส่วนตัวในคอมพิวเตอร์</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q8" value="b" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ข. ตัดต่อภาพเพื่อนให้เสียหายและนำไปโพสต์ประจาน</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q8" value="c" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ค. เล่นเกมออนไลน์ในเวลาว่าง</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Question 9 -->
+                    <div class="mb-6 border-b pb-6">
+                        <p class="font-semibold text-gray-800 mb-3">9. องค์ประกอบใด **ไม่ใช่** ส่วนประกอบหลักของระบบ IoT?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q9" value="a" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ก. Smart Device (อุปกรณ์อัจฉริยะ)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q9" value="b" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ข. Cloud Processing (ระบบประมวลผลบนคลาวด์)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q9" value="c" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ค. Mechanical Typewriter (เครื่องพิมพ์ดีดแบบกลไก)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Question 10 -->
+                    <div class="mb-8">
+                        <p class="font-semibold text-gray-800 mb-3">10. ขั้นตอนแรกสุดของการพัฒนาแอปพลิเคชัน (SDLC) คือข้อใด?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q10" value="a" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ก. การเขียนโปรแกรม (Development)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q10" value="b" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ข. การวิเคราะห์ปัญหา (Analysis)</span>
+                            </label>
+                            <label class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="q10" value="c" class="h-4 w-4 text-brand-600">
+                                <span class="text-sm text-gray-700">ค. การทดสอบระบบ (Testing)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <button type="button" onclick="checkAnswers()" class="px-6 py-3 bg-brand-600 text-white font-bold rounded-lg hover:bg-brand-700 transition w-full md:w-auto">
+                            ส่งคำตอบ
+                        </button>
+                        <span id="score-display" class="hidden text-xl font-bold text-gray-800"></span>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Computing Science M.3</h3>
+                    <p class="text-gray-400 text-sm">
+                        สื่อการเรียนรู้ออนไลน์ รายวิชาวิทยาการคำนวณ ชั้นมัธยมศึกษาปีที่ 3<br>
+                        ตามหลักสูตรแกนกลางการศึกษาขั้นพื้นฐาน พ.ศ. 2551 (ฉบับปรับปรุง พ.ศ. 2560)
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">เมนูลัด</h3>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#unit1" class="hover:text-brand-400 transition">การจัดการข้อมูล</a></li>
+                        <li><a href="#unit2" class="hover:text-brand-400 transition">ความน่าเชื่อถือของข้อมูล</a></li>
+                        <li><a href="#unit3" class="hover:text-brand-400 transition">กฎหมายคอมพิวเตอร์</a></li>
+                        <li><a href="#unit4" class="hover:text-brand-400 transition">การพัฒนาแอปพลิเคชัน</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">ติดต่อ</h3>
+                    <p class="text-gray-400 text-sm">
+                        <i class="fa-solid fa-school mr-2"></i> กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี<br>
+                        <i class="fa-solid fa-envelope mr-2"></i> contact@example.ac.th
+                    </p>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-500">
+                &copy; 2023 สื่อการเรียนรู้วิทยาการคำนวณ ม.3. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top Button -->
+    <button id="scrollToTopBtn" class="fixed bottom-8 right-8 bg-brand-600 text-white p-3 rounded-full shadow-lg hidden hover:bg-brand-700 transition z-50">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // Mobile Menu Toggle
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        // Quiz Logic
+        function checkAnswers() {
+            const form = document.getElementById('quiz-form');
+            const resultDisplay = document.getElementById('score-display');
+            let score = 0;
+            let total = 10;
+
+            // Correct Answers
+            const answers = {
+                q1: 'b', // ข้อมูลปฐมภูมิ
+                q2: 'b', // Processing
+                q3: 'b', // Google Sheets
+                q4: 'a', // Timeliness
+                q5: 'c', // ประโยคยาวๆ (ไม่ใช่เทคนิค)
+                q6: 'b', // ตรวจสอบแหล่งที่มา
+                q7: 'a', // CC BY
+                q8: 'b', // ตัดต่อภาพให้เสียหาย
+                q9: 'c', // เครื่องพิมพ์ดีด (ไม่ใช่ IoT)
+                q10: 'b' // Analysis (ขั้นตอนแรก)
+            };
+
+            const userAnswers = new FormData(form);
+            
+            // Check all 10 questions
+            for (let i = 1; i <= 10; i++) {
+                if (userAnswers.get(`q${i}`) === answers[`q${i}`]) {
+                    score++;
+                }
+            }
+
+            resultDisplay.textContent = `คะแนนของคุณ: ${score} / ${total}`;
+            resultDisplay.classList.remove('hidden');
+            
+            if(score === total) {
+                resultDisplay.className = "text-xl font-bold text-green-600 ml-4 animate-bounce";
+                alert("สุดยอด! คุณทำคะแนนได้เต็ม 10 คะแนน");
+            } else if (score >= 5) {
+                resultDisplay.className = "text-xl font-bold text-brand-600 ml-4";
+            } else {
+                resultDisplay.className = "text-xl font-bold text-red-500 ml-4";
+            }
+        }
+
+        // Scroll to Top Logic
+        const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+        window.onscroll = function() {scrollFunction()};
+
+        function scrollFunction() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                scrollToTopBtn.classList.remove("hidden");
+            } else {
+                scrollToTopBtn.classList.add("hidden");
+            }
+        }
+
+        scrollToTopBtn.addEventListener("click", function() {
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        });
+    </script>
+</body>
+</html>
