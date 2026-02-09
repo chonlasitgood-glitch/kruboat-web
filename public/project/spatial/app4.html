@@ -200,7 +200,7 @@
                     <div class="bg-slate-800/60 p-2 rounded-xl border border-blue-500/30 flex flex-col gap-1 shadow-lg">
                         <div class="flex justify-between items-center px-1">
                             <span class="text-[10px] text-slate-400 font-bold tracking-wider">FACES</span>
-                            <span id="countFaceDisplay" class="text-sm font-bold text-blue-300">0 / 6</span>
+                            <span id="countFaceDisplay" class="text-sm font-bold text-blue-300">0</span>
                         </div>
                         <div class="flex items-center justify-between gap-1">
                             <button id="btnPrevFace" class="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-white w-full flex justify-center transition active:scale-95"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
@@ -212,7 +212,7 @@
                     <div class="bg-slate-800/60 p-2 rounded-xl border border-yellow-500/30 flex flex-col gap-1 shadow-lg">
                         <div class="flex justify-between items-center px-1">
                             <span class="text-[10px] text-slate-400 font-bold tracking-wider">CORNERS</span>
-                            <span id="countCornerDisplay" class="text-sm font-bold text-yellow-300">0 / 8</span>
+                            <span id="countCornerDisplay" class="text-sm font-bold text-yellow-300">0</span>
                         </div>
                         <div class="flex items-center justify-between gap-1">
                             <button id="btnPrevCorner" class="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-white w-full flex justify-center transition active:scale-95"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
@@ -622,7 +622,7 @@
             updateFaceVisuals: function() {
                 // Update UI Text
                 const total = this.faceMeshes.length;
-                document.getElementById('countFaceDisplay').textContent = `${this.currentFaceIndex} / ${total}`;
+                document.getElementById('countFaceDisplay').textContent = `${this.currentFaceIndex}`;
                 
                 // Update 3D Meshes
                 this.faceMeshes.forEach((mesh, index) => {
@@ -642,7 +642,7 @@
             updateCornerVisuals: function() {
                 // Update UI Text
                 const total = this.cornerMeshes.length;
-                document.getElementById('countCornerDisplay').textContent = `${this.currentCornerIndex} / ${total}`;
+                document.getElementById('countCornerDisplay').textContent = `${this.currentCornerIndex}`;
 
                 // Update 3D Spheres
                 this.cornerMeshes.forEach((mesh, index) => {
