@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>วิทยาการคำนวณ ม.4 - การพัฒนาโครงงาน</title>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Prompt', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#f5f3ff', 100: '#ede9fe', 500: '#8b5cf6', 600: '#7c3aed', 800: '#5b21b6', 900: '#4c1d95' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body { background-color: #fafafa; line-height: 1.8; }
+        .card-modern {
+            background: white; border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease; border: 1px solid #f3f4f6;
+        }
+        .card-modern:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: #ede9fe; }
+        .highlight-box { background-color: #f5f3ff; border-left: 4px solid #7c3aed; padding: 1.25rem; border-radius: 0.5rem; margin: 1rem 0; }
+        
+        /* Quiz Styles */
+        .quiz-option:hover { background-color: #f5f3ff; border-color: #7c3aed; }
+        .quiz-option.correct { background-color: #dcfce7; border-color: #22c55e; color: #166534; }
+        .quiz-option.wrong { background-color: #fee2e2; border-color: #ef4444; color: #991b1b; }
+    </style>
+</head>
+<body class="text-gray-700 font-sans antialiased">
+
+    <!-- Nav -->
+    <nav class="bg-white/95 backdrop-blur-md fixed w-full z-50 shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-laptop-code text-brand-600 text-xl mr-2"></i>
+                    <span class="font-bold text-lg tracking-tight text-gray-900">CS M.4 (Project Based)</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
+                    <a href="#home" class="hover:text-brand-600 transition">หน้าแรก</a>
+                    <a href="#unit1" class="hover:text-brand-600 transition">1. แนวคิดโครงงาน</a>
+                    <a href="#unit2" class="hover:text-brand-600 transition">2. กรณีศึกษา</a>
+                    <a href="#quiz" class="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition">แบบทดสอบ</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header id="home" class="pt-28 pb-20 bg-gradient-to-b from-white via-purple-50 to-white">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col md:flex-row items-center gap-12">
+            <div class="md:w-1/2 space-y-6">
+                <span class="px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-xs font-bold uppercase tracking-wider">มัธยมศึกษาปีที่ 4</span>
+                <h1 class="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">
+                    Project Based <br><span class="text-brand-600">Learning</span>
+                </h1>
+                <p class="text-lg text-gray-600 leading-relaxed">
+                    เรียนรู้กระบวนการพัฒนาโครงงานคอมพิวเตอร์อย่างเป็นระบบ ด้วยแนวคิดเชิงคำนวณและวงจรการพัฒนาระบบ (SDLC) ตั้งแต่เริ่มต้นจนถึงการนำเสนอ
+                </p>
+                <div class="flex gap-4">
+                    <a href="#unit1" class="px-6 py-3 bg-brand-600 text-white font-semibold rounded-xl shadow-lg hover:bg-brand-700 transition">เข้าสู่บทเรียน</a>
+                    <a href="#quiz" class="px-6 py-3 bg-white text-gray-700 border border-gray-200 font-semibold rounded-xl hover:bg-gray-50 transition">ทำแบบทดสอบ</a>
+                </div>
+            </div>
+            <div class="md:w-1/2">
+                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1000&auto=format&fit=crop" alt="Team Project" class="rounded-2xl shadow-2xl border-4 border-white w-full object-cover h-[400px]">
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 lg:px-8 py-12 space-y-24">
+
+        <!-- Unit 1: Concepts -->
+        <section id="unit1" class="scroll-mt-24">
+            <div class="border-l-4 border-brand-500 pl-4 mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">1. แนวคิดเชิงคำนวณในการพัฒนาโครงงาน</h2>
+                <p class="text-brand-600">Computational Thinking & SDLC</p>
+            </div>
+
+            <!-- CT in Projects -->
+            <div class="grid lg:grid-cols-2 gap-10 mb-12">
+                <div class="card-modern p-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">แนวคิดเชิงคำนวณกับการทำโครงงาน</h3>
+                    <p class="text-gray-600 mb-6">การทำโครงงานให้สำเร็จ ไม่ใช่แค่การเขียนโค้ด แต่ต้องมีการวางแผนแก้ปัญหาอย่างเป็นระบบ:</p>
+                    <ul class="space-y-4 text-sm text-gray-700">
+                        <li class="flex gap-3">
+                            <div class="bg-blue-100 text-blue-600 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
+                            <div>
+                                <strong>Decomposition (แยกย่อยปัญหา):</strong>
+                                <p class="text-gray-500 text-xs mt-1">แบ่งโครงงานใหญ่ออกเป็นส่วนๆ เช่น ส่วนหน้าเว็บ, ส่วนฐานข้อมูล, ส่วนประมวลผล</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-3">
+                            <div class="bg-purple-100 text-purple-600 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
+                            <div>
+                                <strong>Pattern Recognition (หารูปแบบ):</strong>
+                                <p class="text-gray-500 text-xs mt-1">ศึกษาโครงงานเก่าๆ ที่คล้ายกัน ดูว่าเขาใช้วิธีการใดแก้ปัญหา</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-3">
+                            <div class="bg-orange-100 text-orange-600 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">3</div>
+                            <div>
+                                <strong>Abstraction (คิดเชิงนามธรรม):</strong>
+                                <p class="text-gray-500 text-xs mt-1">โฟกัสที่ฟีเจอร์หลัก (Core Feature) ก่อน รายละเอียดความสวยงามค่อยทำทีหลัง</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-3">
+                            <div class="bg-green-100 text-green-600 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">4</div>
+                            <div>
+                                <strong>Algorithm Design (ออกแบบขั้นตอน):</strong>
+                                <p class="text-gray-500 text-xs mt-1">เขียน Flowchart การทำงานของระบบให้ชัดเจนก่อนลงมือเขียนโปรแกรม</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="relative overflow-hidden rounded-2xl shadow-lg group">
+                    <img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=1000&auto=format&fit=crop" alt="Project Planning" class="w-full h-full object-cover transition transform group-hover:scale-105 duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8 flex flex-col justify-end">
+                        <h3 class="text-white text-2xl font-bold mb-2">ทำไมต้องใช้ SDLC?</h3>
+                        <p class="text-gray-300 text-sm">การพัฒนาซอฟต์แวร์โดยไม่มีแบบแผน มักนำไปสู่ความล้มเหลว SDLC ช่วยให้งานเสร็จทันเวลาและมีคุณภาพ</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SDLC Cycle -->
+            <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-10 mb-12">
+                <h3 class="text-xl font-bold text-center text-gray-800 mb-8">วงจรการพัฒนาระบบ (SDLC: System Development Life Cycle)</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 text-center">
+                    <div class="group">
+                        <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full mx-auto flex items-center justify-center mb-2 group-hover:bg-red-600 group-hover:text-white transition"><i class="fa-solid fa-magnifying-glass"></i></div>
+                        <p class="text-xs font-bold">1. Planning</p>
+                        <p class="text-[10px] text-gray-500">วางแผน/ศึกษา</p>
+                    </div>
+                    <div class="group">
+                        <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-full mx-auto flex items-center justify-center mb-2 group-hover:bg-orange-600 group-hover:text-white transition"><i class="fa-solid fa-chart-pie"></i></div>
+                        <p class="text-xs font-bold">2. Analysis</p>
+                        <p class="text-[10px] text-gray-500">วิเคราะห์ความต้องการ</p>
+                    </div>
+                    <div class="group">
+                        <div class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-full mx-auto flex items-center justify-center mb-2 group-hover:bg-yellow-600 group-hover:text-white transition"><i class="fa-solid fa-pen-ruler"></i></div>
+                        <p class="text-xs font-bold">3. Design</p>
+                        <p class="text-[10px] text-gray-500">ออกแบบระบบ</p>
+                    </div>
+                    <div class="group">
+                        <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full mx-auto flex items-center justify-center mb-2 group-hover:bg-green-600 group-hover:text-white transition"><i class="fa-solid fa-code"></i></div>
+                        <p class="text-xs font-bold">4. Develop</p>
+                        <p class="text-[10px] text-gray-500">พัฒนาระบบ</p>
+                    </div>
+                    <div class="group">
+                        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full mx-auto flex items-center justify-center mb-2 group-hover:bg-blue-600 group-hover:text-white transition"><i class="fa-solid fa-bug"></i></div>
+                        <p class="text-xs font-bold">5. Testing</p>
+                        <p class="text-[10px] text-gray-500">ทดสอบ</p>
+                    </div>
+                    <div class="group">
+                        <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full mx-auto flex items-center justify-center mb-2 group-hover:bg-indigo-600 group-hover:text-white transition"><i class="fa-solid fa-rocket"></i></div>
+                        <p class="text-xs font-bold">6. Deploy</p>
+                        <p class="text-[10px] text-gray-500">ติดตั้งใช้งาน</p>
+                    </div>
+                    <div class="group">
+                        <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full mx-auto flex items-center justify-center mb-2 group-hover:bg-purple-600 group-hover:text-white transition"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                        <p class="text-xs font-bold">7. Maintain</p>
+                        <p class="text-[10px] text-gray-500">บำรุงรักษา</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project Report -->
+            <div class="card-modern p-8 bg-gray-50 border-gray-200">
+                <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fa-solid fa-book mr-2"></i>การเขียนรายงานโครงงาน (5 บท)</h3>
+                <div class="grid md:grid-cols-2 gap-x-8 gap-y-4 text-sm text-gray-700">
+                    <div>
+                        <strong>บทที่ 1: บทนำ</strong>
+                        <p class="text-xs text-gray-500">ที่มาและความสำคัญ, วัตถุประสงค์, ขอบเขต</p>
+                    </div>
+                    <div>
+                        <strong>บทที่ 2: เอกสารที่เกี่ยวข้อง</strong>
+                        <p class="text-xs text-gray-500">ทฤษฎี, เทคโนโลยีที่ใช้, งานวิจัยที่เกี่ยวข้อง</p>
+                    </div>
+                    <div>
+                        <strong>บทที่ 3: วิธีการดำเนินงาน</strong>
+                        <p class="text-xs text-gray-500">วิเคราะห์ระบบ, การออกแบบ, เครื่องมือที่ใช้</p>
+                    </div>
+                    <div>
+                        <strong>บทที่ 4: ผลการดำเนินงาน</strong>
+                        <p class="text-xs text-gray-500">ผลการทดสอบระบบ, ภาพหน้าจอการทำงาน</p>
+                    </div>
+                    <div class="col-span-full border-t pt-2 mt-2">
+                        <strong>บทที่ 5: สรุปผลและข้อเสนอแนะ</strong>
+                        <p class="text-xs text-gray-500">สรุปสิ่งที่ได้, ปัญหาและอุปสรรค, แนวทางพัฒนาต่อ</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Unit 2: Case Studies -->
+        <section id="unit2" class="scroll-mt-24">
+            <div class="border-l-4 border-indigo-500 pl-4 mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">2. กรณีศึกษาการพัฒนาโครงงาน</h2>
+                <p class="text-indigo-600">Case Studies: From Problem to Solution</p>
+            </div>
+
+            <div class="space-y-12">
+                
+                <!-- Case 1 -->
+                <div class="flex flex-col md:flex-row gap-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="md:w-1/3">
+                        <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=800&auto=format&fit=crop" alt="Library" class="rounded-xl h-full object-cover">
+                    </div>
+                    <div class="md:w-2/3">
+                        <div class="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold mb-2">Web Development</div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">กรณีศึกษาที่ 1: เว็บไซต์แนะนำห้องสมุด</h3>
+                        <p class="text-gray-600 text-sm mb-4"><strong>ปัญหา:</strong> นักเรียนหาหนังสือไม่เจอ และไม่รู้กฎระเบียบการยืมคืน ทำให้บรรณารักษ์ทำงานหนัก</p>
+                        <div class="bg-blue-50 p-4 rounded-xl text-sm border-l-4 border-blue-500">
+                            <strong>แนวคิดเชิงคำนวณ:</strong>
+                            <ul class="list-disc list-inside mt-2 text-gray-700">
+                                <li><strong>Decomposition:</strong> แบ่งเนื้อหาเว็บเป็นหน้าแรก, หมวดหมู่หนังสือ, กฎระเบียบ, แผนที่</li>
+                                <li><strong>Pattern:</strong> ดูตัวอย่างเว็บห้องสมุดมหาวิทยาลัยเป็นต้นแบบ</li>
+                                <li><strong>Algorithm:</strong> ออกแบบระบบค้นหาหนังสือ (รับคำค้น -> ตรวจสอบในฐานข้อมูล -> แสดงผล)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Case 2 -->
+                <div class="flex flex-col md:flex-row-reverse gap-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="md:w-1/3">
+                        <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=800&auto=format&fit=crop" alt="Medicine App" class="rounded-xl h-full object-cover">
+                    </div>
+                    <div class="md:w-2/3">
+                        <div class="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold mb-2">Mobile App</div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">กรณีศึกษาที่ 2: แอปแจ้งเตือนกินยา</h3>
+                        <p class="text-gray-600 text-sm mb-4"><strong>ปัญหา:</strong> ผู้สูงอายุชอบลืมกินยา หรือกินยาผิดเวลา ส่งผลต่อการรักษา</p>
+                        <div class="bg-green-50 p-4 rounded-xl text-sm border-l-4 border-green-500">
+                            <strong>แนวคิดเชิงคำนวณ:</strong>
+                            <ul class="list-disc list-inside mt-2 text-gray-700">
+                                <li><strong>Abstraction:</strong> สนใจแค่ ชื่อยา, เวลาที่ต้องกิน, จำนวนเม็ด (ไม่ต้องสนใจสียาหรือบริษัทผลิต)</li>
+                                <li><strong>Algorithm:</strong> ตรวจสอบเวลาปัจจุบัน == เวลาที่ตั้งไว้? ถ้าใช่ -> ส่งเสียงเตือน</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Case 3 -->
+                <div class="flex flex-col md:flex-row gap-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="md:w-1/3">
+                        <img src="https://images.unsplash.com/photo-1558449028-b53a39d100fc?q=80&w=800&auto=format&fit=crop" alt="Smart Farm" class="rounded-xl h-full object-cover">
+                    </div>
+                    <div class="md:w-2/3">
+                        <div class="inline-block px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold mb-2">IoT Project</div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">กรณีศึกษาที่ 3: ระบบรดน้ำต้นไม้อัจฉริยะ</h3>
+                        <p class="text-gray-600 text-sm mb-4"><strong>ปัญหา:</strong> ไม่มีเวลาดูแลต้นไม้ หรือรดน้ำมาก/น้อยเกินไปทำให้ต้นไม้ตาย</p>
+                        <div class="bg-orange-50 p-4 rounded-xl text-sm border-l-4 border-orange-500">
+                            <strong>การแก้ปัญหา:</strong>
+                            <ul class="list-disc list-inside mt-2 text-gray-700">
+                                <li>ใช้เซนเซอร์วัดความชื้นในดิน (Soil Moisture Sensor)</li>
+                                <li>ใช้บอร์ดสมองกล (เช่น KidBright หรือ ESP32) ประมวลผล</li>
+                                <li><strong>Algorithm:</strong> <code>IF ความชื้น < 40% THEN สั่งเปิดปั๊มน้ำ ELSE ปิดปั๊มน้ำ</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Case 4 -->
+                <div class="flex flex-col md:flex-row-reverse gap-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="md:w-1/3">
+                        <img src="https://images.unsplash.com/photo-1531746790731-6c087fecd65a?q=80&w=800&auto=format&fit=crop" alt="Chatbot" class="rounded-xl h-full object-cover">
+                    </div>
+                    <div class="md:w-2/3">
+                        <div class="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold mb-2">AI / Chatbot</div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">กรณีศึกษาที่ 4: แชทบอทถาม-ตอบโรงเรียน</h3>
+                        <p class="text-gray-600 text-sm mb-4"><strong>ปัญหา:</strong> ครูฝ่ายวิชาการต้องตอบคำถามเดิมๆ ซ้ำๆ ทุกวัน (เช่น สอบวันไหน, เกรดออกเมื่อไหร่)</p>
+                        <div class="bg-purple-50 p-4 rounded-xl text-sm border-l-4 border-purple-500">
+                            <strong>แนวคิดเชิงคำนวณ:</strong>
+                            <ul class="list-disc list-inside mt-2 text-gray-700">
+                                <li><strong>Pattern Recognition:</strong> รวบรวมคำถามที่พบบ่อย (FAQ) และรูปแบบประโยคที่นักเรียนชอบถาม</li>
+                                <li><strong>Algorithm:</strong> ตรวจจับคีย์เวิร์ด (เช่น "สอบ", "ตารางเรียน") แล้วดึงคำตอบที่เตรียมไว้มาแสดง</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Case 5 -->
+                <div class="flex flex-col md:flex-row gap-8 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="md:w-1/3">
+                        <img src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=800&auto=format&fit=crop" alt="Healthy Food" class="rounded-xl h-full object-cover">
+                    </div>
+                    <div class="md:w-2/3">
+                        <div class="inline-block px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold mb-2">AI / Image Processing</div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">กรณีศึกษาที่ 5: แอปคำนวณแคลอรี่จากรูป</h3>
+                        <p class="text-gray-600 text-sm mb-4"><strong>ปัญหา:</strong> ผู้รักสุขภาพต้องการคุมอาหารแต่ขี้เกียจกรอกข้อมูลสารอาหารเอง</p>
+                        <div class="bg-red-50 p-4 rounded-xl text-sm border-l-4 border-red-500">
+                            <strong>การแก้ปัญหา:</strong>
+                            <ul class="list-disc list-inside mt-2 text-gray-700">
+                                <li>ใช้ AI (Image Recognition) จำแนกรูปภาพอาหาร (เช่น กะเพรา, ข้าวมันไก่)</li>
+                                <li>เชื่อมต่อฐานข้อมูลโภชนาการเพื่อดึงค่าแคลอรี่</li>
+                                <li><strong>Abstraction:</strong> ไม่สนใจแสงเงาของภาพ สนใจแค่องค์ประกอบเพื่อระบุชนิดอาหาร</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Quiz -->
+        <section id="quiz" class="py-16">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">ทดสอบความรู้ท้ายบท</h2>
+                <p class="text-gray-500">ทบทวนความเข้าใจ 30 ข้อ</p>
+            </div>
+            
+            <div id="quiz-container" class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                <div class="flex justify-between text-sm font-bold text-gray-400 mb-6">
+                    <span id="q-progress">ข้อที่ 1 / 30</span>
+                    <span id="score-display" class="text-brand-600">คะแนน: 0</span>
+                </div>
+                <h3 id="q-text" class="text-xl font-bold text-gray-800 mb-6">Loading...</h3>
+                <div id="options-area" class="space-y-3"></div>
+                <div id="feedback" class="hidden mt-4 p-4 rounded-lg bg-gray-50 text-sm"></div>
+                <div class="mt-8 flex justify-between">
+                    <button onclick="restartQuiz()" class="text-gray-400 hover:text-gray-600 text-sm font-bold">↻ เริ่มใหม่</button>
+                    <button id="next-btn" onclick="nextQuestion()" class="hidden px-6 py-2 bg-brand-600 text-white rounded-lg font-bold hover:bg-brand-700 transition">ข้อถัดไป</button>
+                </div>
+            </div>
+
+            <div id="result-area" class="hidden max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-10 text-center">
+                <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">🏆</div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">ยอดเยี่ยมมาก!</h3>
+                <div class="text-5xl font-black text-brand-600 mb-8" id="final-score">0/30</div>
+                <button onclick="restartQuiz()" class="px-8 py-3 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 transition">ทำแบบทดสอบอีกครั้ง</button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-900 text-gray-400 py-12 mt-20 text-center">
+        <p class="mb-4">สื่อการเรียนรู้วิชาวิทยาการคำนวณ ชั้นมัธยมศึกษาปีที่ 4</p>
+        <p class="text-sm opacity-50">&copy; 2025 kruboat.com. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const questions = [
+            { q: "SDLC ย่อมาจากอะไร?", a: ["System Design Logic Code", "System Development Life Cycle", "Standard Data Life Cycle", "Simple Design Life Cycle"], c: 1, exp: "วงจรการพัฒนาระบบ" },
+            { q: "ขั้นตอนแรกของ SDLC คือ?", a: ["Testing", "Coding", "Planning", "Design"], c: 2, exp: "การวางแผน (Planning) มาก่อนเสมอ" },
+            { q: "Decomposition มีประโยชน์อย่างไรในโครงงาน?", a: ["ทำให้งานซับซ้อนขึ้น", "แบ่งงานใหญ่เป็นงานย่อยเพื่อให้จัดการง่าย", "รวมงานทุกอย่างไว้ที่เดียว", "ตัดรายละเอียดทิ้ง"], c: 1, exp: "การแยกย่อยปัญหาช่วยให้แก้ได้ทีละจุด" },
+            { q: "การทำความเข้าใจปัญหา อยู่ในขั้นตอนใดของโครงงาน?", a: ["การนำเสนอ", "การศึกษาและวิเคราะห์", "การเขียนโปรแกรม", "การทดสอบ"], c: 1, exp: "ต้องวิเคราะห์ปัญหาก่อนเริ่มทำ" },
+            { q: "โครงงานพัฒนาแอปแจ้งเตือนกินยา ใช้แนวคิดใดเด่นชัดที่สุด?", a: ["Pattern Recognition", "Abstraction", "Decomposition", "Algorithm"], c: 3, exp: "ต้องใช้อัลกอริทึมตรวจสอบเวลาเพื่อแจ้งเตือน" },
+            { q: "รายงานบทที่ 3 เกี่ยวกับอะไร?", a: ["บทนำ", "ผลการดำเนินงาน", "วิธีการดำเนินงาน", "สรุปผล"], c: 2, exp: "บทที่ 3 คือ วิธีการดำเนินงาน (Methodology)" },
+            { q: "Feasibility Study คืออะไร?", a: ["การศึกษาความเป็นไปได้", "การเขียนโค้ด", "การออกแบบหน้าจอ", "การทดสอบระบบ"], c: 0, exp: "วิเคราะห์ว่าโครงการคุ้มค่าและทำได้จริงไหม" },
+            { q: "Gantt Chart ใช้ทำอะไร?", a: ["ออกแบบ Database", "วางแผนและติดตามระยะเวลาโครงการ", "เขียน Flowchart", "คำนวณงบประมาณ"], c: 1, exp: "ใช้บริหารจัดการเวลาโครงการ" },
+            { q: "หากต้องการทำ Smart Farm ควรใช้อุปกรณ์ใด?", a: ["Microsoft Word", "Sensor & Microcontroller", "Photoshop", "Printer"], c: 1, exp: "ต้องใช้เซนเซอร์วัดค่าและบอร์ดควบคุม" },
+            { q: "ขั้นตอนใดใน SDLC ที่ใช้เวลานานและสำคัญที่สุด?", a: ["Maintenance", "Planning", "Design", "Development/Coding"], c: 0, exp: "การบำรุงรักษา (Maintenance) กินเวลานานที่สุดตลอดอายุการใช้งาน" },
+            // Added 20 more questions
+            { q: "Abstraction ในโครงงานแผนที่ห้องสมุดคือ?", a: ["ใส่รายละเอียดสีผนังทุกจุด", "ตัดรายละเอียดที่ไม่จำเป็น (เช่น สีเก้าอี้) ออก", "เขียนโค้ดทั้งหมด", "ถ่ายรูปบรรณารักษ์"], c: 1, exp: "โฟกัสแค่ตำแหน่งหนังสือและทางเดิน" },
+            { q: "บทที่ 1 ของรายงานโครงงานคือ?", a: ["วิธีดำเนินงาน", "บทนำ", "ผลการทดลอง", "เอกสารที่เกี่ยวข้อง"], c: 1, exp: "บทนำ (Introduction)" },
+            { q: "Chatbot ใช้เทคโนโลยีใดเป็นหลัก?", a: ["Blockchain", "AI / NLP", "IoT", "AR"], c: 1, exp: "AI และการประมวลผลภาษาธรรมชาติ" },
+            { q: "การทดสอบระบบ (Testing) ทำเพื่ออะไร?", a: ["หาข้อผิดพลาด (Bug)", "เขียนโค้ด", "ออกแบบโลโก้", "ขายสินค้า"], c: 0, exp: "เพื่อหาและแก้ไข Bug ก่อนใช้งานจริง" },
+            { q: "Flowchart เขียนในช่วงใดของ SDLC?", a: ["Planning", "Analysis", "Design", "Maintenance"], c: 2, exp: "เขียนในช่วงการออกแบบ (Design)" },
+            { q: "IoT ย่อมาจาก?", a: ["Internet of Technology", "Internet of Things", "Input of Tools", "Intelligent of Tech"], c: 1, exp: "อินเทอร์เน็ตในทุกสรรพสิ่ง" },
+            { q: "KidBright คืออะไร?", a: ["โปรแกรมวาดรูป", "บอร์ดสมองกลฝังตัวเพื่อการศึกษา", "ชื่อหุ่นยนต์", "เว็บไซต์"], c: 1, exp: "บอร์ด Microcontroller ของไทย" },
+            { q: "การทำโครงงานประเภท AI ต้องอาศัยสิ่งใดมากที่สุด?", a: ["กล้องถ่ายรูป", "ข้อมูล (Data) สำหรับสอน", "เครื่องพิมพ์ 3D", "ลำโพง"], c: 1, exp: "AI ต้องการ Data ในการเรียนรู้" },
+            { q: "Maintenance ใน SDLC คือ?", a: ["การสร้างทีม", "การดูแลรักษาและอัปเดตระบบ", "การรื้อทำใหม่", "การวางแผน"], c: 1, exp: "ดูแลหลังติดตั้งใช้งานแล้ว" },
+            { q: "Project Manager มีหน้าที่อะไร?", a: ["เขียนโค้ด", "ออกแบบกราฟิก", "บริหารจัดการโครงการให้สำเร็จ", "หาข้าวให้ทีมกิน"], c: 2, exp: "บริหารภาพรวมโครงการ" },
+            { q: "User Interface (UI) คือ?", a: ["ระบบหลังบ้าน", "ส่วนติดต่อผู้ใช้ (หน้าจอ ปุ่ม)", "ฐานข้อมูล", "สายไฟ"], c: 1, exp: "สิ่งที่ผู้ใช้มองเห็นและสัมผัส" },
+            { q: "User Experience (UX) คือ?", a: ["ความสวยงาม", "ประสบการณ์และความพึงพอใจของผู้ใช้", "ราคาแอป", "ความเร็วเน็ต"], c: 1, exp: "ความรู้สึกในการใช้งาน" },
+            { q: "Black Box Testing คือ?", a: ["ทดสอบโดยไม่ดูโค้ดข้างใน", "ทดสอบในห้องมืด", "ทดสอบกล่องดำ", "ทดสอบฮาร์ดแวร์"], c: 0, exp: "ทดสอบฟังก์ชันการทำงานจากภายนอก" },
+            { q: "Prototype คือ?", a: ["ระบบตัวจริง", "ต้นแบบจำลอง", "คู่มือ", "โลโก้"], c: 1, exp: "ต้นแบบเพื่อทดสอบแนวคิด" },
+            { q: "โครงงานประเภทสิ่งประดิษฐ์ (Invention) เน้นอะไร?", a: ["ทฤษฎีใหม่", "การสร้างชิ้นงานฮาร์ดแวร์/ซอฟต์แวร์", "การสำรวจความเห็น", "การทดลองวิทย์"], c: 1, exp: "เน้นสร้างชิ้นงานที่ใช้งานได้จริง" },
+            { q: "การอ้างอิงแหล่งข้อมูลในรายงานสำคัญหรือไม่?", a: ["ไม่สำคัญ", "สำคัญ เพื่อป้องกันการละเมิดลิขสิทธิ์", "แล้วแต่อารมณ์", "สำคัญเฉพาะรูปภาพ"], c: 1, exp: "สำคัญมากตามหลักวิชาการและกฎหมาย" },
+            { q: "การนำเสนอโครงงานที่ดีควรเป็นอย่างไร?", a: ["อ่านตามสไลด์ทุกคำ", "พูดให้เร็วที่สุด", "กระชับ เข้าใจง่าย มีสื่อประกอบ", "ไม่ต้องมีรูปภาพ"], c: 2, exp: "สื่อสารให้ผู้ฟังเข้าใจได้ง่าย" },
+            { q: "Smart Home ใช้แนวคิดใด?", a: ["IoT", "Blockchain", "VR", "Big Data"], c: 0, exp: "เชื่อมต่ออุปกรณ์ในบ้านด้วยอินเทอร์เน็ต" },
+            { q: "แอปคำนวณแคลอรี่อาหาร ใช้ Image Processing ทำอะไร?", a: ["ถ่ายรูปสวยๆ", "วิเคราะห์รูปภาพเพื่อระบุชนิดอาหาร", "แต่งรูปให้ผอม", "แชร์ลงโซเชียล"], c: 1, exp: "ประมวลผลภาพเพื่อหาข้อมูล" },
+            { q: "หากโครงงานไม่เสร็จตามกำหนด ควรทำอย่างไร?", a: ["ทิ้งงาน", "ลอกเพื่อน", "ทบทวนแผนและปรับลดขอบเขตงาน", "โทษอาจารย์"], c: 2, exp: "ปรับแผนงาน (Re-plan)" }
+        ];
+
+        let currentQ = 0;
+        let score = 0;
+        let shuffledQ = [];
+
+        function initQuiz() {
+            shuffledQ = [...questions].sort(() => 0.5 - Math.random()).slice(0, 30);
+            currentQ = 0; score = 0;
+            document.getElementById('quiz-container').classList.remove('hidden');
+            document.getElementById('result-area').classList.add('hidden');
+            document.getElementById('score-display').innerText = `คะแนน: 0`;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = shuffledQ[currentQ];
+            document.getElementById('q-progress').innerText = `ข้อที่ ${currentQ + 1} / 30`;
+            document.getElementById('q-text').innerText = q.q;
+            const optsDiv = document.getElementById('options-area');
+            optsDiv.innerHTML = '';
+            q.a.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "quiz-option w-full text-left p-4 rounded-xl border border-gray-200 font-medium transition-all block";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(idx, btn);
+                optsDiv.appendChild(btn);
+            });
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+        }
+
+        function checkAnswer(selectedIdx, btn) {
+            const q = shuffledQ[currentQ];
+            const allBtns = document.querySelectorAll('.quiz-option');
+            allBtns.forEach(b => b.disabled = true);
+            const feedback = document.getElementById('feedback');
+            feedback.classList.remove('hidden');
+            if (selectedIdx === q.c) {
+                score++; btn.classList.add('correct');
+                document.getElementById('score-display').innerText = `คะแนน: ${score}`;
+                feedback.className = "mt-4 p-4 rounded-lg bg-green-50 text-green-800 border border-green-200";
+                feedback.innerHTML = `<strong>ถูกต้อง!</strong> ${q.exp}`;
+            } else {
+                btn.classList.add('wrong'); allBtns[q.c].classList.add('correct');
+                feedback.className = "mt-4 p-4 rounded-lg bg-red-50 text-red-800 border border-red-200";
+                feedback.innerHTML = `<strong>ผิดครับ!</strong> เฉลยคือ "${q.a[q.c]}" <br>(${q.exp})`;
+            }
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQ++; if (currentQ < 30) showQuestion(); else showResult();
+        }
+
+        function showResult() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('result-area').classList.remove('hidden');
+            document.getElementById('final-score').innerText = `${score} / 30`;
+        }
+
+        function restartQuiz() { initQuiz(); }
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>

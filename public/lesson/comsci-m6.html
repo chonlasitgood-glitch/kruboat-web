@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>วิทยาการคำนวณ ม.6 - พลเมืองดิจิทัล</title>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Prompt', 'sans-serif'] },
+                    colors: {
+                        // Indigo Theme for M.6
+                        brand: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 800: '#3730a3', 900: '#312e81' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body { background-color: #fafafa; line-height: 1.8; }
+        .card-modern {
+            background: white; border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease; border: 1px solid #f3f4f6;
+        }
+        .card-modern:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: #e0e7ff; }
+        .highlight-box { background-color: #eef2ff; border-left: 4px solid #4f46e5; padding: 1.25rem; border-radius: 0.5rem; margin: 1rem 0; }
+        
+        /* Quiz Styles */
+        .quiz-option:hover { background-color: #eef2ff; border-color: #4f46e5; }
+        .quiz-option.correct { background-color: #dcfce7; border-color: #22c55e; color: #166534; }
+        .quiz-option.wrong { background-color: #fee2e2; border-color: #ef4444; color: #991b1b; }
+    </style>
+</head>
+<body class="text-gray-700 font-sans antialiased">
+
+    <!-- Nav -->
+    <nav class="bg-white/95 backdrop-blur-md fixed w-full z-50 shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-user-astronaut text-brand-600 text-xl mr-2"></i>
+                    <span class="font-bold text-lg tracking-tight text-gray-900">CS M.6 (Digital Citizen)</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
+                    <a href="#home" class="hover:text-brand-600 transition">หน้าแรก</a>
+                    <a href="#unit1" class="hover:text-brand-600 transition">1. นำเสนอข้อมูล</a>
+                    <a href="#unit2" class="hover:text-brand-600 transition">2. เทคโนโลยีเปลี่ยนโลก</a>
+                    <a href="#unit3" class="hover:text-brand-600 transition">3. พลเมืองดิจิทัล</a>
+                    <a href="#quiz" class="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition">แบบทดสอบ</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header id="home" class="pt-28 pb-20 bg-gradient-to-b from-white via-indigo-50 to-white">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col md:flex-row items-center gap-12">
+            <div class="md:w-1/2 space-y-6">
+                <span class="px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-xs font-bold uppercase tracking-wider">มัธยมศึกษาปีที่ 6</span>
+                <h1 class="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">
+                    Future Ready & <br><span class="text-brand-600">Digital Citizenship</span>
+                </h1>
+                <p class="text-lg text-gray-600 leading-relaxed">
+                    เตรียมความพร้อมสู่โลกอนาคต สร้างสรรค์ผลงาน Portfolio ด้วยเทคโนโลยี รู้ทัน AI และเป็นพลเมืองดิจิทัลที่มีคุณภาพ
+                </p>
+                <div class="flex gap-4">
+                    <a href="#unit1" class="px-6 py-3 bg-brand-600 text-white font-semibold rounded-xl shadow-lg hover:bg-brand-700 transition">เข้าสู่บทเรียน</a>
+                    <a href="#quiz" class="px-6 py-3 bg-white text-gray-700 border border-gray-200 font-semibold rounded-xl hover:bg-gray-50 transition">ทำแบบทดสอบ</a>
+                </div>
+            </div>
+            <div class="md:w-1/2">
+                <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop" alt="Future Technology" class="rounded-2xl shadow-2xl border-4 border-white w-full object-cover h-[400px]">
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 lg:px-8 py-12 space-y-24">
+
+        <!-- Unit 1: Presentation & Sharing -->
+        <section id="unit1" class="scroll-mt-24">
+            <div class="border-l-4 border-brand-500 pl-4 mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">1. การใช้เทคโนโลยีสารสนเทศนำเสนอและแบ่งปันข้อมูล</h2>
+                <p class="text-brand-600">Digital Presentation & Sharing</p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-10 mb-10">
+                <div class="card-modern p-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">การทำแฟ้มสะสมผลงาน (Portfolio)</h3>
+                    <p class="text-gray-600 mb-6">
+                        ในยุคดิจิทัล Portfolio ไม่ใช่แค่แฟ้มเอกสาร แต่คือ "ตัวตนออนไลน์" (Personal Branding) ที่ใช้ยื่นมหาวิทยาลัยหรือสมัครงาน
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex gap-4 items-start">
+                            <div class="bg-red-100 text-red-600 w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0"><i class="fa-brands fa-youtube"></i></div>
+                            <div>
+                                <strong class="text-gray-800">Video Presentation</strong>
+                                <p class="text-xs text-gray-500">แนะนำตัวผ่านวิดีโอ ตัดต่อให้น่าสนใจ (CapCut, Premiere Pro)</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 items-start">
+                            <div class="bg-blue-100 text-blue-600 w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-globe"></i></div>
+                            <div>
+                                <strong class="text-gray-800">Website / E-Portfolio</strong>
+                                <p class="text-xs text-gray-500">สร้างเว็บส่วนตัวรวบรวมผลงาน (Wix, Google Sites, Canva Website)</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 items-start">
+                            <div class="bg-black text-white w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0"><i class="fa-brands fa-medium"></i></div>
+                            <div>
+                                <strong class="text-gray-800">Blog / Article</strong>
+                                <p class="text-xs text-gray-500">เขียนบทความแสดงวิสัยทัศน์หรือเล่าประสบการณ์ (Medium, Blockdit)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-modern p-8 bg-brand-50 border-brand-100">
+                    <h3 class="text-xl font-bold text-brand-900 mb-4">การแบ่งปันข้อมูลอย่างปลอดภัย</h3>
+                    <ul class="space-y-4 text-sm text-gray-700">
+                        <li class="bg-white p-4 rounded-xl shadow-sm">
+                            <strong class="block text-brand-700 mb-1">1. Cloud Storage & Permission</strong>
+                            <p class="text-xs">การฝากไฟล์บน Google Drive/OneDrive ต้องตั้งค่าสิทธิ์ให้ถูกต้อง (Viewer, Commenter, Editor) อย่าเปิด Public หากเป็นข้อมูลส่วนตัว</p>
+                        </li>
+                        <li class="bg-white p-4 rounded-xl shadow-sm">
+                            <strong class="block text-brand-700 mb-1">2. Creative Commons (CC)</strong>
+                            <p class="text-xs">เลือกใช้สัญญาอนุญาตที่เหมาะสมกับงานเรา และเคารพงานคนอื่น (เช่น ให้เครดิตเสมอ)</p>
+                        </li>
+                        <li class="bg-white p-4 rounded-xl shadow-sm">
+                            <strong class="block text-brand-700 mb-1">3. Digital Footprint Awareness</strong>
+                            <p class="text-xs">สิ่งที่โพสต์วันนี้ อาจส่งผลต่อการสมัครงานในอนาคต คิดก่อนแชร์ (Think Before Share)</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="bg-gray-900 text-white p-8 rounded-2xl relative overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop" alt="Data Storytelling" class="absolute inset-0 w-full h-full object-cover opacity-20">
+                <div class="relative z-10 text-center">
+                    <h3 class="text-2xl font-bold mb-4">Data Storytelling (การเล่าเรื่องด้วยข้อมูล)</h3>
+                    <p class="max-w-2xl mx-auto text-gray-300 mb-6">
+                        ทักษะสำคัญของคนยุคใหม่ คือการนำข้อมูลที่ซับซ้อน มานำเสนอให้ "เข้าใจง่าย น่าสนใจ และโน้มน้าวใจ" ผ่าน Infographic หรือ Dashboard
+                    </p>
+                    <div class="flex justify-center gap-4 text-sm font-bold">
+                        <span class="bg-white/20 px-4 py-2 rounded-full">เข้าใจง่าย (Simple)</span>
+                        <span class="bg-white/20 px-4 py-2 rounded-full">สวยงาม (Visual)</span>
+                        <span class="bg-white/20 px-4 py-2 rounded-full">มีเรื่องราว (Narrative)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Unit 2: Tech Trends -->
+        <section id="unit2" class="scroll-mt-24">
+            <div class="border-l-4 border-purple-500 pl-4 mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">2. การเปลี่ยนแปลงของเทคโนโลยี (Disruptive Tech)</h2>
+                <p class="text-purple-600">Future Trends & Innovation</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 mb-10">
+                <!-- AI -->
+                <div class="card-modern p-6 group hover:border-purple-400">
+                    <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition"><i class="fa-solid fa-robot"></i></div>
+                    <h4 class="font-bold text-lg text-gray-800">AI & Machine Learning</h4>
+                    <p class="text-xs text-gray-500 mt-2">ปัญญาประดิษฐ์ที่คิดและเรียนรู้ได้เอง เช่น ChatGPT, Midjourney, ระบบขับรถอัตโนมัติ</p>
+                </div>
+                <!-- Blockchain -->
+                <div class="card-modern p-6 group hover:border-blue-400">
+                    <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition"><i class="fa-solid fa-link"></i></div>
+                    <h4 class="font-bold text-lg text-gray-800">Blockchain</h4>
+                    <p class="text-xs text-gray-500 mt-2">เทคโนโลยีจัดเก็บข้อมูลแบบกระจายศูนย์ ปลอดภัยสูง พื้นฐานของ Cryptocurrency และ Smart Contract</p>
+                </div>
+                <!-- Metaverse -->
+                <div class="card-modern p-6 group hover:border-pink-400">
+                    <div class="w-14 h-14 bg-pink-100 text-pink-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition"><i class="fa-solid fa-vr-cardboard"></i></div>
+                    <h4 class="font-bold text-lg text-gray-800">Metaverse / AR / VR</h4>
+                    <p class="text-xs text-gray-500 mt-2">โลกเสมือนจริงที่ผสานกับโลกจริง เปลี่ยนวิธีการเล่นเกม การประชุม และการเรียนรู้</p>
+                </div>
+                <!-- Cloud -->
+                <div class="card-modern p-6 group hover:border-orange-400">
+                    <div class="w-14 h-14 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition"><i class="fa-solid fa-cloud"></i></div>
+                    <h4 class="font-bold text-lg text-gray-800">Cloud Computing</h4>
+                    <p class="text-xs text-gray-500 mt-2">การประมวลผลบนก้อนเมฆ ทำงานได้ทุกที่ ทุกเวลา ไม่ต้องมี Server เอง</p>
+                </div>
+                <!-- IoT -->
+                <div class="card-modern p-6 group hover:border-green-400">
+                    <div class="w-14 h-14 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition"><i class="fa-solid fa-wifi"></i></div>
+                    <h4 class="font-bold text-lg text-gray-800">IoT (Internet of Things)</h4>
+                    <p class="text-xs text-gray-500 mt-2">อุปกรณ์ต่างๆ เชื่อมต่ออินเทอร์เน็ต สื่อสารกันเองได้ เช่น ตู้เย็นสั่งของเอง, Smart Farm</p>
+                </div>
+                <!-- 5G/6G -->
+                <div class="card-modern p-6 group hover:border-indigo-400">
+                    <div class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition"><i class="fa-solid fa-tower-cell"></i></div>
+                    <h4 class="font-bold text-lg text-gray-800">5G / 6G Network</h4>
+                    <p class="text-xs text-gray-500 mt-2">เครือข่ายความเร็วสูง ความหน่วงต่ำ รองรับการเชื่อมต่อมหาศาล ขับเคลื่อน Telemedicine</p>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <h3 class="text-xl font-bold text-brand-800 mb-2">ผลกระทบต่ออาชีพในอนาคต</h3>
+                <p class="text-sm text-gray-700">
+                    เทคโนโลยีจะเข้ามาแทนที่งานที่ทำซ้ำๆ (Routine) แต่อาชีพที่ต้องใช้ <strong>ความคิดสร้างสรรค์ (Creativity)</strong>, <strong>ความเห็นอกเห็นใจ (Empathy)</strong> และ <strong>การแก้ปัญหาซับซ้อน (Complex Problem Solving)</strong> จะยังคงเป็นที่ต้องการ
+                </p>
+            </div>
+        </section>
+
+        <!-- Unit 3: Safety & Ethics -->
+        <section id="unit3" class="scroll-mt-24">
+            <div class="border-l-4 border-red-500 pl-4 mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">3. การใช้เทคโนโลยีสารสนเทศอย่างปลอดภัย</h2>
+                <p class="text-red-600">Digital Citizenship & Ethics</p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-10">
+                <!-- Digital Citizen -->
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">คุณสมบัติของพลเมืองดิจิทัล (Digital Citizenship)</h3>
+                    <ul class="space-y-4 text-sm text-gray-600">
+                        <li class="flex items-center gap-4">
+                            <span class="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center font-bold">1</span>
+                            <span><strong>Digital Rights:</strong> เคารพสิทธิและทรัพย์สินทางปัญญาของผู้อื่น</span>
+                        </li>
+                        <li class="flex items-center gap-4">
+                            <span class="w-10 h-10 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold">2</span>
+                            <span><strong>Digital Etiquette:</strong> มีมารยาททางไซเบอร์ ไม่ Cyberbullying</span>
+                        </li>
+                        <li class="flex items-center gap-4">
+                            <span class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold">3</span>
+                            <span><strong>Digital Safety:</strong> ป้องกันข้อมูลส่วนตัวและอุปกรณ์จากภัยคุกคาม</span>
+                        </li>
+                        <li class="flex items-center gap-4">
+                            <span class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">4</span>
+                            <span><strong>Digital Health:</strong> รักษาสุขภาพ ไม่เสพติดจอ (Office Syndrome)</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Laws -->
+                <div class="bg-red-50 rounded-2xl p-8 border border-red-100">
+                    <h3 class="text-xl font-bold text-red-800 mb-6"><i class="fa-solid fa-gavel mr-2"></i>กฎหมายที่ต้องรู้ก่อนติดคุก!</h3>
+                    <div class="space-y-4 text-sm">
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <strong class="text-red-900 block mb-1">หมิ่นประมาทออนไลน์</strong>
+                            <p class="text-gray-600">การโพสต์ด่าทอ ใส่ความผู้อื่นให้เสียหาย แม้ไม่เอ่ยชื่อแต่คนรู้ว่าเป็นใคร ก็ผิดกฎหมายอาญา</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <strong class="text-red-900 block mb-1">PDPA (ละเมิดข้อมูลส่วนบุคคล)</strong>
+                            <p class="text-gray-600">การนำเบอร์โทร รูปถ่าย ข้อมูลคนอื่นไปใช้หรือเผยแพร่โดยไม่ได้รับความยินยอม</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <strong class="text-red-900 block mb-1">ลิขสิทธิ์ (Copyright)</strong>
+                            <p class="text-gray-600">การดูดคลิป, ก๊อปรูป, โหลดโปรแกรมเถื่อน เป็นการละเมิดทรัพย์สินทางปัญญา</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz Section -->
+        <section id="quiz" class="py-16 bg-brand-50 rounded-[3rem] px-8 relative overflow-hidden">
+            <div class="max-w-3xl mx-auto relative z-10">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-brand-900">ทดสอบความรู้ท้ายบท</h2>
+                    <p class="text-brand-700">แบบทดสอบ 30 ข้อ ท้าทายความสามารถ</p>
+                </div>
+                
+                <div id="quiz-container" class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                    <div class="flex justify-between text-sm font-bold text-gray-400 mb-6">
+                        <span id="q-progress">ข้อที่ 1 / 30</span>
+                        <span id="score-display" class="text-brand-600">คะแนน: 0</span>
+                    </div>
+                    <h3 id="q-text" class="text-xl font-bold text-gray-800 mb-6">Loading...</h3>
+                    <div id="options-area" class="space-y-3"></div>
+                    <div id="feedback" class="hidden mt-4 p-4 rounded-lg bg-gray-50 text-sm"></div>
+                    <div class="mt-8 flex justify-between border-t pt-6">
+                        <button onclick="restartQuiz()" class="text-gray-400 hover:text-brand-600 text-sm font-bold"><i class="fa-solid fa-rotate-right mr-1"></i> เริ่มใหม่</button>
+                        <div class="flex gap-3">
+                            <button id="skip-btn" onclick="quizApp.skipQuestion()" class="text-gray-500 hover:text-gray-800 font-bold px-4 transition">ข้าม</button>
+                            <button id="next-btn" onclick="quizApp.nextQuestion()" class="hidden bg-brand-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-brand-700 transition">ข้อถัดไป</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="result-area" class="hidden max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-10 text-center">
+                    <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">🏆</div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">ทำแบบทดสอบเสร็จสิ้น!</h3>
+                    <p class="text-gray-500 mb-6">คุณมีความรู้พื้นฐานวิทยาการคำนวณที่ยอดเยี่ยม</p>
+                    <div class="text-5xl font-black text-brand-600 mb-8" id="final-score">0/30</div>
+                    <button onclick="restartQuiz()" class="px-8 py-3 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 transition">ทำแบบทดสอบอีกครั้ง</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-900 text-gray-400 py-12 mt-20 text-center">
+        <p class="mb-4">สื่อการเรียนรู้วิชาวิทยาการคำนวณ ชั้นมัธยมศึกษาปีที่ 6</p>
+        <p class="text-sm opacity-50">&copy; 2026 kruboat.com. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const questions = [
+            { q: "Data Storytelling คืออะไร?", a: ["การเขียนนิยาย", "การเล่าเรื่องราวจากข้อมูลให้น่าสนใจ", "การพูดโกหกด้วยข้อมูล", "การท่องจำข้อมูล"], c: 1, exp: "การนำเสนอข้อมูลให้เข้าใจง่ายและมีเรื่องราว" },
+            { q: "Disruptive Technology หมายถึง?", a: ["เทคโนโลยีที่ล้าหลัง", "เทคโนโลยีที่ทำลายล้างโลก", "เทคโนโลยีที่เปลี่ยนรูปแบบการดำเนินชีวิตอย่างสิ้นเชิง", "เทคโนโลยีราคาแพง"], c: 2, exp: "เทคโนโลยีเปลี่ยนโลก เช่น AI, Blockchain" },
+            { q: "Blockchain มีลักษณะเด่นอย่างไร?", a: ["รวมศูนย์", "กระจายศูนย์และแก้ไขได้ยาก", "ข้อมูลหายง่าย", "ใช้กระดาษจด"], c: 1, exp: "Decentralized และมีความปลอดภัยสูง" },
+            { q: "Metaverse คืออะไร?", a: ["จักรวาลนฤมิต/โลกเสมือนจริง", "โปรแกรมแต่งรูป", "เว็บไซต์ขายของ", "ยี่ห้อแว่นตา"], c: 0, exp: "โลกเสมือนที่ผสานโลกจริง (Virtual World)" },
+            { q: "Digital Footprint คือ?", a: ["รอยเท้ารองเท้าผ้าใบ", "ร่องรอยการกระทำบนโลกออนไลน์", "การเดินออกกำลังกาย", "ลายนิ้วมือ"], c: 1, exp: "ประวัติการใช้งานที่สืบค้นย้อนหลังได้" },
+            { q: "การแชร์สถานที่อยู่ (Check-in) สาธารณะ เสี่ยงต่ออะไร?", a: ["เสียเงิน", "ความปลอดภัยในชีวิตและทรัพย์สิน", "เน็ตหมด", "เพื่อนรำคาญ"], c: 1, exp: "ผู้ไม่หวังดีอาจรู้ความเคลื่อนไหวของเรา" },
+            { q: "Cloud Computing ช่วยเรื่องอะไรมากที่สุด?", a: ["เล่นเกมได้", "เข้าถึงข้อมูลได้ทุกที่ทุกเวลา", "พิมพ์งานเร็วขึ้น", "หน้าจอชัดขึ้น"], c: 1, exp: "Anywhere, Anytime Access" },
+            { q: "AI (Artificial Intelligence) คือ?", a: ["หุ่นยนต์ทำความสะอาด", "ปัญญาประดิษฐ์ที่เลียนแบบการคิดของมนุษย์", "โปรแกรมไวรัส", "คนอัจฉริยะ"], c: 1, exp: "ระบบคอมพิวเตอร์ที่คิดและเรียนรู้ได้" },
+            { q: "Portfolio ดิจิทัลมีข้อดีกว่าแบบเล่มอย่างไร?", a: ["จับต้องได้", "หนักกระเป๋า", "เข้าถึงง่าย แก้ไขง่าย เผยแพร่ได้กว้างขวาง", "ราคาแพง"], c: 2, exp: "สะดวกในการแชร์และอัปเดต" },
+            { q: "การนำเพลงลิขสิทธิ์มาประกอบคลิปขายของ ผิดหรือไม่?", a: ["ไม่ผิดถ้าเพลงเพราะ", "ผิดฐานละเมิดลิขสิทธิ์", "ไม่ผิดถ้าคลิปสั้น", "ผิดเฉพาะตอนกลางคืน"], c: 1, exp: "การใช้เพื่อการค้าโดยไม่ได้รับอนุญาตถือว่าผิด" },
+            { q: "PDPA เกี่ยวข้องกับอะไร?", a: ["การคุ้มครองข้อมูลส่วนบุคคล", "การปราบปรามยาเสพติด", "การจราจร", "ภาษี"], c: 0, exp: "Personal Data Protection Act" },
+            { q: "Cyberbullying คือ?", a: ["การป้องกันภัยไซเบอร์", "การกลั่นแกล้งรังแกผ่านสื่อออนไลน์", "การเล่นเกมออนไลน์", "การซื้อของออนไลน์"], c: 1, exp: "การใช้สื่อดิจิทัลทำร้ายจิตใจผู้อื่น" },
+            { q: "Infographic ที่ดีควรเป็นอย่างไร?", a: ["ตัวหนังสือเยอะๆ", "สีสันฉูดฉาดอ่านยาก", "ข้อมูลกระชับ เข้าใจง่าย เน้นภาพ", "ไม่มีรูปภาพ"], c: 2, exp: "Visual Communication ที่ดี" },
+            { q: "IoT (Internet of Things) ตัวอย่างเช่น?", a: ["สมุดจดบันทึก", "ตู้เย็นที่สั่งของได้เองเมื่อของหมด", "พัดลมธรรมดา", "โต๊ะไม้"], c: 1, exp: "อุปกรณ์ที่เชื่อมเน็ตและสื่อสารได้" },
+            { q: "การตั้งค่าความเป็นส่วนตัว (Privacy Settings) สำคัญอย่างไร?", a: ["ไม่สำคัญ", "ช่วยคัดกรองคนที่จะเห็นข้อมูลของเรา", "ทำให้เฟสบุ๊คพัง", "ทำให้ยอดไลค์ลดลง"], c: 1, exp: "ป้องกันข้อมูลรั่วไหลสู่สาธารณะ" },
+            { q: "Digital Empathy คือ?", a: ["ความเห็นอกเห็นใจในโลกดิจิทัล", "ความโกรธ", "ความเกลียดชัง", "ความรวดเร็ว"], c: 0, exp: "ใจเขาใจเรา แม้ไม่เห็นหน้ากัน" },
+            { q: "Cryptocurrency เกี่ยวข้องกับเทคโนโลยีใด?", a: ["AI", "Blockchain", "VR", "3D Printing"], c: 1, exp: "สกุลเงินดิจิทัลทำงานบน Blockchain" },
+            { q: "Office Syndrome ป้องกันได้โดย?", a: ["นั่งท่านเดิมนานๆ", "ปรับท่านั่งและพักสายตา", "ทำงานหนักขึ้น", "นอนดึก"], c: 1, exp: "Ergonomics และการพักผ่อน" },
+            { q: "Phishing มักมาในรูปแบบใด?", a: ["จดหมายไปรษณีย์", "อีเมลหรือลิงก์ปลอม", "โทรทัศน์", "วิทยุ"], c: 1, exp: "หลอกให้คลิกลิงก์ปลอม" },
+            { q: "Generative AI คืออะไร?", a: ["AI ที่สร้างเนื้อหาใหม่ได้ (รูป, ข้อความ)", "AI ที่เล่นเกมเก่ง", "AI ขับรถ", "AI หุ่นยนต์"], c: 0, exp: "เช่น ChatGPT, Midjourney" },
+            { q: "AR (Augmented Reality) คือ?", a: ["โลกเสมือนจริง 100%", "การซ้อนภาพจำลองลงบนโลกจริง", "แว่นตากันแดด", "การดูหนัง 3D"], c: 1, exp: "เช่น เกม Pokemon GO" },
+            { q: "Creative Commons ประเภท ND หมายถึง?", a: ["ห้ามใช้", "ห้ามดัดแปลงแก้ไข", "ห้ามขาย", "ต้องให้เครดิต"], c: 1, exp: "No Derivatives" },
+            { q: "การใช้ Wi-Fi สาธารณะทำธุรกรรมการเงิน ปลอดภัยหรือไม่?", a: ["ปลอดภัยมาก", "ไม่ปลอดภัย เสี่ยงถูกดักข้อมูล", "เร็วดี", "ประหยัดเน็ต"], c: 1, exp: "เสี่ยงต่อการถูกดักจับข้อมูล (Sniffing)" },
+            { q: "Soft Power เกี่ยวข้องกับสื่อดิจิทัลอย่างไร?", a: ["ไม่เกี่ยวกัน", "สื่อดิจิทัลช่วยแพร่กระจายวัฒนธรรมได้รวดเร็ว", "ทำให้คอมพิวเตอร์นุ่มนวล", "โปรแกรมราคาถูก"], c: 1, exp: "สื่อดิจิทัลเป็นเครื่องมือสำคัญในการส่งต่อ Soft Power" },
+            { q: "Platform ใดเหมาะเขียนบทความวิชาการ?", a: ["TikTok", "Medium / Blockdit", "Instagram", "Twitter"], c: 1, exp: "ออกแบบมาเพื่อการอ่านบทความยาว" },
+            { q: "ข้อใดคือมารยาท (Netiquette) ที่ดี?", a: ["สแปมข้อความ", "ใช้ถ้อยคำสุภาพ ให้เกียรติผู้อื่น", "พิมพ์ตัวใหญ่ทั้งหมด (T-Posing)", "ขโมยรูป"], c: 1, exp: "Digital Etiquette" },
+            { q: "Deepfake คืออันตรายจากอะไร?", a: ["ไวรัส", "AI สลับหน้า/เสียงปลอม", "แฮกเกอร์", "เน็ตช้า"], c: 1, exp: "การปลอมแปลงอัตลักษณ์ด้วย AI" },
+            { q: "Smart Contract คือ?", a: ["สัญญาว่าจ้าง", "สัญญาอัจฉริยะบน Blockchain", "สัญญากู้ยืม", "โทรศัพท์มือถือ"], c: 1, exp: "โค้ดที่ดำเนินการตามเงื่อนไขอัตโนมัติ" },
+            { q: "Telemedicine ช่วยเรื่องอะไร?", a: ["เล่นเกม", "หาหมอทางไกล", "สั่งอาหาร", "เรียกรถ"], c: 1, exp: "แพทย์ทางไกล" },
+            { q: "Big Data มีประโยชน์ต่อธุรกิจอย่างไร?", a: ["เปลืองที่เก็บ", "ช่วยวิเคราะห์พฤติกรรมลูกค้า", "ทำให้คอมช้า", "ไม่มีประโยชน์"], c: 1, exp: "Business Intelligence" }
+        ];
+
+        let currentQ = 0;
+        let score = 0;
+        let shuffledQ = [];
+
+        function initQuiz() {
+            shuffledQ = [...questions].sort(() => 0.5 - Math.random()).slice(0, 30);
+            currentQ = 0; score = 0;
+            document.getElementById('quiz-container').classList.remove('hidden');
+            document.getElementById('result-area').classList.add('hidden');
+            document.getElementById('score-display').innerText = `คะแนน: 0`;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = shuffledQ[currentQ];
+            document.getElementById('q-progress').innerText = `ข้อที่ ${currentQ + 1} / 30`;
+            document.getElementById('q-text').innerText = q.q;
+            const optsDiv = document.getElementById('options-area');
+            optsDiv.innerHTML = '';
+            q.a.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "quiz-option w-full text-left p-4 rounded-xl border border-gray-200 font-medium transition-all block";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(idx, btn);
+                optsDiv.appendChild(btn);
+            });
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+        }
+
+        function checkAnswer(selectedIdx, btn) {
+            const q = shuffledQ[currentQ];
+            const allBtns = document.querySelectorAll('.quiz-option');
+            allBtns.forEach(b => b.disabled = true);
+            const feedback = document.getElementById('feedback');
+            feedback.classList.remove('hidden');
+            if (selectedIdx === q.c) {
+                score++; btn.classList.add('correct');
+                document.getElementById('score-display').innerText = `คะแนน: ${score}`;
+                feedback.className = "mt-4 p-4 rounded-lg bg-green-50 text-green-800 border border-green-200";
+                feedback.innerHTML = `<strong>ถูกต้อง!</strong> ${q.exp}`;
+            } else {
+                btn.classList.add('wrong'); allBtns[q.c].classList.add('correct');
+                feedback.className = "mt-4 p-4 rounded-lg bg-red-50 text-red-800 border border-red-200";
+                feedback.innerHTML = `<strong>ผิดครับ!</strong> เฉลยคือ "${q.a[q.c]}" <br>(${q.exp})`;
+            }
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQ++;
+            if (currentQ < 30) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('result-area').classList.remove('hidden');
+            document.getElementById('final-score').innerText = `${score} / 30`;
+        }
+
+        function restartQuiz() {
+            initQuiz();
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>

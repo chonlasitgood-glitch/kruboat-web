@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>วิทยาการคำนวณ ม.5 - ข้อมูลและเทคโนโลยี</title>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Prompt', 'sans-serif'] },
+                    colors: {
+                        // Teal Theme for M.5 (Professional & Data-centric)
+                        brand: { 50: '#f0fdfa', 100: '#ccfbf1', 500: '#14b8a6', 600: '#0d9488', 800: '#115e59', 900: '#134e4a' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body { background-color: #fafafa; line-height: 1.8; }
+        .card-modern {
+            background: white; border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease; border: 1px solid #f3f4f6;
+        }
+        .card-modern:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: #ccfbf1; }
+        .highlight-box { background-color: #f0fdfa; border-left: 4px solid #0d9488; padding: 1.25rem; border-radius: 0.5rem; margin: 1rem 0; }
+        
+        /* Quiz Styles */
+        .quiz-option:hover { background-color: #f0fdfa; border-color: #0d9488; }
+        .quiz-option.correct { background-color: #dcfce7; border-color: #22c55e; color: #166534; }
+        .quiz-option.wrong { background-color: #fee2e2; border-color: #ef4444; color: #991b1b; }
+    </style>
+</head>
+<body class="text-gray-700 font-sans antialiased">
+
+    <!-- Nav -->
+    <nav class="bg-white/95 backdrop-blur-md fixed w-full z-50 shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-server text-brand-600 text-xl mr-2"></i>
+                    <span class="font-bold text-lg tracking-tight text-gray-900">CS M.5 (Data Tech)</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
+                    <a href="#home" class="hover:text-brand-600 transition">หน้าแรก</a>
+                    <a href="#unit1" class="hover:text-brand-600 transition">1. ชีวิตดิจิทัล</a>
+                    <a href="#unit2" class="hover:text-brand-600 transition">2. จัดการข้อมูล</a>
+                    <a href="#unit3" class="hover:text-brand-600 transition">3. ประมวลผล</a>
+                    <a href="#unit4" class="hover:text-brand-600 transition">4. วิทยาการข้อมูล</a>
+                    <a href="#quiz" class="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition">แบบทดสอบ</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header id="home" class="pt-28 pb-20 bg-gradient-to-b from-white via-teal-50 to-white">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col md:flex-row items-center gap-12">
+            <div class="md:w-1/2 space-y-6">
+                <span class="px-3 py-1 bg-brand-100 text-brand-800 rounded-full text-xs font-bold uppercase tracking-wider">มัธยมศึกษาปีที่ 5</span>
+                <h1 class="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">
+                    Digital Value & <br><span class="text-brand-600">Big Data</span>
+                </h1>
+                <p class="text-lg text-gray-600 leading-relaxed">
+                    เจาะลึกบทบาทของเทคโนโลยีในการสร้างมูลค่าเพิ่ม การบริหารจัดการคลังข้อมูล และพลังของ Data Science ในการขับเคลื่อนสังคม
+                </p>
+                <div class="flex gap-4">
+                    <a href="#unit1" class="px-6 py-3 bg-brand-600 text-white font-semibold rounded-xl shadow-lg hover:bg-brand-700 transition">เริ่มบทเรียน</a>
+                    <a href="#quiz" class="px-6 py-3 bg-white text-gray-700 border border-gray-200 font-semibold rounded-xl hover:bg-gray-50 transition">ทำแบบทดสอบ</a>
+                </div>
+            </div>
+            <div class="md:w-1/2">
+                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop" alt="Data Science Visualization" class="rounded-2xl shadow-2xl border-4 border-white w-full object-cover h-[400px]">
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 lg:px-8 py-12 space-y-24">
+
+        <!-- Unit 1: Digital Life & Value -->
+        <section id="unit1" class="scroll-mt-24">
+            <div class="border-l-4 border-brand-500 pl-4 mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">1. วิทยาการคอมพิวเตอร์และสื่อดิจิทัลกับการดำเนินชีวิต</h2>
+                <p class="text-brand-600">Digital Life & Value Creation</p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-10 mb-10">
+                <div class="card-modern p-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">เทคโนโลยีเปลี่ยนชีวิตอย่างไร?</h3>
+                    <ul class="space-y-6">
+                        <li class="flex gap-4">
+                            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-house-signal"></i></div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Smart Living</h4>
+                                <p class="text-sm text-gray-600">บ้านอัจฉริยะ (IoT), การสั่งงานด้วยเสียง, หุ่นยนต์ดูดฝุ่น, กล้องวงจรปิดออนไลน์</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-4">
+                            <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-cart-shopping"></i></div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Digital Commerce</h4>
+                                <p class="text-sm text-gray-600">ซื้อของออนไลน์, จ่ายเงินผ่าน QR Code, บริการ Food Delivery</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-4">
+                            <div class="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-heart-pulse"></i></div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Health Tech</h4>
+                                <p class="text-sm text-gray-600">Smartwatch วัดชีพจร, Telemedicine ปรึกษาหมอออนไลน์</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-modern p-8 bg-brand-50 border-brand-100">
+                    <h3 class="text-xl font-bold text-brand-900 mb-4">การเพิ่มมูลค่า (Value Added) ด้วยเทคโนโลยี</h3>
+                    <p class="text-sm text-brand-800 mb-6">สินค้าและบริการเดิม สามารถสร้างมูลค่าเพิ่มได้ด้วยข้อมูลและดิจิทัลคอนเทนต์</p>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-white p-4 rounded-xl shadow-sm">
+                            <strong class="text-brand-700 block mb-1">1. Storytelling (การเล่าเรื่อง)</strong>
+                            <p class="text-xs text-gray-600">กาแฟธรรมดา -> กาแฟออร์แกนิกที่เล่าเรื่องราวของเกษตรกรผ่าน QR Code ข้างแก้ว</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm">
+                            <strong class="text-brand-700 block mb-1">2. Personalization (ความเฉพาะตัว)</strong>
+                            <p class="text-xs text-gray-600">แอปฟังเพลงแนะนำเพลย์ลิสต์ที่ "คุณน่าจะชอบ" จากประวัติการฟัง (Spotify/YouTube)</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm">
+                            <strong class="text-brand-700 block mb-1">3. Convenience (ความสะดวก)</strong>
+                            <p class="text-xs text-gray-600">เรียกรถแท็กซี่ผ่านแอปฯ เห็นราคาและตำแหน่งรถทันที (Grab/Bolt)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Unit 2: Data Management -->
+        <section id="unit2" class="scroll-mt-24">
+            <div class="border-l-4 border-blue-500 pl-4 mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">2. เทคโนโลยีกับการจัดการข้อมูล</h2>
+                <p class="text-blue-600">Database, Warehouse & Mining</p>
+            </div>
+
+            <!-- Hierarchy Visualization -->
+            <div class="relative mb-12">
+                <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-gray-200"></div>
+                </div>
+                <div class="relative flex justify-center">
+                    <span class="bg-white px-3 text-lg font-medium text-gray-900">ลำดับชั้นของการจัดการข้อมูล</span>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 mb-12">
+                <!-- Step 1 -->
+                <div class="card-modern p-6 text-center group hover:border-blue-300">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full mx-auto flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition"><i class="fa-solid fa-database"></i></div>
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">1. Database</h4>
+                    <p class="text-xs text-gray-500 uppercase tracking-wide mb-3">ฐานข้อมูล</p>
+                    <p class="text-sm text-gray-600">ที่เก็บรวบรวมข้อมูลดิบ (Raw Data) ที่มีความสัมพันธ์กัน ไว้ใช้งานทั่วไปในระบบงานประจำวัน (Operational)</p>
+                </div>
+                <!-- Step 2 -->
+                <div class="card-modern p-6 text-center group hover:border-indigo-300">
+                    <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full mx-auto flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition"><i class="fa-solid fa-warehouse"></i></div>
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">2. Data Warehouse</h4>
+                    <p class="text-xs text-gray-500 uppercase tracking-wide mb-3">คลังข้อมูล</p>
+                    <p class="text-sm text-gray-600">รวบรวมข้อมูลจากหลายฐานข้อมูล มาจัดระเบียบใหม่เพื่อใช้ในการ "วิเคราะห์" โดยเฉพาะ (Analytical)</p>
+                </div>
+                <!-- Step 3 -->
+                <div class="card-modern p-6 text-center group hover:border-purple-300">
+                    <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full mx-auto flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition"><i class="fa-solid fa-gem"></i></div>
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">3. Data Mining</h4>
+                    <p class="text-xs text-gray-500 uppercase tracking-wide mb-3">เหมืองข้อมูล</p>
+                    <p class="text-sm text-gray-600">กระบวนการขุดค้นหา "รูปแบบ (Pattern)" หรือ "ความสัมพันธ์ที่ซ่อนอยู่" ในข้อมูลขนาดใหญ่ เพื่อทำนายอนาคต</p>
+                </div>
+            </div>
+
+            <div class="bg-gray-900 rounded-2xl p-8 text-white relative overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?q=80&w=1000&auto=format&fit=crop" alt="Data Mining" class="absolute inset-0 w-full h-full object-cover opacity-20">
+                <div class="relative z-10 flex flex-col md:flex-row gap-8 items-center">
+                    <div class="md:w-1/2">
+                        <h3 class="text-2xl font-bold mb-4 text-brand-300">ตัวอย่าง: Beer & Diapers</h3>
+                        <p class="text-gray-300 mb-4">
+                            ตำนาน Data Mining ของห้างสรรพสินค้าแห่งหนึ่ง พบความสัมพันธ์แปลกๆ ว่า <strong>"ผู้ชายที่มาซื้อผ้าอ้อม มักจะซื้อเบียร์กลับไปด้วย"</strong> ในเย็นวันศุกร์
+                        </p>
+                        <div class="inline-block bg-brand-600 px-4 py-2 rounded-lg text-sm font-bold">
+                            ผลลัพธ์: วางขายเบียร์ใกล้โซนผ้าอ้อม = ยอดขายเพิ่ม!
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 bg-white/10 p-6 rounded-xl backdrop-blur-sm border border-white/10">
+                        <h4 class="font-bold mb-3 border-b border-gray-600 pb-2">เทคนิค Data Mining</h4>
+                        <ul class="space-y-2 text-sm text-gray-300">
+                            <li>• <strong>Classification:</strong> จำแนกประเภทข้อมูล (เช่น ลูกค้าเกรด A, B, C)</li>
+                            <li>• <strong>Clustering:</strong> จัดกลุ่มข้อมูลที่มีลักษณะคล้ายกัน</li>
+                            <li>• <strong>Association:</strong> หาความสัมพันธ์ (เช่น ซื้อ A มักซื้อ B)</li>
+                            <li>• <strong>Regression:</strong> พยากรณ์แนวโน้มตัวเลข (เช่น ยอดขายเดือนหน้า)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Unit 3: Processing -->
+        <section id="unit3" class="scroll-mt-24">
+            <div class="border-l-4 border-orange-500 pl-4 mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">3. การประมวลผลข้อมูล (Data Processing)</h2>
+                <p class="text-orange-600">From Raw Data to Information</p>
+            </div>
+
+            <div class="card-modern p-10">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-6 text-center">
+                    <div class="w-full md:w-1/5 group">
+                        <div class="bg-gray-100 p-4 rounded-xl mb-3 group-hover:bg-orange-50 transition">
+                            <i class="fa-solid fa-file-arrow-down text-3xl text-gray-500 group-hover:text-orange-500"></i>
+                        </div>
+                        <strong class="block text-gray-800">1. Collection</strong>
+                        <span class="text-xs text-gray-500">เก็บรวบรวม</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-gray-300 hidden md:block"></i>
+                    
+                    <div class="w-full md:w-1/5 group">
+                        <div class="bg-gray-100 p-4 rounded-xl mb-3 group-hover:bg-orange-50 transition">
+                            <i class="fa-solid fa-filter text-3xl text-gray-500 group-hover:text-orange-500"></i>
+                        </div>
+                        <strong class="block text-gray-800">2. Preparation</strong>
+                        <span class="text-xs text-gray-500">เตรียม/ทำความสะอาด</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-gray-300 hidden md:block"></i>
+                    
+                    <div class="w-full md:w-1/5 group">
+                        <div class="bg-gray-100 p-4 rounded-xl mb-3 group-hover:bg-orange-50 transition">
+                            <i class="fa-solid fa-gears text-3xl text-gray-500 group-hover:text-orange-500"></i>
+                        </div>
+                        <strong class="block text-gray-800">3. Processing</strong>
+                        <span class="text-xs text-gray-500">ประมวลผล</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-gray-300 hidden md:block"></i>
+                    
+                    <div class="w-full md:w-1/5 group">
+                        <div class="bg-gray-100 p-4 rounded-xl mb-3 group-hover:bg-orange-50 transition">
+                            <i class="fa-solid fa-chart-pie text-3xl text-gray-500 group-hover:text-orange-500"></i>
+                        </div>
+                        <strong class="block text-gray-800">4. Analysis</strong>
+                        <span class="text-xs text-gray-500">วิเคราะห์ผล</span>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-8 border-t border-gray-100 grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="font-bold text-gray-800 mb-2">กรรมวิธีการประมวลผลพื้นฐาน</h4>
+                        <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                            <li><strong>การคำนวณ (Computation):</strong> บวก ลบ คูณ หาร หาค่าเฉลี่ย</li>
+                            <li><strong>การจัดเรียง (Sorting):</strong> เรียงจากน้อยไปมาก, ก-ฮ</li>
+                            <li><strong>การจัดกลุ่ม (Classifying):</strong> แยกเพศ, แยกแผนก</li>
+                            <li><strong>การสรุปผล (Summarizing):</strong> หาผลรวมยอดขายรายเดือน</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-800 mb-2">ซอฟต์แวร์ที่ใช้ประมวลผล</h4>
+                        <div class="flex gap-3">
+                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">Excel / Google Sheets</span>
+                            <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-bold">Power BI</span>
+                            <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs font-bold">Python (Pandas)</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">เลือกใช้ตามปริมาณและความซับซ้อนของข้อมูล</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Unit 4: Data Science -->
+        <section id="unit4" class="scroll-mt-24">
+            <div class="border-l-4 border-green-500 pl-4 mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">4. วิทยาการข้อมูล (Data Science)</h2>
+                <p class="text-green-600">Driving Future with Data</p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-10">
+                <div class="card-modern p-8 bg-green-50 border-green-100">
+                    <h3 class="text-xl font-bold text-green-900 mb-4">วิทยาการข้อมูล (Data Science) คือ?</h3>
+                    <p class="text-sm text-green-800 mb-6">
+                        ศาสตร์ที่นำเอาความรู้ 3 ด้านมารวมกัน เพื่อดึง "ความรู้ (Insights)" ออกมาจากข้อมูลมหาศาล ได้แก่:
+                    </p>
+                    <div class="space-y-2 text-sm text-gray-700">
+                        <div class="flex items-center gap-3 bg-white p-3 rounded shadow-sm">
+                            <span class="bg-red-100 text-red-600 px-2 rounded font-bold text-xs">CS</span>
+                            <span>วิทยาการคอมพิวเตอร์ (เขียนโปรแกรม, ฐานข้อมูล)</span>
+                        </div>
+                        <div class="flex items-center gap-3 bg-white p-3 rounded shadow-sm">
+                            <span class="bg-blue-100 text-blue-600 px-2 rounded font-bold text-xs">Math</span>
+                            <span>คณิตศาสตร์และสถิติ (โมเดล, ความน่าจะเป็น)</span>
+                        </div>
+                        <div class="flex items-center gap-3 bg-white p-3 rounded shadow-sm">
+                            <span class="bg-yellow-100 text-yellow-600 px-2 rounded font-bold text-xs">Biz</span>
+                            <span>ความรู้เฉพาะทางธุรกิจ (เข้าใจปัญหาขององค์กร)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-modern p-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Big Data (ข้อมูลขนาดใหญ่)</h3>
+                    <p class="text-sm text-gray-600 mb-4">ข้อมูลที่มีขนาดใหญ่มากจนซอฟต์แวร์ปกติจัดการไม่ได้ ต้องมีลักษณะ 5Vs:</p>
+                    <ul class="text-sm space-y-3">
+                        <li class="flex justify-between border-b pb-1">
+                            <span>1. Volume (ปริมาณ)</span>
+                            <span class="text-gray-400">ระดับ Terabyte/Petabyte</span>
+                        </li>
+                        <li class="flex justify-between border-b pb-1">
+                            <span>2. Velocity (ความเร็ว)</span>
+                            <span class="text-gray-400">ข้อมูลมาเร็วแบบ Real-time</span>
+                        </li>
+                        <li class="flex justify-between border-b pb-1">
+                            <span>3. Variety (ความหลากหลาย)</span>
+                            <span class="text-gray-400">ภาพ, เสียง, ข้อความ, พิกัด</span>
+                        </li>
+                        <li class="flex justify-between border-b pb-1">
+                            <span>4. Veracity (ความถูกต้อง)</span>
+                            <span class="text-gray-400">ข้อมูลต้องเชื่อถือได้</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span>5. Value (คุณค่า)</span>
+                            <span class="text-gray-400">นำไปใช้ประโยชน์ทางธุรกิจได้</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-10 bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">การวิเคราะห์ข้อมูล (Data Analytics) 4 ระดับ</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="p-4 bg-gray-50 rounded-xl">
+                        <strong class="text-brand-600 block mb-1">1. Descriptive</strong>
+                        <p class="text-xs text-gray-500">"เกิดอะไรขึ้น?" (อดีต)<br>ดูรายงาน, กราฟสรุปผล</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-xl">
+                        <strong class="text-brand-600 block mb-1">2. Diagnostic</strong>
+                        <p class="text-xs text-gray-500">"ทำไมถึงเกิด?" (หาสาเหตุ)<br>เจาะลึกข้อมูลหาปัจจัย</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-xl">
+                        <strong class="text-brand-600 block mb-1">3. Predictive</strong>
+                        <p class="text-xs text-gray-500">"จะเกิดอะไรขึ้น?" (อนาคต)<br>ใช้สถิติพยากรณ์แนวโน้ม</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-xl">
+                        <strong class="text-brand-600 block mb-1">4. Prescriptive</strong>
+                        <p class="text-xs text-gray-500">"ควรทำอย่างไร?" (แนะนำ)<br>ระบบเสนอทางเลือกที่ดีที่สุด</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz -->
+        <section id="quiz" class="py-16 bg-brand-50 rounded-[3rem] px-8 relative overflow-hidden">
+            <div class="max-w-3xl mx-auto relative z-10">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-brand-900">ทดสอบความรู้ท้ายบท</h2>
+                    <p class="text-brand-700">แบบทดสอบ 30 ข้อ ทบทวนความเข้าใจ</p>
+                </div>
+                
+                <div id="quiz-container" class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                    <div class="flex justify-between text-sm font-bold text-gray-400 mb-6">
+                        <span id="q-progress">ข้อที่ 1 / 30</span>
+                        <span id="score-display" class="text-brand-600">คะแนน: 0</span>
+                    </div>
+                    <h3 id="q-text" class="text-xl font-bold text-gray-800 mb-6">Loading...</h3>
+                    <div id="options-area" class="space-y-3"></div>
+                    <div id="feedback" class="hidden mt-4 p-4 rounded-lg bg-gray-50 text-sm"></div>
+                    <div class="mt-8 flex justify-between border-t pt-6">
+                        <button onclick="restartQuiz()" class="text-gray-400 hover:text-brand-600 text-sm font-bold"><i class="fa-solid fa-rotate-right mr-1"></i> เริ่มใหม่</button>
+                        <div class="flex gap-3">
+                            <button id="skip-btn" onclick="quizApp.skipQuestion()" class="text-gray-500 hover:text-gray-800 font-bold px-4 transition">ข้าม</button>
+                            <button id="next-btn" onclick="quizApp.nextQuestion()" class="hidden bg-brand-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-brand-700 transition">ข้อถัดไป</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="result-area" class="hidden max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-10 text-center">
+                    <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">🏆</div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">ยอดเยี่ยมมาก!</h3>
+                    <div class="text-5xl font-black text-brand-600 mb-8" id="final-score">0/30</div>
+                    <button onclick="restartQuiz()" class="px-8 py-3 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 transition">ทำแบบทดสอบอีกครั้ง</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-900 text-gray-400 py-12 mt-20 text-center">
+        <p class="mb-4">สื่อการเรียนรู้วิชาวิทยาการคำนวณ ชั้นมัธยมศึกษาปีที่ 5</p>
+        <p class="text-sm opacity-50">&copy; 2025 kruboat.com. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const questions = [
+            { q: "ข้อใดคือการสร้างมูลค่าเพิ่ม (Value Added) ด้วยเทคโนโลยี?", a: ["ขายราคาแพงขึ้น", "ทำบรรจุภัณฑ์ให้ใหญ่ขึ้น", "ใช้ QR Code บอกเล่าเรื่องราวสินค้า", "จ้างดารามาโฆษณา"], c: 2, exp: "การใช้ Storytelling ผ่านเทคโนโลยีช่วยสร้างประสบการณ์และมูลค่า" },
+            { q: "Database ต่างจาก Data Warehouse อย่างไร?", a: ["เหมือนกัน", "Database เก็บข้อมูลปัจจุบัน Warehouse เก็บข้อมูลอดีตเพื่อวิเคราะห์", "Warehouse เล็กกว่า", "Database ใช้สำหรับวิเคราะห์เท่านั้น"], c: 1, exp: "Warehouse รวบรวมข้อมูลจากหลาย Database เพื่อการวิเคราะห์" },
+            { q: "Data Mining คืออะไร?", a: ["การขุดเหมืองทอง", "การทำลายข้อมูล", "การค้นหารูปแบบและความสัมพันธ์ในข้อมูล", "การสร้างฐานข้อมูล"], c: 2, exp: "ค้นหา Pattern ที่ซ่อนอยู่เพื่อทำนายอนาคต" },
+            { q: "ขั้นตอนแรกของการประมวลผลข้อมูลคือ?", a: ["Processing", "Output", "Collection", "Analysis"], c: 2, exp: "ต้องเก็บรวบรวมข้อมูล (Collection) มาก่อน" },
+            { q: "5Vs ของ Big Data ข้อใดหมายถึงความหลากหลาย?", a: ["Volume", "Velocity", "Variety", "Veracity"], c: 2, exp: "Variety คือความหลากหลายของรูปแบบข้อมูล" },
+            { q: "Data Science ประกอบด้วยความรู้ 3 ด้าน ยกเว้นข้อใด?", a: ["Computer Science", "Math & Stats", "Business Domain", "History"], c: 3, exp: "ประวัติศาสตร์ไม่ใช่แกนหลักของ Data Science" },
+            { q: "การวิเคราะห์แบบ Descriptive ตอบคำถามว่าอะไร?", a: ["จะเกิดอะไรขึ้น", "ทำไมถึงเกิด", "เกิดอะไรขึ้น (ในอดีต)", "ควรทำอย่างไร"], c: 2, exp: "Descriptive อธิบายสิ่งที่เกิดขึ้นไปแล้ว" },
+            { q: "กรณีศึกษา Beer & Diapers เกิดจากกระบวนการใด?", a: ["Database Design", "Data Mining", "Data Entry", "Data Cleaning"], c: 1, exp: "การหาความสัมพันธ์ (Association) ด้วย Data Mining" },
+            { q: "Smart Home จัดเป็นเทคโนโลยีด้านใด?", a: ["AI", "IoT", "Big Data", "Blockchain"], c: 1, exp: "Internet of Things เชื่อมต่ออุปกรณ์ในบ้าน" },
+            { q: "Visualization คืออะไร?", a: ["การคำนวณตัวเลข", "การทำความสะอาดข้อมูล", "การแปลงข้อมูลเป็นภาพกราฟิก", "การเก็บข้อมูล"], c: 2, exp: "สื่อสารข้อมูลด้วยภาพเพื่อให้เข้าใจง่าย" },
+            { q: "ข้อมูลขยะเข้า ผลลัพธ์ก็เป็นขยะ ตรงกับคำว่า?", a: ["GIGO", "FIFO", "LIFO", "SWOT"], c: 0, exp: "Garbage In, Garbage Out" },
+            { q: "Telemedicine คืออะไร?", a: ["การรักษาทางไกลผ่านเทคโนโลยี", "หุ่นยนต์ผ่าตัด", "ยาอัจฉริยะ", "การออกกำลังกาย"], c: 0, exp: "แพทย์ทางไกล" },
+            { q: "Predictive Analytics ทำหน้าที่อะไร?", a: ["สรุปผล", "พยากรณ์สิ่งที่น่าจะเกิดขึ้น", "หาสาเหตุ", "แนะนำทางเลือก"], c: 1, exp: "ทำนายอนาคต (Predict)" },
+            { q: "การลบข้อมูลซ้ำซ้อนเรียกว่าอะไร?", a: ["Data Mining", "Data Visualization", "Data Cleaning", "Data Gathering"], c: 2, exp: "เป็นส่วนหนึ่งของการทำความสะอาดข้อมูล" },
+            { q: "Velocity ใน Big Data หมายถึง?", a: ["ปริมาณมาก", "ความถูกต้อง", "ความเร็วในการเกิดและประมวลผล", "มูลค่า"], c: 2, exp: "ความเร็ว (Velocity)" },
+            { q: "ฐานข้อมูล (Database) เก็บข้อมูลประเภทใด?", a: ["ข้อมูลที่ผ่านการวิเคราะห์แล้ว", "ข้อมูลดิบสำหรับใช้งานประจำวัน", "กราฟและแผนภูมิ", "กฎหมาย"], c: 1, exp: "Operational Data" },
+            { q: "Personalization คืออะไร?", a: ["การขายสินค้าทั่วไป", "การนำเสนอสินค้าที่ตรงใจเฉพาะบุคคล", "การลดราคา", "การโฆษณาผ่านทีวี"], c: 1, exp: "ปรับแต่งให้เหมาะกับแต่ละคน" },
+            { q: "การจัดเรียงข้อมูล (Sorting) คือการประมวลผลแบบใด?", a: ["วิเคราะห์", "จัดระเบียบ", "คำนวณ", "สรุปผล"], c: 1, exp: "จัดระเบียบข้อมูล" },
+            { q: "ใครคือผู้ที่ทำงานเกี่ยวกับ Data Science?", a: ["Data Scientist", "Graphic Designer", "Civil Engineer", "Chef"], c: 0, exp: "นักวิทยาศาสตร์ข้อมูล" },
+            { q: "Veracity ใน Big Data หมายถึง?", a: ["ความเร็ว", "ความหลากหลาย", "ความถูกต้องน่าเชื่อถือ", "ปริมาณ"], c: 2, exp: "ความน่าเชื่อถือของข้อมูล" },
+            { q: "ข้อใดไม่ใช่ขั้นตอนของ Data Science Process?", a: ["ตั้งคำถาม", "เก็บข้อมูล", "วิเคราะห์", "ซ่อมคอมพิวเตอร์"], c: 3, exp: "ซ่อมคอมฯ เป็นงาน IT Support" },
+            { q: "แพลตฟอร์มใดเป็น Digital Commerce?", a: ["Microsoft Word", "Shopee", "Calculator", "Notepad"], c: 1, exp: "Shopee เป็น E-commerce platform" },
+            { q: "การหาค่าเฉลี่ย (Mean) เป็นการประมวลผลแบบใด?", a: ["Sorting", "Computation", "Visualization", "Recording"], c: 1, exp: "การคำนวณ" },
+            { q: "Value ใน Big Data หมายถึง?", a: ["ขนาดข้อมูล", "ความเร็ว", "ความหลากหลาย", "คุณค่าทางธุรกิจ"], c: 3, exp: "ข้อมูลต้องสร้างมูลค่าได้" },
+            { q: "ข้อใดคือ Unstructured Data?", a: ["ตาราง Excel", "ไฟล์วิดีโอ/รูปภาพ", "ฐานข้อมูล SQL", "รายชื่อนักเรียน"], c: 1, exp: "ข้อมูลไม่มีโครงสร้างที่แน่นอน" },
+            { q: "Prescriptive Analytics ตอบคำถามว่า?", a: ["เกิดอะไรขึ้น", "ทำไมถึงเกิด", "จะเกิดอะไรขึ้น", "ควรทำอย่างไรดีที่สุด"], c: 3, exp: "แนะนำทางเลือก (Prescribe)" },
+            { q: "Clustering ใน Data Mining คือ?", a: ["การจัดกลุ่มข้อมูลที่คล้ายกัน", "การพยากรณ์ยอดขาย", "การหาความผิดปกติ", "การเรียงลำดับ"], c: 0, exp: "การจัดกลุ่ม (Cluster)" },
+            { q: "โปรแกรมใดเหมาะสำหรับทำ Data Visualization?", a: ["Power BI", "Notepad", "Paint", "WinRAR"], c: 0, exp: "Power BI / Tableau" },
+            { q: "Data Scientist ต้องมีความรู้ด้าน Business เพื่ออะไร?", a: ["เพื่อขายของ", "เพื่อเข้าใจปัญหาและโจทย์ขององค์กร", "เพื่อทำบัญชี", "เพื่อซ่อมคอม"], c: 1, exp: "เพื่อให้แก้ปัญหาได้ตรงจุดธุรกิจ" },
+            { q: "IoT ย่อมาจาก?", a: ["Input of Technology", "Internet of Things", "Internal of Things", "Idea of Tech"], c: 1, exp: "อินเทอร์เน็ตของสรรพสิ่ง" }
+        ];
+
+        let currentQ = 0;
+        let score = 0;
+        let shuffledQ = [];
+
+        function initQuiz() {
+            shuffledQ = [...questions].sort(() => 0.5 - Math.random()).slice(0, 30);
+            currentQ = 0; score = 0;
+            document.getElementById('quiz-container').classList.remove('hidden');
+            document.getElementById('result-area').classList.add('hidden');
+            document.getElementById('score-display').innerText = `คะแนน: 0`;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = shuffledQ[currentQ];
+            document.getElementById('q-progress').innerText = `ข้อที่ ${currentQ + 1} / 30`;
+            document.getElementById('q-text').innerText = q.q;
+            const optsDiv = document.getElementById('options-area');
+            optsDiv.innerHTML = '';
+            q.a.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "quiz-option w-full text-left p-4 rounded-xl border border-gray-200 font-medium transition-all block";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(idx, btn);
+                optsDiv.appendChild(btn);
+            });
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+        }
+
+        function checkAnswer(selectedIdx, btn) {
+            const q = shuffledQ[currentQ];
+            const allBtns = document.querySelectorAll('.quiz-option');
+            allBtns.forEach(b => b.disabled = true);
+            const feedback = document.getElementById('feedback');
+            feedback.classList.remove('hidden');
+            if (selectedIdx === q.c) {
+                score++; btn.classList.add('correct');
+                document.getElementById('score-display').innerText = `คะแนน: ${score}`;
+                feedback.className = "mt-4 p-4 rounded-lg bg-green-50 text-green-800 border border-green-200";
+                feedback.innerHTML = `<strong>ถูกต้อง!</strong> ${q.exp}`;
+            } else {
+                btn.classList.add('wrong'); allBtns[q.c].classList.add('correct');
+                feedback.className = "mt-4 p-4 rounded-lg bg-red-50 text-red-800 border border-red-200";
+                feedback.innerHTML = `<strong>ผิดครับ!</strong> เฉลยคือ "${q.a[q.c]}" <br>(${q.exp})`;
+            }
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQ++; if (currentQ < 30) showQuestion(); else showResult();
+        }
+
+        function showResult() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('result-area').classList.remove('hidden');
+            document.getElementById('final-score').innerText = `${score} / 30`;
+        }
+
+        function restartQuiz() { initQuiz(); }
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
