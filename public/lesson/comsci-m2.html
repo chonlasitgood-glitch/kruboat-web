@@ -3,992 +3,426 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>วิทยาการคำนวณ ม.2 - สื่อการเรียนรู้ออนไลน์</title>
-    
-    <!-- Google Fonts: Prompt -->
+    <title>วิทยาการคำนวณ ม.2</title>
+    <!-- Fonts & Tailwind same as M.1 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Prompt', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['Prompt', 'sans-serif'] },
                     colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            800: '#075985',
-                            900: '#0c4a6e',
-                        },
-                        python: {
-                            blue: '#306998',
-                            yellow: '#FFD43B'
-                        }
-                    },
-                    boxShadow: {
-                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-                        'glow': '0 0 15px rgba(14, 165, 233, 0.3)',
+                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 800: '#075985', 900: '#0c4a6e' },
+                        python: { blue: '#306998', yellow: '#FFD43B' }
                     }
                 }
             }
         }
     </script>
-
     <style>
-        html {
-            scroll-behavior: smooth;
-        }
-        body {
-            background-color: #fafafa;
-        }
-        .gradient-text {
-            background: linear-gradient(to right, #0284c7, #2563eb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        /* Styles same as M.1 but Blue theme preference */
+        html { scroll-behavior: smooth; }
+        body { background-color: #fafafa; line-height: 1.8; }
         .card-modern {
-            background: white;
-            border-radius: 1.5rem;
-            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-            border: 1px solid #f3f4f6;
+            background: white; border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease; border: 1px solid #f3f4f6;
         }
-        .card-modern:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border-color: #e0f2fe;
-        }
-        .theory-box {
-            background-color: #f8fafc;
-            border-left: 4px solid #0284c7;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-        }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #fafafa; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
-        }
-        
-        /* Quiz Button Styles */
-        .option-btn {
-            transition: all 0.2s;
-        }
-        .option-btn:hover:not(:disabled) {
-            background-color: #f0f9ff;
-            border-color: #0ea5e9;
-            transform: translateX(4px);
-        }
-        .option-btn.correct {
-            background-color: #dcfce7;
-            border-color: #22c55e;
-            color: #15803d;
-        }
-        .option-btn.wrong {
-            background-color: #fee2e2;
-            border-color: #ef4444;
-            color: #b91c1c;
-        }
-        /* Code Block Styling */
-        pre {
-            background-color: #1e1e1e;
-            color: #d4d4d4;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            overflow-x: auto;
-            font-family: 'Consolas', 'Monaco', monospace;
-        }
-        .code-keyword { color: #569cd6; }
-        .code-string { color: #ce9178; }
-        .code-comment { color: #6a9955; }
-        .code-function { color: #dcdcaa; }
+        .card-modern:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: #e0f2fe; }
+        .highlight-box { background-color: #f0f9ff; border-left: 4px solid #0284c7; padding: 1.25rem; border-radius: 0.5rem; margin: 1.5rem 0; }
+        pre { background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; font-family: monospace; font-size: 0.9em; }
+        /* Quiz Styles */
+        .quiz-option:hover { background-color: #f0f9ff; border-color: #0284c7; }
+        .quiz-option.correct { background-color: #dcfce7; border-color: #22c55e; color: #166534; }
+        .quiz-option.wrong { background-color: #fee2e2; border-color: #ef4444; color: #991b1b; }
     </style>
 </head>
-<body class="text-gray-700 font-sans leading-loose antialiased">
+<body class="text-gray-700 font-sans antialiased">
 
-    <!-- Navigation -->
-    <nav class="bg-white/90 backdrop-blur-md fixed w-full z-50 shadow-sm border-b border-gray-100 transition-all duration-300">
+    <!-- Nav -->
+    <nav class="bg-white/95 backdrop-blur-md fixed w-full z-50 shadow-sm border-b border-gray-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20">
+            <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <div class="bg-brand-50 p-2 rounded-lg mr-3">
-                        <i class="fa-solid fa-code text-brand-600 text-xl"></i>
-                    </div>
-                    <span class="font-bold text-xl tracking-tight text-gray-900">
-                        lesson/<span class="text-brand-600">comsci-m2</span>
-                    </span>
+                    <i class="fa-solid fa-code text-brand-600 text-xl mr-2"></i>
+                    <span class="font-bold text-lg tracking-tight text-gray-900">CS M.2 (Intensive)</span>
                 </div>
-                
-                <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="#home" class="text-gray-500 hover:text-brand-600 font-medium transition text-sm">หน้าแรก</a>
-                    <a href="#unit1" class="text-gray-500 hover:text-brand-600 font-medium transition text-sm">1. แนวคิดเชิงคำนวณ</a>
-                    <a href="#unit2" class="text-gray-500 hover:text-brand-600 font-medium transition text-sm">2. ภาษาไพทอน</a>
-                    <a href="#unit3" class="text-gray-500 hover:text-brand-600 font-medium transition text-sm">3. ระบบคอมพิวเตอร์</a>
-                    <a href="#unit4" class="text-gray-500 hover:text-brand-600 font-medium transition text-sm">4. ความปลอดภัย</a>
-                    <a href="#quiz" class="px-6 py-2.5 bg-brand-600 text-white rounded-full hover:bg-brand-700 transition shadow-lg shadow-brand-500/30 text-sm font-semibold">
-                        แบบทดสอบ
-                    </a>
+                <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
+                    <a href="#home" class="hover:text-brand-600 transition">หน้าแรก</a>
+                    <a href="#unit1" class="hover:text-brand-600 transition">1. แนวคิดเชิงคำนวณ</a>
+                    <a href="#unit2" class="hover:text-brand-600 transition">2. Python</a>
+                    <a href="#unit3" class="hover:text-brand-600 transition">3. ระบบคอมฯ</a>
+                    <a href="#unit4" class="hover:text-brand-600 transition">4. กฎหมาย</a>
+                    <a href="#quiz" class="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition">แบบทดสอบ</a>
                 </div>
-
-                <!-- Mobile Menu Button -->
-                <div class="md:hidden flex items-center">
-                    <button id="mobile-menu-btn" class="text-gray-500 hover:text-gray-900 focus:outline-none p-2">
-                        <i class="fa-solid fa-bars text-2xl"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <!-- Mobile Menu Panel -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 shadow-lg absolute w-full">
-            <div class="px-4 pt-4 pb-6 space-y-2">
-                <a href="#home" class="block px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:text-brand-600 hover:bg-brand-50">หน้าแรก</a>
-                <a href="#unit1" class="block px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:text-brand-600 hover:bg-brand-50">1. แนวคิดเชิงคำนวณ</a>
-                <a href="#unit2" class="block px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:text-brand-600 hover:bg-brand-50">2. ภาษาไพทอน</a>
-                <a href="#unit3" class="block px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:text-brand-600 hover:bg-brand-50">3. ระบบคอมพิวเตอร์</a>
-                <a href="#unit4" class="block px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:text-brand-600 hover:bg-brand-50">4. เทคโนโลยีปลอดภัย</a>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <header id="home" class="pt-32 pb-20 md:pt-48 md:pb-32 bg-gradient-to-b from-white via-brand-50/30 to-white relative overflow-hidden">
-        <!-- Background Decoration -->
-        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-yellow-100/50 blur-3xl"></div>
-        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-72 h-72 rounded-full bg-blue-100/50 blur-3xl"></div>
-
-        <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
-            <div class="flex flex-col md:flex-row items-center gap-16">
-                <div class="md:w-1/2">
-                    <div class="mb-8 relative inline-block">
-                        <div class="absolute inset-0 bg-brand-200 transform -skew-x-12 rounded-lg opacity-50"></div>
-                        <h2 class="relative text-3xl md:text-4xl font-black text-brand-800 px-4 py-2 uppercase tracking-wider">
-                            วิชาวิทยาการคำนวณ ม.2
-                        </h2>
-                    </div>
-                    
-                    <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-8 leading-tight tracking-tight">
-                        Logic &<br>
-                        <span class="gradient-text">Python Coding</span>
-                    </h1>
-                    <p class="text-xl text-gray-500 mb-10 max-w-lg leading-relaxed">
-                        ปูพื้นฐานแนวคิดเชิงคำนวณ ฝึกเขียนโปรแกรมภาษาไพทอน เรียนรู้ระบบคอมพิวเตอร์ และการใช้งานไอทีอย่างปลอดภัย
-                    </p>
-                    <div class="flex flex-wrap gap-4">
-                        <a href="#unit1" class="px-8 py-4 bg-brand-600 text-white font-semibold rounded-2xl shadow-xl shadow-brand-500/20 hover:bg-brand-700 hover:scale-105 transition duration-300">
-                            เริ่มบทเรียน
-                        </a>
-                        <a href="#quiz" class="px-8 py-4 bg-white text-gray-600 border border-gray-200 font-semibold rounded-2xl hover:bg-gray-50 hover:border-gray-300 transition duration-300 flex items-center gap-2">
-                            <i class="fa-solid fa-pen-to-square"></i> แบบทดสอบ
-                        </a>
-                    </div>
+    <!-- Hero -->
+    <header id="home" class="pt-28 pb-20 bg-gradient-to-b from-white via-blue-50 to-white">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col md:flex-row items-center gap-12">
+            <div class="md:w-1/2 space-y-6">
+                <span class="px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-xs font-bold uppercase tracking-wider">เนื้อหาเข้มข้น</span>
+                <h1 class="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">
+                    Logic & <span class="text-brand-600">Coding</span><br>ระดับกลาง
+                </h1>
+                <p class="text-lg text-gray-600 leading-relaxed">
+                    ยกระดับทักษะการคิดวิเคราะห์ด้วย Computational Thinking เขียนโปรแกรม Python อย่างมืออาชีพ และเจาะลึกสถาปัตยกรรมคอมพิวเตอร์
+                </p>
+                <div class="flex gap-4">
+                    <a href="#unit1" class="px-6 py-3 bg-brand-600 text-white font-semibold rounded-xl shadow-lg hover:bg-brand-700 transition">เริ่มเรียนรู้</a>
+                    <a href="#quiz" class="px-6 py-3 bg-white text-gray-700 border border-gray-200 font-semibold rounded-xl hover:bg-gray-50 transition">ทำแบบทดสอบ</a>
                 </div>
-                <div class="md:w-1/2 flex justify-center perspective-1000">
-                    <img src="https://placehold.co/800x600/1e293b/38bdf8?text=Python+Coding+M.2&font=roboto" alt="Coding Illustration" class="rounded-3xl shadow-2xl w-full max-w-lg transform hover:rotate-1 transition duration-500 border-8 border-white">
-                </div>
+            </div>
+            <div class="md:w-1/2">
+                <img src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=1000&auto=format&fit=crop" alt="Programming Code" class="rounded-2xl shadow-2xl border-4 border-white w-full object-cover h-[400px]">
             </div>
         </div>
     </header>
 
-    <!-- Content Container -->
-    <main class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-16 space-y-32">
+    <main class="max-w-7xl mx-auto px-6 lg:px-8 py-12 space-y-24">
 
-        <!-- Unit 1: Computational Thinking -->
-        <section id="unit1" class="scroll-mt-32">
-            <div class="flex items-end gap-6 mb-12 border-b border-gray-100 pb-6">
-                <span class="text-8xl font-black text-gray-100 leading-none -mb-4 -ml-4 select-none absolute z-0">01</span>
-                <div class="relative z-10">
-                    <h2 class="text-4xl font-bold text-gray-900 mb-2">แนวคิดเชิงคำนวณ</h2>
-                    <p class="text-brand-600 font-medium">Computational Thinking (CT)</p>
-                </div>
+        <!-- Unit 1 -->
+        <section id="unit1" class="scroll-mt-24">
+            <div class="border-l-4 border-brand-500 pl-4 mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">1. แนวคิดเชิงคำนวณ (Computational Thinking)</h2>
+                <p class="text-brand-600">4 Pillars of Problem Solving</p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                <div class="lg:col-span-8 space-y-10">
-                    <div class="card-modern p-10">
-                        <p class="text-gray-600 mb-8 text-lg">
-                            แนวคิดเชิงคำนวณ ไม่ใช่การคิดเหมือนคอมพิวเตอร์ แต่เป็นกระบวนการแก้ปัญหาอย่างเป็นขั้นตอน เพื่อให้คอมพิวเตอร์ (หรือมนุษย์) สามารถนำไปปฏิบัติตามได้ ประกอบด้วย 4 องค์ประกอบหลัก:
-                        </p>
-                        
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100">
-                                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white mb-4"><i class="fa-solid fa-puzzle-piece"></i></div>
-                                <h4 class="font-bold text-blue-900 text-lg mb-2">1. Decomposition</h4>
-                                <p class="text-sm text-gray-600"><strong>การแตกปัญหาใหญ่เป็นปัญหาย่อย:</strong> แยกส่วนประกอบให้เล็กลงเพื่อให้จัดการง่ายขึ้น เช่น การแยกชิ้นส่วนจักรยานเพื่อซ่อม</p>
+            <div class="card-modern p-10 mb-10">
+                <p class="text-gray-600 mb-8">
+                    ไม่ใช่การคิดเหมือนคอมพิวเตอร์ แต่เป็นกระบวนการแก้ปัญหาที่มนุษย์ใช้ และคอมพิวเตอร์สามารถช่วยดำเนินการได้ ประกอบด้วย 4 องค์ประกอบสำคัญ:
+                </p>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="flex gap-4 items-start">
+                        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-puzzle-piece"></i></div>
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-lg">1. Decomposition (การแยกส่วนประกอบ)</h4>
+                            <p class="text-sm text-gray-600">การแตกปัญหาใหญ่ที่ซับซ้อนให้เป็นปัญหาย่อยๆ เพื่อให้จัดการได้ง่ายขึ้น</p>
+                            <div class="text-xs bg-gray-50 p-2 mt-2 rounded border border-gray-200">Ex. สร้างบ้าน -> ฐานราก, ผนัง, หลังคา, ระบบไฟ</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 items-start">
+                        <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-lg">2. Pattern Recognition (การหารูปแบบ)</h4>
+                            <p class="text-sm text-gray-600">การหาความสัมพันธ์หรือลักษณะที่เหมือนกันของปัญหา เพื่อใช้วิธีแก้เดิมซ้ำๆ</p>
+                            <div class="text-xs bg-gray-50 p-2 mt-2 rounded border border-gray-200">Ex. แมวทุกตัวมี 4 ขา, มีหาง, มีหนวด -> เจอสัตว์ลักษณะนี้คือแมว</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 items-start">
+                        <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-filter"></i></div>
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-lg">3. Abstraction (แนวคิดเชิงนามธรรม)</h4>
+                            <p class="text-sm text-gray-600">การมุ่งเน้นเฉพาะข้อมูลสำคัญ ตัดรายละเอียดที่ไม่จำเป็นออก</p>
+                            <div class="text-xs bg-gray-50 p-2 mt-2 rounded border border-gray-200">Ex. แผนที่รถไฟฟ้า บอกแค่สถานี (ไม่บอกความโค้งรางจริง)</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 items-start">
+                        <div class="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-list-ol"></i></div>
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-lg">4. Algorithm Design (การออกแบบขั้นตอนวิธี)</h4>
+                            <p class="text-sm text-gray-600">การวางลำดับขั้นตอนการแก้ปัญหาที่ชัดเจน เป็นขั้นเป็นตอน (1, 2, 3...)</p>
+                            <div class="text-xs bg-gray-50 p-2 mt-2 rounded border border-gray-200">Ex. สูตรทำอาหาร, ขั้นตอนการผูกเชือกรองเท้า</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Unit 2 -->
+        <section id="unit2" class="scroll-mt-24">
+            <div class="border-l-4 border-yellow-500 pl-4 mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">2. ภาษาไพทอน (Python Programming)</h2>
+                <p class="text-yellow-600">Intermediate Coding Skills</p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-10 mb-10">
+                <div class="card-modern p-8 bg-gray-900 text-white border-gray-800">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-python-yellow">โครงสร้างควบคุม (Control Structures)</h3>
+                        <i class="fa-brands fa-python text-3xl"></i>
+                    </div>
+                    
+                    <div class="space-y-6 font-mono text-sm">
+                        <!-- If-Else -->
+                        <div class="bg-black/30 p-4 rounded-lg border border-gray-700">
+                            <p class="text-gray-400 mb-2"># 1. การตัดสินใจ (Selection)</p>
+                            <div class="text-green-400">
+                                score = <span class="text-blue-400">int</span>(<span class="text-blue-400">input</span>("Score: "))<br>
+                                <span class="text-pink-500">if</span> score >= <span class="text-orange-400">50</span>:<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-blue-400">print</span>("Pass")<br>
+                                <span class="text-pink-500">else</span>:<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-blue-400">print</span>("Fail")
                             </div>
-                            <div class="bg-purple-50 p-6 rounded-2xl border border-purple-100">
-                                <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center text-white mb-4"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
-                                <h4 class="font-bold text-purple-900 text-lg mb-2">2. Pattern Recognition</h4>
-                                <p class="text-sm text-gray-600"><strong>การหารูปแบบ:</strong> หาความเหมือนหรือความสัมพันธ์ของปัญหาที่เคยเจอมาแล้ว เพื่อใช้วิธีเดิมแก้ปัญหาใหม่</p>
-                            </div>
-                            <div class="bg-orange-50 p-6 rounded-2xl border border-orange-100">
-                                <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center text-white mb-4"><i class="fa-solid fa-filter"></i></div>
-                                <h4 class="font-bold text-orange-900 text-lg mb-2">3. Abstraction</h4>
-                                <p class="text-sm text-gray-600"><strong>ความคิดเชิงนามธรรม:</strong> มุ่งเน้นเฉพาะข้อมูลสำคัญ ตัดรายละเอียดที่ไม่จำเป็นออก เช่น แผนที่รถไฟฟ้าที่ไม่บอกระยะทางจริงแต่บอกสถานี</p>
-                            </div>
-                            <div class="bg-green-50 p-6 rounded-2xl border border-green-100">
-                                <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center text-white mb-4"><i class="fa-solid fa-list-ol"></i></div>
-                                <h4 class="font-bold text-green-900 text-lg mb-2">4. Algorithm Design</h4>
-                                <p class="text-sm text-gray-600"><strong>การออกแบบขั้นตอนวิธี:</strong> ลำดับขั้นตอนการทำงานที่ชัดเจน ตั้งแต่ต้นจนจบ เช่น วิธีการทอดไข่เจียว</p>
+                        </div>
+
+                        <!-- Loop -->
+                        <div class="bg-black/30 p-4 rounded-lg border border-gray-700">
+                            <p class="text-gray-400 mb-2"># 2. การวนซ้ำ (Loop)</p>
+                            <div class="text-green-400">
+                                <span class="text-pink-500">for</span> i <span class="text-pink-500">in</span> <span class="text-blue-400">range</span>(<span class="text-orange-400">5</span>):<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-blue-400">print</span>(f"Round {i+1}")
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <div class="lg:col-span-4 relative">
-                    <div class="sticky top-28">
-                         <div class="card-modern p-8 bg-gradient-to-br from-gray-900 to-gray-800 text-white border-none">
-                            <h3 class="text-xl font-bold mb-4 text-gray-100">ตัวอย่าง: การจัดกระเป๋าไปโรงเรียน</h3>
-                            <ul class="space-y-4 text-sm text-gray-300">
-                                <li>
-                                    <strong class="text-blue-400 block mb-1">Decomposition:</strong>
-                                    แยกของเป็นหมวดหมู่ (หนังสือ, เครื่องเขียน, ชุดพละ)
-                                </li>
-                                <li>
-                                    <strong class="text-purple-400 block mb-1">Pattern Recognition:</strong>
-                                    ดูตารางเรียน วันจันทร์มีวิชาอะไรบ้าง (เหมือนสัปดาห์ที่แล้ว)
-                                </li>
-                                <li>
-                                    <strong class="text-orange-400 block mb-1">Abstraction:</strong>
-                                    สนใจแค่วิชาเรียน ไม่ต้องสนใจว่าปกหนังสือสีอะไร
-                                </li>
-                                <li>
-                                    <strong class="text-green-400 block mb-1">Algorithm:</strong>
-                                    1. เปิดตารางเรียน<br>
-                                    2. หยิบหนังสือตามวิชา<br>
-                                    3. ตรวจสอบเครื่องเขียน<br>
-                                    4. ปิดกระเป๋า
-                                </li>
+
+                <div class="space-y-6">
+                    <div class="card-modern p-6">
+                        <h3 class="font-bold text-gray-800 mb-3">ตัวดำเนินการ (Operators)</h3>
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-50 text-gray-600">
+                                <tr><th class="p-2">สัญลักษณ์</th><th class="p-2">ความหมาย</th><th class="p-2">ตัวอย่าง</th></tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr><td class="p-2 font-mono text-brand-600">**</td><td>ยกกำลัง</td><td class="font-mono">2**3 = 8</td></tr>
+                                <tr><td class="p-2 font-mono text-brand-600">%</td><td>หารเอาเศษ (Mod)</td><td class="font-mono">10%3 = 1</td></tr>
+                                <tr><td class="p-2 font-mono text-brand-600">//</td><td>หารปัดเศษทิ้ง</td><td class="font-mono">10//3 = 3</td></tr>
+                                <tr><td class="p-2 font-mono text-brand-600">==</td><td>เท่ากับ</td><td class="font-mono">5==5 (True)</td></tr>
+                                <tr><td class="p-2 font-mono text-brand-600">!=</td><td>ไม่เท่ากับ</td><td class="font-mono">5!=3 (True)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="card-modern p-6 bg-yellow-50 border-yellow-100">
+                        <h3 class="font-bold text-yellow-800 mb-2">Data Structures (โครงสร้างข้อมูล)</h3>
+                        <ul class="text-sm text-yellow-900 space-y-2">
+                            <li><strong>List:</strong> เก็บข้อมูลหลายค่า เรียงลำดับ แก้ไขได้ <br><code class="bg-white px-1 rounded">fruits = ["apple", "banana"]</code></li>
+                            <li><strong>Dictionary:</strong> เก็บข้อมูลแบบ Key-Value <br><code class="bg-white px-1 rounded">student = {"name": "Somchai", "age": 14}</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Unit 3 -->
+        <section id="unit3" class="scroll-mt-24">
+            <div class="border-l-4 border-purple-500 pl-4 mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">3. ระบบคอมพิวเตอร์ (Computer System)</h2>
+                <p class="text-purple-600">Hardware, Software & Architecture</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-8 relative overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb753?q=80&w=1000&auto=format&fit=crop" alt="Computer Chip" class="absolute top-0 right-0 w-1/3 h-full object-cover opacity-10">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">หลักการทำงาน (Von Neumann Architecture)</h3>
+                <div class="flex flex-col md:flex-row gap-6 items-start relative z-10">
+                    <div class="flex-1 bg-purple-50 p-6 rounded-xl border border-purple-100 text-center">
+                        <i class="fa-solid fa-microchip text-4xl text-purple-600 mb-4"></i>
+                        <h4 class="font-bold text-purple-900 text-lg">CPU (Central Processing Unit)</h4>
+                        <p class="text-sm text-gray-600 mt-2">"สมอง" ทำหน้าที่คำนวณและประมวลผลคำสั่ง ประกอบด้วย ALU (คำนวณ) และ CU (ควบคุม)</p>
+                    </div>
+                    <div class="flex-1 bg-green-50 p-6 rounded-xl border border-green-100 text-center">
+                        <i class="fa-solid fa-memory text-4xl text-green-600 mb-4"></i>
+                        <h4 class="font-bold text-green-900 text-lg">Memory (RAM)</h4>
+                        <p class="text-sm text-gray-600 mt-2">หน่วยความจำหลัก เก็บข้อมูลชั่วคราวระหว่างทำงาน ข้อมูลหายเมื่อไฟดับ (Volatile)</p>
+                    </div>
+                    <div class="flex-1 bg-blue-50 p-6 rounded-xl border border-blue-100 text-center">
+                        <i class="fa-solid fa-hard-drive text-4xl text-blue-600 mb-4"></i>
+                        <h4 class="font-bold text-blue-900 text-lg">Storage (SSD/HDD)</h4>
+                        <p class="text-sm text-gray-600 mt-2">หน่วยความจำสำรอง เก็บข้อมูลถาวรแม้ปิดเครื่อง (Non-Volatile)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card-modern p-8">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Software (ซอฟต์แวร์)</h3>
+                    <div class="space-y-4 text-sm">
+                        <div>
+                            <strong class="text-brand-600 block">1. System Software (ซอฟต์แวร์ระบบ)</strong>
+                            <p class="text-gray-600">โปรแกรมที่ทำหน้าที่คุมเครื่อง เช่น Windows, macOS, Android, iOS, Linux</p>
+                        </div>
+                        <div>
+                            <strong class="text-brand-600 block">2. Application Software (ซอฟต์แวร์ประยุกต์)</strong>
+                            <p class="text-gray-600">โปรแกรมใช้งานเฉพาะด้าน เช่น Microsoft Word, Chrome, Photoshop, Games</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-modern p-8">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Peopleware (บุคลากร)</h3>
+                    <ul class="text-sm text-gray-600 space-y-2">
+                        <li><strong>User:</strong> ผู้ใช้งานทั่วไป</li>
+                        <li><strong>Programmer:</strong> ผู้เขียนโปรแกรม/โค้ด</li>
+                        <li><strong>System Analyst (SA):</strong> ผู้วิเคราะห์และออกแบบระบบ</li>
+                        <li><strong>Admin:</strong> ผู้ดูแลระบบเครือข่ายและเครื่องแม่ข่าย</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Unit 4 -->
+        <section id="unit4" class="scroll-mt-24">
+            <div class="border-l-4 border-red-500 pl-4 mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">4. เทคโนโลยีสารสนเทศกับความปลอดภัย</h2>
+                <p class="text-red-600">Cyber Security & Digital Law</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-8">
+                <div class="bg-red-50 p-8 rounded-2xl border border-red-100">
+                    <h3 class="text-xl font-bold text-red-800 mb-4"><i class="fa-solid fa-triangle-exclamation mr-2"></i>ภัยคุกคาม (Threats)</h3>
+                    <ul class="space-y-3 text-sm text-red-900">
+                        <li><strong>Phishing:</strong> เว็บ/อีเมลปลอม หลอกให้กรอกข้อมูล</li>
+                        <li><strong>Ransomware:</strong> ไวรัสเรียกค่าไถ่ ล็อกไฟล์จนกว่าจะจ่ายเงิน</li>
+                        <li><strong>Spyware:</strong> แอบดักข้อมูล รหัสผ่าน พฤติกรรมการใช้งาน</li>
+                        <li><strong>DDoS:</strong> ระดมส่งข้อมูลถล่มเซิร์ฟเวอร์ให้ล่ม</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-2xl border border-gray-200">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4"><i class="fa-solid fa-scale-balanced mr-2"></i>กฎหมายและจริยธรรม</h3>
+                    <ul class="space-y-3 text-sm text-gray-600">
+                        <li><strong>CC (Creative Commons):</strong> สัญญาอนุญาตลิขสิทธิ์แบบเปิด
+                            <ul class="list-disc list-inside ml-4 text-xs mt-1">
+                                <li><strong>BY:</strong> อ้างอิงที่มา</li>
+                                <li><strong>NC:</strong> ห้ามใช้เพื่อการค้า</li>
+                                <li><strong>ND:</strong> ห้ามดัดแปลง</li>
                             </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Unit 2: Python Programming -->
-        <section id="unit2" class="scroll-mt-32">
-            <div class="flex items-end gap-6 mb-12 border-b border-gray-100 pb-6">
-                <span class="text-8xl font-black text-gray-100 leading-none -mb-4 -ml-4 select-none absolute z-0">02</span>
-                <div class="relative z-10">
-                    <h2 class="text-4xl font-bold text-gray-900 mb-2">การเขียนโปรแกรม Python</h2>
-                    <p class="text-python-blue font-medium">Programming & Logic Control</p>
-                </div>
-            </div>
-
-            <div class="card-modern overflow-hidden mb-8">
-                <div class="p-10 bg-white">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-6">สัญลักษณ์ผังงาน (Flowchart) เบื้องต้น</h3>
-                    <div class="flex flex-wrap gap-8 justify-center items-center">
-                         <div class="text-center">
-                            <div class="h-10 px-6 rounded-full border-2 border-gray-800 flex items-center justify-center bg-gray-50 mb-2 mx-auto w-32 font-mono text-xs">Start/End</div>
-                            <span class="text-xs text-gray-500">เริ่มต้น/สิ้นสุด</span>
-                        </div>
-                        <div class="text-center">
-                            <div class="h-10 w-32 border-2 border-gray-800 flex items-center justify-center bg-gray-50 mb-2 mx-auto font-mono text-xs">Process</div>
-                            <span class="text-xs text-gray-500">การประมวลผล</span>
-                        </div>
-                        <div class="text-center">
-                            <div class="h-10 w-32 border-2 border-gray-800 flex items-center justify-center bg-gray-50 mb-2 mx-auto font-mono text-xs transform -skew-x-12">Input/Output</div>
-                            <span class="text-xs text-gray-500">รับ/แสดงข้อมูล</span>
-                        </div>
-                        <div class="text-center">
-                            <div class="w-10 h-10 border-2 border-gray-800 bg-gray-50 mb-2 mx-auto transform rotate-45"></div>
-                            <span class="text-xs text-gray-500">ตัดสินใจ (Decision)</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-10">
-                <!-- Python Basics -->
-                <div class="space-y-6">
-                    <h3 class="text-2xl font-bold text-gray-800">โครงสร้างภาษาไพทอน</h3>
-                    
-                    <!-- Code Block 1: Variables -->
-                    <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg">
-                        <div class="bg-gray-900 px-4 py-2 text-xs text-gray-400 flex justify-between">
-                            <span>example_1.py</span>
-                            <span>Variables & Output</span>
-                        </div>
-                        <pre><code><span class="code-comment"># การประกาศตัวแปรและแสดงผล</span>
-name = <span class="code-string">"Somchai"</span>
-age = <span class="code-keyword">14</span>
-height = <span class="code-keyword">165.5</span>
-
-<span class="code-function">print</span>(<span class="code-string">"ชื่อ:"</span>, name)
-<span class="code-function">print</span>(<span class="code-string">f"อายุ {age} ปี"</span>)  <span class="code-comment"># f-string</span></code></pre>
-                    </div>
-
-                    <!-- Code Block 2: Decision -->
-                    <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg">
-                         <div class="bg-gray-900 px-4 py-2 text-xs text-gray-400 flex justify-between">
-                            <span>example_2.py</span>
-                            <span>Control Structure (If-Else)</span>
-                        </div>
-                        <pre><code><span class="code-comment"># การตรวจสอบเงื่อนไข</span>
-score = <span class="code-function">int</span>(<span class="code-function">input</span>(<span class="code-string">"กรอกคะแนน: "</span>))
-
-<span class="code-keyword">if</span> score >= <span class="code-keyword">50</span>:
-    <span class="code-function">print</span>(<span class="code-string">"สอบผ่าน"</span>)
-<span class="code-keyword">else</span>:
-    <span class="code-function">print</span>(<span class="code-string">"สอบตก"</span>)</code></pre>
-                    </div>
-                </div>
-
-                <!-- Concepts -->
-                <div class="space-y-6">
-                    <div class="card-modern p-8 h-full">
-                        <h4 class="font-bold text-xl mb-4 text-brand-800">คำสั่งพื้นฐานที่ควรรู้</h4>
-                        <ul class="space-y-4">
-                            <li class="flex gap-4 items-start">
-                                <span class="font-mono text-sm bg-gray-100 px-2 py-1 rounded text-red-600 font-bold">print()</span>
-                                <span class="text-sm text-gray-600">คำสั่งแสดงผลข้อมูลออกทางหน้าจอ</span>
-                            </li>
-                            <li class="flex gap-4 items-start">
-                                <span class="font-mono text-sm bg-gray-100 px-2 py-1 rounded text-blue-600 font-bold">input()</span>
-                                <span class="text-sm text-gray-600">คำสั่งรับข้อมูลจากคีย์บอร์ด (ค่าที่ได้จะเป็น String เสมอ)</span>
-                            </li>
-                            <li class="flex gap-4 items-start">
-                                <span class="font-mono text-sm bg-gray-100 px-2 py-1 rounded text-purple-600 font-bold">int() / float()</span>
-                                <span class="text-sm text-gray-600">แปลงข้อความตัวเลขให้เป็นจำนวนเต็ม (int) หรือทศนิยม (float) เพื่อใช้คำนวณ</span>
-                            </li>
-                        </ul>
-
-                        <h4 class="font-bold text-xl mb-4 mt-8 text-brand-800">โครงสร้างควบคุม (Control Structures)</h4>
-                        <ul class="space-y-2 text-sm text-gray-600">
-                            <li><strong>1. การทำงานแบบลำดับ (Sequence):</strong> ทำทีละบรรทัดจากบนลงล่าง</li>
-                            <li><strong>2. การทำงานแบบทางเลือก (Selection):</strong> ตัดสินใจด้วย <code>if</code>, <code>elif</code>, <code>else</code></li>
-                            <li><strong>3. การทำงานแบบวนซ้ำ (Repetition):</strong> ทำซ้ำด้วย <code>for</code> หรือ <code>while</code></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Unit 3: Computer System -->
-        <section id="unit3" class="scroll-mt-32">
-            <div class="flex items-end gap-6 mb-12 border-b border-gray-100 pb-6">
-                <span class="text-8xl font-black text-gray-100 leading-none -mb-4 -ml-4 select-none absolute z-0">03</span>
-                <div class="relative z-10">
-                    <h2 class="text-4xl font-bold text-gray-900 mb-2">ระบบคอมพิวเตอร์</h2>
-                    <p class="text-purple-500 font-medium">Computer Architecture & Systems</p>
-                </div>
-            </div>
-
-            <div class="card-modern p-10 mb-8 border-t-8 border-t-purple-500">
-                <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">องค์ประกอบของระบบคอมพิวเตอร์</h3>
-                <div class="grid md:grid-cols-3 gap-8">
-                    <div class="text-center p-6 bg-purple-50 rounded-2xl">
-                        <i class="fa-solid fa-memory text-5xl text-purple-600 mb-4"></i>
-                        <h4 class="font-bold text-lg mb-2">Hardware</h4>
-                        <p class="text-sm text-gray-600">อุปกรณ์ที่จับต้องได้ เช่น CPU, RAM, Mouse, Monitor</p>
-                    </div>
-                    <div class="text-center p-6 bg-blue-50 rounded-2xl">
-                        <i class="fa-brands fa-windows text-5xl text-blue-600 mb-4"></i>
-                        <h4 class="font-bold text-lg mb-2">Software</h4>
-                        <p class="text-sm text-gray-600">ชุดคำสั่ง/โปรแกรม เช่น Windows, iOS, Word, Game</p>
-                    </div>
-                    <div class="text-center p-6 bg-orange-50 rounded-2xl">
-                        <i class="fa-solid fa-users text-5xl text-orange-600 mb-4"></i>
-                        <h4 class="font-bold text-lg mb-2">Peopleware</h4>
-                        <p class="text-sm text-gray-600">ผู้ใช้งาน/ผู้ดูแลระบบ เช่น User, Programmer, Admin</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-10">
-                <div class="space-y-6">
-                    <h3 class="text-xl font-bold text-gray-800">หลักการทำงาน (IPOS Cycle)</h3>
-                    <div class="space-y-4">
-                        <div class="flex items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                            <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold mr-4">I</div>
-                            <div>
-                                <strong class="block">Input (รับข้อมูล)</strong>
-                                <span class="text-xs text-gray-500">Keyboard, Mouse, Microphone</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center font-bold mr-4">P</div>
-                            <div>
-                                <strong class="block">Process (ประมวลผล)</strong>
-                                <span class="text-xs text-gray-500">CPU (สมองของคอมพิวเตอร์)</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold mr-4">O</div>
-                            <div>
-                                <strong class="block">Output (แสดงผล)</strong>
-                                <span class="text-xs text-gray-500">Monitor, Printer, Speaker</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                            <div class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center font-bold mr-4">S</div>
-                            <div>
-                                <strong class="block">Storage (จัดเก็บข้อมูล)</strong>
-                                <span class="text-xs text-gray-500">Hard Disk, SSD, Flash Drive (เก็บถาวร) / RAM (เก็บชั่วคราว)</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-modern p-8 bg-gray-900 text-white border-none flex flex-col justify-center">
-                    <h3 class="text-xl font-bold mb-4">รู้หรือไม่?</h3>
-                    <p class="text-gray-300 mb-6">
-                        <strong>RAM vs ROM</strong><br>
-                        - <strong>RAM:</strong> ความจำชั่วคราว ไฟดับข้อมูลหาย (ใช้ตอนเปิดโปรแกรม)<br>
-                        - <strong>ROM:</strong> ความจำถาวร ไฟดับข้อมูลอยู่ (เก็บชุดคำสั่งเริ่มต้นระบบ BIOS)
-                    </p>
-                    <p class="text-gray-300">
-                        <strong>System vs Application Software</strong><br>
-                        - <strong>System SW:</strong> ระบบปฏิบัติการ (OS) เช่น Windows, macOS, Android<br>
-                        - <strong>App SW:</strong> โปรแกรมประยุกต์ เช่น Chrome, Photoshop, Line
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Unit 4: IT Safety -->
-        <section id="unit4" class="scroll-mt-32">
-            <div class="flex items-end gap-6 mb-12 border-b border-gray-100 pb-6">
-                <span class="text-8xl font-black text-gray-100 leading-none -mb-4 -ml-4 select-none absolute z-0">04</span>
-                <div class="relative z-10">
-                    <h2 class="text-4xl font-bold text-gray-900 mb-2">เทคโนโลยีสารสนเทศกับความปลอดภัย</h2>
-                    <p class="text-green-500 font-medium">Cyber Security & Ethics</p>
-                </div>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-10">
-                <div class="card-modern p-10 border-t-8 border-t-red-500">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">ภัยคุกคามทางคอมพิวเตอร์</h3>
-                    <ul class="space-y-4">
-                        <li class="flex gap-3 items-start">
-                            <i class="fa-solid fa-bug mt-1 text-red-500"></i>
-                            <div>
-                                <strong>Malware (มัลแวร์):</strong> โปรแกรมประสงค์ร้าย เช่น Virus, Worm, Trojan
-                            </div>
                         </li>
-                        <li class="flex gap-3 items-start">
-                            <i class="fa-solid fa-user-secret mt-1 text-red-500"></i>
-                            <div>
-                                <strong>Hacker / Cracker:</strong> ผู้ที่มีความรู้สูงและเจาะระบบคอมพิวเตอร์ (Cracker เจาะเพื่อทำลาย)
-                            </div>
-                        </li>
-                         <li class="flex gap-3 items-start">
-                            <i class="fa-solid fa-fish mt-1 text-red-500"></i>
-                            <div>
-                                <strong>Phishing:</strong> การหลอกลวงทางอินเทอร์เน็ตเพื่อให้กรอกข้อมูลส่วนตัว
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="card-modern p-10 border-t-8 border-t-green-500">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">การใช้งานอย่างมีความรับผิดชอบ</h3>
-                    <ul class="space-y-4">
-                        <li class="flex gap-3 items-start">
-                            <i class="fa-solid fa-shield-halved mt-1 text-green-500"></i>
-                            <div>
-                                <strong>Privacy:</strong> ไม่เปิดเผยข้อมูลส่วนตัวของตนเองและผู้อื่น (ชื่อ, ที่อยู่, รหัสผ่าน)
-                            </div>
-                        </li>
-                        <li class="flex gap-3 items-start">
-                            <i class="fa-solid fa-copyright mt-1 text-green-500"></i>
-                            <div>
-                                <strong>Copyright:</strong> เคารพสิทธิความเป็นเจ้าของผลงาน ไม่คัดลอกงานผู้อื่นโดยไม่อ้างอิง
-                            </div>
-                        </li>
-                        <li class="flex gap-3 items-start">
-                            <i class="fa-solid fa-heart mt-1 text-green-500"></i>
-                            <div>
-                                <strong>Etiquette:</strong> มีมารยาท ไม่ใช้ถ้อยคำรุนแรง (Cyberbullying) หรือสร้างความเกลียดชัง
-                            </div>
-                        </li>
+                        <li><strong>Fair Use:</strong> การใช้ลิขสิทธิ์ที่เป็นธรรม (เพื่อการศึกษา/วิจารณ์ ในปริมาณพอเหมาะ)</li>
+                        <li><strong>Cyberbullying:</strong> การกลั่นแกล้งทางออนไลน์ (ผิดกฎหมายและจริยธรรม)</li>
                     </ul>
                 </div>
             </div>
-
-            <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 mt-8">
-                <h4 class="font-bold text-gray-800 mb-4"><i class="fa-solid fa-triangle-exclamation text-yellow-500 mr-2"></i>แนวทางปฏิบัติเมื่อพบข้อมูลไม่เหมาะสม</h4>
-                <div class="flex flex-wrap gap-4">
-                    <span class="px-4 py-2 bg-white rounded-lg shadow-sm text-sm border border-gray-200">1. ปฏิเสธการรับข้อมูลนั้น</span>
-                    <span class="px-4 py-2 bg-white rounded-lg shadow-sm text-sm border border-gray-200">2. ไม่ส่งต่อ (ไม่ Share)</span>
-                    <span class="px-4 py-2 bg-white rounded-lg shadow-sm text-sm border border-gray-200">3. แจ้งผู้ดูแลระบบหรือผู้ปกครอง</span>
-                    <span class="px-4 py-2 bg-white rounded-lg shadow-sm text-sm border border-gray-200">4. บล็อก (Block) ผู้ส่ง</span>
-                </div>
-            </div>
         </section>
 
-        <!-- Quiz Section -->
-        <section id="quiz" class="py-20 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-[3rem] mx-4 relative overflow-hidden shadow-inner">
-            <div class="relative z-10 max-w-4xl mx-auto px-6">
-                <div class="text-center mb-12">
-                    <span class="inline-block px-4 py-2 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold mb-4">Challenge Mode</span>
-                    <h2 class="text-4xl font-bold text-gray-900 mb-4">ทดสอบความรู้ท้ายบท</h2>
-                    <p class="text-gray-600 text-lg">แบบทดสอบแบบสุ่ม 30 ข้อ พร้อมเฉลยทันที</p>
+        <!-- Quiz -->
+        <section id="quiz" class="py-16">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">ทดสอบความรู้ท้ายบท</h2>
+                <p class="text-gray-500">ทบทวนความเข้าใจ 30 ข้อ</p>
+            </div>
+            
+            <div id="quiz-container" class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                <div class="flex justify-between text-sm font-bold text-gray-400 mb-6">
+                    <span id="q-progress">ข้อที่ 1 / 30</span>
+                    <span id="score-display" class="text-brand-600">คะแนน: 0</span>
                 </div>
-
-                <div id="quiz-container" class="bg-white rounded-3xl shadow-xl p-8 md:p-12 min-h-[500px] flex flex-col relative overflow-hidden">
-                    <!-- Progress Bar -->
-                    <div class="absolute top-0 left-0 w-full h-2 bg-gray-100">
-                        <div id="progress-bar" class="h-full bg-brand-500 transition-all duration-500 ease-out" style="width: 0%"></div>
-                    </div>
-
-                    <!-- Header -->
-                    <div class="flex justify-between items-center mb-10 mt-2">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-gray-300"></span>
-                            <span id="question-counter" class="text-sm font-bold text-gray-400 uppercase tracking-wider">Question 1/30</span>
-                        </div>
-                        <div class="bg-green-50 text-green-700 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm border border-green-100">
-                            คะแนน: <span id="score-counter">0</span>
-                        </div>
-                    </div>
-
-                    <!-- Question -->
-                    <h3 id="question-text" class="text-2xl md:text-3xl font-bold text-gray-800 mb-10 leading-snug">
-                        กำลังโหลด...
-                    </h3>
-
-                    <!-- Options -->
-                    <div id="options-container" class="space-y-4 flex-grow">
-                        <!-- JS injected -->
-                    </div>
-
-                    <!-- Feedback -->
-                    <div id="feedback-area" class="hidden mt-8 p-6 rounded-2xl bg-gray-50 border border-gray-100 animate-fade-in">
-                        <div class="flex items-start gap-4">
-                            <div id="feedback-icon" class="text-2xl mt-1"></div>
-                            <div>
-                                <p id="feedback-message" class="font-bold text-lg mb-2"></p>
-                                <p id="feedback-detail" class="text-gray-600 leading-relaxed"></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Footer Controls -->
-                    <div class="mt-10 flex flex-wrap items-center justify-between gap-6 border-t border-gray-100 pt-8 relative z-20">
-                        <button onclick="quizApp.init()" class="text-gray-400 hover:text-red-500 font-medium text-sm transition-colors flex items-center gap-2 cursor-pointer p-2">
-                            <i class="fa-solid fa-rotate-right"></i> เริ่มใหม่
-                        </button>
-
-                        <div class="flex gap-4">
-                            <button id="skip-btn" onclick="quizApp.skipQuestion()" class="px-6 py-3 text-gray-500 hover:text-gray-800 font-medium hover:bg-gray-100 rounded-xl transition-colors cursor-pointer">
-                                ข้ามข้อนี้
-                            </button>
-                            <button id="next-btn" onclick="quizApp.nextQuestion()" class="hidden px-8 py-3 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-1 flex items-center gap-3 cursor-pointer">
-                                ข้อถัดไป <i class="fa-solid fa-arrow-right"></i>
-                            </button>
-                        </div>
-                    </div>
+                <h3 id="q-text" class="text-xl font-bold text-gray-800 mb-6">Loading...</h3>
+                <div id="options-area" class="space-y-3"></div>
+                <div id="feedback" class="hidden mt-4 p-4 rounded-lg bg-gray-50 text-sm"></div>
+                <div class="mt-8 flex justify-between">
+                    <button onclick="restartQuiz()" class="text-gray-400 hover:text-gray-600 text-sm font-bold">↻ เริ่มใหม่</button>
+                    <button id="next-btn" onclick="nextQuestion()" class="hidden px-6 py-2 bg-brand-600 text-white rounded-lg font-bold hover:bg-brand-700 transition">ข้อถัดไป</button>
                 </div>
+            </div>
 
-                <!-- Result Card -->
-                <div id="result-card" class="hidden bg-white rounded-3xl shadow-xl p-12 text-center animate-fade-in max-w-2xl mx-auto">
-                    <div class="w-32 h-32 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
-                        <i class="fa-solid fa-trophy text-6xl text-green-500"></i>
-                    </div>
-                    <h3 class="text-4xl font-bold text-gray-900 mb-4">ยอดเยี่ยมมาก!</h3>
-                    <p class="text-gray-500 mb-10 text-lg">คุณทำแบบทดสอบครบทุกข้อแล้ว</p>
-                    
-                    <div class="bg-gray-50 rounded-2xl p-8 mb-10 border border-gray-100 inline-block w-full">
-                        <p class="text-gray-400 uppercase text-xs font-bold tracking-widest mb-2">คะแนนรวมของคุณ</p>
-                        <div class="text-7xl font-black text-brand-600" id="final-score">0</div>
-                    </div>
-                    
-                    <button onclick="quizApp.restartQuiz()" class="px-10 py-4 bg-brand-600 text-white font-bold rounded-2xl hover:bg-brand-700 shadow-xl shadow-brand-500/20 transition transform hover:-translate-y-1 w-full md:w-auto">
-                        ทำแบบทดสอบอีกครั้ง
-                    </button>
-                </div>
+            <div id="result-area" class="hidden max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-10 text-center">
+                <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">🏆</div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">ยอดเยี่ยมมาก!</h3>
+                <div class="text-5xl font-black text-brand-600 mb-8" id="final-score">0/30</div>
+                <button onclick="restartQuiz()" class="px-8 py-3 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 transition">ทำแบบทดสอบอีกครั้ง</button>
             </div>
         </section>
 
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-400 py-20 mt-20">
-        <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-                <div class="col-span-1 lg:col-span-2">
-                    <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                        <i class="fa-solid fa-code text-brand-500"></i>
-                        Computing Science M.2
-                    </h3>
-                    <p class="leading-relaxed mb-8 max-w-md">
-                        สื่อการเรียนรู้ออนไลน์เพื่อพัฒนาทักษะด้านเทคโนโลยี (วิทยาการคำนวณ)<br>
-                        ชั้นมัธยมศึกษาปีที่ 2
-                    </p>
-                </div>
-                <div>
-                    <h4 class="text-white font-bold mb-6 text-lg">เมนูนำทาง</h4>
-                    <ul class="space-y-4">
-                        <li><a href="#unit1" class="hover:text-brand-400 transition flex items-center gap-2"><i class="fa-solid fa-angle-right text-xs"></i> แนวคิดเชิงคำนวณ</a></li>
-                        <li><a href="#unit2" class="hover:text-brand-400 transition flex items-center gap-2"><i class="fa-solid fa-angle-right text-xs"></i> ภาษาไพทอน</a></li>
-                        <li><a href="#unit3" class="hover:text-brand-400 transition flex items-center gap-2"><i class="fa-solid fa-angle-right text-xs"></i> ระบบคอมพิวเตอร์</a></li>
-                        <li><a href="#quiz" class="hover:text-brand-400 transition flex items-center gap-2"><i class="fa-solid fa-angle-right text-xs"></i> แบบทดสอบ</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-white font-bold mb-6 text-lg">ติดต่อเรา</h4>
-                    <ul class="space-y-4">
-                        <li class="flex items-start gap-3">
-                            <i class="fa-solid fa-location-dot mt-1 text-brand-500"></i>
-                            <span>กลุ่มสาระการเรียนรู้<br>วิทยาศาสตร์และเทคโนโลยี</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <i class="fa-solid fa-envelope text-brand-500"></i>
-                            <a href="mailto:contact@example.ac.th" class="hover:text-white transition">contact@example.ac.th</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="border-t border-gray-800 mt-16 pt-8 text-center text-sm">
-                &copy; 2023 kruboat.com. All rights reserved.
-            </div>
-        </div>
+    <footer class="bg-gray-900 text-gray-400 py-12 mt-20 text-center">
+        <p class="mb-4">สื่อการเรียนรู้วิชาวิทยาการคำนวณ ชั้นมัธยมศึกษาปีที่ 2</p>
+        <p class="text-sm opacity-50">&copy; 2025 kruboat.com. All rights reserved.</p>
     </footer>
 
-    <!-- Scroll to Top Button -->
-    <button id="scrollToTopBtn" class="fixed bottom-8 right-8 bg-brand-600 text-white p-4 rounded-full shadow-2xl hidden hover:bg-brand-700 transition z-50 hover:-translate-y-1">
-        <i class="fa-solid fa-arrow-up text-lg"></i>
-    </button>
-
     <script>
-        // Mobile Menu Toggle
-        const btn = document.getElementById('mobile-menu-btn');
-        const menu = document.getElementById('mobile-menu');
-
-        btn.addEventListener('click', () => {
-            menu.classList.toggle('hidden');
-        });
-
-        // Quiz Application Logic for M.2
-        const questionPool = [
-            // Unit 1: CT
-            {
-                question: "การแตกปัญหาใหญ่เป็นปัญหาย่อย เพื่อให้แก้ปัญหาได้ง่ายขึ้น ตรงกับแนวคิดใด?",
-                options: ["Abstraction", "Decomposition", "Pattern Recognition", "Algorithm"],
-                correctIndex: 1,
-                explanation: "Decomposition คือการแยกส่วนประกอบและการย่อยปัญหา"
-            },
-            {
-                question: "ข้อใดคือความหมายของ Algorithm Design?",
-                options: ["การหารูปแบบ", "การเขียนโปรแกรม", "การออกแบบขั้นตอนวิธีที่ชัดเจน", "การคิดเชิงนามธรรม"],
-                correctIndex: 2,
-                explanation: "Algorithm คือลำดับขั้นตอนการทำงานที่ชัดเจนตั้งแต่ต้นจนจบ"
-            },
-            {
-                question: "Abstraction (แนวคิดเชิงนามธรรม) มีประโยชน์อย่างไร?",
-                options: ["ทำให้โปรแกรมสวยขึ้น", "ช่วยให้โฟกัสเฉพาะจุดสำคัญ ตัดรายละเอียดที่ไม่จำเป็น", "ช่วยให้คอมพิวเตอร์ทำงานเร็วขึ้น", "ช่วยประหยัดไฟ"],
-                correctIndex: 1,
-                explanation: "Abstraction ช่วยลดความซับซ้อนโดยตัดรายละเอียดปลีกย่อยที่ไม่จำเป็นออก"
-            },
-            {
-                question: "การสังเกตว่าจักรยานทุกคันต้องมีล้อและแฮนด์ จัดเป็นแนวคิดใด?",
-                options: ["Pattern Recognition", "Decomposition", "Coding", "Debug"],
-                correctIndex: 0,
-                explanation: "Pattern Recognition คือการหารูปแบบที่เหมือนกันหรือสัมพันธ์กัน"
-            },
-
-            // Unit 2: Python
-            {
-                question: "คำสั่งใดในภาษา Python ใช้สำหรับแสดงผลออกทางหน้าจอ?",
-                options: ["input()", "scan()", "print()", "show()"],
-                correctIndex: 2,
-                explanation: "print() คือฟังก์ชันมาตรฐานสำหรับแสดงผลข้อความหรือค่าตัวแปร"
-            },
-            {
-                question: "หากต้องการรับค่าตัวเลขจำนวนเต็มจากผู้ใช้ ต้องใช้คำสั่งใด?",
-                options: ["input()", "int(input())", "float(input())", "str(input())"],
-                correctIndex: 1,
-                explanation: "input() รับค่าเป็น string ต้องแปลงเป็นจำนวนเต็มด้วย int()"
-            },
-            {
-                question: "ผลลัพธ์ของ 10 % 3 ในภาษา Python คือเท่าไร?",
-                options: ["3.33", "3", "1", "10"],
-                correctIndex: 2,
-                explanation: "% (Modulo) คือการหารเอาเศษ (10 หาร 3 ได้ 3 เศษ 1)"
-            },
-            {
-                question: "สัญลักษณ์สี่เหลี่ยมข้าวหลามตัด (Decision) ใน Flowchart ใช้ทำอะไร?",
-                options: ["เริ่มต้นการทำงาน", "แสดงผลลัพธ์", "ตัดสินใจ/ตรวจสอบเงื่อนไข", "ประมวลผล"],
-                correctIndex: 2,
-                explanation: "ใช้สำหรับตรวจสอบเงื่อนไขที่มีทางเลือก จริง/เท็จ (Yes/No)"
-            },
-            {
-                question: "ถ้า x = 5 และ y = 2 คำสั่ง print(x ** y) จะได้ผลลัพธ์เท่าไร?",
-                options: ["10", "7", "25", "2.5"],
-                correctIndex: 2,
-                explanation: "** คือการยกกำลัง (5 ยกกำลัง 2 เท่ากับ 25)"
-            },
-            {
-                question: "โครงสร้างควบคุมแบบใดที่มีการตรวจสอบเงื่อนไข?",
-                options: ["Sequence (ลำดับ)", "Selection (ทางเลือก)", "Input", "Output"],
-                correctIndex: 1,
-                explanation: "Selection ใช้ if/else เพื่อเลือกทำงานตามเงื่อนไขที่กำหนด"
-            },
-
-            // Unit 3: Computer System
-            {
-                question: "อุปกรณ์ใดทำหน้าที่เป็นหน่วยประมวลผลกลาง (สมองของคอมพิวเตอร์)?",
-                options: ["Hard Disk", "RAM", "CPU", "Monitor"],
-                correctIndex: 2,
-                explanation: "CPU (Central Processing Unit) ทำหน้าที่ประมวลผลคำสั่งต่างๆ"
-            },
-            {
-                question: "ข้อใดจัดเป็นหน่วยรับข้อมูล (Input Unit)?",
-                options: ["Printer", "Monitor", "Speaker", "Keyboard"],
-                correctIndex: 3,
-                explanation: "Keyboard ใช้ป้อนข้อมูลเข้าสู่ระบบคอมพิวเตอร์"
-            },
-            {
-                question: "หน่วยความจำใดที่ข้อมูลจะหายไปเมื่อไฟดับ?",
-                options: ["ROM", "RAM", "Hard Disk", "Flash Drive"],
-                correctIndex: 1,
-                explanation: "RAM (Random Access Memory) เป็นหน่วยความจำชั่วคราว ข้อมูลหายเมื่อไม่มีไฟเลี้ยง"
-            },
-            {
-                question: "โปรแกรม Microsoft Word จัดเป็นซอฟต์แวร์ประเภทใด?",
-                options: ["System Software", "Application Software", "Malware", "Hardware"],
-                correctIndex: 1,
-                explanation: "เป็นซอฟต์แวร์ประยุกต์ (Application) สำหรับงานเอกสาร"
-            },
-            {
-                question: "หน้าที่หลักของ OS (Operating System) คืออะไร?",
-                options: ["พิมพ์เอกสาร", "เล่นเกม", "จัดการทรัพยากรของระบบและเป็นสื่อกลางระหว่างฮาร์ดแวร์กับผู้ใช้", "ป้องกันไวรัส"],
-                correctIndex: 2,
-                explanation: "OS เช่น Windows, macOS ทำหน้าที่บริหารจัดการระบบทั้งหมด"
-            },
-
-            // Unit 4: Safety & Ethics
-            {
-                question: "Phishing คือการโจมตีแบบใด?",
-                options: ["ส่งไวรัสทำลายเครื่อง", "สร้างหน้าเว็บปลอมหลอกให้กรอกรหัสผ่าน", "ขโมยคอมพิวเตอร์", "ดักฟังโทรศัพท์"],
-                correctIndex: 1,
-                explanation: "Phishing คือการตกเบ็ดล่อลวงข้อมูลด้วยหน้าเว็บหรืออีเมลปลอม"
-            },
-            {
-                question: "หากพบภาพที่ไม่เหมาะสมบนอินเทอร์เน็ต ควรทำอย่างไร?",
-                options: ["แชร์ให้เพื่อนดู", "แจ้งผู้ปกครองหรือครู", "บันทึกเก็บไว้", "คอมเมนต์ด่าทอ"],
-                correctIndex: 1,
-                explanation: "ควรแจ้งผู้ใหญ่ที่ไว้ใจได้และไม่ส่งต่อข้อมูลนั้น"
-            },
-            {
-                question: "ข้อใดเป็นการใช้งานลิขสิทธิ์ที่เป็นธรรม (Fair Use)?",
-                options: ["ก๊อปปี้บทความทั้งหมดมาใส่เว็บตัวเอง", "นำเพลงมาประกอบคลิปขายของ", "คัดลอกบางส่วนมาเพื่อการศึกษาและอ้างอิงแหล่งที่มา", "แอบถ่ายหนังในโรงมาโพสต์"],
-                correctIndex: 2,
-                explanation: "การใช้เพื่อการศึกษา วิจารณ์ หรือวิจัย ในปริมาณพอสมควรและให้เครดิต ถือเป็น Fair Use"
-            },
-            {
-                question: "การตั้งรหัสผ่านที่ดีควรเป็นอย่างไร?",
-                options: ["123456", "เบอร์โทรศัพท์", "ชื่อเล่น", "ผสมตัวเลข ตัวอักษรใหญ่-เล็ก และสัญลักษณ์"],
-                correctIndex: 3,
-                explanation: "รหัสผ่านที่ซับซ้อนยากต่อการคาดเดาช่วยเพิ่มความปลอดภัย"
-            },
-            {
-                question: "Cyberbullying หมายถึงอะไร?",
-                options: ["การป้องกันภัยไซเบอร์", "การกลั่นแกล้งหรือรังแกผู้อื่นผ่านโลกออนไลน์", "การเล่นเกมออนไลน์", "การซื้อของออนไลน์"],
-                correctIndex: 1,
-                explanation: "การใช้เทคโนโลยีเพื่อทำร้ายจิตใจหรือทำให้ผู้อื่นอับอาย"
-            },
-            {
-                question: "IPOS Cycle คืออะไร?",
-                options: ["วงจรการทำงานของคอมพิวเตอร์ (Input-Process-Output-Storage)", "ชื่อรุ่น iPhone", "ระบบปฏิบัติการ", "ยี่ห้อคอมพิวเตอร์"],
-                correctIndex: 0,
-                explanation: "หลักการทำงานพื้นฐาน: รับเข้า -> ประมวลผล -> แสดงผล -> จัดเก็บ"
-            },
-             {
-                question: "ข้อใดไม่ใช่ Peopleware?",
-                options: ["Programmer", "User", "System Analyst", "Windows 10"],
-                correctIndex: 3,
-                explanation: "Windows 10 เป็น Software ส่วนข้ออื่นๆ เป็นบุคลากรทางคอมพิวเตอร์"
-            }
+        const questions = [
+            { q: "Decomposition คืออะไร?", a: ["การแตกปัญหาใหญ่เป็นย่อย", "การหารูปแบบ", "การเขียนโปรแกรม", "การคิดรวบยอด"], c: 0, exp: "Decomposition คือการแยกส่วนประกอบของปัญหาให้เล็กลง" },
+            { q: "Pattern Recognition มีประโยชน์อย่างไร?", a: ["ทำให้คอมสวยขึ้น", "ช่วยลดเวลาโดยใช้วิธีเดิมแก้ปัญหาที่ซ้ำกัน", "ทำให้เน็ตเร็วขึ้น", "ป้องกันไวรัส"], c: 1, exp: "การจดจำรูปแบบช่วยให้นำวิธีการเดิมมาใช้ซ้ำได้" },
+            { q: "Abstraction (แนวคิดเชิงนามธรรม) คือ?", a: ["คิดเพ้อฝัน", "ตัดรายละเอียดที่ไม่จำเป็นออก", "คิดละเอียดทุกจุด", "วาดรูปนามธรรม"], c: 1, exp: "เน้นเฉพาะใจความสำคัญ ตัดส่วนเกินทิ้ง" },
+            { q: "Algorithm Design หมายถึง?", a: ["ออกแบบกราฟิก", "ออกแบบลำดับขั้นตอนวิธี", "ออกแบบฮาร์ดแวร์", "ออกแบบเว็บไซต์"], c: 1, exp: "การวางลำดับขั้นตอนการแก้ปัญหาที่ชัดเจน" },
+            { q: "สัญลักษณ์ ** ใน Python คือ?", a: ["คูณ", "หาร", "ยกกำลัง", "รากที่สอง"], c: 2, exp: "** คือ Operator ยกกำลัง" },
+            { q: "ผลลัพธ์ของ 10 % 3 คือ?", a: ["3", "1", "3.33", "0"], c: 1, exp: "10 หาร 3 ได้ 3 เศษ 1 (Modulus คือเอาเศษ)" },
+            { q: "คำสั่ง input() ใน Python ให้ผลลัพธ์เป็นชนิดใดเสมอ?", a: ["Integer", "Float", "String", "Boolean"], c: 2, exp: "input() รับค่าเป็นข้อความ (String) เสมอ" },
+            { q: "ถ้าต้องการวนซ้ำ 5 รอบ ใช้คำสั่งใด?", a: ["if 5:", "for i in range(5):", "loop 5:", "repeat 5"], c: 1, exp: "for loop กับ range() ใช้กำหนดจำนวนรอบ" },
+            { q: "CPU ทำหน้าที่อะไร?", a: ["เก็บข้อมูล", "ประมวลผลคำสั่ง", "แสดงภาพ", "จ่ายไฟ"], c: 1, exp: "CPU คือสมอง ทำหน้าที่คำนวณและประมวลผล" },
+            { q: "หน่วยความจำใดข้อมูลหายเมื่อไฟดับ?", a: ["ROM", "RAM", "HDD", "SSD"], c: 1, exp: "RAM เป็นหน่วยความจำชั่วคราว (Volatile)" },
+            { q: "Phishing คือภัยคุกคามแบบใด?", a: ["ไวรัส", "เว็บไซต์ปลอมหลอกเอาข้อมูล", "การแฮก WiFi", "สแปมเมล"], c: 1, exp: "ตกเบ็ดหลอกให้เหยื่อกรอกข้อมูล" },
+            { q: "CC NC หมายถึงอะไร?", a: ["ห้ามแก้ไข", "ห้ามใช้", "ห้ามใช้เพื่อการค้า", "ต้องให้เครดิต"], c: 2, exp: "NC = Non-Commercial" },
+            { q: "ซอฟต์แวร์ระบบ (System Software) คือ?", a: ["Word", "Excel", "Windows", "Game"], c: 2, exp: "Windows เป็นระบบปฏิบัติการ (OS)" },
+            { q: "SSD ดีกว่า HDD อย่างไร?", a: ["ราคาถูกกว่า", "อ่านเขียนข้อมูลเร็วกว่า", "ความจุน้อยกว่า", "ทนทานน้อยกว่า"], c: 1, exp: "SSD ใช้ชิป ทำงานเร็วกว่าจานหมุน HDD มาก" },
+            { q: "Peopleware หมายถึง?", a: ["ฮาร์ดแวร์", "โปรแกรม", "บุคลากรคอมพิวเตอร์", "ไวรัส"], c: 2, exp: "ผู้ใช้งานและผู้ดูแลระบบ" },
+            { q: "Operator != หมายถึง?", a: ["เท่ากับ", "ไม่เท่ากับ", "น้อยกว่า", "มากกว่า"], c: 1, exp: "!= คือเครื่องหมายไม่เท่ากับ" },
+            { q: "List ใน Python คือ?", a: ["เก็บข้อมูลตัวเดียว", "เก็บข้อมูลหลายค่าเรียงลำดับ", "เก็บข้อมูลแบบคู่", "คำสั่งวนซ้ำ"], c: 1, exp: "List เก็บกลุ่มข้อมูล [a, b, c]" },
+            { q: "Ransomware คือ?", a: ["โปรแกรมป้องกันไวรัส", "มัลแวร์เรียกค่าไถ่", "โปรแกรมแชท", "ฮาร์ดแวร์"], c: 1, exp: "ล็อกไฟล์เพื่อเรียกเงินค่าไถ่" },
+            { q: "Fair Use คือ?", a: ["ห้ามใช้เลย", "ใช้ได้เต็มที่", "การใช้ลิขสิทธิ์ที่เป็นธรรม", "การขโมยงาน"], c: 2, exp: "ใช้เพื่อการศึกษา/วิจารณ์ ในปริมาณที่เหมาะสม" },
+            { q: "คำสั่ง print() ใช้ทำอะไร?", a: ["รับค่า", "แสดงผล", "คำนวณ", "จบโปรแกรม"], c: 1, exp: "แสดงข้อมูลออกทางหน้าจอ" },
+            { q: "ALU ใน CPU ทำหน้าที่อะไร?", a: ["ควบคุม", "คำนวณทางคณิตศาสตร์และตรรกะ", "เก็บข้อมูล", "แสดงผล"], c: 1, exp: "Arithmetic Logic Unit" },
+            { q: "รหัสผ่านที่ดีควรยาวอย่างน้อยกี่ตัวอักษร?", a: ["4", "6", "8", "12"], c: 2, exp: "มาตรฐานขั้นต่ำคือ 8 ตัวอักษร (ผสมตัวเลข/อักษร)" },
+            { q: "Spyware คือ?", a: ["โปรแกรมแอบดูข้อมูล", "โปรแกรมฆ่าไวรัส", "โปรแกรมแต่งรูป", "เกม"], c: 0, exp: "แอบดักจับข้อมูลผู้ใช้" },
+            { q: "Flowchart สัญลักษณ์สี่เหลี่ยมผืนผ้าคือ?", a: ["Start", "Decision", "Process", "Input"], c: 2, exp: "Process (การประมวลผล)" },
+            { q: "Flowchart สัญลักษณ์สี่เหลี่ยมข้าวหลามตัดคือ?", a: ["Start", "Decision", "Process", "Input"], c: 1, exp: "Decision (การตัดสินใจ)" },
+            { q: "ข้อใดไม่ใช่ OS?", a: ["Linux", "iOS", "Android", "Microsoft Word"], c: 3, exp: "Word เป็น Application Software" },
+            { q: "การคิดเชิงคำนวณมีกี่องค์ประกอบ?", a: ["3", "4", "5", "6"], c: 1, exp: "4 องค์ประกอบ (Decomposition, Pattern, Abstraction, Algorithm)" },
+            { q: "ใครคือผู้พัฒนา Python?", a: ["Bill Gates", "Steve Jobs", "Guido van Rossum", "Mark Zuckerberg"], c: 2, exp: "Guido van Rossum" },
+            { q: "Boolean เก็บค่าอะไร?", a: ["ตัวเลข", "ตัวอักษร", "จริง/เท็จ", "ทศนิยม"], c: 2, exp: "True / False" },
+            { q: "นามสกุลไฟล์ Python คือ?", a: [".py", ".pt", ".pn", ".pl"], c: 0, exp: ".py" }
         ];
 
-        const quizApp = {
-            questions: [],
-            currentQuestionIndex: 0,
-            score: 0,
-            
-            init: function() {
-                // Shuffle questions
-                this.questions = [...questionPool].sort(() => 0.5 - Math.random());
-                this.currentQuestionIndex = 0;
-                this.score = 0;
-                this.showQuestion();
-                document.getElementById('quiz-container').classList.remove('hidden');
-                document.getElementById('result-card').classList.add('hidden');
-            },
+        let currentQ = 0;
+        let score = 0;
+        let shuffledQ = [];
 
-            showQuestion: function() {
-                const questionData = this.questions[this.currentQuestionIndex];
-                
-                // Update UI Texts
-                document.getElementById('question-counter').innerText = `Question ${this.currentQuestionIndex + 1} / ${this.questions.length}`;
-                document.getElementById('score-counter').innerText = this.score;
-                document.getElementById('question-text').innerText = questionData.question;
-                
-                // Update Progress Bar
-                const progress = ((this.currentQuestionIndex) / this.questions.length) * 100;
-                document.getElementById('progress-bar').style.width = `${progress}%`;
-
-                // Reset Options Area
-                const optionsContainer = document.getElementById('options-container');
-                optionsContainer.innerHTML = '';
-
-                // Create Option Buttons (More spacious)
-                questionData.options.forEach((option, index) => {
-                    const button = document.createElement('button');
-                    button.className = 'option-btn w-full text-left p-5 rounded-2xl border border-gray-100 text-gray-700 font-medium hover:shadow-md transition-all flex items-center group';
-                    button.innerHTML = `
-                        <span class="w-10 h-10 rounded-full bg-gray-50 text-gray-400 flex items-center justify-center mr-4 text-base font-bold border border-gray-200 group-hover:border-brand-300 group-hover:text-brand-600 transition-colors">${['A', 'B', 'C', 'D'][index]}</span>
-                        <span class="text-lg">${option}</span>
-                    `;
-                    button.onclick = () => this.checkAnswer(index, button);
-                    optionsContainer.appendChild(button);
-                });
-
-                // Reset Feedback & Buttons
-                document.getElementById('feedback-area').classList.add('hidden');
-                document.getElementById('skip-btn').classList.remove('hidden');
-                document.getElementById('next-btn').classList.add('hidden');
-            },
-
-            checkAnswer: function(selectedIndex, selectedButton) {
-                const questionData = this.questions[this.currentQuestionIndex];
-                const isCorrect = selectedIndex === questionData.correctIndex;
-                const buttons = document.querySelectorAll('.option-btn');
-
-                // Disable all buttons
-                buttons.forEach(btn => btn.disabled = true);
-
-                // Highlight buttons
-                if (isCorrect) {
-                    this.score++;
-                    selectedButton.classList.add('correct');
-                    selectedButton.querySelector('span:first-child').classList.add('bg-green-100', 'text-green-700', 'border-green-300');
-                    selectedButton.innerHTML += '<i class="fa-solid fa-circle-check ml-auto text-green-500 text-2xl animate-bounce"></i>';
-                    this.showFeedback(true, questionData.explanation);
-                } else {
-                    selectedButton.classList.add('wrong');
-                    selectedButton.querySelector('span:first-child').classList.add('bg-red-100', 'text-red-700', 'border-red-300');
-                    selectedButton.innerHTML += '<i class="fa-solid fa-circle-xmark ml-auto text-red-500 text-2xl"></i>';
-                    
-                    // Highlight correct answer
-                    const correctBtn = buttons[questionData.correctIndex];
-                    correctBtn.classList.add('correct');
-                    correctBtn.innerHTML += '<i class="fa-solid fa-check ml-auto text-green-600 text-xl"></i>';
-                    
-                    this.showFeedback(false, questionData.explanation);
-                }
-
-                // Update UI Controls
-                document.getElementById('score-counter').innerText = this.score;
-                document.getElementById('skip-btn').classList.add('hidden');
-                document.getElementById('next-btn').classList.remove('hidden');
-            },
-
-            showFeedback: function(isCorrect, explanation) {
-                const feedbackArea = document.getElementById('feedback-area');
-                const feedbackMessage = document.getElementById('feedback-message');
-                const feedbackDetail = document.getElementById('feedback-detail');
-                const feedbackIcon = document.getElementById('feedback-icon');
-
-                feedbackArea.classList.remove('hidden');
-                if (isCorrect) {
-                    feedbackArea.className = "mt-8 p-6 rounded-2xl bg-green-50 border border-green-100 animate-fade-in";
-                    feedbackMessage.className = "font-bold text-lg mb-1 text-green-700";
-                    feedbackMessage.innerText = 'ถูกต้อง! ยอดเยี่ยมมาก';
-                    feedbackIcon.innerHTML = '<i class="fa-solid fa-thumbs-up text-green-500"></i>';
-                } else {
-                    feedbackArea.className = "mt-8 p-6 rounded-2xl bg-red-50 border border-red-100 animate-fade-in";
-                    feedbackMessage.className = "font-bold text-lg mb-1 text-red-700";
-                    feedbackMessage.innerText = 'ข้อนี้ยังไม่ถูกนะ...';
-                    feedbackIcon.innerHTML = '<i class="fa-regular fa-lightbulb text-red-500"></i>';
-                }
-                feedbackDetail.innerText = explanation;
-            },
-
-            skipQuestion: function() {
-                const questionData = this.questions[this.currentQuestionIndex];
-                const buttons = document.querySelectorAll('.option-btn');
-                
-                buttons.forEach(btn => btn.disabled = true);
-                
-                // Highlight correct answer
-                const correctBtn = buttons[questionData.correctIndex];
-                correctBtn.classList.add('correct');
-                correctBtn.innerHTML += '<i class="fa-solid fa-check ml-auto text-green-600 text-xl"></i>';
-                
-                this.showFeedback(false, "เฉลย: " + questionData.explanation);
-                
-                document.getElementById('skip-btn').classList.add('hidden');
-                document.getElementById('next-btn').classList.remove('hidden');
-            },
-
-            nextQuestion: function() {
-                this.currentQuestionIndex++;
-                if (this.currentQuestionIndex < this.questions.length) {
-                    this.showQuestion();
-                } else {
-                    this.showResult();
-                }
-            },
-
-            showResult: function() {
-                document.getElementById('quiz-container').classList.add('hidden');
-                document.getElementById('result-card').classList.remove('hidden');
-                document.getElementById('final-score').innerText = `${this.score} / ${this.questions.length}`;
-            },
-
-            restartQuiz: function() {
-                this.init();
-            }
-        };
-
-        // Scroll to Top Logic
-        const scrollToTopBtn = document.getElementById("scrollToTopBtn");
-        window.onscroll = function() {scrollFunction()};
-
-        function scrollFunction() {
-            if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
-                scrollToTopBtn.classList.remove("hidden");
-            } else {
-                scrollToTopBtn.classList.add("hidden");
-            }
+        function initQuiz() {
+            shuffledQ = [...questions].sort(() => 0.5 - Math.random()).slice(0, 30);
+            currentQ = 0; score = 0;
+            document.getElementById('quiz-container').classList.remove('hidden');
+            document.getElementById('result-area').classList.add('hidden');
+            document.getElementById('score-display').innerText = `คะแนน: 0`;
+            showQuestion();
         }
 
-        scrollToTopBtn.addEventListener("click", function() {
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        });
+        function showQuestion() {
+            const q = shuffledQ[currentQ];
+            document.getElementById('q-progress').innerText = `ข้อที่ ${currentQ + 1} / 30`;
+            document.getElementById('q-text').innerText = q.q;
+            const optsDiv = document.getElementById('options-area');
+            optsDiv.innerHTML = '';
+            q.a.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "quiz-option w-full text-left p-4 rounded-xl border border-gray-200 font-medium transition-all block";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(idx, btn);
+                optsDiv.appendChild(btn);
+            });
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+        }
 
-        // Initialize Quiz on Load
-        window.onload = function() {
-            quizApp.init();
-        };
+        function checkAnswer(selectedIdx, btn) {
+            const q = shuffledQ[currentQ];
+            const allBtns = document.querySelectorAll('.quiz-option');
+            allBtns.forEach(b => b.disabled = true);
+            const feedback = document.getElementById('feedback');
+            feedback.classList.remove('hidden');
+            if (selectedIdx === q.c) {
+                score++; btn.classList.add('correct');
+                document.getElementById('score-display').innerText = `คะแนน: ${score}`;
+                feedback.className = "mt-4 p-4 rounded-lg bg-green-50 text-green-800 border border-green-200";
+                feedback.innerHTML = `<strong>ถูกต้อง!</strong> ${q.exp}`;
+            } else {
+                btn.classList.add('wrong'); allBtns[q.c].classList.add('correct');
+                feedback.className = "mt-4 p-4 rounded-lg bg-red-50 text-red-800 border border-red-200";
+                feedback.innerHTML = `<strong>ผิดครับ!</strong> เฉลยคือ "${q.a[q.c]}" <br>(${q.exp})`;
+            }
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQ++;
+            if (currentQ < 30) showQuestion(); else showResult();
+        }
+
+        function showResult() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('result-area').classList.remove('hidden');
+            document.getElementById('final-score').innerText = `${score} / 30`;
+        }
+
+        function restartQuiz() { initQuiz(); }
+        window.onload = initQuiz;
     </script>
 </body>
 </html>

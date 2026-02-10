@@ -3,1085 +3,427 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>วิทยาการคำนวณ ม.3 - สื่อการเรียนรู้ออนไลน์</title>
-    
-    <!-- Google Fonts: Prompt -->
+    <title>วิทยาการคำนวณ ม.3</title>
+    <!-- Fonts & Tailwind same as others -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Prompt', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['Prompt', 'sans-serif'] },
                     colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            800: '#075985',
-                            900: '#0c4a6e',
-                        }
-                    },
-                    boxShadow: {
-                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-                        'glow': '0 0 15px rgba(14, 165, 233, 0.3)',
+                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 800: '#075985', 900: '#0c4a6e' }
                     }
                 }
             }
         }
     </script>
-
     <style>
-        html {
-            scroll-behavior: smooth;
-        }
-        body {
-            background-color: #fafafa;
-        }
-        .gradient-text {
-            background: linear-gradient(to right, #0284c7, #2563eb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        html { scroll-behavior: smooth; }
+        body { background-color: #fafafa; line-height: 1.8; }
         .card-modern {
-            background: white;
-            border-radius: 1.5rem;
-            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-            border: 1px solid #f3f4f6;
+            background: white; border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease; border: 1px solid #f3f4f6;
         }
-        .card-modern:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border-color: #e0f2fe;
-        }
-        .theory-box {
-            background-color: #f8fafc;
-            border-left: 4px solid #0284c7;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-        }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #fafafa; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
-        }
-        
-        /* Quiz Button Styles */
-        .option-btn {
-            transition: all 0.2s;
-        }
-        .option-btn:hover:not(:disabled) {
-            background-color: #f0f9ff;
-            border-color: #0ea5e9;
-            transform: translateX(4px);
-        }
-        .option-btn.correct {
-            background-color: #dcfce7;
-            border-color: #22c55e;
-            color: #15803d;
-        }
-        .option-btn.wrong {
-            background-color: #fee2e2;
-            border-color: #ef4444;
-            color: #b91c1c;
-        }
+        .card-modern:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: #e0f2fe; }
+        .highlight-box { background-color: #f0f9ff; border-left: 4px solid #0284c7; padding: 1.25rem; border-radius: 0.5rem; margin: 1.5rem 0; }
+        /* Quiz Styles */
+        .quiz-option:hover { background-color: #f0f9ff; border-color: #0284c7; }
+        .quiz-option.correct { background-color: #dcfce7; border-color: #22c55e; color: #166534; }
+        .quiz-option.wrong { background-color: #fee2e2; border-color: #ef4444; color: #991b1b; }
     </style>
 </head>
-<body class="text-gray-700 font-sans leading-loose antialiased">
+<body class="text-gray-700 font-sans antialiased">
 
-    <!-- Navigation -->
-    <nav class="bg-white/90 backdrop-blur-md fixed w-full z-50 shadow-sm border-b border-gray-100 transition-all duration-300">
+    <!-- Nav -->
+    <nav class="bg-white/95 backdrop-blur-md fixed w-full z-50 shadow-sm border-b border-gray-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20">
+            <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <div class="bg-brand-50 p-2 rounded-lg mr-3">
-                        <i class="fa-solid fa-microchip text-brand-600 text-xl"></i>
-                    </div>
-                    <span class="font-bold text-xl tracking-tight text-gray-900">
-                        lesson/<span class="text-brand-600">comsci-m3</span>
-                    </span>
+                    <i class="fa-solid fa-microchip text-brand-600 text-xl mr-2"></i>
+                    <span class="font-bold text-lg tracking-tight text-gray-900">CS M.3 (Intensive)</span>
                 </div>
-                
-                <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center space-x-10">
-                    <a href="#home" class="text-gray-500 hover:text-brand-600 font-medium transition text-sm">หน้าแรก</a>
-                    <a href="#unit1" class="text-gray-500 hover:text-brand-600 font-medium transition text-sm">1. ข้อมูล</a>
-                    <a href="#unit2" class="text-gray-500 hover:text-brand-600 font-medium transition text-sm">2. ความน่าเชื่อถือ</a>
-                    <a href="#unit3" class="text-gray-500 hover:text-brand-600 font-medium transition text-sm">3. ไอที & กฎหมาย</a>
-                    <a href="#unit4" class="text-gray-500 hover:text-brand-600 font-medium transition text-sm">4. แอปพลิเคชัน</a>
-                    <a href="#quiz" class="px-6 py-2.5 bg-brand-600 text-white rounded-full hover:bg-brand-700 transition shadow-lg shadow-brand-500/30 text-sm font-semibold">
-                        แบบทดสอบ
-                    </a>
+                <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
+                    <a href="#home" class="hover:text-brand-600 transition">หน้าแรก</a>
+                    <a href="#unit1" class="hover:text-brand-600 transition">1. ข้อมูล</a>
+                    <a href="#unit2" class="hover:text-brand-600 transition">2. ความน่าเชื่อถือ</a>
+                    <a href="#unit3" class="hover:text-brand-600 transition">3. กฎหมาย</a>
+                    <a href="#unit4" class="hover:text-brand-600 transition">4. IoT/App</a>
+                    <a href="#quiz" class="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition">แบบทดสอบ</a>
                 </div>
-
-                <!-- Mobile Menu Button -->
-                <div class="md:hidden flex items-center">
-                    <button id="mobile-menu-btn" class="text-gray-500 hover:text-gray-900 focus:outline-none p-2">
-                        <i class="fa-solid fa-bars text-2xl"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <!-- Mobile Menu Panel -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 shadow-lg absolute w-full">
-            <div class="px-4 pt-4 pb-6 space-y-2">
-                <a href="#home" class="block px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:text-brand-600 hover:bg-brand-50">หน้าแรก</a>
-                <a href="#unit1" class="block px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:text-brand-600 hover:bg-brand-50">1. การจัดการข้อมูล</a>
-                <a href="#unit2" class="block px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:text-brand-600 hover:bg-brand-50">2. ความน่าเชื่อถือ</a>
-                <a href="#unit3" class="block px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:text-brand-600 hover:bg-brand-50">3. การใช้เทคโนโลยี</a>
-                <a href="#unit4" class="block px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:text-brand-600 hover:bg-brand-50">4. แอปพลิเคชัน</a>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <header id="home" class="pt-32 pb-20 md:pt-48 md:pb-32 bg-gradient-to-b from-white via-brand-50/30 to-white relative overflow-hidden">
-        <!-- Background Decoration -->
-        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-brand-100/50 blur-3xl"></div>
-        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-72 h-72 rounded-full bg-purple-100/50 blur-3xl"></div>
-
-        <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
-            <div class="flex flex-col md:flex-row items-center gap-16">
-                <div class="md:w-1/2">
-                    <!-- Highlighted Course Title -->
-                    <div class="mb-8 relative inline-block">
-                        <div class="absolute inset-0 bg-brand-200 transform -skew-x-12 rounded-lg opacity-50"></div>
-                        <h2 class="relative text-3xl md:text-4xl font-black text-brand-800 px-4 py-2 uppercase tracking-wider">
-                            วิชาวิทยาการคำนวณ ม.3
-                        </h2>
-                    </div>
-                    
-                    <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-8 leading-tight tracking-tight">
-                        เรียนรู้โลก<br>
-                        <span class="gradient-text">Data & Technology</span>
-                    </h1>
-                    <p class="text-xl text-gray-500 mb-10 max-w-lg leading-relaxed">
-                        เจาะลึกวิทยาการข้อมูล (Data Science), รู้เท่าทันสื่อยุคดิจิทัล, กฎหมาย PDPA และการสร้างนวัตกรรม IoT ตามหลักสูตรแกนกลางฯ
-                    </p>
-                    <div class="flex flex-wrap gap-4">
-                        <a href="#unit1" class="px-8 py-4 bg-brand-600 text-white font-semibold rounded-2xl shadow-xl shadow-brand-500/20 hover:bg-brand-700 hover:scale-105 transition duration-300">
-                            เริ่มบทเรียน
-                        </a>
-                        <a href="#quiz" class="px-8 py-4 bg-white text-gray-600 border border-gray-200 font-semibold rounded-2xl hover:bg-gray-50 hover:border-gray-300 transition duration-300 flex items-center gap-2">
-                            <i class="fa-solid fa-pen-to-square"></i> ลองทำข้อสอบ
-                        </a>
-                    </div>
+    <!-- Hero -->
+    <header id="home" class="pt-28 pb-20 bg-gradient-to-b from-white via-indigo-50 to-white">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col md:flex-row items-center gap-12">
+            <div class="md:w-1/2 space-y-6">
+                <span class="px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-xs font-bold uppercase tracking-wider">มัธยมศึกษาปีที่ 3</span>
+                <h1 class="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">
+                    Data Science & <br><span class="text-brand-600">IoT Innovation</span>
+                </h1>
+                <p class="text-lg text-gray-600 leading-relaxed">
+                    เจาะลึกกระบวนการวิทยาการข้อมูล รู้เท่าทันกฎหมาย PDPA และสถาปัตยกรรม IoT เตรียมพร้อมสู่โลกยุค AI
+                </p>
+                <div class="flex gap-4">
+                    <a href="#unit1" class="px-6 py-3 bg-brand-600 text-white font-semibold rounded-xl shadow-lg hover:bg-brand-700 transition">เข้าสู่บทเรียน</a>
+                    <a href="#quiz" class="px-6 py-3 bg-white text-gray-700 border border-gray-200 font-semibold rounded-xl hover:bg-gray-50 transition">ทำแบบทดสอบ</a>
                 </div>
-                <div class="md:w-1/2 flex justify-center perspective-1000">
-                    <img src="https://placehold.co/800x600/e0f2fe/0284c7?text=Computing+Science+M.3&font=roboto" alt="Learning" class="rounded-3xl shadow-2xl w-full max-w-lg transform hover:rotate-1 transition duration-500 border-8 border-white">
-                </div>
+            </div>
+            <div class="md:w-1/2">
+                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop" alt="Data Analytics" class="rounded-2xl shadow-2xl border-4 border-white w-full object-cover h-[400px]">
             </div>
         </div>
     </header>
 
-    <!-- Content Container -->
-    <main class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-16 space-y-32">
+    <main class="max-w-7xl mx-auto px-6 lg:px-8 py-12 space-y-24">
 
-        <!-- Unit 1: Data Management -->
-        <section id="unit1" class="scroll-mt-32">
-            <div class="flex items-end gap-6 mb-12 border-b border-gray-100 pb-6">
-                <span class="text-8xl font-black text-gray-100 leading-none -mb-4 -ml-4 select-none absolute z-0">01</span>
+        <!-- Unit 1 -->
+        <section id="unit1" class="scroll-mt-24">
+            <div class="border-l-4 border-brand-500 pl-4 mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">1. การจัดการข้อมูล (Data Science)</h2>
+                <p class="text-brand-600">Data Lifecycle & Analysis</p>
+            </div>
+
+            <div class="bg-gray-900 rounded-2xl p-8 text-white mb-10 shadow-xl relative overflow-hidden">
                 <div class="relative z-10">
-                    <h2 class="text-4xl font-bold text-gray-900 mb-2">การจัดการข้อมูล</h2>
-                    <p class="text-brand-600 font-medium">Data Science Fundamentals</p>
+                    <h3 class="text-xl font-bold mb-6 text-center">กระบวนการวิทยาการข้อมูล (Data Science Process)</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div class="text-center p-4 bg-white/10 rounded-xl backdrop-blur-sm">
+                            <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-2 font-bold">1</div>
+                            <h4 class="font-bold">ตั้งคำถาม</h4>
+                            <p class="text-xs text-gray-300">Ask Question</p>
+                        </div>
+                        <div class="text-center p-4 bg-white/10 rounded-xl backdrop-blur-sm">
+                            <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-2 font-bold">2</div>
+                            <h4 class="font-bold">เก็บข้อมูล</h4>
+                            <p class="text-xs text-gray-300">Collect Data</p>
+                        </div>
+                        <div class="text-center p-4 bg-white/10 rounded-xl backdrop-blur-sm">
+                            <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-2 font-bold text-black">3</div>
+                            <h4 class="font-bold">ทำความสะอาด</h4>
+                            <p class="text-xs text-gray-300">Clean/Explore</p>
+                        </div>
+                        <div class="text-center p-4 bg-white/10 rounded-xl backdrop-blur-sm">
+                            <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2 font-bold">4</div>
+                            <h4 class="font-bold">วิเคราะห์</h4>
+                            <p class="text-xs text-gray-300">Analyze Model</p>
+                        </div>
+                        <div class="text-center p-4 bg-white/10 rounded-xl backdrop-blur-sm">
+                            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-2 font-bold">5</div>
+                            <h4 class="font-bold">สื่อสารผลลัพธ์</h4>
+                            <p class="text-xs text-gray-300">Visualize</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                <!-- Main Content -->
-                <div class="lg:col-span-7 space-y-10">
-                    
-                    <!-- Theory: DIKW Pyramid -->
-                    <div class="theory-box">
-                        <h4 class="font-bold text-gray-800 text-lg mb-2"><i class="fa-solid fa-layer-group mr-2"></i>ทฤษฎี: ลำดับชั้นของข้อมูล (DIKW Pyramid)</h4>
-                        <ul class="space-y-2 text-sm text-gray-600">
-                            <li><strong class="text-red-500">Data (ข้อมูล):</strong> ข้อเท็จจริงดิบๆ เช่น ตัวเลข 25, 30 (ยังไม่รู้ว่าคืออะไร)</li>
-                            <li><strong class="text-orange-500">Information (สารสนเทศ):</strong> ข้อมูลที่ผ่านการประมวลผล เช่น อุณหภูมิเฉลี่ย 25 องศา</li>
-                            <li><strong class="text-yellow-600">Knowledge (ความรู้):</strong> การเข้าใจรูปแบบ เช่น อุณหภูมิ 25 องศาคืออากาศเย็นสบาย</li>
-                            <li><strong class="text-green-600">Wisdom (ภูมิปัญญา):</strong> การนำไปตัดสินใจ เช่น วันนี้อากาศดี ควรจัดกิจกรรมกลางแจ้ง</li>
-                        </ul>
-                    </div>
-
-                    <!-- 1.1 Collection -->
-                    <div class="card-modern p-10 relative overflow-hidden">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <span class="bg-green-100 text-green-600 p-2 rounded-lg mr-4 text-lg"><i class="fa-solid fa-database"></i></span>
-                            1. การเก็บรวบรวมข้อมูล (Data Collection)
-                        </h3>
-                        <p class="text-gray-500 mb-6">
-                            แบ่งประเภทข้อมูลตามคุณลักษณะ (Attributes) และแหล่งที่มา:
-                        </p>
-                        <div class="grid md:grid-cols-2 gap-4 mb-4">
-                            <div class="bg-gray-50 p-4 rounded-xl">
-                                <h5 class="font-bold text-gray-800 mb-2">แบ่งตามแหล่งที่มา</h5>
-                                <ul class="text-sm space-y-2 text-gray-600">
-                                    <li><strong>ปฐมภูมิ (Primary):</strong> เก็บเอง (สัมภาษณ์, แบบสอบถาม, เซนเซอร์ IoT)</li>
-                                    <li><strong>ทุติยภูมิ (Secondary):</strong> คนอื่นเก็บไว้ (สถิติรัฐ, รายงานวิจัย, API)</li>
-                                </ul>
-                            </div>
-                            <div class="bg-gray-50 p-4 rounded-xl">
-                                <h5 class="font-bold text-gray-800 mb-2">แบ่งตามรูปแบบ</h5>
-                                <ul class="text-sm space-y-2 text-gray-600">
-                                    <li><strong>เชิงปริมาณ (Quantitative):</strong> ตัวเลขคำนวณได้ (น้ำหนัก, ส่วนสูง)</li>
-                                    <li><strong>เชิงคุณภาพ (Qualitative):</strong> ความรู้สึก, ความเห็น, สีที่ชอบ</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 1.2 Processing -->
-                    <div class="card-modern p-10">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <span class="bg-blue-100 text-blue-600 p-2 rounded-lg mr-4 text-lg"><i class="fa-solid fa-gears"></i></span>
-                            2. การประมวลผลข้อมูล (Data Processing)
-                        </h3>
-                        <div class="space-y-6">
-                            <div>
-                                <h4 class="font-bold text-gray-800 mb-2">Data Cleaning (การทำความสะอาดข้อมูล)</h4>
-                                <p class="text-sm text-gray-600 mb-2">ก่อนนำข้อมูลไปใช้ ต้องจัดการสิ่งผิดปกติ:</p>
-                                <ul class="list-disc list-inside text-sm text-gray-500 ml-4">
-                                    <li><strong>Missing Values:</strong> ค่าว่าง (อาจเติมด้วยค่าเฉลี่ย หรือตัดทิ้ง)</li>
-                                    <li><strong>Outliers:</strong> ค่าที่โดดผิดปกติ (เช่น อายุ 200 ปี)</li>
-                                    <li><strong>Inconsistency:</strong> ความไม่สม่ำเสมอ (เช่น ชาย, Male, M)</li>
-                                </ul>
-                            </div>
-                            <div class="border-t pt-4">
-                                <h4 class="font-bold text-gray-800 mb-2">Data Analysis Types</h4>
-                                <div class="grid grid-cols-2 gap-4 text-sm">
-                                    <div class="bg-blue-50 p-3 rounded-lg text-blue-800">
-                                        <strong>Descriptive:</strong> เกิดอะไรขึ้น? (สรุปผลอดีต)
-                                    </div>
-                                    <div class="bg-purple-50 p-3 rounded-lg text-purple-800">
-                                        <strong>Predictive:</strong> จะเกิดอะไรขึ้น? (พยากรณ์อนาคต)
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="grid md:grid-cols-2 gap-10">
+                <div class="card-modern p-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Big Data (5Vs)</h3>
+                    <ul class="space-y-3 text-sm text-gray-600">
+                        <li><strong>1. Volume:</strong> ปริมาณมหาศาล (ระดับ Terabytes/Petabytes)</li>
+                        <li><strong>2. Velocity:</strong> ความเร็วสูง (Real-time, Streaming)</li>
+                        <li><strong>3. Variety:</strong> หลากหลายรูปแบบ (Text, Image, Video, Log)</li>
+                        <li><strong>4. Veracity:</strong> ความถูกต้องน่าเชื่อถือ (ข้อมูลต้องไม่มั่ว)</li>
+                        <li><strong>5. Value:</strong> มีคุณค่าทางธุรกิจ นำไปต่อยอดได้</li>
+                    </ul>
                 </div>
-                
-                <!-- Sidebar / Tools & Theory -->
-                <div class="lg:col-span-5 relative">
-                    <div class="sticky top-28 space-y-8">
-                        <div class="bg-gray-900 text-white p-8 rounded-3xl shadow-xl">
-                            <h3 class="text-xl font-bold mb-4 text-gray-100">Big Data (5Vs)</h3>
-                            <p class="text-gray-400 text-sm mb-4">ข้อมูลขนาดใหญ่ต้องมีลักษณะ 5 อย่าง:</p>
-                            <ul class="space-y-3 text-sm">
-                                <li class="flex items-start"><i class="fa-solid fa-cube mt-1 mr-3 text-blue-400"></i> <span><strong>Volume:</strong> ปริมาณมหาศาล</span></li>
-                                <li class="flex items-start"><i class="fa-solid fa-bolt mt-1 mr-3 text-yellow-400"></i> <span><strong>Velocity:</strong> เปลี่ยนแปลงรวดเร็ว</span></li>
-                                <li class="flex items-start"><i class="fa-solid fa-shapes mt-1 mr-3 text-green-400"></i> <span><strong>Variety:</strong> หลากหลายรูปแบบ (ภาพ, เสียง, ข้อความ)</span></li>
-                                <li class="flex items-start"><i class="fa-solid fa-check-double mt-1 mr-3 text-red-400"></i> <span><strong>Veracity:</strong> ความถูกต้องน่าเชื่อถือ</span></li>
-                                <li class="flex items-start"><i class="fa-solid fa-gem mt-1 mr-3 text-purple-400"></i> <span><strong>Value:</strong> มีคุณค่าทางธุรกิจ/สังคม</span></li>
-                            </ul>
-                        </div>
+                <div class="card-modern p-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">การทำความสะอาดข้อมูล (Cleaning)</h3>
+                    <p class="text-sm text-gray-600 mb-3">"Garbage In, Garbage Out" ข้อมูลขยะเข้า ผลลัพธ์ก็เป็นขยะ ต้องจัดการดังนี้:</p>
+                    <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+                        <li><strong>Missing Values:</strong> ค่าว่าง -> ลบทิ้ง หรือเติมด้วยค่าเฉลี่ย</li>
+                        <li><strong>Outliers:</strong> ค่าที่โดดผิดปกติ -> เช่น อายุ 200 ปี ต้องตรวจสอบ</li>
+                        <li><strong>Duplicate:</strong> ข้อมูลซ้ำ -> ลบให้เหลือรายการเดียว</li>
+                        <li><strong>Inconsistent:</strong> รูปแบบไม่ตรงกัน -> แก้ให้เป็นมาตรฐานเดียวกัน</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
 
-                        <div class="card-modern p-8 border-none bg-gradient-to-br from-white to-gray-50">
-                            <h3 class="text-lg font-bold mb-4 text-gray-800">เครื่องมือ (Tools)</h3>
-                            <ul class="space-y-4">
-                                <li class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-green-600"><i class="fa-solid fa-table"></i></div>
-                                    <div>
-                                        <div class="font-bold text-sm">Spreadsheet</div>
-                                        <div class="text-xs text-gray-500">Excel / Google Sheets (งานพื้นฐาน)</div>
-                                    </div>
-                                </li>
-                                <li class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600"><i class="fa-brands fa-python"></i></div>
-                                    <div>
-                                        <div class="font-bold text-sm">Python (Pandas)</div>
-                                        <div class="text-xs text-gray-500">Data Science / Automation</div>
-                                    </div>
-                                </li>
-                                <li class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600"><i class="fa-solid fa-chart-pie"></i></div>
-                                    <div>
-                                        <div class="font-bold text-sm">Data Studio / PowerBI</div>
-                                        <div class="text-xs text-gray-500">Dashboard Visualization</div>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
+        <!-- Unit 2 -->
+        <section id="unit2" class="scroll-mt-24">
+            <div class="border-l-4 border-yellow-500 pl-4 mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">2. ความน่าเชื่อถือของข้อมูล</h2>
+                <p class="text-yellow-600">Information Reliability & Literacy</p>
+            </div>
+
+            <div class="card-modern p-10 border-t-4 border-yellow-500">
+                <h3 class="text-xl font-bold text-gray-800 mb-6 text-center">หลักการ PROMPT: เช็คให้ชัวร์ก่อนแชร์</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                    <div class="bg-yellow-50 p-4 rounded-xl">
+                        <strong class="text-yellow-900 block mb-1">P - Presentation</strong>
+                        <span class="text-xs text-gray-600">การนำเสนอ รูปแบบภาษา ดูเป็นมืออาชีพหรือไม่?</span>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-xl">
+                        <strong class="text-yellow-900 block mb-1">R - Relevance</strong>
+                        <span class="text-xs text-gray-600">เนื้อหาตรงกับเรื่องที่ต้องการหาหรือไม่?</span>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-xl">
+                        <strong class="text-yellow-900 block mb-1">O - Objectivity</strong>
+                        <span class="text-xs text-gray-600">มีอคติ หรือเจตนาแอบแฝง (โฆษณา) หรือไม่?</span>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-xl">
+                        <strong class="text-yellow-900 block mb-1">M - Method</strong>
+                        <span class="text-xs text-gray-600">วิธีการได้มาซึ่งข้อมูล น่าเชื่อถือแค่ไหน?</span>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-xl">
+                        <strong class="text-yellow-900 block mb-1">P - Provenance</strong>
+                        <span class="text-xs text-gray-600">ระบุแหล่งที่มา/ผู้เขียนชัดเจนหรือไม่?</span>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-xl">
+                        <strong class="text-yellow-900 block mb-1">T - Timeliness</strong>
+                        <span class="text-xs text-gray-600">ข้อมูลเป็นปัจจุบัน ทันสมัยหรือไม่?</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Unit 2: Reliability -->
-        <section id="unit2" class="scroll-mt-32">
-            <div class="flex items-end gap-6 mb-12 border-b border-gray-100 pb-6">
-                <span class="text-8xl font-black text-gray-100 leading-none -mb-4 -ml-4 select-none absolute z-0">02</span>
+        <!-- Unit 3 -->
+        <section id="unit3" class="scroll-mt-24">
+            <div class="border-l-4 border-purple-500 pl-4 mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">3. กฎหมายและเทคโนโลยี</h2>
+                <p class="text-purple-600">Computer Crime Act & PDPA</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-10">
+                <div class="card-modern p-8 bg-purple-50 border-purple-100">
+                    <h3 class="text-xl font-bold text-purple-900 mb-4"><i class="fa-solid fa-gavel mr-2"></i>พ.ร.บ. คอมพิวเตอร์ฯ (น่ารู้)</h3>
+                    <ul class="space-y-4 text-sm text-gray-700">
+                        <li>
+                            <strong>มาตรา 14(1): Fake News</strong><br>
+                            นำเข้าข้อมูลเท็จ/บิดเบือน ทำให้เกิดความเสียหาย/ตื่นตระหนก <span class="text-red-600 font-bold">คุก 5 ปี / ปรับ 1 แสน</span>
+                        </li>
+                        <li>
+                            <strong>มาตรา 16: ตัดต่อภาพ</strong><br>
+                            ตัดต่อภาพผู้อื่นทำให้เสียชื่อเสียง อับอาย <span class="text-red-600 font-bold">คุก 3 ปี / ปรับ 2 แสน</span>
+                        </li>
+                        <li>
+                            <strong>มาตรา 5-7: การแฮก</strong><br>
+                            เข้าถึงระบบ/ข้อมูลผู้อื่นโดยมิชอบ (แม้ไม่ได้ขโมยอะไรก็ผิด)
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-modern p-8 bg-green-50 border-green-100">
+                    <h3 class="text-xl font-bold text-green-900 mb-4"><i class="fa-solid fa-shield-halved mr-2"></i>PDPA (คุ้มครองข้อมูลส่วนบุคคล)</h3>
+                    <p class="text-sm text-gray-700 mb-4">
+                        กฎหมายที่ให้สิทธิเราในการจัดการข้อมูลส่วนตัว (เช่น ชื่อ, เบอร์โทร, รูปถ่าย)
+                    </p>
+                    <ul class="space-y-2 text-sm text-gray-700">
+                        <li><i class="fa-solid fa-check text-green-600 mr-2"></i> <strong>Consent:</strong> ต้องขอความยินยอมก่อนเก็บข้อมูล</li>
+                        <li><i class="fa-solid fa-check text-green-600 mr-2"></i> <strong>Purpose:</strong> ใช้ข้อมูลตามวัตถุประสงค์ที่แจ้งเท่านั้น</li>
+                        <li><i class="fa-solid fa-check text-green-600 mr-2"></i> <strong>Rights:</strong> เจ้าของข้อมูลขอให้ลบ/ระงับการใช้ได้</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Unit 4 -->
+        <section id="unit4" class="scroll-mt-24">
+            <div class="border-l-4 border-green-500 pl-4 mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">4. การพัฒนาแอปพลิเคชัน & IoT</h2>
+                <p class="text-green-600">IoT Architecture & SDLC</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow p-8 mb-10 overflow-hidden relative">
+                <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1000&auto=format&fit=crop" alt="Smart Chip" class="absolute top-0 right-0 w-1/2 h-full object-cover opacity-10">
                 <div class="relative z-10">
-                    <h2 class="text-4xl font-bold text-gray-900 mb-2">ความน่าเชื่อถือ</h2>
-                    <p class="text-red-500 font-medium">Information Literacy</p>
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">สถาปัตยกรรม IoT 4 ชั้น (4 Layers)</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4 bg-green-50 p-4 rounded-lg border border-green-100">
+                            <div class="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center font-bold">1</div>
+                            <div>
+                                <strong class="text-green-900">Perception Layer (ชั้นรับรู้)</strong>
+                                <p class="text-xs text-gray-600">อุปกรณ์ปลายทาง เช่น Sensors วัดอุณหภูมิ, กล้อง, GPS, RFID</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 bg-blue-50 p-4 rounded-lg border border-blue-100">
+                            <div class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">2</div>
+                            <div>
+                                <strong class="text-blue-900">Network Layer (ชั้นเครือข่าย)</strong>
+                                <p class="text-xs text-gray-600">ช่องทางส่งข้อมูล เช่น WiFi, 5G, Bluetooth, NB-IoT, LoRaWAN</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 bg-purple-50 p-4 rounded-lg border border-purple-100">
+                            <div class="w-10 h-10 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold">3</div>
+                            <div>
+                                <strong class="text-purple-900">Processing Layer (ชั้นประมวลผล)</strong>
+                                <p class="text-xs text-gray-600">Cloud Computing, Big Data Analytics, Database จัดเก็บและวิเคราะห์</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 bg-orange-50 p-4 rounded-lg border border-orange-100">
+                            <div class="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold">4</div>
+                            <div>
+                                <strong class="text-orange-900">Application Layer (ชั้นใช้งาน)</strong>
+                                <p class="text-xs text-gray-600">ส่วนติดต่อผู้ใช้ เช่น Smart Home App, Dashboard ดูค่าฝุ่น PM2.5</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="card-modern overflow-hidden mb-10">
-                <div class="grid md:grid-cols-2">
-                    <div class="p-10 md:p-12 bg-white">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-8">หลักการประเมิน <span class="text-brand-600">PROMPT</span></h3>
-                        <p class="text-gray-500 mb-6 text-sm">วิธีตรวจสอบข้อมูลก่อนเชื่อหรือแชร์:</p>
-                        <div class="space-y-4">
-                            <div class="flex gap-4 items-start border-l-4 border-red-200 pl-4 py-1">
-                                <div class="font-black text-red-500 w-6">P</div>
-                                <div><strong class="text-gray-900">Presentation:</strong> การนำเสนอเป็นมืออาชีพหรือไม่?</div>
-                            </div>
-                            <div class="flex gap-4 items-start border-l-4 border-orange-200 pl-4 py-1">
-                                <div class="font-black text-orange-500 w-6">R</div>
-                                <div><strong class="text-gray-900">Relevance:</strong> ตรงกับหัวข้อที่หาหรือไม่?</div>
-                            </div>
-                            <div class="flex gap-4 items-start border-l-4 border-yellow-200 pl-4 py-1">
-                                <div class="font-black text-yellow-500 w-6">O</div>
-                                <div><strong class="text-gray-900">Objectivity:</strong> มีอคติหรือเจตนาแอบแฝงไหม?</div>
-                            </div>
-                            <div class="flex gap-4 items-start border-l-4 border-green-200 pl-4 py-1">
-                                <div class="font-black text-green-500 w-6">M</div>
-                                <div><strong class="text-gray-900">Method:</strong> วิธีการเก็บข้อมูลน่าเชื่อถือไหม?</div>
-                            </div>
-                            <div class="flex gap-4 items-start border-l-4 border-blue-200 pl-4 py-1">
-                                <div class="font-black text-blue-500 w-6">P</div>
-                                <div><strong class="text-gray-900">Provenance:</strong> ระบุแหล่งที่มาชัดเจนไหม?</div>
-                            </div>
-                            <div class="flex gap-4 items-start border-l-4 border-purple-200 pl-4 py-1">
-                                <div class="font-black text-purple-500 w-6">T</div>
-                                <div><strong class="text-gray-900">Timeliness:</strong> ข้อมูลเป็นปัจจุบันหรือไม่?</div>
-                            </div>
-                        </div>
+            <div class="card-modern p-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">วงจรการพัฒนาซอฟต์แวร์ (SDLC)</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm">
+                    <div class="p-3 border rounded-lg">
+                        <strong class="block text-brand-600">1. Analysis</strong>
+                        <span class="text-xs text-gray-500">วิเคราะห์ปัญหา/ความต้องการ</span>
                     </div>
-                    
-                    <div class="p-10 md:p-12 bg-gray-50 border-t md:border-t-0 md:border-l border-gray-100">
-                        <div class="mb-10">
-                            <h3 class="text-xl font-bold text-gray-800 mb-6">เทคนิคการสืบค้น (Search Operators)</h3>
-                            <div class="space-y-3">
-                                <div class="bg-white p-4 rounded-xl shadow-sm">
-                                    <div class="flex justify-between mb-1">
-                                        <code class="text-blue-600 font-bold">"..."</code>
-                                        <span class="text-xs bg-gray-100 px-2 rounded">Exact Match</span>
-                                    </div>
-                                    <p class="text-xs text-gray-500">ค้นหาคำตรงตัวเป๊ะๆ เช่น "โลกร้อน"</p>
-                                </div>
-                                <div class="bg-white p-4 rounded-xl shadow-sm">
-                                    <div class="flex justify-between mb-1">
-                                        <code class="text-blue-600 font-bold">AND / OR</code>
-                                        <span class="text-xs bg-gray-100 px-2 rounded">Logic</span>
-                                    </div>
-                                    <p class="text-xs text-gray-500">แมว AND หมา (ต้องมีทั้งคู่), แมว OR หมา (มีอย่างใดอย่างหนึ่ง)</p>
-                                </div>
-                                <div class="bg-white p-4 rounded-xl shadow-sm">
-                                    <div class="flex justify-between mb-1">
-                                        <code class="text-blue-600 font-bold">- (ลบ)</code>
-                                        <span class="text-xs bg-gray-100 px-2 rounded">Exclude</span>
-                                    </div>
-                                    <p class="text-xs text-gray-500">ตัดคำที่ไม่ต้องการ เช่น รถยนต์ -มือสอง</p>
-                                </div>
-                                <div class="bg-white p-4 rounded-xl shadow-sm">
-                                    <div class="flex justify-between mb-1">
-                                        <code class="text-blue-600 font-bold">site:</code>
-                                        <span class="text-xs bg-gray-100 px-2 rounded">Domain</span>
-                                    </div>
-                                    <p class="text-xs text-gray-500">ระบุเว็บ เช่น site:ac.th (หาเฉพาะเว็บสถานศึกษา)</p>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="p-3 border rounded-lg">
+                        <strong class="block text-brand-600">2. Design</strong>
+                        <span class="text-xs text-gray-500">ออกแบบหน้าจอ/Flowchart</span>
+                    </div>
+                    <div class="p-3 border rounded-lg">
+                        <strong class="block text-brand-600">3. Develop</strong>
+                        <span class="text-xs text-gray-500">เขียนโปรแกรม (Coding)</span>
+                    </div>
+                    <div class="p-3 border rounded-lg">
+                        <strong class="block text-brand-600">4. Testing</strong>
+                        <span class="text-xs text-gray-500">ทดสอบหา Bug และแก้ไข</span>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- Quiz -->
+        <section id="quiz" class="py-16">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">ทดสอบความรู้ท้ายบท</h2>
+                <p class="text-gray-500">ทบทวนความเข้าใจ 30 ข้อ</p>
             </div>
             
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="bg-red-50 p-6 rounded-2xl border border-red-100">
-                    <h4 class="font-bold text-red-800 mb-3"><i class="fa-solid fa-user-secret mr-2"></i>ภัยเงียบโลกออนไลน์</h4>
-                    <ul class="text-sm space-y-2 text-red-700">
-                        <li><strong>Cyberbullying:</strong> การกลั่นแกล้ง รังแก หรือสร้างความเกลียดชังออนไลน์</li>
-                        <li><strong>Digital Footprint:</strong> ร่องรอยดิจิทัลที่ลบไม่ออก (โพสต์, ประวัติการค้นหา)</li>
-                        <li><strong>Phishing:</strong> เว็บ/อีเมลปลอมหลอกให้กรอกรหัสผ่าน</li>
-                    </ul>
+            <div id="quiz-container" class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                <div class="flex justify-between text-sm font-bold text-gray-400 mb-6">
+                    <span id="q-progress">ข้อที่ 1 / 30</span>
+                    <span id="score-display" class="text-brand-600">คะแนน: 0</span>
                 </div>
-                <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100">
-                    <h4 class="font-bold text-indigo-800 mb-3"><i class="fa-solid fa-shield-halved mr-2"></i>การรู้เท่าทันสื่อ (Media Literacy)</h4>
-                    <ul class="text-sm space-y-2 text-indigo-700">
-                        <li><strong>Deepfake:</strong> AI ตัดต่อใบหน้า/เสียง ต้องสังเกตการกระพริบตาหรือเงา</li>
-                        <li><strong>Clickbait:</strong> พาดหัวเวอร์วัง ล่อให้กดเข้าไปดูโฆษณา</li>
-                        <li><strong>Echo Chamber:</strong> เห็นแต่ข้อมูลที่ตัวเองชอบ เพราะ AI เลือกให้</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <!-- Unit 3: Law -->
-        <section id="unit3" class="scroll-mt-32">
-            <div class="flex items-end gap-6 mb-12 border-b border-gray-100 pb-6">
-                <span class="text-8xl font-black text-gray-100 leading-none -mb-4 -ml-4 select-none absolute z-0">03</span>
-                <div class="relative z-10">
-                    <h2 class="text-4xl font-bold text-gray-900 mb-2">กฎหมาย & ลิขสิทธิ์</h2>
-                    <p class="text-purple-500 font-medium">Computer Law & PDPA</p>
+                <h3 id="q-text" class="text-xl font-bold text-gray-800 mb-6">Loading...</h3>
+                <div id="options-area" class="space-y-3"></div>
+                <div id="feedback" class="hidden mt-4 p-4 rounded-lg bg-gray-50 text-sm"></div>
+                <div class="mt-8 flex justify-between">
+                    <button onclick="restartQuiz()" class="text-gray-400 hover:text-gray-600 text-sm font-bold">↻ เริ่มใหม่</button>
+                    <button id="next-btn" onclick="nextQuestion()" class="hidden px-6 py-2 bg-brand-600 text-white rounded-lg font-bold hover:bg-brand-700 transition">ข้อถัดไป</button>
                 </div>
             </div>
 
-            <div class="grid md:grid-cols-2 gap-10 items-stretch">
-                <div class="card-modern p-10 border-t-8 border-t-purple-500 h-full flex flex-col">
-                    <div class="flex justify-between items-start mb-6">
-                        <h3 class="text-2xl font-bold text-gray-800">พ.ร.บ. คอมพิวเตอร์ฯ (ฉบับที่ 2)</h3>
-                        <i class="fa-solid fa-gavel text-3xl text-purple-200"></i>
-                    </div>
-                    <ul class="space-y-6 flex-grow">
-                        <li class="bg-purple-50 p-4 rounded-xl">
-                            <strong class="block text-purple-900 mb-1">มาตรา 14 (1) - ข้อมูลเท็จ/บิดเบือน</strong>
-                            <p class="text-sm text-gray-600">นำเข้าข้อมูลอันเป็นเท็จ สร้างความเสียหาย/ตื่นตระหนก (โทษ: คุก 5 ปี / ปรับ 1 แสน)</p>
-                        </li>
-                        <li class="bg-purple-50 p-4 rounded-xl">
-                            <strong class="block text-purple-900 mb-1">มาตรา 16 - ตัดต่อภาพ</strong>
-                            <p class="text-sm text-gray-600">ตัดต่อภาพผู้อื่นให้เสียชื่อเสียง อับอาย (โทษ: คุก 3 ปี / ปรับ 2 แสน)</p>
-                        </li>
-                         <li class="bg-purple-50 p-4 rounded-xl">
-                            <strong class="block text-purple-900 mb-1">มาตรา 5-7 - การเข้าถึงระบบ</strong>
-                            <p class="text-sm text-gray-600">Hack เข้าระบบ/ข้อมูลผู้อื่นโดยมิชอบ (แม้ไม่ได้ขโมยอะไรก็ผิด)</p>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="space-y-6 flex flex-col h-full">
-                    <!-- CC Section -->
-                    <div class="card-modern p-8 border-t-8 border-t-blue-500 flex-grow">
-                        <h3 class="text-xl font-bold text-gray-800 mb-4">สัญญาอนุญาต Creative Commons (CC)</h3>
-                        <div class="grid grid-cols-2 gap-4 text-sm">
-                            <div class="flex items-center gap-2">
-                                <i class="fa-brands fa-creative-commons-by text-2xl text-gray-600"></i>
-                                <span><strong>BY:</strong> ให้เครดิต</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fa-brands fa-creative-commons-nc text-2xl text-gray-600"></i>
-                                <span><strong>NC:</strong> ไม่ใช้เพื่อการค้า</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fa-brands fa-creative-commons-nd text-2xl text-gray-600"></i>
-                                <span><strong>ND:</strong> ห้ามดัดแปลง</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="fa-brands fa-creative-commons-sa text-2xl text-gray-600"></i>
-                                <span><strong>SA:</strong> อนุญาตต่อแบบเดิม</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- PDPA Section -->
-                    <div class="card-modern p-8 border-t-8 border-t-green-500 flex-grow">
-                        <h3 class="text-xl font-bold text-gray-800 mb-2">PDPA (พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล)</h3>
-                        <p class="text-sm text-gray-500 mb-4">กฎหมายที่คุ้มครองสิทธิในข้อมูลส่วนตัวของเรา</p>
-                        <ul class="text-sm space-y-2 text-gray-700">
-                            <li><i class="fa-solid fa-check text-green-500 mr-2"></i> ต้องขอความยินยอม (Consent) ก่อนเก็บข้อมูล</li>
-                            <li><i class="fa-solid fa-check text-green-500 mr-2"></i> ใช้ข้อมูลตามวัตถุประสงค์ที่แจ้งเท่านั้น</li>
-                            <li><i class="fa-solid fa-check text-green-500 mr-2"></i> เจ้าของข้อมูลมีสิทธิขอให้ลบหรือระงับการใช้ข้อมูล</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Unit 4: IoT -->
-        <section id="unit4" class="scroll-mt-32">
-            <div class="flex items-end gap-6 mb-12 border-b border-gray-100 pb-6">
-                <span class="text-8xl font-black text-gray-100 leading-none -mb-4 -ml-4 select-none absolute z-0">04</span>
-                <div class="relative z-10">
-                    <h2 class="text-4xl font-bold text-gray-900 mb-2">แอปพลิเคชัน & IoT</h2>
-                    <p class="text-green-500 font-medium">Application Development</p>
-                </div>
-            </div>
-
-            <!-- IoT Architecture Theory -->
-            <div class="bg-gray-900 rounded-[2.5rem] p-10 md:p-14 mb-12 shadow-2xl relative overflow-hidden text-white">
-                <div class="absolute top-0 right-0 w-96 h-96 bg-green-500 rounded-full blur-[120px] opacity-20 pointer-events-none"></div>
-                
-                <h3 class="text-3xl font-bold mb-8 text-center relative z-10">สถาปัตยกรรม IoT (IoT Architecture)</h3>
-                
-                <div class="grid md:grid-cols-4 gap-6 relative z-10">
-                    <div class="bg-white/10 p-6 rounded-2xl backdrop-blur-md border border-white/10 hover:bg-white/20 transition text-center">
-                        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-xl"><i class="fa-solid fa-eye"></i></div>
-                        <h4 class="font-bold mb-2">1. Perception Layer</h4>
-                        <p class="text-xs text-gray-300">ชั้นรับรู้: เซนเซอร์ (วัดอุณหภูมิ, จับการเคลื่อนไหว), RFID, QR Code</p>
-                    </div>
-                    <div class="bg-white/10 p-6 rounded-2xl backdrop-blur-md border border-white/10 hover:bg-white/20 transition text-center">
-                        <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 text-xl"><i class="fa-solid fa-network-wired"></i></div>
-                        <h4 class="font-bold mb-2">2. Network Layer</h4>
-                        <p class="text-xs text-gray-300">ชั้นเครือข่าย: ส่งข้อมูลผ่าน WiFi, Bluetooth, 5G, NB-IoT ไปยัง Cloud</p>
-                    </div>
-                    <div class="bg-white/10 p-6 rounded-2xl backdrop-blur-md border border-white/10 hover:bg-white/20 transition text-center">
-                        <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 text-xl"><i class="fa-solid fa-server"></i></div>
-                        <h4 class="font-bold mb-2">3. Processing Layer</h4>
-                        <p class="text-xs text-gray-300">ชั้นประมวลผล: Cloud Computing วิเคราะห์ข้อมูล Big Data</p>
-                    </div>
-                    <div class="bg-white/10 p-6 rounded-2xl backdrop-blur-md border border-white/10 hover:bg-white/20 transition text-center">
-                        <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 text-xl"><i class="fa-solid fa-mobile-screen"></i></div>
-                        <h4 class="font-bold mb-2">4. Application Layer</h4>
-                        <p class="text-xs text-gray-300">ชั้นใช้งาน: แอปพลิเคชันบนมือถือ, Smart Home Dashboard</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Example: Smart Farm -->
-            <div class="bg-green-50 rounded-3xl p-8 border border-green-100 mb-12">
-                <h3 class="text-xl font-bold text-green-800 mb-4"><i class="fa-solid fa-leaf mr-2"></i>ตัวอย่างการประยุกต์ใช้: Smart Farm</h3>
-                <div class="flex flex-col md:flex-row gap-6 items-center">
-                    <div class="flex-1 space-y-2 text-sm text-green-700">
-                        <p><strong>Input:</strong> เซนเซอร์วัดความชื้นในดิน และเซนเซอร์วัดแสงแดด ส่งค่าไปยังบอร์ด KidBright</p>
-                        <p><strong>Process:</strong> บอร์ดตรวจสอบเงื่อนไข "ถ้าความชื้น < 40% ให้เปิดน้ำ"</p>
-                        <p><strong>Output:</strong> สั่งงาน Relay ให้เปิดปั๊มน้ำ และแจ้งเตือนเกษตรกรผ่าน LINE Notify</p>
-                    </div>
-                    <div class="flex-1">
-                         <div class="bg-white p-4 rounded-xl shadow-sm text-xs font-mono">
-                            <span class="text-blue-600">if</span> (humidity < <span class="text-orange-600">40</span>) {<br>
-                            &nbsp;&nbsp;pump.<span class="text-purple-600">on</span>();<br>
-                            &nbsp;&nbsp;notifyLine(<span class="text-green-600">"รดน้ำต้นไม้แล้วครับ"</span>);<br>
-                            } <span class="text-blue-600">else</span> {<br>
-                            &nbsp;&nbsp;pump.<span class="text-purple-600">off</span>();<br>
-                            }
-                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="space-y-8">
-                <h3 class="text-2xl font-bold text-gray-800 text-center">วงจรการพัฒนาแอปพลิเคชัน (SDLC)</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <!-- Step 1 -->
-                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 hover:border-brand-200 hover:shadow-lg transition group">
-                        <span class="text-6xl font-black text-gray-100 group-hover:text-brand-50 transition block mb-4">01</span>
-                        <h4 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-brand-600">Analysis</h4>
-                        <p class="text-gray-500 text-sm">วิเคราะห์ปัญหา กำหนดกลุ่มเป้าหมาย และรวบรวมความต้องการ (Requirement)</p>
-                    </div>
-                    <!-- Step 2 -->
-                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 hover:border-brand-200 hover:shadow-lg transition group">
-                        <span class="text-6xl font-black text-gray-100 group-hover:text-brand-50 transition block mb-4">02</span>
-                        <h4 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-brand-600">Design</h4>
-                        <p class="text-gray-500 text-sm">ออกแบบ User Interface (UI), User Experience (UX) และผังงาน (Flowchart)</p>
-                    </div>
-                    <!-- Step 3 -->
-                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 hover:border-brand-200 hover:shadow-lg transition group">
-                        <span class="text-6xl font-black text-gray-100 group-hover:text-brand-50 transition block mb-4">03</span>
-                        <h4 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-brand-600">Development</h4>
-                        <p class="text-gray-500 text-sm">ลงมือเขียนโค้ด (Coding) เพื่อสร้างผลงานตามที่ออกแบบไว้</p>
-                    </div>
-                    <!-- Step 4 -->
-                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 hover:border-brand-200 hover:shadow-lg transition group">
-                        <span class="text-6xl font-black text-gray-100 group-hover:text-brand-50 transition block mb-4">04</span>
-                        <h4 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-brand-600">Testing</h4>
-                        <p class="text-gray-500 text-sm">ทดสอบหาข้อผิดพลาด (Bug) และนำไปให้ผู้ใช้ทดลองใช้จริง</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Quiz Section -->
-        <section id="quiz" class="py-20 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-[3rem] mx-4 relative overflow-hidden shadow-inner">
-            <div class="relative z-10 max-w-4xl mx-auto px-6">
-                <div class="text-center mb-12">
-                    <span class="inline-block px-4 py-2 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold mb-4">Challenge Mode</span>
-                    <h2 class="text-4xl font-bold text-gray-900 mb-4">ทดสอบความรู้ท้ายบท</h2>
-                    <p class="text-gray-600 text-lg">แบบทดสอบแบบสุ่ม 30 ข้อ พร้อมเฉลยทันที</p>
-                </div>
-
-                <div id="quiz-container" class="bg-white rounded-3xl shadow-xl p-8 md:p-12 min-h-[500px] flex flex-col relative overflow-hidden">
-                    <!-- Progress Bar -->
-                    <div class="absolute top-0 left-0 w-full h-2 bg-gray-100">
-                        <div id="progress-bar" class="h-full bg-brand-500 transition-all duration-500 ease-out" style="width: 0%"></div>
-                    </div>
-
-                    <!-- Header -->
-                    <div class="flex justify-between items-center mb-10 mt-2">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-gray-300"></span>
-                            <span id="question-counter" class="text-sm font-bold text-gray-400 uppercase tracking-wider">Question 1/30</span>
-                        </div>
-                        <div class="bg-green-50 text-green-700 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm border border-green-100">
-                            คะแนน: <span id="score-counter">0</span>
-                        </div>
-                    </div>
-
-                    <!-- Question -->
-                    <h3 id="question-text" class="text-2xl md:text-3xl font-bold text-gray-800 mb-10 leading-snug">
-                        กำลังโหลด...
-                    </h3>
-
-                    <!-- Options -->
-                    <div id="options-container" class="space-y-4 flex-grow">
-                        <!-- JS injected -->
-                    </div>
-
-                    <!-- Feedback -->
-                    <div id="feedback-area" class="hidden mt-8 p-6 rounded-2xl bg-gray-50 border border-gray-100 animate-fade-in">
-                        <div class="flex items-start gap-4">
-                            <div id="feedback-icon" class="text-2xl mt-1"></div>
-                            <div>
-                                <p id="feedback-message" class="font-bold text-lg mb-2"></p>
-                                <p id="feedback-detail" class="text-gray-600 leading-relaxed"></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Footer Controls -->
-                    <div class="mt-10 flex flex-wrap items-center justify-between gap-6 border-t border-gray-100 pt-8">
-                        <button onclick="quizApp.init()" class="text-gray-400 hover:text-red-500 font-medium text-sm transition-colors flex items-center gap-2 cursor-pointer p-2">
-                            <i class="fa-solid fa-rotate-right"></i> เริ่มใหม่
-                        </button>
-
-                        <div class="flex gap-4">
-                            <button id="skip-btn" onclick="quizApp.skipQuestion()" class="px-6 py-3 text-gray-500 hover:text-gray-800 font-medium hover:bg-gray-100 rounded-xl transition-colors">
-                                ข้ามข้อนี้
-                            </button>
-                            <button id="next-btn" onclick="quizApp.nextQuestion()" class="hidden px-8 py-3 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-1 flex items-center gap-3">
-                                ข้อถัดไป <i class="fa-solid fa-arrow-right"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Result Card -->
-                <div id="result-card" class="hidden bg-white rounded-3xl shadow-xl p-12 text-center animate-fade-in max-w-2xl mx-auto">
-                    <div class="w-32 h-32 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
-                        <i class="fa-solid fa-trophy text-6xl text-green-500"></i>
-                    </div>
-                    <h3 class="text-4xl font-bold text-gray-900 mb-4">ยอดเยี่ยมมาก!</h3>
-                    <p class="text-gray-500 mb-10 text-lg">คุณทำแบบทดสอบครบทุกข้อแล้ว</p>
-                    
-                    <div class="bg-gray-50 rounded-2xl p-8 mb-10 border border-gray-100 inline-block w-full">
-                        <p class="text-gray-400 uppercase text-xs font-bold tracking-widest mb-2">คะแนนรวมของคุณ</p>
-                        <div class="text-7xl font-black text-brand-600" id="final-score">0</div>
-                    </div>
-                    
-                    <button onclick="quizApp.restartQuiz()" class="px-10 py-4 bg-brand-600 text-white font-bold rounded-2xl hover:bg-brand-700 shadow-xl shadow-brand-500/20 transition transform hover:-translate-y-1 w-full md:w-auto">
-                        ทำแบบทดสอบอีกครั้ง
-                    </button>
-                </div>
+            <div id="result-area" class="hidden max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-10 text-center">
+                <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">🏆</div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">ยอดเยี่ยมมาก!</h3>
+                <div class="text-5xl font-black text-brand-600 mb-8" id="final-score">0/30</div>
+                <button onclick="restartQuiz()" class="px-8 py-3 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 transition">ทำแบบทดสอบอีกครั้ง</button>
             </div>
         </section>
 
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-400 py-20 mt-20">
-        <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-                <div class="col-span-1 lg:col-span-2">
-                    <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                        <i class="fa-solid fa-microchip text-brand-500"></i>
-                        Computing Science M.3
-                    </h3>
-                    <p class="leading-relaxed mb-8 max-w-md">
-                        สื่อการเรียนรู้ออนไลน์เพื่อพัฒนาทักษะด้านเทคโนโลยี<br>
-                        มุ่งเน้นความเข้าใจและการนำไปใช้จริงในชีวิตประจำวัน
-                    </p>
-                </div>
-                <div>
-                    <h4 class="text-white font-bold mb-6 text-lg">เมนูนำทาง</h4>
-                    <ul class="space-y-4">
-                        <li><a href="#unit1" class="hover:text-brand-400 transition flex items-center gap-2"><i class="fa-solid fa-angle-right text-xs"></i> การจัดการข้อมูล</a></li>
-                        <li><a href="#unit2" class="hover:text-brand-400 transition flex items-center gap-2"><i class="fa-solid fa-angle-right text-xs"></i> ความน่าเชื่อถือ</a></li>
-                        <li><a href="#unit3" class="hover:text-brand-400 transition flex items-center gap-2"><i class="fa-solid fa-angle-right text-xs"></i> กฎหมายคอมพิวเตอร์</a></li>
-                        <li><a href="#quiz" class="hover:text-brand-400 transition flex items-center gap-2"><i class="fa-solid fa-angle-right text-xs"></i> แบบทดสอบ</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-white font-bold mb-6 text-lg">ติดต่อเรา</h4>
-                    <ul class="space-y-4">
-                        <li class="flex items-start gap-3">
-                            <i class="fa-solid fa-location-dot mt-1 text-brand-500"></i>
-                            <span>กลุ่มสาระการเรียนรู้<br>วิทยาศาสตร์และเทคโนโลยี</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <i class="fa-solid fa-envelope text-brand-500"></i>
-                            <a href="mailto:contact@example.ac.th" class="hover:text-white transition">contact@example.ac.th</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="border-t border-gray-800 mt-16 pt-8 text-center text-sm">
-                &copy; 2023 kruboat.com. All rights reserved.
-            </div>
-        </div>
+    <footer class="bg-gray-900 text-gray-400 py-12 mt-20 text-center">
+        <p class="mb-4">สื่อการเรียนรู้วิชาวิทยาการคำนวณ ชั้นมัธยมศึกษาปีที่ 3</p>
+        <p class="text-sm opacity-50">&copy; 2025 kruboat.com. All rights reserved.</p>
     </footer>
 
-    <!-- Scroll to Top Button -->
-    <button id="scrollToTopBtn" class="fixed bottom-8 right-8 bg-brand-600 text-white p-4 rounded-full shadow-2xl hidden hover:bg-brand-700 transition z-50 hover:-translate-y-1">
-        <i class="fa-solid fa-arrow-up text-lg"></i>
-    </button>
-
     <script>
-        // Mobile Menu Toggle
-        const btn = document.getElementById('mobile-menu-btn');
-        const menu = document.getElementById('mobile-menu');
-
-        btn.addEventListener('click', () => {
-            menu.classList.toggle('hidden');
-        });
-
-        // Quiz Application Logic
-        const questionPool = [
-            // Unit 1: Data
-            {
-                question: "ข้อมูลที่นักเรียนเก็บรวบรวมด้วยตนเองจากการสัมภาษณ์ปราชญ์ชาวบ้าน เรียกว่าข้อมูลประเภทใด?",
-                options: ["ข้อมูลทุติยภูมิ", "ข้อมูลปฐมภูมิ", "ข้อมูลสารสนเทศ", "ข้อมูลเชิงคุณภาพ"],
-                correctIndex: 1,
-                explanation: "ข้อมูลปฐมภูมิ คือข้อมูลที่ผู้ใช้เก็บรวบรวมด้วยตนเองจากแหล่งกำเนิดโดยตรง"
-            },
-            {
-                question: "การหาค่าเฉลี่ย (Mean) ของคะแนนสอบ จัดอยู่ในขั้นตอนใดของการจัดการข้อมูล?",
-                options: ["การเก็บรวบรวมข้อมูล", "การประมวลผลข้อมูล", "การนำเสนอข้อมูล", "การทำความสะอาดข้อมูล"],
-                correctIndex: 1,
-                explanation: "การคำนวณหาค่าสถิติต่างๆ ถือเป็นการประมวลผลข้อมูล (Data Processing)"
-            },
-            {
-                question: "ซอฟต์แวร์ใดเหมาะสมที่สุดสำหรับการวิเคราะห์ข้อมูลในรูปแบบตารางและการสร้างกราฟเบื้องต้น?",
-                options: ["Microsoft Word", "Google Sheets", "Adobe Photoshop", "Notepad"],
-                correctIndex: 1,
-                explanation: "Google Sheets หรือ Excel เป็นโปรแกรมตารางทำงานที่เหมาะกับการคำนวณและสร้างกราฟ"
-            },
-            {
-                question: "ข้อมูลชนิดใดต่อไปนี้ จัดเป็น Big Data ได้ชัดเจนที่สุด?",
-                options: ["รายรับรายจ่ายส่วนตัวในสมุด", "ข้อมูลการจราจรแบบ Real-time ทั่วกรุงเทพฯ", "คะแนนสอบนักเรียน 1 ห้อง", "รายชื่อหนังสือในห้องสมุดโรงเรียน"],
-                correctIndex: 1,
-                explanation: "Big Data ต้องมีปริมาณมหาศาล (Volume) และมีการเปลี่ยนแปลงรวดเร็ว (Velocity)"
-            },
-            {
-                question: "ขั้นตอนแรกของการทำ Data Science คือข้อใด?",
-                options: ["เก็บรวบรวมข้อมูล", "ตั้งคำถาม/ระบุปัญหา", "วิเคราะห์ข้อมูล", "นำเสนอข้อมูล"],
-                correctIndex: 1,
-                explanation: "เราต้องรู้ก่อนว่าอยากรู้อะไร (ตั้งคำถาม) จึงจะไปเก็บข้อมูลได้ถูกต้อง"
-            },
-            {
-                question: "หากข้อมูลมีค่าว่าง (Null) หรือสะกดผิด ควรทำอย่างไร?",
-                options: ["ลบทิ้งทันที", "ทำความสะอาดข้อมูล (Data Cleaning)", "นำไปคำนวณเลย", "เก็บไว้แบบนั้นเพื่อความเรียล"],
-                correctIndex: 1,
-                explanation: "ต้องทำ Data Cleaning ก่อนนำไปประมวลผลเพื่อให้ได้ผลลัพธ์ที่ถูกต้อง"
-            },
-            {
-                question: "ข้อใดคือข้อมูลเชิงปริมาณ (Quantitative Data)?",
-                options: ["เพศ", "ความรู้สึก", "น้ำหนัก", "สีที่ชอบ"],
-                correctIndex: 2,
-                explanation: "น้ำหนักเป็นตัวเลขที่นำมาคำนวณเปรียบเทียบได้"
-            },
-
-            // Unit 2: Reliability
-            {
-                question: "ในหลักการ PROMPT ตัวอักษร T (Timeliness) หมายถึงสิ่งใด?",
-                options: ["ความทันสมัยของข้อมูล", "ความถูกต้องของไวยากรณ์", "วัตถุประสงค์ของผู้เขียน", "กระบวนการ"],
-                correctIndex: 0,
-                explanation: "Timeliness คือความทันสมัย เป็นปัจจุบัน ของข้อมูล"
-            },
-            {
-                question: "ข้อใดไม่ใช่เทคนิคการสืบค้นข้อมูลให้แม่นยำ?",
-                options: ['ใช้เครื่องหมาย "..."', "ระบุประเภทไฟล์ด้วย filetype:", "พิมพ์ประโยคยาวๆ เหมือนคุยกับเพื่อน", "ใช้ site: เพื่อระบุเว็บไซต์"],
-                correctIndex: 2,
-                explanation: "การพิมพ์ประโยคยาวเกินไปอาจทำให้ Search Engine สับสน ควรใช้คำสำคัญ (Keywords)"
-            },
-            {
-                question: "หากพบข่าวลวง (Fake News) ควรทำอย่างไร?",
-                options: ["แชร์ต่อเพื่อเตือนเพื่อน", "ตรวจสอบแหล่งที่มาก่อนเชื่อ", "ด่าผู้โพสต์", "กดไลก์"],
-                correctIndex: 1,
-                explanation: "ควรตรวจสอบแหล่งที่มา (Check Source) ให้แน่ใจก่อนตัดสินใจเชื่อหรือแชร์"
-            },
-            {
-                question: "Clickbait คืออะไร?",
-                options: ["ไวรัสคอมพิวเตอร์", "การพาดหัวข่าวให้น่าสนใจเกินจริงเพื่อเรียกยอดคลิก", "โปรแกรมแชท", "เว็บไซต์ขายของ"],
-                correctIndex: 1,
-                explanation: "Clickbait มักใช้คำที่กระตุ้นความอยากรู้ แต่เนื้อหาอาจไม่มีสาระ"
-            },
-            {
-                question: "Phishing คือการโจมตีแบบใด?",
-                options: ["ส่งอีเมลหลอกลวงให้กรอกข้อมูลส่วนตัว", "เจาะระบบเซิร์ฟเวอร์", "ดักฟังโทรศัพท์", "ทำลายฮาร์ดดิสก์"],
-                correctIndex: 0,
-                explanation: "Phishing คือการตกเหยื่อ โดยสร้างหน้าเว็บหรืออีเมลปลอม"
-            },
-            {
-                question: "Digital Footprint คืออะไร?",
-                options: ["รอยเท้านักสืบดิจิทัล", "ร่องรอยการใช้งานอินเทอร์เน็ตที่ทิ้งไว้", "ลายนิ้วมือสแกนเข้างาน", "แผนที่ดิจิทัล"],
-                correctIndex: 1,
-                explanation: "ทุกสิ่งที่เราโพสต์ แชร์ หรือค้นหา จะถูกบันทึกเป็นร่องรอยดิจิทัล"
-            },
-
-            // Unit 3: Law & IT
-            {
-                question: "หากต้องการนำรูปภาพไปใช้โดยต้องให้เครดิตเจ้าของ ควรเลือกสัญญาอนุญาตแบบใด?",
-                options: ["CC BY", "All Rights Reserved", "Public Domain", "Copyright"],
-                correctIndex: 0,
-                explanation: "CC BY (Attribution) คืออนุญาตให้ใช้ได้แต่ต้องอ้างอิงที่มา"
-            },
-            {
-                question: "การกระทำใดมีความผิดตาม พ.ร.บ. คอมพิวเตอร์ฯ?",
-                options: ["พิมพ์งานส่วนตัว", "ตัดต่อภาพผู้อื่นให้เสียหายแล้วโพสต์", "เล่นเกมออนไลน์", "ดูหนังออนไลน์ถูกลิขสิทธิ์"],
-                correctIndex: 1,
-                explanation: "การตัดต่อภาพที่ทำให้ผู้อื่นเสื่อมเสียชื่อเสียง มีความผิดตามกฎหมาย"
-            },
-            {
-                question: "รหัสผ่านที่ปลอดภัยควรมีลักษณะอย่างไร?",
-                options: ["12345678", "วันเดือนปีเกิด", "เบอร์โทรศัพท์", "มีตัวอักษรเล็ก-ใหญ่ ตัวเลข และอักขระพิเศษผสมกัน"],
-                correctIndex: 3,
-                explanation: "รหัสผ่านที่ซับซ้อนจะถูกเดาหรือเจาะได้ยาก"
-            },
-            {
-                question: "การ Cyberbullying คืออะไร?",
-                options: ["การเล่นเกมต่อสู้", "การกลั่นแกล้งหรือรังแกผู้อื่นผ่านโลกออนไลน์", "การป้องกันภัยไซเบอร์", "การซื้อของออนไลน์"],
-                correctIndex: 1,
-                explanation: "การใช้สื่อออนไลน์เพื่อทำร้ายจิตใจผู้อื่นถือเป็น Cyberbullying"
-            },
-            {
-                question: "ลิขสิทธิ์ (Copyright) คุ้มครองผลงานเมื่อใด?",
-                options: ["เมื่อจดทะเบียน", "ทันทีที่สร้างสรรค์ผลงานเสร็จ", "เมื่อวางขาย", "เมื่อมีคนมาซื้อ"],
-                correctIndex: 1,
-                explanation: "ลิขสิทธิ์เกิดขึ้นทันทีที่สร้างสรรค์ผลงานโดยไม่ต้องจดทะเบียน"
-            },
-            {
-                question: "Ransomware คืออะไร?",
-                options: ["โปรแกรมเรียกค่าไถ่ข้อมูล", "โปรแกรมป้องกันไวรัส", "โปรแกรมตัดต่อวิดีโอ", "ฮาร์ดแวร์ชนิดหนึ่ง"],
-                correctIndex: 0,
-                explanation: "Ransomware จะเข้ารหัสไฟล์ของเราและเรียกเงินค่าไถ่เพื่อปลดล็อก"
-            },
-
-            // Unit 4: App Dev & IoT
-            {
-                question: "องค์ประกอบใด **ไม่ใช่** ส่วนประกอบหลักของระบบ IoT?",
-                options: ["Smart Device", "Cloud Processing", "Connectivity", "Mechanical Typewriter"],
-                correctIndex: 3,
-                explanation: "เครื่องพิมพ์ดีดแบบกลไกไม่สามารถเชื่อมต่ออินเทอร์เน็ตได้ จึงไม่ใช่ IoT"
-            },
-            {
-                question: "ขั้นตอนแรกสุดของการพัฒนาแอปพลิเคชัน (SDLC) คือข้อใด?",
-                options: ["Development", "Analysis", "Testing", "Maintenance"],
-                correctIndex: 1,
-                explanation: "ต้องวิเคราะห์ความต้องการ (Analysis) ก่อนจึงจะเริ่มออกแบบและพัฒนาได้"
-            },
-            {
-                question: "บอร์ดสมองกลฝังตัวที่นิยมใช้ในการเรียนรู้ IoT ของไทยคือ?",
-                options: ["KidBright", "PlayStation", "iPhone", "Smart TV"],
-                correctIndex: 0,
-                explanation: "KidBright เป็นบอร์ดสมองกลที่พัฒนาโดย NECTEC เพื่อการศึกษา"
-            },
-            {
-                question: "สัญลักษณ์สี่เหลี่ยมข้าวหลามตัดใน Flowchart หมายถึงอะไร?",
-                options: ["จุดเริ่มต้น", "การประมวลผล", "การตัดสินใจ (Decision)", "การรับข้อมูล"],
-                correctIndex: 2,
-                explanation: "สี่เหลี่ยมข้าวหลามตัดใช้สำหรับตรวจสอบเงื่อนไข (จริง/เท็จ)"
-            },
-            {
-                question: "Smart Farm ใช้ประโยชน์จาก IoT อย่างไร?",
-                options: ["ใช้หุ่นยนต์ปลูกผักแทนคนทั้งหมด", "ใช้เซนเซอร์วัดความชื้นเพื่อรดน้ำอัตโนมัติ", "ใช้คอมพิวเตอร์เล่นเกมในฟาร์ม", "ใช้อินเทอร์เน็ตขายของ"],
-                correctIndex: 1,
-                explanation: "การใช้เซนเซอร์วัดค่าและสั่งงานระบบรดน้ำเป็นตัวอย่างที่ชัดเจนของ Smart Farm"
-            },
-            {
-                question: "Algorithm คืออะไร?",
-                options: ["ลำดับขั้นตอนการทำงานที่ชัดเจน", "ชื่อโปรแกรม", "ไวรัสคอมพิวเตอร์", "ภาษาคอมพิวเตอร์"],
-                correctIndex: 0,
-                explanation: "อัลกอริทึมคือกระบวนการแก้ปัญหาที่อธิบายเป็นขั้นตอน"
-            },
-            {
-                question: "ข้อใดเป็นประโยชน์ของเทคโนโลยี 5G ที่มีต่อ IoT?",
-                options: ["ทำให้โทรศัพท์สวยขึ้น", "รับส่งข้อมูลได้เร็วมากและความหน่วงต่ำ (Low Latency)", "ประหยัดแบตเตอรี่น้อยลง", "หน้าจอชัดขึ้น"],
-                correctIndex: 1,
-                explanation: "ความเร็วและความหน่วงต่ำทำให้การสั่งงานอุปกรณ์ IoT แม่นยำและเรียลไทม์"
-            },
-            {
-                question: "User Interface (UI) คืออะไร?",
-                options: ["ระบบหลังบ้าน", "ส่วนต่อประสานกับผู้ใช้ (หน้าจอ ปุ่ม เมนู)", "ฐานข้อมูล", "สายไฟ"],
-                correctIndex: 1,
-                explanation: "UI คือสิ่งที่ผู้ใช้มองเห็นและสัมผัสเพื่อใช้งานแอปพลิเคชัน"
-            },
-            {
-                question: "ก่อนปล่อยแอปพลิเคชันให้ใช้งานจริง ต้องทำขั้นตอนใด?",
-                options: ["Testing (ทดสอบ)", "Design (ออกแบบ)", "Analysis (วิเคราะห์)", "Uninstall (ถอนการติดตั้ง)"],
-                correctIndex: 0,
-                explanation: "การทดสอบ (Testing) เพื่อหาข้อผิดพลาด (Bug) เป็นสิ่งจำเป็นก่อนใช้งานจริง"
-            },
-            {
-                question: "เซนเซอร์ (Sensor) ในระบบ IoT ทำหน้าที่อะไร?",
-                options: ["ประมวลผล", "รับค่าข้อมูลจากสภาพแวดล้อม", "แสดงผลภาพ", "จ่ายไฟ"],
-                correctIndex: 1,
-                explanation: "เซนเซอร์ทำหน้าที่รับค่าทางกายภาพ เช่น แสง อุณหภูมิ เสียง เปลี่ยนเป็นสัญญาณไฟฟ้า"
-            }
+        const questions = [
+            { q: "ข้อมูลทุติยภูมิ (Secondary Data) คือ?", a: ["เก็บเองจากแหล่งกำเนิด", "ข้อมูลที่ผู้อื่นรวบรวมไว้แล้ว", "ข้อมูลลับ", "ข้อมูลเท็จ"], c: 1, exp: "ทุติยภูมิคือข้อมูลมือสองที่มีคนเก็บไว้แล้ว" },
+            { q: "ขั้นตอนแรกของ Data Science คือ?", a: ["เก็บข้อมูล", "วิเคราะห์", "ตั้งคำถาม", "สร้างโมเดล"], c: 2, exp: "Ask Question คือจุดเริ่มต้น" },
+            { q: "Velocity ใน Big Data หมายถึง?", a: ["ปริมาณมาก", "ความเร็วในการเปลี่ยนแปลง", "ความหลากหลาย", "ความถูกต้อง"], c: 1, exp: "Velocity คือความเร็วของข้อมูลที่เข้ามา" },
+            { q: "Data Cleaning คือ?", a: ["ลบข้อมูลทิ้ง", "ทำความสะอาดคอมพิวเตอร์", "ตรวจสอบและแก้ไขข้อมูลให้สมบูรณ์", "สแกนไวรัส"], c: 2, exp: "จัดการค่าว่าง/ผิดปกติ ก่อนนำไปใช้" },
+            { q: "PROMPT ตัว O หมายถึง?", a: ["Objective (วัตถุประสงค์)", "Open", "Old", "Owner"], c: 0, exp: "ตรวจสอบว่ามีเจตนาแอบแฝงหรือไม่" },
+            { q: "Fake News ผิด พ.ร.บ. คอมฯ มาตราใด?", a: ["14", "16", "10", "12"], c: 0, exp: "มาตรา 14(1) นำเข้าข้อมูลอันเป็นเท็จ" },
+            { q: "PDPA ให้ความสำคัญกับสิ่งใด?", a: ["ลิขสิทธิ์เพลง", "ข้อมูลส่วนบุคคล", "ความปลอดภัยไซเบอร์", "อีคอมเมิร์ซ"], c: 1, exp: "Personal Data Protection Act" },
+            { q: "IoT Layer ใดทำหน้าที่เชื่อมต่ออินเทอร์เน็ต?", a: ["Perception", "Network", "Processing", "Application"], c: 1, exp: "Network Layer" },
+            { q: "Sensor จัดอยู่ใน IoT Layer ใด?", a: ["Perception", "Network", "Processing", "Application"], c: 0, exp: "Perception (ชั้นรับรู้)" },
+            { q: "SDLC ขั้นตอนแรกคือ?", a: ["Design", "Testing", "Analysis", "Coding"], c: 2, exp: "Analysis วิเคราะห์ปัญหา/ความต้องการ" },
+            { q: "CC BY หมายถึง?", a: ["ห้ามใช้", "ใช้ได้แต่ต้องให้เครดิต", "ห้ามแก้ไข", "ห้ามค้าขาย"], c: 1, exp: "BY = Attribution" },
+            { q: "Outlier ในข้อมูลคือ?", a: ["ค่าว่าง", "ค่าซ้ำ", "ค่าที่โดดผิดปกติ", "ค่าเฉลี่ย"], c: 2, exp: "เช่น อายุ 200 ปี" },
+            { q: "การตัดต่อภาพผู้อื่นเสียหาย ผิดมาตราใด?", a: ["14", "16", "18", "20"], c: 1, exp: "มาตรา 16 ตัดต่อภาพ" },
+            { q: "Clickbait คือ?", a: ["พาดหัวข่าวล่อเป้า", "ไวรัส", "การตกปลา", "โปรแกรมโกงเกม"], c: 0, exp: "เรียกยอดคลิกด้วยหัวข้อเกินจริง" },
+            { q: "Volume ใน Big Data คือ?", a: ["ความเร็ว", "ปริมาณมหาศาล", "ความหลากหลาย", "ความน่าเชื่อถือ"], c: 1, exp: "Volume = ปริมาณ" },
+            { q: "Veracity ใน Big Data คือ?", a: ["ความเร็ว", "ปริมาณ", "ความถูกต้องน่าเชื่อถือ", "รูปแบบ"], c: 2, exp: "ความถูกต้องของข้อมูล" },
+            { q: "การนำเสนอข้อมูลด้วยแผนภูมิ เรียกว่า?", a: ["Data Cleaning", "Data Visualization", "Data Mining", "Data Entry"], c: 1, exp: "การทำข้อมูลให้เป็นภาพ" },
+            { q: "Cloud Computing อยู่ใน IoT Layer ใด?", a: ["Perception", "Network", "Processing", "Application"], c: 2, exp: "Processing Layer ประมวลผลบนคลาวด์" },
+            { q: "Smart Farm ใช้เซนเซอร์วัดอะไร?", a: ["ความเร็วรถ", "ความชื้นในดิน", "ชีพจร", "จำนวนคน"], c: 1, exp: "วัดความชื้น/แสงแดด เพื่อรดน้ำ" },
+            { q: "Python Library ใดใช้จัดการข้อมูล?", a: ["Pandas", "Turtle", "PyGame", "Request"], c: 0, exp: "Pandas ใช้ทำ Data Analysis" },
+            { q: "Deepfake คือ?", a: ["AI ตัดต่อหน้า/เสียง", "หุ่นยนต์", "โปรแกรมแชท", "การดำน้ำ"], c: 0, exp: "ปลอมแปลงอัตลักษณ์ด้วย AI" },
+            { q: "Digital Footprint คือ?", a: ["รอยเท้ายักษ์", "ร่องรอยดิจิทัลที่สืบค้นได้", "รองเท้าวิ่ง", "ลายนิ้วมือ"], c: 1, exp: "ประวัติการใช้งานออนไลน์" },
+            { q: "Consent ใน PDPA คือ?", a: ["การยินยอม", "การปฏิเสธ", "การลงโทษ", "การวิเคราะห์"], c: 0, exp: "ต้องขอความยินยอมก่อนเก็บข้อมูล" },
+            { q: "CSV ย่อมาจาก?", a: ["Computer Service", "Comma Separated Values", "Common Save", "Cyber Security"], c: 1, exp: "ไฟล์ข้อมูลตารางที่คั่นด้วยจุลภาค" },
+            { q: "Dashboard ใน IoT อยู่ Layer ใด?", a: ["Perception", "Network", "Processing", "Application"], c: 3, exp: "Application Layer ส่วนติดต่อผู้ใช้" },
+            { q: "การสุ่มกลุ่มตัวอย่าง (Sampling) ใช้เพื่อ?", a: ["เดาข้อมูล", "ศึกษาตัวแทนประชากร", "ลบข้อมูล", "เพิ่มข้อมูล"], c: 1, exp: "ศึกษาข้อมูลจากส่วนน้อยเพื่ออ้างอิงส่วนใหญ่" },
+            { q: "Pharming ต่างจาก Phishing อย่างไร?", a: ["เหมือนกัน", "Pharming แฮก DNS พาไปเว็บปลอมอัตโนมัติ", "Pharming ปลอดภัยกว่า", "Phishing ใช้ไวรัส"], c: 1, exp: "Phishing หลอกให้คลิก, Pharming พาไปเอง" },
+            { q: "ลิขสิทธิ์คุ้มครองทันทีเมื่อใด?", a: ["จดทะเบียน", "สร้างสรรค์ผลงานเสร็จ", "เผยแพร่", "มีคนซื้อ"], c: 1, exp: "ทันทีที่สร้างสรรค์" },
+            { q: "การเก็บข้อมูลโดยใช้ Google Forms เป็นข้อมูลประเภทใด?", a: ["ปฐมภูมิ", "ทุติยภูมิ", "ตติยภูมิ", "ข้อมูลเท็จ"], c: 0, exp: "เก็บเอง = ปฐมภูมิ" },
+            { q: "Mean คือค่าอะไร?", a: ["มัธยฐาน", "ฐานนิยม", "ค่าเฉลี่ย", "ส่วนเบี่ยงเบน"], c: 2, exp: "Mean = Average" }
         ];
 
-        const quizApp = {
-            questions: [],
-            currentQuestionIndex: 0,
-            score: 0,
-            
-            init: function() {
-                // Shuffle questions
-                this.questions = [...questionPool].sort(() => 0.5 - Math.random());
-                this.currentQuestionIndex = 0;
-                this.score = 0;
-                this.showQuestion();
-                document.getElementById('quiz-container').classList.remove('hidden');
-                document.getElementById('result-card').classList.add('hidden');
-            },
+        let currentQ = 0;
+        let score = 0;
+        let shuffledQ = [];
 
-            showQuestion: function() {
-                const questionData = this.questions[this.currentQuestionIndex];
-                
-                // Update UI Texts
-                document.getElementById('question-counter').innerText = `Question ${this.currentQuestionIndex + 1} / ${this.questions.length}`;
-                document.getElementById('score-counter').innerText = this.score;
-                document.getElementById('question-text').innerText = questionData.question;
-                
-                // Update Progress Bar
-                const progress = ((this.currentQuestionIndex) / this.questions.length) * 100;
-                document.getElementById('progress-bar').style.width = `${progress}%`;
-
-                // Reset Options Area
-                const optionsContainer = document.getElementById('options-container');
-                optionsContainer.innerHTML = '';
-
-                // Create Option Buttons (More spacious)
-                questionData.options.forEach((option, index) => {
-                    const button = document.createElement('button');
-                    button.className = 'option-btn w-full text-left p-5 rounded-2xl border border-gray-100 text-gray-700 font-medium hover:shadow-md transition-all flex items-center group';
-                    button.innerHTML = `
-                        <span class="w-10 h-10 rounded-full bg-gray-50 text-gray-400 flex items-center justify-center mr-4 text-base font-bold border border-gray-200 group-hover:border-brand-300 group-hover:text-brand-600 transition-colors">${['A', 'B', 'C', 'D'][index]}</span>
-                        <span class="text-lg">${option}</span>
-                    `;
-                    button.onclick = () => this.checkAnswer(index, button);
-                    optionsContainer.appendChild(button);
-                });
-
-                // Reset Feedback & Buttons
-                document.getElementById('feedback-area').classList.add('hidden');
-                document.getElementById('skip-btn').classList.remove('hidden');
-                document.getElementById('next-btn').classList.add('hidden');
-            },
-
-            checkAnswer: function(selectedIndex, selectedButton) {
-                const questionData = this.questions[this.currentQuestionIndex];
-                const isCorrect = selectedIndex === questionData.correctIndex;
-                const buttons = document.querySelectorAll('.option-btn');
-
-                // Disable all buttons
-                buttons.forEach(btn => btn.disabled = true);
-
-                // Highlight buttons
-                if (isCorrect) {
-                    this.score++;
-                    selectedButton.classList.add('correct');
-                    selectedButton.querySelector('span:first-child').classList.add('bg-green-100', 'text-green-700', 'border-green-300');
-                    selectedButton.innerHTML += '<i class="fa-solid fa-circle-check ml-auto text-green-500 text-2xl animate-bounce"></i>';
-                    this.showFeedback(true, questionData.explanation);
-                } else {
-                    selectedButton.classList.add('wrong');
-                    selectedButton.querySelector('span:first-child').classList.add('bg-red-100', 'text-red-700', 'border-red-300');
-                    selectedButton.innerHTML += '<i class="fa-solid fa-circle-xmark ml-auto text-red-500 text-2xl"></i>';
-                    
-                    // Highlight correct answer
-                    const correctBtn = buttons[questionData.correctIndex];
-                    correctBtn.classList.add('correct');
-                    correctBtn.innerHTML += '<i class="fa-solid fa-check ml-auto text-green-600 text-xl"></i>';
-                    
-                    this.showFeedback(false, questionData.explanation);
-                }
-
-                // Update UI Controls
-                document.getElementById('score-counter').innerText = this.score;
-                document.getElementById('skip-btn').classList.add('hidden');
-                document.getElementById('next-btn').classList.remove('hidden');
-            },
-
-            showFeedback: function(isCorrect, explanation) {
-                const feedbackArea = document.getElementById('feedback-area');
-                const feedbackMessage = document.getElementById('feedback-message');
-                const feedbackDetail = document.getElementById('feedback-detail');
-                const feedbackIcon = document.getElementById('feedback-icon');
-
-                feedbackArea.classList.remove('hidden');
-                if (isCorrect) {
-                    feedbackArea.className = "mt-8 p-6 rounded-2xl bg-green-50 border border-green-100 animate-fade-in";
-                    feedbackMessage.className = "font-bold text-lg mb-1 text-green-700";
-                    feedbackMessage.innerText = 'ถูกต้อง! ยอดเยี่ยมมาก';
-                    feedbackIcon.innerHTML = '<i class="fa-solid fa-thumbs-up text-green-500"></i>';
-                } else {
-                    feedbackArea.className = "mt-8 p-6 rounded-2xl bg-red-50 border border-red-100 animate-fade-in";
-                    feedbackMessage.className = "font-bold text-lg mb-1 text-red-700";
-                    feedbackMessage.innerText = 'ข้อนี้ยังไม่ถูกนะ...';
-                    feedbackIcon.innerHTML = '<i class="fa-regular fa-lightbulb text-red-500"></i>';
-                }
-                feedbackDetail.innerText = explanation;
-            },
-
-            skipQuestion: function() {
-                const questionData = this.questions[this.currentQuestionIndex];
-                const buttons = document.querySelectorAll('.option-btn');
-                
-                buttons.forEach(btn => btn.disabled = true);
-                
-                // Highlight correct answer
-                const correctBtn = buttons[questionData.correctIndex];
-                correctBtn.classList.add('correct');
-                correctBtn.innerHTML += '<i class="fa-solid fa-check ml-auto text-green-600 text-xl"></i>';
-                
-                this.showFeedback(false, "เฉลย: " + questionData.explanation);
-                
-                document.getElementById('skip-btn').classList.add('hidden');
-                document.getElementById('next-btn').classList.remove('hidden');
-            },
-
-            nextQuestion: function() {
-                this.currentQuestionIndex++;
-                if (this.currentQuestionIndex < this.questions.length) {
-                    this.showQuestion();
-                } else {
-                    this.showResult();
-                }
-            },
-
-            showResult: function() {
-                document.getElementById('quiz-container').classList.add('hidden');
-                document.getElementById('result-card').classList.remove('hidden');
-                document.getElementById('final-score').innerText = `${this.score} / ${this.questions.length}`;
-            },
-
-            restartQuiz: function() {
-                this.init();
-            }
-        };
-
-        // Scroll to Top Logic
-        const scrollToTopBtn = document.getElementById("scrollToTopBtn");
-        window.onscroll = function() {scrollFunction()};
-
-        function scrollFunction() {
-            if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
-                scrollToTopBtn.classList.remove("hidden");
-            } else {
-                scrollToTopBtn.classList.add("hidden");
-            }
+        function initQuiz() {
+            shuffledQ = [...questions].sort(() => 0.5 - Math.random()).slice(0, 30);
+            currentQ = 0; score = 0;
+            document.getElementById('quiz-container').classList.remove('hidden');
+            document.getElementById('result-area').classList.add('hidden');
+            document.getElementById('score-display').innerText = `คะแนน: 0`;
+            showQuestion();
         }
 
-        scrollToTopBtn.addEventListener("click", function() {
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        });
+        function showQuestion() {
+            const q = shuffledQ[currentQ];
+            document.getElementById('q-progress').innerText = `ข้อที่ ${currentQ + 1} / 30`;
+            document.getElementById('q-text').innerText = q.q;
+            const optsDiv = document.getElementById('options-area');
+            optsDiv.innerHTML = '';
+            q.a.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "quiz-option w-full text-left p-4 rounded-xl border border-gray-200 font-medium transition-all block";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(idx, btn);
+                optsDiv.appendChild(btn);
+            });
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+        }
 
-        // Initialize Quiz on Load
-        window.onload = function() {
-            quizApp.init();
-        };
+        function checkAnswer(selectedIdx, btn) {
+            const q = shuffledQ[currentQ];
+            const allBtns = document.querySelectorAll('.quiz-option');
+            allBtns.forEach(b => b.disabled = true);
+            const feedback = document.getElementById('feedback');
+            feedback.classList.remove('hidden');
+            if (selectedIdx === q.c) {
+                score++; btn.classList.add('correct');
+                document.getElementById('score-display').innerText = `คะแนน: ${score}`;
+                feedback.className = "mt-4 p-4 rounded-lg bg-green-50 text-green-800 border border-green-200";
+                feedback.innerHTML = `<strong>ถูกต้อง!</strong> ${q.exp}`;
+            } else {
+                btn.classList.add('wrong'); allBtns[q.c].classList.add('correct');
+                feedback.className = "mt-4 p-4 rounded-lg bg-red-50 text-red-800 border border-red-200";
+                feedback.innerHTML = `<strong>ผิดครับ!</strong> เฉลยคือ "${q.a[q.c]}" <br>(${q.exp})`;
+            }
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQ++; if (currentQ < 30) showQuestion(); else showResult();
+        }
+
+        function showResult() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('result-area').classList.remove('hidden');
+            document.getElementById('final-score').innerText = `${score} / 30`;
+        }
+
+        function restartQuiz() { initQuiz(); }
+        window.onload = initQuiz;
     </script>
 </body>
 </html>
