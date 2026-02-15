@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShutterLife - Professional Camera Store & Rental</title>
+    
+    <!-- Google Fonts: Prompt & Kanit for Thai Modern Look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Icons (Phosphor Icons) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        body {
+            font-family: 'Prompt', 'Inter', sans-serif;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Custom Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+    </style>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9', // Sky Blue
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                            gold: '#f59e0b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-800 transition-colors duration-300 dark:bg-gray-900 dark:text-gray-100">
+
+    <!-- ==================== STATE MANAGEMENT & DATA ==================== -->
+    <script>
+        // Mock User Data
+        let currentUser = null; // null = guest
+        const mockUser = {
+            id: 1,
+            name: "คุณช่างภาพ มือโปร",
+            email: "pro@camera.com",
+            points: 1250,
+            avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+        };
+
+        // Mock Products Data (30 Items) - Corrected Images
+        const products = [
+            // SONY
+            { id: 1, name: "Sony A7 IV Body", brand: "Sony", category: "Camera", type: "sell", price: 82990, rentPrice: 1500, condition: "Mint", rating: 4.8, image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=800", specs: "33MP, 4K60p" },
+            { id: 2, name: "Sony FE 24-70mm GM II", brand: "Sony", category: "Lens", type: "sell", price: 75990, rentPrice: 1200, condition: "New", rating: 5.0, image: "https://images.unsplash.com/photo-1617005082133-548c4dd27f35?auto=format&fit=crop&q=80&w=800", specs: "F2.8 Constant" },
+            { id: 3, name: "Sony A7R V", brand: "Sony", category: "Camera", type: "rent", price: 119990, rentPrice: 2500, condition: "Excellent", rating: 4.9, image: "https://images.unsplash.com/photo-1624823183492-239556d538e1?auto=format&fit=crop&q=80&w=800", specs: "61MP AI Focus" },
+            { id: 4, name: "Sony ZV-E10", brand: "Sony", category: "Camera", type: "sell", price: 23990, rentPrice: 500, condition: "Good", rating: 4.5, image: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&q=80&w=800", specs: "Vlog Camera" },
+            { id: 5, name: "Sony FE 50mm F1.2 GM", brand: "Sony", category: "Lens", type: "rent", price: 69990, rentPrice: 1000, condition: "Mint", rating: 4.9, image: "https://images.unsplash.com/photo-1621532296180-2d88730da4f0?auto=format&fit=crop&q=80&w=800", specs: "Portrait King" },
+            
+            // CANON
+            { id: 6, name: "Canon EOS R5", brand: "Canon", category: "Camera", type: "sell", price: 105900, rentPrice: 2000, condition: "Excellent", rating: 4.8, image: "https://images.unsplash.com/photo-1519638831568-d9897f54ed69?auto=format&fit=crop&q=80&w=800", specs: "8K Video, 45MP" },
+            { id: 7, name: "Canon RF 70-200mm F2.8", brand: "Canon", category: "Lens", type: "sell", price: 89900, rentPrice: 1400, condition: "Mint", rating: 4.9, image: "https://images.unsplash.com/photo-1610427338575-b8296a246872?auto=format&fit=crop&q=80&w=800", specs: "Telephoto Zoom" },
+            { id: 8, name: "Canon EOS R6 Mark II", brand: "Canon", category: "Camera", type: "rent", price: 84990, rentPrice: 1600, condition: "Good", rating: 4.7, image: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&q=80&w=800", specs: "Hybrid Shooter" },
+            { id: 9, name: "Canon RF 50mm F1.8 STM", brand: "Canon", category: "Lens", type: "sell", price: 6900, rentPrice: 200, condition: "New", rating: 4.6, image: "https://images.unsplash.com/photo-1606423961741-2e86333c5b86?auto=format&fit=crop&q=80&w=800", specs: "Nifty Fifty" },
+            
+            // FUJIFILM
+            { id: 10, name: "Fujifilm X100V", brand: "Fujifilm", category: "Camera", type: "sell", price: 52990, rentPrice: 900, condition: "Mint", rating: 4.9, image: "https://images.unsplash.com/photo-1527011046414-4781f1f94f8c?auto=format&fit=crop&q=80&w=800", specs: "Street Photography" },
+            { id: 11, name: "Fujifilm X-T5", brand: "Fujifilm", category: "Camera", type: "rent", price: 64990, rentPrice: 1100, condition: "New", rating: 4.8, image: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?auto=format&fit=crop&q=80&w=800", specs: "40MP APS-C" },
+            { id: 12, name: "Fujinon XF 35mm F1.4", brand: "Fujifilm", category: "Lens", type: "sell", price: 18900, rentPrice: 300, condition: "Good", rating: 4.7, image: "https://images.unsplash.com/photo-1622374351368-22f309995c02?auto=format&fit=crop&q=80&w=800", specs: "Magic Lens" },
+            
+            // LEICA
+            { id: 13, name: "Leica Q2", brand: "Leica", category: "Camera", type: "sell", price: 169000, rentPrice: 3500, condition: "Mint", rating: 5.0, image: "https://images.unsplash.com/photo-1533158388470-9a56699990c6?auto=format&fit=crop&q=80&w=800", specs: "Full Frame Compact" },
+            { id: 14, name: "Leica M6 (Film)", brand: "Leica", category: "Camera", type: "sell", price: 120000, rentPrice: 0, condition: "Vintage", rating: 5.0, image: "https://images.unsplash.com/photo-1495707902641-75cac588d2e9?auto=format&fit=crop&q=80&w=800", specs: "Classic Film" },
+
+            // NIKON
+            { id: 15, name: "Nikon Z8", brand: "Nikon", category: "Camera", type: "rent", price: 139900, rentPrice: 2800, condition: "New", rating: 4.9, image: "https://images.unsplash.com/photo-1564466021183-50ec85888252?auto=format&fit=crop&q=80&w=800", specs: "Baby Z9" },
+            { id: 16, name: "Nikon Z f", brand: "Nikon", category: "Camera", type: "sell", price: 72900, rentPrice: 1300, condition: "New", rating: 4.7, image: "https://images.unsplash.com/photo-1500634245200-e5245c7574ef?auto=format&fit=crop&q=80&w=800", specs: "Retro Full Frame" },
+
+            // ACCESSORIES & DRONE
+            { id: 17, name: "DJI Mavic 3 Pro", brand: "DJI", category: "Drone", type: "rent", price: 79000, rentPrice: 2000, condition: "Excellent", rating: 4.8, image: "https://images.unsplash.com/photo-1579829366248-204fe8413f31?auto=format&fit=crop&q=80&w=800", specs: "Triple Camera" },
+            { id: 18, name: "GoPro Hero 12", brand: "GoPro", category: "Action", type: "sell", price: 14900, rentPrice: 300, condition: "New", rating: 4.6, image: "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?auto=format&fit=crop&q=80&w=800", specs: "Action Cam" },
+            { id: 19, name: "Peak Design Tripod", brand: "Accessories", category: "Tripod", type: "sell", price: 22000, rentPrice: 500, condition: "Mint", rating: 4.8, image: "https://images.unsplash.com/photo-1506241537529-eefea1fbe44d?auto=format&fit=crop&q=80&w=800", specs: "Carbon Fiber" },
+            { id: 20, name: "Rode Wireless Pro", brand: "Rode", category: "Audio", type: "rent", price: 14000, rentPrice: 400, condition: "Excellent", rating: 4.7, image: "https://images.unsplash.com/photo-1590845947698-8924d7409b56?auto=format&fit=crop&q=80&w=800", specs: "Wireless Mic" },
+            
+            // LIGHTING & MORE
+            { id: 21, name: "Aputure 120d II", brand: "Aputure", category: "Lighting", type: "rent", price: 25000, rentPrice: 800, condition: "Good", rating: 4.5, image: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?auto=format&fit=crop&q=80&w=800", specs: "Studio Light" },
+            { id: 22, name: "Profoto B10", brand: "Profoto", category: "Lighting", type: "rent", price: 55000, rentPrice: 1500, condition: "Mint", rating: 4.9, image: "https://images.unsplash.com/photo-1554625293-6b3a0b1c0a0c?auto=format&fit=crop&q=80&w=800", specs: "Flash Strobe" },
+            
+            // BAGS
+            { id: 23, name: "Peak Design Backpack 30L", brand: "Peak Design", category: "Bag", type: "sell", price: 11000, rentPrice: 0, condition: "New", rating: 4.8, image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80&w=800", specs: "Travel Bag" },
+            { id: 24, name: "Pelican Case 1510", brand: "Pelican", category: "Bag", type: "sell", price: 8500, rentPrice: 200, condition: "Good", rating: 4.9, image: "https://images.unsplash.com/photo-1542125208-8e6583d73516?auto=format&fit=crop&q=80&w=800", specs: "Hard Case" },
+            
+            // FILM
+            { id: 25, name: "Kodak Portra 400", brand: "Kodak", category: "Film", type: "sell", price: 650, rentPrice: 0, condition: "New", rating: 5.0, image: "https://images.unsplash.com/photo-1499591410405-bc5586616ca7?auto=format&fit=crop&q=80&w=800", specs: "35mm Film" },
+            { id: 26, name: "Hasselblad 500CM", brand: "Hasselblad", category: "Camera", type: "sell", price: 95000, rentPrice: 0, condition: "Vintage", rating: 5.0, image: "https://images.unsplash.com/photo-1517260739337-6799d2ff4f27?auto=format&fit=crop&q=80&w=800", specs: "Medium Format" },
+            
+            // INSTANT
+            { id: 27, name: "Polaroid Now+", brand: "Polaroid", category: "Camera", type: "sell", price: 6900, rentPrice: 0, condition: "New", rating: 4.4, image: "https://images.unsplash.com/photo-1563289056-113c87515a1c?auto=format&fit=crop&q=80&w=800", specs: "Instant Cam" },
+            
+            // MORE LENSES
+            { id: 28, name: "Sigma 85mm F1.4 DG DN", brand: "Sigma", category: "Lens", type: "sell", price: 36900, rentPrice: 600, condition: "New", rating: 4.8, image: "https://images.unsplash.com/photo-1606423961741-2e86333c5b86?auto=format&fit=crop&q=80&w=800", specs: "Art Series" },
+            { id: 29, name: "Tamron 28-75mm G2", brand: "Tamron", category: "Lens", type: "sell", price: 29900, rentPrice: 500, condition: "Mint", rating: 4.6, image: "https://images.unsplash.com/photo-1610427338575-b8296a246872?auto=format&fit=crop&q=80&w=800", specs: "E-Mount" },
+            { id: 30, name: "Olympus OM-1", brand: "Olympus", category: "Camera", type: "sell", price: 79900, rentPrice: 1200, condition: "Excellent", rating: 4.7, image: "https://images.unsplash.com/photo-1506869680387-578b7a006c7d?auto=format&fit=crop&q=80&w=800", specs: "M4/3 System" }
+        ];
+
+        let cart = [];
+        let wishlist = [];
+        let compareList = [];
+    </script>
+
+    <!-- ==================== HEADER ==================== -->
+    <header class="sticky top-0 z-50 bg-white dark:bg-gray-900 shadow-md transition-colors duration-300">
+        <div class="bg-gray-900 text-white text-xs py-1 px-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="ph ph-phone"></i> 02-123-4567
+                <span class="mx-2">|</span>
+                <i class="ph ph-envelope"></i> contact@shutterlife.com
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="#" class="hover:text-brand-500">จองคิวซ่อม</a>
+                <a href="#" class="hover:text-brand-500">ประเมินราคาเทิร์น</a>
+                <button onclick="toggleTheme()" class="hover:text-yellow-400" title="Dark Mode">
+                    <i class="ph ph-moon text-lg" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <!-- Logo -->
+            <a href="#" class="flex items-center gap-2 group">
+                <div class="w-10 h-10 bg-brand-600 rounded-lg flex items-center justify-center text-white text-2xl group-hover:bg-brand-500 transition-colors">
+                    <i class="ph ph-aperture"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">SHUTTER<span class="text-brand-600">LIFE</span></h1>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-widest">Premium Camera Store</p>
+                </div>
+            </a>
+
+            <!-- Search (Feature: Smart Search) -->
+            <div class="hidden md:flex flex-1 mx-8 relative">
+                <input type="text" id="searchInput" onkeyup="searchProducts()" placeholder="ค้นหากล้อง, เลนส์, อุปกรณ์..." class="w-full bg-gray-100 dark:bg-gray-800 dark:text-white border-none rounded-full py-2 px-4 pl-10 focus:ring-2 focus:ring-brand-500 outline-none">
+                <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
+            </div>
+
+            <!-- User Actions -->
+            <div class="flex items-center gap-4">
+                <div id="userSection" class="hidden md:flex items-center gap-2 cursor-pointer" onclick="toggleUserMenu()">
+                    <!-- User content injected by JS -->
+                    <button class="text-sm font-semibold text-brand-600" onclick="showLoginModal()">เข้าสู่ระบบ / สมัครสมาชิก</button>
+                </div>
+
+                <!-- Wishlist Icon -->
+                <button class="relative p-2 text-gray-600 dark:text-gray-300 hover:text-red-500" onclick="alert('ฟีเจอร์ Wishlist')">
+                    <i class="ph ph-heart text-2xl"></i>
+                    <span class="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center" id="wishlistCount">0</span>
+                </button>
+
+                <!-- Cart Icon -->
+                <button class="relative p-2 text-gray-600 dark:text-gray-300 hover:text-brand-600" onclick="toggleCart()">
+                    <i class="ph ph-shopping-cart text-2xl"></i>
+                    <span class="absolute top-0 right-0 w-4 h-4 bg-brand-600 text-white text-[10px] rounded-full flex items-center justify-center" id="cartCount">0</span>
+                </button>
+            </div>
+        </nav>
+        
+        <!-- Mobile Menu Bottom Bar (Visible on mobile only) -->
+        <div class="md:hidden fixed bottom-0 left-0 w-full bg-white dark:bg-gray-900 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-50 flex justify-around py-3 text-xs border-t dark:border-gray-800">
+            <div class="flex flex-col items-center text-brand-600"><i class="ph ph-house text-2xl"></i>หน้าแรก</div>
+            <div class="flex flex-col items-center text-gray-500 dark:text-gray-400" onclick="document.getElementById('productSection').scrollIntoView()"><i class="ph ph-storefront text-2xl"></i>สินค้า</div>
+            <div class="flex flex-col items-center text-gray-500 dark:text-gray-400" onclick="toggleCart()"><i class="ph ph-shopping-cart text-2xl"></i>ตะกร้า</div>
+            <div class="flex flex-col items-center text-gray-500 dark:text-gray-400" onclick="showLoginModal()"><i class="ph ph-user text-2xl"></i>โปรไฟล์</div>
+        </div>
+    </header>
+
+    <!-- ==================== HERO SECTION ==================== -->
+    <section class="relative bg-gray-900 overflow-hidden">
+        <div class="absolute inset-0">
+            <img src="https://images.unsplash.com/photo-1500634245200-e5245c7574ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80" alt="Camera Background" class="w-full h-full object-cover opacity-30">
+        </div>
+        <div class="container mx-auto px-4 py-20 relative z-10 text-white">
+            <div class="max-w-2xl animate-fade-in">
+                <span class="bg-brand-600 text-xs font-bold px-2 py-1 rounded text-white mb-4 inline-block">Best Camera Store 2024</span>
+                <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">จับจองความเป็นเจ้าของ<br>หรือเช่าเพื่อสร้างสรรค์งาน</h1>
+                <p class="text-gray-300 text-lg mb-8">ครบเครื่องเรื่องกล้อง มือหนึ่ง มือสองคุณภาพ Mint Condition พร้อมบริการเช่ารายวัน ราคาดีที่สุด</p>
+                <div class="flex flex-wrap gap-4">
+                    <button onclick="scrollToProducts('sell')" class="bg-white text-gray-900 px-8 py-3 rounded-full font-bold hover:bg-gray-100 transition shadow-lg">ช้อปเลย</button>
+                    <button onclick="scrollToProducts('rent')" class="bg-transparent border-2 border-white px-8 py-3 rounded-full font-bold hover:bg-white hover:text-gray-900 transition backdrop-blur-sm">ดูรายการเช่า</button>
+                </div>
+            </div>
+            
+            <!-- Quick Stats/Features -->
+            <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-gray-700 pt-8">
+                <div>
+                    <h4 class="text-2xl font-bold text-brand-500">100%</h4>
+                    <p class="text-sm text-gray-400">รับประกันคุณภาพ</p>
+                </div>
+                <div>
+                    <h4 class="text-2xl font-bold text-brand-500">24h</h4>
+                    <p class="text-sm text-gray-400">บริการส่งด่วน</p>
+                </div>
+                <div>
+                    <h4 class="text-2xl font-bold text-brand-500">Grade A</h4>
+                    <p class="text-sm text-gray-400">สภาพสวยคัดพิเศษ</p>
+                </div>
+                <div>
+                    <h4 class="text-2xl font-bold text-brand-500">Service</h4>
+                    <p class="text-sm text-gray-400">ดูแลตลอดการใช้งาน</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SERVICES BAR (Extras) ==================== -->
+    <section class="bg-white dark:bg-gray-800 py-8 shadow-sm">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl cursor-pointer transition group" onclick="document.getElementById('tradeInModal').classList.remove('hidden')">
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition">
+                        <i class="ph ph-camera-rotate text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold dark:text-white">รับซื้อ-เทิร์น</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">ประเมินราคาไว ให้ราคาสูง</p>
+                </div>
+                <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl cursor-pointer transition group">
+                    <div class="w-12 h-12 bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition">
+                        <i class="ph ph-wrench text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold dark:text-white">ศูนย์ซ่อม</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">ล้างเซนเซอร์ ซ่อมบำรุง</p>
+                </div>
+                <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl cursor-pointer transition group">
+                    <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition">
+                        <i class="ph ph-calendar-check text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold dark:text-white">เช่าอุปกรณ์</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">เช็คคิวว่างได้ทันที</p>
+                </div>
+                <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl cursor-pointer transition group">
+                    <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-300 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition">
+                        <i class="ph ph-seal-check text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold dark:text-white">การรับประกัน</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">ประกันศูนย์/ร้าน นานสูงสุด</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="container mx-auto px-4 py-10" id="productSection">
+        
+        <!-- Filter & Tools Bar -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <h2 class="text-3xl font-bold dark:text-white">สินค้าแนะนำ</h2>
+            
+            <div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+                <button onclick="filterProducts('all')" class="filter-btn active bg-brand-600 text-white px-4 py-2 rounded-full text-sm whitespace-nowrap">ทั้งหมด</button>
+                <button onclick="filterProducts('Camera')" class="filter-btn bg-white dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-full text-sm hover:bg-gray-50 whitespace-nowrap">กล้อง</button>
+                <button onclick="filterProducts('Lens')" class="filter-btn bg-white dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-full text-sm hover:bg-gray-50 whitespace-nowrap">เลนส์</button>
+                <button onclick="filterProducts('rent')" class="filter-btn bg-white dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-full text-sm hover:bg-gray-50 whitespace-nowrap text-purple-600 font-semibold"><i class="ph ph-clock"></i> สินค้าเช่า</button>
+            </div>
+
+            <select id="sortSelect" onchange="sortProducts()" class="bg-white dark:bg-gray-800 dark:text-white border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-brand-500">
+                <option value="default">เรียงตาม: แนะนำ</option>
+                <option value="priceLow">ราคา: ต่ำ -> สูง</option>
+                <option value="priceHigh">ราคา: สูง -> ต่ำ</option>
+                <option value="newest">ใหม่ล่าสุด</option>
+            </select>
+        </div>
+
+        <!-- Products Grid -->
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Content Injected via JS -->
+        </div>
+
+        <!-- Pagination (Mock) -->
+        <div class="flex justify-center mt-12">
+            <nav class="flex gap-2">
+                <button class="w-10 h-10 rounded-lg bg-white dark:bg-gray-800 border dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:text-white"><i class="ph ph-caret-left"></i></button>
+                <button class="w-10 h-10 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold">1</button>
+                <button class="w-10 h-10 rounded-lg bg-white dark:bg-gray-800 border dark:border-gray-700 dark:text-white flex items-center justify-center font-bold hover:bg-gray-50">2</button>
+                <button class="w-10 h-10 rounded-lg bg-white dark:bg-gray-800 border dark:border-gray-700 dark:text-white flex items-center justify-center font-bold hover:bg-gray-50">3</button>
+                <button class="w-10 h-10 rounded-lg bg-white dark:bg-gray-800 border dark:border-gray-700 dark:text-white flex items-center justify-center hover:bg-gray-50"><i class="ph ph-caret-right"></i></button>
+            </nav>
+        </div>
+    </main>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="bg-gray-900 text-white pt-16 pb-8 border-t border-gray-800">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div>
+                    <h3 class="text-2xl font-bold mb-4">SHUTTER<span class="text-brand-500">LIFE</span></h3>
+                    <p class="text-gray-400 text-sm mb-4">ร้านกล้องที่คุณไว้วางใจได้มากที่สุด ด้วยประสบการณ์กว่า 10 ปี บริการครบวงจรทั้งซื้อ ขาย แลกเปลี่ยน และเช่า</p>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-brand-600 transition"><i class="ph ph-facebook-logo text-xl"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-brand-600 transition"><i class="ph ph-instagram-logo text-xl"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-brand-600 transition"><i class="ph ph-youtube-logo text-xl"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-lg">เมนูลัด</h4>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white">สินค้ามาใหม่</a></li>
+                        <li><a href="#" class="hover:text-white">สินค้ามือสอง</a></li>
+                        <li><a href="#" class="hover:text-white">บริการเช่า</a></li>
+                        <li><a href="#" class="hover:text-white">ตรวจสอบสถานะซ่อม</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-lg">ช่วยเหลือ</h4>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white">วิธีการสั่งซื้อ</a></li>
+                        <li><a href="#" class="hover:text-white">เงื่อนไขการรับประกัน</a></li>
+                        <li><a href="#" class="hover:text-white">นโยบายความเป็นส่วนตัว</a></li>
+                        <li><a href="#" class="hover:text-white">ติดต่อเรา</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-lg">รับข่าวสาร</h4>
+                    <p class="text-gray-400 text-sm mb-4">รับโปรโมชั่นพิเศษและข่าวสารวงการกล้องก่อนใคร</p>
+                    <div class="flex">
+                        <input type="email" placeholder="อีเมลของคุณ" class="bg-gray-800 border-none text-white px-4 py-2 rounded-l-lg w-full focus:ring-2 focus:ring-brand-500 outline-none">
+                        <button class="bg-brand-600 px-4 py-2 rounded-r-lg font-bold hover:bg-brand-500">ส่ง</button>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 text-center text-gray-500 text-sm">
+                &copy; 2025 www.kruboat.com | All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black/70 hidden z-[60] flex items-center justify-center backdrop-blur-sm px-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-8 relative animate-fade-in shadow-2xl">
+            <button onclick="closeModal('loginModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white"><i class="ph ph-x text-2xl"></i></button>
+            <h2 class="text-2xl font-bold mb-6 text-center dark:text-white">ยินดีต้อนรับ</h2>
+            
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">อีเมล / เบอร์โทรศัพท์</label>
+                    <input type="text" value="pro@camera.com" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">รหัสผ่าน</label>
+                    <input type="password" value="123456" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none">
+                </div>
+                <div class="flex justify-between text-sm">
+                    <label class="flex items-center gap-2 cursor-pointer dark:text-gray-300"><input type="checkbox" class="rounded"> จำฉันไว้</label>
+                    <a href="#" class="text-brand-600 hover:underline">ลืมรหัสผ่าน?</a>
+                </div>
+                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-lg transition">เข้าสู่ระบบ</button>
+            </form>
+            
+            <div class="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                ยังไม่เป็นสมาชิก? <a href="#" class="text-brand-600 font-bold hover:underline">สมัครสมาชิก</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Detail & Rental Modal -->
+    <div id="productModal" class="fixed inset-0 bg-black/80 hidden z-[60] flex items-center justify-center backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-4xl grid md:grid-cols-2 overflow-hidden shadow-2xl relative animate-fade-in my-auto">
+            <button onclick="closeModal('productModal')" class="absolute top-4 right-4 z-10 bg-white/50 dark:bg-black/50 p-2 rounded-full hover:bg-white dark:hover:bg-black transition"><i class="ph ph-x text-xl dark:text-white"></i></button>
+            
+            <div class="bg-gray-100 dark:bg-gray-700 flex items-center justify-center relative group">
+                <img id="modalImage" src="" alt="Product" class="w-full h-full object-cover">
+                <!-- Condition Badge Overlay -->
+                <div id="modalCondition" class="absolute top-4 left-4 bg-brand-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider"></div>
+            </div>
+            
+            <div class="p-8 flex flex-col h-full">
+                <div class="mb-auto">
+                    <div class="flex justify-between items-start mb-2">
+                        <span id="modalBrand" class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Brand</span>
+                        <div class="flex text-yellow-400 text-sm">
+                            <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star-half"></i>
+                            <span class="text-gray-400 ml-1 text-xs">(42 รีวิว)</span>
+                        </div>
+                    </div>
+                    <h2 id="modalTitle" class="text-3xl font-bold mb-2 dark:text-white">Product Name</h2>
+                    <p id="modalSpecs" class="text-gray-600 dark:text-gray-300 mb-6 text-sm">Specs description...</p>
+                    
+                    <div class="border-t border-b border-gray-200 dark:border-gray-700 py-4 mb-6">
+                         <div class="flex justify-between items-center mb-2">
+                             <span class="dark:text-gray-300">ราคา:</span>
+                             <span id="modalPrice" class="text-2xl font-bold text-brand-600">฿0</span>
+                         </div>
+                         <div id="rentalInfo" class="hidden">
+                             <div class="flex justify-between items-center text-sm text-gray-500 mb-2">
+                                 <span>ค่ามัดจำ:</span>
+                                 <span>฿5,000 (คืนเมื่อส่งคืนของ)</span>
+                             </div>
+                             
+                             <!-- Rental Date Picker -->
+                             <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg mt-4 border border-gray-200 dark:border-gray-700">
+                                 <label class="block text-xs font-bold uppercase text-gray-500 mb-2">เช็คตารางว่าง</label>
+                                 <div class="flex gap-2">
+                                     <input type="date" class="w-full border rounded px-3 py-2 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-600">
+                                     <button onclick="checkAvailability()" class="bg-gray-900 dark:bg-gray-700 text-white px-4 py-2 rounded text-sm hover:bg-gray-800 whitespace-nowrap">เช็คสถานะ</button>
+                                 </div>
+                                 <div id="availabilityMsg" class="mt-2 text-xs font-bold text-green-600 hidden"><i class="ph-fill ph-check-circle"></i> ว่างในวันที่เลือก</div>
+                             </div>
+                         </div>
+                    </div>
+
+                    <!-- Comparison Feature -->
+                    <div class="flex items-center gap-2 mb-6">
+                        <input type="checkbox" id="compareCheck" class="rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                        <label for="compareCheck" class="text-sm text-gray-500 dark:text-gray-400 cursor-pointer">เปรียบเทียบสินค้านี้</label>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 mt-4">
+                    <button onclick="addToCartFromModal()" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition transform hover:scale-[1.02] shadow-lg shadow-brand-500/30">
+                        <i class="ph ph-shopping-cart-simple text-xl"></i> <span id="modalBtnText">ใส่ตะกร้า</span>
+                    </button>
+                    <button class="w-12 h-12 border border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 dark:text-white transition"><i class="ph ph-heart text-xl"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div id="cartSidebar" class="fixed inset-y-0 right-0 w-full max-w-sm bg-white dark:bg-gray-900 shadow-2xl z-[70] transform translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-4 border-b dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-gray-800">
+            <h2 class="font-bold text-lg flex items-center gap-2 dark:text-white"><i class="ph ph-shopping-bag"></i> ตะกร้าสินค้า</h2>
+            <button onclick="toggleCart()" class="text-gray-500 hover:text-red-500"><i class="ph ph-x text-xl"></i></button>
+        </div>
+        
+        <div id="cartItems" class="flex-1 overflow-y-auto p-4 space-y-4">
+            <!-- Cart items injected here -->
+            <div class="text-center text-gray-500 mt-10">
+                <i class="ph ph-shopping-cart text-4xl mb-2 opacity-50"></i>
+                <p>ยังไม่มีสินค้าในตะกร้า</p>
+            </div>
+        </div>
+        
+        <div class="p-4 border-t dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
+            <div class="flex justify-between mb-2 dark:text-gray-300">
+                <span>ยอดรวม</span>
+                <span id="cartTotal" class="font-bold text-gray-900 dark:text-white">฿0</span>
+            </div>
+            
+            <!-- Delivery Options -->
+            <div class="flex gap-2 mb-4 text-xs">
+                <label class="flex-1 cursor-pointer border dark:border-gray-600 rounded p-2 text-center hover:bg-white dark:hover:bg-gray-700 has-[:checked]:border-brand-500 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/30">
+                    <input type="radio" name="delivery" class="hidden" checked>
+                    <div class="font-bold dark:text-white">ส่งพัสดุ</div>
+                    <div class="text-gray-500">+฿100</div>
+                </label>
+                <label class="flex-1 cursor-pointer border dark:border-gray-600 rounded p-2 text-center hover:bg-white dark:hover:bg-gray-700 has-[:checked]:border-brand-500 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/30">
+                    <input type="radio" name="delivery" class="hidden">
+                    <div class="font-bold dark:text-white">รับหน้าร้าน</div>
+                    <div class="text-gray-500">ฟรี</div>
+                </label>
+            </div>
+
+            <button onclick="checkout()" class="w-full bg-gray-900 dark:bg-brand-600 text-white font-bold py-3 rounded-lg hover:opacity-90 transition">ชำระเงิน</button>
+        </div>
+    </div>
+
+    <!-- Trade-in Modal (Feature Extra) -->
+    <div id="tradeInModal" class="fixed inset-0 bg-black/70 hidden z-[60] flex items-center justify-center backdrop-blur-sm px-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg p-6 relative animate-fade-in">
+            <button onclick="closeModal('tradeInModal')" class="absolute top-4 right-4 text-gray-400 dark:hover:text-white"><i class="ph ph-x text-2xl"></i></button>
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2 dark:text-white"><i class="ph ph-camera-rotate text-brand-600"></i> ประเมินราคาเทิร์น</h2>
+            <p class="text-sm text-gray-500 mb-4 dark:text-gray-400">กรอกข้อมูลอุปกรณ์ของคุณเพื่อรับราคาประเมินเบื้องต้นภายใน 24 ชม.</p>
+            
+            <form class="space-y-3">
+                <input type="text" placeholder="ยี่ห้อ / รุ่น (เช่น Sony A7III)" class="w-full border rounded px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <select class="w-full border rounded px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white text-gray-500">
+                    <option>สภาพสินค้า</option>
+                    <option>นางฟ้า (เหมือนใหม่)</option>
+                    <option>ใช้งานทั่วไป (มีรอยเล็กน้อย)</option>
+                    <option>ผ่านศึก (รอยเยอะ/ยางบวม)</option>
+                </select>
+                <textarea placeholder="รายละเอียดเพิ่มเติม / อุปกรณ์ที่มี" class="w-full border rounded px-3 py-2 text-sm h-20 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded text-xs text-yellow-800 dark:text-yellow-400">
+                    * ราคาประเมินเป็นราคาเบื้องต้น ทางร้านต้องตรวจสอบสินค้าจริงอีกครั้ง
+                </div>
+                <button type="button" onclick="alert('ส่งข้อมูลเรียบร้อย เจ้าหน้าที่จะติดต่อกลับ'); closeModal('tradeInModal')" class="w-full bg-brand-600 text-white font-bold py-2 rounded">ส่งประเมินราคา</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Chat Widget (Feature Extra) -->
+    <div class="fixed bottom-6 right-6 z-40">
+        <button onclick="document.getElementById('chatPopup').classList.toggle('hidden')" class="w-14 h-14 bg-brand-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-brand-700 transition transform hover:scale-110">
+            <i class="ph-fill ph-chat-circle-dots text-2xl"></i>
+        </button>
+        <!-- Chat Box -->
+        <div id="chatPopup" class="hidden absolute bottom-16 right-0 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border dark:border-gray-700 overflow-hidden animate-fade-in">
+            <div class="bg-brand-600 p-3 text-white flex items-center gap-2">
+                <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span class="font-bold text-sm">Live Support</span>
+            </div>
+            <div class="p-4 h-64 overflow-y-auto bg-gray-50 dark:bg-gray-900 text-sm space-y-2">
+                <div class="bg-white dark:bg-gray-800 p-2 rounded-lg rounded-tl-none shadow-sm dark:text-gray-200 max-w-[80%]">สวัสดีครับ มีอะไรให้ช่วยไหมครับ?</div>
+            </div>
+            <div class="p-2 border-t dark:border-gray-700 bg-white dark:bg-gray-800 flex">
+                <input type="text" placeholder="พิมพ์ข้อความ..." class="flex-1 text-sm outline-none px-2 dark:bg-transparent dark:text-white">
+                <button class="text-brand-600 font-bold text-sm px-2">ส่ง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+    <script>
+        // --- 1. Initialization & Rendering ---
+        
+        function init() {
+            renderUser();
+            renderProducts(products);
+        }
+
+        // Render User Section based on Login Status
+        function renderUser() {
+            const userSection = document.getElementById('userSection');
+            if (currentUser) {
+                userSection.innerHTML = `
+                    <div class="flex flex-col items-end mr-2">
+                        <span class="text-xs font-bold dark:text-white">${currentUser.name}</span>
+                        <span class="text-[10px] bg-yellow-100 text-yellow-800 px-1 rounded dark:bg-yellow-900 dark:text-yellow-300">Points: ${currentUser.points}</span>
+                    </div>
+                    <img src="${currentUser.avatar}" class="w-8 h-8 rounded-full border border-gray-200">
+                `;
+            } else {
+                userSection.innerHTML = `<button class="text-sm font-semibold text-brand-600 hover:text-brand-700" onclick="showLoginModal()">เข้าสู่ระบบ / สมัครสมาชิก</button>`;
+            }
+        }
+
+        // Render Product Cards
+        function renderProducts(items) {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = items.map(item => {
+                const isRent = item.type === 'rent';
+                const priceLabel = isRent ? `฿${item.rentPrice.toLocaleString()}<span class="text-xs text-gray-500 font-normal">/วัน</span>` : `฿${item.price.toLocaleString()}`;
+                const badgeColor = isRent ? 'bg-purple-600' : (item.condition === 'Mint' || item.condition === 'New') ? 'bg-green-500' : 'bg-brand-600';
+                const badgeText = isRent ? 'FOR RENT' : item.condition;
+
+                // Urgency Tag Logic (Random for Demo)
+                const urgencyHtml = Math.random() > 0.8 ? `<div class="absolute bottom-2 left-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded animate-pulse">เหลือชิ้นสุดท้าย!</div>` : '';
+
+                return `
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl transition duration-300 group overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col h-full">
+                    <div class="relative aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-gray-700">
+                        <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <span class="absolute top-2 left-2 ${badgeColor} text-white text-[10px] font-bold px-2 py-1 rounded tracking-wider uppercase">${badgeText}</span>
+                        <button onclick="toggleWishlist(${item.id})" class="absolute top-2 right-2 w-8 h-8 bg-white/80 dark:bg-black/50 rounded-full flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-red-500 transition shadow-sm">
+                            <i class="ph ${wishlist.includes(item.id) ? 'ph-heart-fill text-red-500' : 'ph-heart'}"></i>
+                        </button>
+                        ${urgencyHtml}
+                        
+                        <!-- Quick Actions Overlay -->
+                        <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 to-transparent translate-y-full group-hover:translate-y-0 transition duration-300 flex justify-center">
+                            <button onclick="openProductModal(${item.id})" class="bg-white text-gray-900 text-xs font-bold px-4 py-2 rounded-full shadow-lg hover:bg-brand-50">ดูรายละเอียด</button>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 flex flex-col flex-1">
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider">${item.brand}</span>
+                            <div class="flex items-center text-yellow-400 text-xs">
+                                <i class="ph-fill ph-star"></i> <span class="text-gray-400 ml-1">${item.rating}</span>
+                            </div>
+                        </div>
+                        <h3 class="font-bold text-gray-900 dark:text-white text-lg leading-tight mb-1 line-clamp-2">${item.name}</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">${item.specs}</p>
+                        
+                        <div class="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                            <div class="font-bold text-brand-600 text-lg">${priceLabel}</div>
+                            <button onclick="addToCart(${item.id})" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-900 dark:text-white hover:bg-brand-600 hover:text-white transition">
+                                <i class="ph ph-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // --- 2. Filtering & Search ---
+
+        function filterProducts(criteria) {
+            // Update UI buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active', 'bg-brand-600', 'text-white'));
+            event.target.classList.add('active', 'bg-brand-600', 'text-white');
+            event.target.classList.remove('bg-white', 'text-gray-900');
+
+            let filtered = products;
+            if (criteria === 'rent') {
+                filtered = products.filter(p => p.type === 'rent');
+            } else if (criteria !== 'all') {
+                filtered = products.filter(p => p.category === criteria || p.brand === criteria);
+            }
+            renderProducts(filtered);
+        }
+
+        function searchProducts() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = products.filter(p => 
+                p.name.toLowerCase().includes(query) || 
+                p.brand.toLowerCase().includes(query) ||
+                p.category.toLowerCase().includes(query)
+            );
+            renderProducts(filtered);
+        }
+
+        function scrollToProducts(type) {
+            document.getElementById('productSection').scrollIntoView({ behavior: 'smooth' });
+            if(type === 'rent') filterProducts('rent');
+        }
+
+        function sortProducts() {
+            const sortVal = document.getElementById('sortSelect').value;
+            let sorted = [...products]; // Copy array
+            
+            if (sortVal === 'priceLow') {
+                sorted.sort((a, b) => (a.type === 'rent' ? a.rentPrice : a.price) - (b.type === 'rent' ? b.rentPrice : b.price));
+            } else if (sortVal === 'priceHigh') {
+                sorted.sort((a, b) => (b.type === 'rent' ? b.rentPrice : b.price) - (a.type === 'rent' ? a.rentPrice : a.price));
+            }
+            // 'newest' & 'default' use original ID order for mock
+            
+            renderProducts(sorted);
+        }
+
+        // --- 3. Cart Logic ---
+
+        function toggleCart() {
+            const sidebar = document.getElementById('cartSidebar');
+            const isOpen = sidebar.classList.contains('translate-x-0');
+            if (isOpen) {
+                sidebar.classList.remove('translate-x-0');
+                sidebar.classList.add('translate-x-full');
+            } else {
+                sidebar.classList.remove('translate-x-full');
+                sidebar.classList.add('translate-x-0');
+            }
+        }
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            cart.push(product);
+            updateCartUI();
+            
+            // Animation feedback
+            const btn = event.currentTarget;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="ph ph-check"></i>';
+            btn.classList.add('bg-green-500', 'text-white');
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.remove('bg-green-500', 'text-white');
+            }, 1000);
+        }
+
+        function updateCartUI() {
+            document.getElementById('cartCount').innerText = cart.length;
+            const cartList = document.getElementById('cartItems');
+            
+            if (cart.length === 0) {
+                cartList.innerHTML = `
+                    <div class="text-center text-gray-500 mt-10">
+                        <i class="ph ph-shopping-cart text-4xl mb-2 opacity-50"></i>
+                        <p>ยังไม่มีสินค้าในตะกร้า</p>
+                    </div>`;
+                document.getElementById('cartTotal').innerText = '฿0';
+                return;
+            }
+
+            let total = 0;
+            cartList.innerHTML = cart.map((item, index) => {
+                const price = item.type === 'rent' ? item.rentPrice : item.price;
+                total += price;
+                return `
+                <div class="flex gap-3 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg animate-fade-in">
+                    <img src="${item.image}" class="w-16 h-16 object-cover rounded bg-white">
+                    <div class="flex-1">
+                        <h4 class="text-sm font-bold dark:text-white truncate">${item.name}</h4>
+                        <div class="text-xs text-gray-500 mb-1">${item.type === 'rent' ? 'เช่ารายวัน' : 'ซื้อขาด'}</div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-brand-600 font-bold text-sm">฿${price.toLocaleString()}</span>
+                            <button onclick="removeFromCart(${index})" class="text-gray-400 hover:text-red-500"><i class="ph ph-trash"></i></button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            
+            document.getElementById('cartTotal').innerText = '฿' + total.toLocaleString();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function checkout() {
+            if(!currentUser) {
+                alert('กรุณาเข้าสู่ระบบก่อนชำระเงิน');
+                showLoginModal();
+                return;
+            }
+            if(cart.length === 0) return;
+            alert(`ขอบคุณที่ใช้บริการ! \nยอดชำระทั้งหมด: ${document.getElementById('cartTotal').innerText}\n\nระบบจะส่งรายละเอียดไปที่อีเมล ${currentUser.email}`);
+            cart = [];
+            updateCartUI();
+            toggleCart();
+        }
+
+        // --- 4. Modal & Interaction Logic ---
+
+        let currentModalItem = null;
+
+        function openProductModal(id) {
+            const product = products.find(p => p.id === id);
+            currentModalItem = product;
+            
+            document.getElementById('modalImage').src = product.image;
+            document.getElementById('modalTitle').innerText = product.name;
+            document.getElementById('modalBrand').innerText = product.brand;
+            document.getElementById('modalSpecs').innerText = product.specs + " - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+            document.getElementById('modalCondition').innerText = product.type === 'rent' ? 'FOR RENT' : product.condition;
+            document.getElementById('modalCondition').className = `absolute top-4 left-4 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ${product.type === 'rent' ? 'bg-purple-600' : 'bg-brand-600'}`;
+
+            const isRent = product.type === 'rent';
+            document.getElementById('modalPrice').innerText = isRent ? `฿${product.rentPrice.toLocaleString()}/วัน` : `฿${product.price.toLocaleString()}`;
+            document.getElementById('modalBtnText').innerText = isRent ? 'จองคิวเช่า' : 'ใส่ตะกร้า';
+            
+            // Toggle Rental specific UI
+            const rentalInfo = document.getElementById('rentalInfo');
+            if(isRent) {
+                rentalInfo.classList.remove('hidden');
+            } else {
+                rentalInfo.classList.add('hidden');
+            }
+
+            document.getElementById('productModal').classList.remove('hidden');
+            document.getElementById('availabilityMsg').classList.add('hidden'); // Reset msg
+        }
+
+        function addToCartFromModal() {
+            if(currentModalItem) {
+                addToCart(currentModalItem.id);
+                closeModal('productModal');
+                toggleCart();
+            }
+        }
+
+        function checkAvailability() {
+            // Mock logic: random availability
+            const msg = document.getElementById('availabilityMsg');
+            msg.classList.remove('hidden');
+            // Simulate API delay
+            msg.innerHTML = '<i class="ph ph-spinner animate-spin"></i> กำลังตรวจสอบ...';
+            msg.className = "mt-2 text-xs font-bold text-gray-500";
+            
+            setTimeout(() => {
+                const isAvailable = Math.random() > 0.3;
+                if(isAvailable) {
+                    msg.innerHTML = '<i class="ph-fill ph-check-circle"></i> ว่างในวันที่เลือก (กดจองได้เลย)';
+                    msg.className = "mt-2 text-xs font-bold text-green-600";
+                } else {
+                    msg.innerHTML = '<i class="ph-fill ph-x-circle"></i> วันนี้คิวเต็มแล้วครับ';
+                    msg.className = "mt-2 text-xs font-bold text-red-600";
+                }
+            }, 800);
+        }
+
+        // --- 5. Auth Logic ---
+        function showLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            // Mock Login Success
+            currentUser = mockUser;
+            renderUser();
+            closeModal('loginModal');
+            alert(`ยินดีต้อนรับกลับ, ${currentUser.name}!`);
+        }
+
+        // --- 6. Utilities ---
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            const icon = document.getElementById('themeIcon');
+            if(document.documentElement.classList.contains('dark')) {
+                icon.classList.replace('ph-moon', 'ph-sun');
+            } else {
+                icon.classList.replace('ph-sun', 'ph-moon');
+            }
+        }
+        
+        function toggleWishlist(id) {
+            // Visual toggle only for demo
+            alert('เพิ่มลงในรายการโปรดเรียบร้อย');
+        }
+
+        // Close modals on click outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('fixed')) {
+                event.target.classList.add('hidden');
+            }
+        }
+
+        // Initialize App
+        init();
+
+    </script>
+</body>
+</html>
